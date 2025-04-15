@@ -26,6 +26,14 @@ const badgeVariants = cva(
           "border-transparent bg-yellow-900/20 text-yellow-400 hover:bg-yellow-900/30",
         error: 
           "border-transparent bg-red-900/20 text-red-400 hover:bg-red-900/30",
+        premium:
+          "border-transparent bg-purple-900/20 text-purple-400 hover:bg-purple-900/30",
+        event:
+          "border-transparent bg-blue-900/20 text-blue-400 hover:bg-blue-900/30",
+        community:
+          "border-transparent bg-teal-900/20 text-teal-400 hover:bg-teal-900/30",
+        challenge:
+          "border-transparent bg-orange-900/20 text-orange-400 hover:bg-orange-900/30",
       },
     },
     defaultVariants: {

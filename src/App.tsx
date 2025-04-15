@@ -17,6 +17,7 @@ import Exercises from "./pages/Exercises";
 import Community from "./pages/Community";
 import SurvivalMode from "./pages/SurvivalMode";
 import Leaderboard from "./pages/Leaderboard";
+import ExerciseDetail from "./pages/ExerciseDetail";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/notebooks" element={<Notebooks />} />
           <Route path="/exercises" element={<Exercises />} />
+          <Route path="/exercises/:id" element={<ExerciseDetail />} />
           <Route path="/community" element={<Community />} />
           <Route path="/survival-mode" element={<SurvivalMode />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
