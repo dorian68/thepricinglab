@@ -41,6 +41,204 @@
     "contact": "Contact",
     "copyright": "Tous droits réservés."
   },
+  "home": {
+    "hero": {
+      "title1": "Prépare-toi à entrer dans la",
+      "title2": "salle des marchés.",
+      "description": "Formation d'élite destinée aux étudiants en finance qui souhaitent maîtriser les méthodes de pricing utilisées quotidiennement par les professionnels.",
+      "startCourse": "Commencer le parcours",
+      "signUp": "S'inscrire maintenant",
+      "tagline": "MAÎTRISE. TECHNIQUE. MARCHÉS.",
+      "terminal": "TRADING TERMINAL ACTIVATED"
+    },
+    "approach": {
+      "title": "Notre approche pédagogique",
+      "description": "Une formation conçue par des professionnels des marchés, pour préparer les futurs talents à exceller dans ce domaine exigeant."
+    },
+    "features": {
+      "pragmatic": {
+        "title": "Pragmatique",
+        "description": "Des méthodes et techniques directement applicables en milieu professionnel. Aucune théorie sans application concrète."
+      },
+      "tech": {
+        "title": "Tech-friendly",
+        "description": "Maîtrise des outils technologiques utilisés en salle des marchés (Python, Excel, Bloomberg, etc)."
+      },
+      "job": {
+        "title": "Orientée emploi",
+        "description": "Notre programme est conçu en collaboration avec des recruteurs pour maximiser votre employabilité."
+      },
+      "certified": {
+        "title": "Certifiée",
+        "description": "Obtenez une certification reconnue par les professionnels du secteur, validant vos compétences techniques."
+      }
+    },
+    "curriculum": {
+      "title": "Parcours de formation",
+      "description": "Un programme structuré et progressif pour maîtriser les compétences de pricing essentielles.",
+      "allModules": "Tous les modules"
+    },
+    "modules": {
+      "blackScholes": {
+        "title": "Black-Scholes & Modèles fondamentaux",
+        "level": "FONDAMENTAUX",
+        "description": "Maîtrisez les bases du pricing d'options vanilles et comprenez les hypothèses sous-jacentes aux modèles standards."
+      },
+      "volatility": {
+        "title": "Volatilité implicite & Surfaces",
+        "level": "VANILLES AVANCÉS",
+        "description": "Analysez les structures de volatilité, calibrez les modèles et interprétez les signaux de marché."
+      },
+      "exotic": {
+        "title": "Dérivés exotiques & Path-dependent",
+        "level": "PRODUITS COMPLEXES",
+        "description": "Techniques de pricing pour options asiatiques, barrières, et produits autocallables."
+      },
+      "greeks": {
+        "title": "Greeks & Stratégies de couverture",
+        "level": "VANILLES AVANCÉS",
+        "description": "Gérez le risque de vos positions avec une compréhension approfondie des sensibilités."
+      },
+      "monteCarlo": {
+        "title": "Monte Carlo pour le pricing",
+        "level": "PRODUITS COMPLEXES",
+        "description": "Implémentez des simulations Monte Carlo pour valoriser des produits dérivés complexes."
+      },
+      "stressTesting": {
+        "title": "Stress Testing & Scénarios",
+        "level": "BONUS",
+        "description": "Anticipez les mouvements de marché extrêmes et leurs impacts sur vos valorisations."
+      }
+    },
+    "testimonials": {
+      "title": "Témoignages",
+      "description": "Ce que nos anciens élèves disent après avoir suivi notre formation.",
+      "alexandre": {
+        "quote": "J'ai pu intégrer une desk d'equity derivatives grâce aux compétences acquises sur The Pricing Lab. La différence entre cette formation et mes cours théoriques à l'université était frappante.",
+        "author": "Alexandre M.",
+        "position": "Junior Quant Trader, BNP Paribas"
+      },
+      "sarah": {
+        "quote": "L'aspect technique et la rigueur de cette formation m'ont permis de me démarquer lors des entretiens d'embauche. J'ai aujourd'hui une longueur d'avance sur mes collègues sortis d'écoles prestigieuses.",
+        "author": "Sarah K.",
+        "position": "Risk Analyst, JP Morgan"
+      },
+      "thomas": {
+        "quote": "Mon manager a été impressionné par ma capacité à comprendre les mécanismes de pricing dès mon arrivée. Cette formation est un investissement qui a déjà été rentabilisé par mon bonus de première année.",
+        "author": "Thomas D.",
+        "position": "Structurer, Société Générale"
+      },
+      "joinCta": "Rejoindre la formation"
+    },
+    "cta": {
+      "title": "Prêt à transformer ta carrière?",
+      "description": "Accès illimité à tous nos modules, outils et challenges pour seulement 19€/mois. Investissement minimal, impact maximal sur ton futur professionnel.",
+      "subscribe": "S'abonner pour 19€/mois",
+      "explore": "Explorer les modules"
+    }
+  },
+  "coursesPage": {
+    "title": "Modules de formation",
+    "subtitle": "Une progression pédagogique structurée des fondamentaux aux techniques avancées de pricing utilisées en salle des marchés.",
+    "stats": {
+      "modules": "12 modules",
+      "hours": "48+ heures",
+      "exercises": "24 exercices pratiques"
+    },
+    "heroTagline": "EXPERTISE. PRÉCISION. TRADING.",
+    "topics": "Sujets traités",
+    "locked": "Module verrouillé",
+    "access": "Accéder au module",
+    "unlockModules": "Débloquer tous les modules",
+    "subscriptionAccess": "Accès complet avec l'abonnement à 19€/mois",
+    "fundamentals": {
+      "level": "FONDAMENTAUX",
+      "description": "Les bases essentielles pour comprendre les mécanismes de pricing et construire une expertise solide.",
+      "blackScholes": {
+        "title": "Introduction au Pricing et Black-Scholes",
+        "duration": "3h 20min",
+        "description": "Les bases essentielles pour comprendre les mécanismes de pricing d'options.",
+        "topics": {
+          "probabilities": "Probabilités",
+          "brownian": "Mouvement Brownien",
+          "derivation": "Dérivation B-S",
+          "putCall": "Put-Call Parity"
+        }
+      },
+      "yieldCurves": {
+        "title": "Taux d'intérêt et courbes de rendement",
+        "duration": "2h 45min",
+        "description": "Comprendre et modéliser les courbes de taux pour la valorisation.",
+        "topics": {
+          "zeroCoupon": "Zéro-coupons",
+          "interpolation": "Interpolation",
+          "bootstrapping": "Bootstrapping",
+          "discounting": "Discounting"
+        }
+      },
+      "greeks": {
+        "title": "Greeks et sensibilités",
+        "duration": "4h 10min",
+        "description": "Maîtriser les mesures de risque et les techniques de couverture.",
+        "topics": {
+          "hedging": "Couverture"
+        }
+      }
+    },
+    "advanced": {
+      "level": "VANILLES AVANCÉS",
+      "description": "Techniques sophistiquées pour valoriser et gérer les produits vanilles dans des environnements complexes.",
+      "impliedVol": {
+        "title": "Volatilité implicite et structures",
+        "duration": "5h 30min",
+        "description": "Analyser et interpréter les surfaces de volatilité du marché.",
+        "topics": {
+          "calibration": "Calibration"
+        }
+      },
+      "volProducts": {
+        "title": "Produits de volatilité",
+        "duration": "4h 15min",
+        "description": "Maitriser les indices de volatilité et leurs dérivés.",
+        "topics": {
+          "varianceSwaps": "Variance Swaps",
+          "volSwaps": "Vol Swaps",
+          "volTargeting": "Vol Targeting"
+        }
+      }
+    },
+    "complex": {
+      "level": "PRODUITS COMPLEXES",
+      "description": "Maîtrisez les méthodes de pricing pour les produits structurés et exotiques.",
+      "exotic": {
+        "title": "Options exotiques et barrières",
+        "duration": "6h 40min",
+        "description": "Pricing des produits dérivés complexes avec discontinuités.",
+        "topics": {
+          "knockInOut": "Knock-in/out",
+          "touch": "Touch",
+          "digitals": "Digitals",
+          "corridors": "Corridors"
+        }
+      },
+      "monteCarlo": {
+        "title": "Monte Carlo pour produits path-dependent",
+        "duration": "7h 15min",
+        "description": "Techniques avancées de simulation pour options dépendantes du chemin.",
+        "topics": {
+          "asian": "Asiatiques",
+          "lookback": "Lookback",
+          "simulation": "Simulation",
+          "varianceReduction": "Réduction variance"
+        }
+      }
+    },
+    "cta": {
+      "title": "Accédez à tous les modules",
+      "description": "Débloquez l'intégralité du contenu et progressez à votre rythme avec l'abonnement mensuel à The Pricing Lab.",
+      "learnMore": "En savoir plus"
+    }
+  },
   "projects": {
     "title": "Challenges & Projets",
     "subtitle": "Mettez vos connaissances à l'épreuve avec nos challenges pratiques et comparez vos résultats avec d'autres membres de la communauté.",

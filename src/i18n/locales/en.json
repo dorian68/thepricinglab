@@ -41,6 +41,204 @@
     "contact": "Contact",
     "copyright": "All rights reserved."
   },
+  "home": {
+    "hero": {
+      "title1": "Prepare yourself to enter the",
+      "title2": "trading floor.",
+      "description": "Elite training for finance students who want to master the pricing methods used daily by professionals.",
+      "startCourse": "Start the course",
+      "signUp": "Sign up now",
+      "tagline": "MASTERY. TECHNIQUE. MARKETS.",
+      "terminal": "TRADING TERMINAL ACTIVATED"
+    },
+    "approach": {
+      "title": "Our pedagogical approach",
+      "description": "Training designed by market professionals to prepare future talents to excel in this demanding field."
+    },
+    "features": {
+      "pragmatic": {
+        "title": "Pragmatic",
+        "description": "Methods and techniques directly applicable in a professional environment. No theory without practical application."
+      },
+      "tech": {
+        "title": "Tech-friendly",
+        "description": "Master the technological tools used in trading floors (Python, Excel, Bloomberg, etc)."
+      },
+      "job": {
+        "title": "Job-oriented",
+        "description": "Our program is designed in collaboration with recruiters to maximize your employability."
+      },
+      "certified": {
+        "title": "Certified",
+        "description": "Obtain a certification recognized by industry professionals, validating your technical skills."
+      }
+    },
+    "curriculum": {
+      "title": "Training curriculum",
+      "description": "A structured and progressive program to master essential pricing skills.",
+      "allModules": "All modules"
+    },
+    "modules": {
+      "blackScholes": {
+        "title": "Black-Scholes & Fundamental Models",
+        "level": "FUNDAMENTALS",
+        "description": "Master the basics of vanilla option pricing and understand the assumptions underlying standard models."
+      },
+      "volatility": {
+        "title": "Implied Volatility & Surfaces",
+        "level": "ADVANCED VANILLAS",
+        "description": "Analyze volatility structures, calibrate models and interpret market signals."
+      },
+      "exotic": {
+        "title": "Exotic Derivatives & Path-dependent",
+        "level": "COMPLEX PRODUCTS",
+        "description": "Pricing techniques for Asian options, barriers, and autocallable products."
+      },
+      "greeks": {
+        "title": "Greeks & Hedging Strategies",
+        "level": "ADVANCED VANILLAS",
+        "description": "Manage the risk of your positions with a deep understanding of sensitivities."
+      },
+      "monteCarlo": {
+        "title": "Monte Carlo for Pricing",
+        "level": "COMPLEX PRODUCTS",
+        "description": "Implement Monte Carlo simulations to value complex derivative products."
+      },
+      "stressTesting": {
+        "title": "Stress Testing & Scenarios",
+        "level": "BONUS",
+        "description": "Anticipate extreme market movements and their impacts on your valuations."
+      }
+    },
+    "testimonials": {
+      "title": "Testimonials",
+      "description": "What our former students say after completing our training.",
+      "alexandre": {
+        "quote": "I was able to join an equity derivatives desk thanks to the skills acquired on The Pricing Lab. The difference between this training and my theoretical courses at university was striking.",
+        "author": "Alexandre M.",
+        "position": "Junior Quant Trader, BNP Paribas"
+      },
+      "sarah": {
+        "quote": "The technical aspect and rigor of this training allowed me to stand out during job interviews. I now have an edge over my colleagues from prestigious schools.",
+        "author": "Sarah K.",
+        "position": "Risk Analyst, JP Morgan"
+      },
+      "thomas": {
+        "quote": "My manager was impressed by my ability to understand pricing mechanisms from day one. This training is an investment that has already been paid for by my first-year bonus.",
+        "author": "Thomas D.",
+        "position": "Structurer, Société Générale"
+      },
+      "joinCta": "Join the training"
+    },
+    "cta": {
+      "title": "Ready to transform your career?",
+      "description": "Unlimited access to all our modules, tools and challenges for only €19/month. Minimal investment, maximum impact on your professional future.",
+      "subscribe": "Subscribe for €19/month",
+      "explore": "Explore the modules"
+    }
+  },
+  "coursesPage": {
+    "title": "Training Modules",
+    "subtitle": "A structured pedagogical progression from fundamentals to advanced pricing techniques used on trading floors.",
+    "stats": {
+      "modules": "12 modules",
+      "hours": "48+ hours",
+      "exercises": "24 practical exercises"
+    },
+    "heroTagline": "EXPERTISE. PRECISION. TRADING.",
+    "topics": "Topics covered",
+    "locked": "Module locked",
+    "access": "Access the module",
+    "unlockModules": "Unlock all modules",
+    "subscriptionAccess": "Full access with €19/month subscription",
+    "fundamentals": {
+      "level": "FUNDAMENTALS",
+      "description": "The essential basics to understand pricing mechanisms and build solid expertise.",
+      "blackScholes": {
+        "title": "Introduction to Pricing and Black-Scholes",
+        "duration": "3h 20min",
+        "description": "The essential basics to understand option pricing mechanisms.",
+        "topics": {
+          "probabilities": "Probabilities",
+          "brownian": "Brownian Motion",
+          "derivation": "B-S Derivation",
+          "putCall": "Put-Call Parity"
+        }
+      },
+      "yieldCurves": {
+        "title": "Interest Rates and Yield Curves",
+        "duration": "2h 45min",
+        "description": "Understanding and modeling yield curves for valuation.",
+        "topics": {
+          "zeroCoupon": "Zero-coupons",
+          "interpolation": "Interpolation",
+          "bootstrapping": "Bootstrapping",
+          "discounting": "Discounting"
+        }
+      },
+      "greeks": {
+        "title": "Greeks and Sensitivities",
+        "duration": "4h 10min",
+        "description": "Master risk measures and hedging techniques.",
+        "topics": {
+          "hedging": "Hedging"
+        }
+      }
+    },
+    "advanced": {
+      "level": "ADVANCED VANILLAS",
+      "description": "Sophisticated techniques for valuing and managing vanilla products in complex environments.",
+      "impliedVol": {
+        "title": "Implied Volatility and Structures",
+        "duration": "5h 30min",
+        "description": "Analyze and interpret market volatility surfaces.",
+        "topics": {
+          "calibration": "Calibration"
+        }
+      },
+      "volProducts": {
+        "title": "Volatility Products",
+        "duration": "4h 15min",
+        "description": "Master volatility indices and their derivatives.",
+        "topics": {
+          "varianceSwaps": "Variance Swaps",
+          "volSwaps": "Vol Swaps",
+          "volTargeting": "Vol Targeting"
+        }
+      }
+    },
+    "complex": {
+      "level": "COMPLEX PRODUCTS",
+      "description": "Master pricing methods for structured and exotic products.",
+      "exotic": {
+        "title": "Exotic Options and Barriers",
+        "duration": "6h 40min",
+        "description": "Pricing complex derivative products with discontinuities.",
+        "topics": {
+          "knockInOut": "Knock-in/out",
+          "touch": "Touch",
+          "digitals": "Digitals",
+          "corridors": "Corridors"
+        }
+      },
+      "monteCarlo": {
+        "title": "Monte Carlo for Path-dependent Products",
+        "duration": "7h 15min",
+        "description": "Advanced simulation techniques for path-dependent options.",
+        "topics": {
+          "asian": "Asian",
+          "lookback": "Lookback",
+          "simulation": "Simulation",
+          "varianceReduction": "Variance Reduction"
+        }
+      }
+    },
+    "cta": {
+      "title": "Access all modules",
+      "description": "Unlock all content and progress at your own pace with The Pricing Lab monthly subscription.",
+      "learnMore": "Learn more"
+    }
+  },
   "projects": {
     "title": "Challenges & Projects",
     "subtitle": "Test your knowledge with our practical challenges and compare your results with other community members.",
