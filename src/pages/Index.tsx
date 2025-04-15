@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -97,7 +98,7 @@ const Index = () => {
               <div className="bg-[url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3')] bg-cover bg-center w-full h-full opacity-60 mix-blend-overlay"></div>
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="terminal-text text-finance-accent bg-finance-charcoal/80 px-4 py-3 border border-finance-burgundy/30 rounded text-sm tracking-wider">
-                  PRICING • RISK • QUANT
+                  TRADING TERMINAL ACTIVATED
                 </div>
               </div>
             </div>

@@ -1,3 +1,4 @@
+
 import { Mail, Linkedin, Github, Twitter } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -9,7 +10,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-lg font-semibold mb-4 terminal-text text-finance-accent">THE PRICING LAB</h3>
+            <h3 className="text-lg font-semibold mb-4 terminal-text">THE PRICING LAB</h3>
             <p className="text-finance-lightgray text-sm">
               {t('footer.description')}
             </p>

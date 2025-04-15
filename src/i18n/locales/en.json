@@ -1,4 +1,3 @@
-
 {
   "navbar": {
     "courses": "Courses",
@@ -10,27 +9,15 @@
     "login": "Log in"
   },
   "footer": {
-    "company": "Company",
-    "about": "About us",
-    "careers": "Careers",
+    "description": "The Pricing Lab is a platform for learning financial product pricing that combines theory, practice and gamification.",
+    "navigation": "Navigation",
     "legal": "Legal",
     "contact": "Contact",
-    "courses": "Courses",
-    "fundamentals": "Fundamentals",
-    "vanillas": "Vanilla Options",
-    "exotics": "Exotic Products",
-    "resources": "Resources",
-    "documentation": "Documentation",
-    "tutorials": "Tutorials",
-    "certification": "Certification",
-    "faq": "FAQ",
-    "pricing": "Pricing",
-    "free": "Free",
-    "premium": "Premium",
-    "enterprise": "Enterprise",
-    "copyright": "© 2025 QuantFinance, Inc. All rights reserved.",
     "terms": "Terms",
-    "privacy": "Privacy"
+    "privacy": "Privacy",
+    "cookies": "Cookies",
+    "refund": "Refund Policy",
+    "copyright": "All rights reserved."
   },
   "home": {
     "hero": {

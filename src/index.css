@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -80,5 +81,6 @@
 
   .terminal-text {
     font-family: 'Roboto Mono', monospace;
+    color: #ea384c;
   }
 }

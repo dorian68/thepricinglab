@@ -1,4 +1,3 @@
-
 {
   "navbar": {
     "courses": "Cours",
@@ -10,27 +9,15 @@
     "login": "Connexion"
   },
   "footer": {
-    "company": "Entreprise",
-    "about": "À propos",
-    "careers": "Carrières",
+    "description": "The Pricing Lab est une plateforme d'apprentissage du pricing des produits financiers qui combine théorie, pratique et gamification.",
+    "navigation": "Navigation",
     "legal": "Mentions légales",
     "contact": "Contact",
-    "courses": "Cours",
-    "fundamentals": "Fondamentaux",
-    "vanillas": "Options Vanilles",
-    "exotics": "Produits Exotiques",
-    "resources": "Ressources",
-    "documentation": "Documentation",
-    "tutorials": "Tutoriels",
-    "certification": "Certification",
-    "faq": "FAQ",
-    "pricing": "Tarification",
-    "free": "Gratuit",
-    "premium": "Premium",
-    "enterprise": "Entreprise",
-    "copyright": "© 2025 QuantFinance, Inc. Tous droits réservés.",
-    "terms": "Conditions",
-    "privacy": "Confidentialité"
+    "terms": "Conditions d'utilisation",
+    "privacy": "Politique de confidentialité",
+    "cookies": "Gestion des cookies",
+    "refund": "Politique de remboursement",
+    "copyright": "Tous droits réservés."
   },
   "home": {
     "hero": {
@@ -396,5 +383,9 @@
     "membersPageComing": "Annuaire des Membres Bientôt Disponible",
     "membersPageComingDesc": "Nous construisons un annuaire complet des membres avec des profils, des réalisations et des fonctionnalités de réseautage. Soyez le premier à être informé de son lancement !",
     "getNotified": "Être Notifié"
+  },
+  "languageSwitcher": {
+    "en": "Anglais",
+    "fr": "Français"
   }
 }
