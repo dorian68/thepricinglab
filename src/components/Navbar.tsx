@@ -2,10 +2,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X, ChevronDown } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <nav className="sticky top-0 z-50 bg-finance-dark/95 backdrop-blur-sm border-b border-finance-steel/20">
@@ -18,7 +21,7 @@ const Navbar = () => {
             <div className="hidden md:block">
               <div className="ml-10 flex items-center space-x-4">
                 <Link to="/" className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium">
-                  Accueil
+                  {t('nav.home')}
                 </Link>
                 
                 <div className="relative">
@@ -26,7 +29,7 @@ const Navbar = () => {
                     onClick={() => setDropdownOpen(!dropdownOpen)}
                     className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium flex items-center"
                   >
-                    Cours <ChevronDown className="ml-1 h-4 w-4" />
+                    {t('nav.courses')} <ChevronDown className="ml-1 h-4 w-4" />
                   </button>
                   
                   {dropdownOpen && (
@@ -37,28 +40,28 @@ const Navbar = () => {
                           className="block px-4 py-2 text-sm text-finance-offwhite hover:bg-finance-steel/20"
                           role="menuitem"
                         >
-                          Fondamentaux
+                          {t('courses.fundamentals')}
                         </Link>
                         <Link
                           to="/courses/advanced"
                           className="block px-4 py-2 text-sm text-finance-offwhite hover:bg-finance-steel/20"
                           role="menuitem"
                         >
-                          Vanilles avancés
+                          {t('courses.advanced')}
                         </Link>
                         <Link
                           to="/courses/complex"
                           className="block px-4 py-2 text-sm text-finance-offwhite hover:bg-finance-steel/20"
                           role="menuitem"
                         >
-                          Produits complexes
+                          {t('courses.complex')}
                         </Link>
                         <Link
                           to="/courses/bonus"
                           className="block px-4 py-2 text-sm text-finance-offwhite hover:bg-finance-steel/20"
                           role="menuitem"
                         >
-                          Bonus
+                          {t('courses.bonus')}
                         </Link>
                       </div>
                     </div>
@@ -66,27 +69,28 @@ const Navbar = () => {
                 </div>
                 
                 <Link to="/dashboard" className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium">
-                  Dashboard
+                  {t('nav.dashboard')}
                 </Link>
                 <Link to="/projects" className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium">
-                  Projets
+                  {t('nav.projects')}
                 </Link>
                 <Link to="/tools" className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium">
-                  Outils
+                  {t('nav.tools')}
                 </Link>
                 <Link to="/mentoring" className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium">
-                  Mentorat
+                  {t('nav.mentoring')}
                 </Link>
               </div>
             </div>
           </div>
-          <div className="hidden md:block">
+          <div className="hidden md:flex items-center space-x-4">
+            <LanguageSwitcher />
             <div className="ml-4 flex items-center md:ml-6">
               <Link to="/login" className="finance-button-outline mr-4">
-                Se connecter
+                {t('nav.login')}
               </Link>
               <Link to="/signup" className="finance-button">
-                S'inscrire
+                {t('nav.signup')}
               </Link>
             </div>
           </div>
@@ -113,56 +117,59 @@ const Navbar = () => {
               to="/"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              Accueil
+              {t('nav.home')}
             </Link>
             <Link
               to="/courses/fundamentals"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              Cours: Fondamentaux
+              {t('courses.fundamentals')}
             </Link>
             <Link
               to="/courses/advanced"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              Cours: Vanilles avancés
+              {t('courses.advanced')}
             </Link>
             <Link
               to="/courses/complex"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              Cours: Produits complexes
+              {t('courses.complex')}
             </Link>
             <Link
               to="/dashboard"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              Dashboard
+              {t('nav.dashboard')}
             </Link>
             <Link
               to="/projects"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              Projets
+              {t('nav.projects')}
             </Link>
             <Link
               to="/tools"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              Outils
+              {t('nav.tools')}
             </Link>
             <Link
               to="/mentoring"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              Mentorat
+              {t('nav.mentoring')}
             </Link>
+            <div className="mt-3 flex justify-start px-3">
+              <LanguageSwitcher />
+            </div>
             <div className="pt-4 pb-3 border-t border-finance-steel/20">
               <Link to="/login" className="finance-button-outline block w-full text-center mb-2">
-                Se connecter
+                {t('nav.login')}
               </Link>
               <Link to="/signup" className="finance-button block w-full text-center">
-                S'inscrire
+                {t('nav.signup')}
               </Link>
             </div>
           </div>

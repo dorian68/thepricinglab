@@ -1,0 +1,37 @@
+
+{
+  "nav": {
+    "home": "Home",
+    "courses": "Courses",
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "tools": "Tools",
+    "mentoring": "Mentoring",
+    "login": "Log in",
+    "signup": "Sign up"
+  },
+  "courses": {
+    "fundamentals": "Fundamentals",
+    "advanced": "Advanced Vanillas",
+    "complex": "Complex Products",
+    "bonus": "Bonus"
+  },
+  "login": {
+    "title": "Login",
+    "subtitle": "Access your learning space",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "loginButton": "Log in",
+    "noAccount": "Don't have an account yet?",
+    "signupLink": "Sign up",
+    "termsPrefix": "By logging in, you accept our",
+    "terms": "terms of use",
+    "andOur": "and our",
+    "privacy": "privacy policy"
+  },
+  "languageSwitcher": {
+    "en": "English",
+    "fr": "French"
+  }
+}

@@ -3,12 +3,14 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const { t } = useTranslation();
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,9 +25,9 @@ const Login = () => {
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold terminal-text">Connexion</h1>
+            <h1 className="text-3xl font-bold terminal-text">{t('login.title')}</h1>
             <p className="text-finance-lightgray mt-2">
-              Accédez à votre espace d'apprentissage
+              {t('login.subtitle')}
             </p>
           </div>
           
@@ -33,7 +35,7 @@ const Login = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-finance-lightgray text-sm mb-2">
-                  Email
+                  {t('login.email')}
                 </label>
                 <input
                   type="email"
@@ -47,7 +49,7 @@ const Login = () => {
               
               <div>
                 <label className="block text-finance-lightgray text-sm mb-2">
-                  Mot de passe
+                  {t('login.password')}
                 </label>
                 <div className="relative">
                   <input
@@ -68,7 +70,7 @@ const Login = () => {
                 </div>
                 <div className="flex justify-end mt-2">
                   <Link to="/reset-password" className="text-finance-accent text-sm hover:underline">
-                    Mot de passe oublié?
+                    {t('login.forgotPassword')}
                   </Link>
                 </div>
               </div>
@@ -77,15 +79,15 @@ const Login = () => {
                 type="submit"
                 className="finance-button w-full"
               >
-                Se connecter
+                {t('login.loginButton')}
               </button>
             </form>
             
             <div className="mt-8 pt-6 border-t border-finance-steel/20 text-center">
               <p className="text-finance-lightgray text-sm">
-                Pas encore de compte? {" "}
+                {t('login.noAccount')} {" "}
                 <Link to="/signup" className="text-finance-accent hover:underline">
-                  S'inscrire
+                  {t('login.signupLink')}
                 </Link>
               </p>
             </div>
@@ -93,13 +95,13 @@ const Login = () => {
           
           <div className="mt-8 text-center text-finance-lightgray text-sm">
             <p>
-              En vous connectant, vous acceptez nos {" "}
+              {t('login.termsPrefix')} {" "}
               <Link to="/terms" className="text-finance-accent hover:underline">
-                conditions d'utilisation
+                {t('login.terms')}
               </Link>
-              {" "} et notre {" "}
+              {" "} {t('login.andOur')} {" "}
               <Link to="/privacy" className="text-finance-accent hover:underline">
-                politique de confidentialité
+                {t('login.privacy')}
               </Link>
             </p>
           </div>
