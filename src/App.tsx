@@ -18,6 +18,7 @@ import Community from "./pages/Community";
 import SurvivalMode from "./pages/SurvivalMode";
 import Leaderboard from "./pages/Leaderboard";
 import ExerciseDetail from "./pages/ExerciseDetail";
+import CourseAdvanced from "./pages/CourseAdvanced";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/community" element={<Community />} />
           <Route path="/survival-mode" element={<SurvivalMode />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/courses/advanced" element={<CourseAdvanced />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
