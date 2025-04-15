@@ -89,7 +89,7 @@ const Index = () => {
               
               <div className="mt-8 flex items-center space-x-6">
                 <div className="flex items-center">
-                  <span className="text-finance-lightgray text-sm">MAÎTRISE. TECHNIQUE. MARCHÉS.</span>
+                  <span className="terminal-text text-sm font-mono tracking-wider">MAÎTRISE. TECHNIQUE. MARCHÉS.</span>
                 </div>
               </div>
             </div>

@@ -11,181 +11,29 @@ import {
   ChevronDown,
   Info
 } from "lucide-react";
-
-// Simplified Black-Scholes calculator component
-const BlackScholesCalculator = () => {
-  const [spot, setSpot] = useState<number>(100);
-  const [strike, setStrike] = useState<number>(100);
-  const [interestRate, setInterestRate] = useState<number>(0.05);
-  const [volatility, setVolatility] = useState<number>(0.2);
-  const [timeToMaturity, setTimeToMaturity] = useState<number>(1);
-  const [callPrice, setCallPrice] = useState<number>(0);
-  const [putPrice, setPutPrice] = useState<number>(0);
-  const [delta, setDelta] = useState<number>(0);
-  const [gamma, setGamma] = useState<number>(0);
-  const [vega, setVega] = useState<number>(0);
-  const [theta, setTheta] = useState<number>(0);
-  
-  const calculate = () => {
-    // This is just a placeholder for the actual Black-Scholes calculation
-    // In a real implementation, this would calculate the option prices and Greeks
-    
-    // Simple Black-Scholes formula approximation for demonstration
-    const d1 = (Math.log(spot / strike) + (interestRate + volatility * volatility / 2) * timeToMaturity) / (volatility * Math.sqrt(timeToMaturity));
-    const d2 = d1 - volatility * Math.sqrt(timeToMaturity);
-    
-    // Standard normal CDF approximation
-    const normCDF = (x: number) => {
-      const t = 1 / (1 + 0.2316419 * Math.abs(x));
-      const d = 0.3989423 * Math.exp(-x * x / 2);
-      const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
-      return x > 0 ? 1 - p : p;
-    };
-    
-    // Call price
-    const calculatedCallPrice = spot * normCDF(d1) - strike * Math.exp(-interestRate * timeToMaturity) * normCDF(d2);
-    setCallPrice(parseFloat(calculatedCallPrice.toFixed(2)));
-    
-    // Put price
-    const calculatedPutPrice = strike * Math.exp(-interestRate * timeToMaturity) * normCDF(-d2) - spot * normCDF(-d1);
-    setPutPrice(parseFloat(calculatedPutPrice.toFixed(2)));
-    
-    // Greeks
-    setDelta(parseFloat(normCDF(d1).toFixed(4)));
-    setGamma(parseFloat((Math.exp(-d1 * d1 / 2) / (spot * volatility * Math.sqrt(timeToMaturity) * Math.sqrt(2 * Math.PI))).toFixed(4)));
-    setVega(parseFloat((spot * Math.sqrt(timeToMaturity) * Math.exp(-d1 * d1 / 2) / Math.sqrt(2 * Math.PI) / 100).toFixed(4)));
-    const thetaValue = (-(spot * volatility * Math.exp(-d1 * d1 / 2)) / (2 * Math.sqrt(timeToMaturity) * Math.sqrt(2 * Math.PI)) - interestRate * strike * Math.exp(-interestRate * timeToMaturity) * normCDF(d2)) / 365;
-    setTheta(parseFloat(thetaValue.toFixed(4)));
-  };
-
-  return (
-    <div className="finance-card p-6">
-      <h3 className="text-xl font-medium mb-6">Calculatrice Black-Scholes</h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Prix spot</label>
-              <input
-                type="number"
-                value={spot}
-                onChange={(e) => setSpot(parseFloat(e.target.value))}
-                className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Prix d'exercice</label>
-              <input
-                type="number"
-                value={strike}
-                onChange={(e) => setStrike(parseFloat(e.target.value))}
-                className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Taux d'intérêt (décimal)</label>
-              <input
-                type="number"
-                step="0.01"
-                value={interestRate}
-                onChange={(e) => setInterestRate(parseFloat(e.target.value))}
-                className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Volatilité (décimal)</label>
-              <input
-                type="number"
-                step="0.01"
-                value={volatility}
-                onChange={(e) => setVolatility(parseFloat(e.target.value) || 0)}
-                className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Temps jusqu'à maturité (années)</label>
-              <input
-                type="number"
-                step="0.01"
-                value={timeToMaturity}
-                onChange={(e) => setTimeToMaturity(parseFloat(e.target.value) || 0)}
-                className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
-              />
-            </div>
-            
-            <button
-              onClick={calculate}
-              className="finance-button w-full"
-            >
-              Calculer
-            </button>
-          </div>
-        </div>
-        
-        <div>
-          <h4 className="text-finance-offwhite font-medium mb-4">Résultats</h4>
-          
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="finance-card p-4">
-              <p className="text-finance-lightgray text-sm mb-1">Prix Call</p>
-              <p className="text-2xl font-medium text-finance-offwhite">{callPrice}</p>
-            </div>
-            
-            <div className="finance-card p-4">
-              <p className="text-finance-lightgray text-sm mb-1">Prix Put</p>
-              <p className="text-2xl font-medium text-finance-offwhite">{putPrice}</p>
-            </div>
-          </div>
-          
-          <h4 className="text-finance-offwhite font-medium mb-4">Greeks</h4>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="finance-card p-3">
-              <p className="text-finance-lightgray text-sm mb-1">Delta</p>
-              <p className="text-lg font-medium text-finance-offwhite">{delta}</p>
-            </div>
-            
-            <div className="finance-card p-3">
-              <p className="text-finance-lightgray text-sm mb-1">Gamma</p>
-              <p className="text-lg font-medium text-finance-offwhite">{gamma}</p>
-            </div>
-            
-            <div className="finance-card p-3">
-              <p className="text-finance-lightgray text-sm mb-1">Vega</p>
-              <p className="text-lg font-medium text-finance-offwhite">{vega}</p>
-            </div>
-            
-            <div className="finance-card p-3">
-              <p className="text-finance-lightgray text-sm mb-1">Theta</p>
-              <p className="text-lg font-medium text-finance-offwhite">{theta}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+import BlackScholesCalculator from "../components/tools/BlackScholesCalculator";
+import BinomialCalculator from "../components/tools/BinomialCalculator";
+import YieldCurveVisualizer from "../components/tools/YieldCurveVisualizer";
+import GreeksSimulator from "../components/tools/GreeksSimulator";
+import BondCalculator from "../components/tools/BondCalculator";
 
 // Tool card component
 const ToolCard = ({ 
   icon: Icon, 
   title, 
   description, 
-  locked = false 
+  locked = false,
+  onClick
 }: { 
   icon: React.ElementType; 
   title: string; 
   description: string; 
   locked?: boolean;
+  onClick?: () => void;
 }) => (
   <div className={`finance-card p-6 ${locked ? 'opacity-60' : 'hover:border-finance-accent transition-colors duration-300'}`}>
     <div className="flex items-start justify-between mb-4">
-      <div className="p-3 rounded-md bg-finance-burgundy/10">
+      <div className="bg-finance-burgundy/20 rounded-full p-3">
         <Icon className="h-6 w-6 text-finance-accent" />
       </div>
       
@@ -200,6 +48,7 @@ const ToolCard = ({
     <p className="text-finance-lightgray text-sm mb-4">{description}</p>
     
     <button 
+      onClick={onClick}
       className={`flex justify-between items-center w-full p-3 rounded ${
         locked 
           ? 'bg-finance-steel/10 text-finance-lightgray cursor-not-allowed' 
@@ -210,54 +59,6 @@ const ToolCard = ({
         {locked ? "Débloquer" : "Utiliser l'outil"}
       </span>
       <ArrowRight className="h-4 w-4" />
-    </button>
-  </div>
-);
-
-// Volatility Surface Viewer Placeholder
-const VolatilitySurfaceViewer = () => (
-  <div className="finance-card p-6">
-    <h3 className="text-xl font-medium mb-6">Visualiseur de Surface de Volatilité</h3>
-    
-    <div className="aspect-[4/3] bg-finance-charcoal rounded-lg p-4 flex flex-col items-center justify-center border border-finance-steel/30 mb-6">
-      <LineChart className="h-16 w-16 text-finance-accent opacity-30 mb-4" />
-      <p className="text-finance-lightgray text-sm max-w-md text-center">
-        Cet outil vous permet de visualiser et d'analyser les surfaces de volatilité implicites pour différents sous-jacents.
-        Sélectionnez un sous-jacent et une date pour générer la surface.
-      </p>
-    </div>
-    
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <div>
-        <label className="block text-finance-lightgray text-sm mb-1">Sous-jacent</label>
-        <select className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite">
-          <option>EUROSTOXX 50</option>
-          <option>S&P 500</option>
-          <option>DAX</option>
-          <option>CAC 40</option>
-        </select>
-      </div>
-      
-      <div>
-        <label className="block text-finance-lightgray text-sm mb-1">Date</label>
-        <input
-          type="date"
-          className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
-        />
-      </div>
-      
-      <div>
-        <label className="block text-finance-lightgray text-sm mb-1">Type de visualisation</label>
-        <select className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite">
-          <option>Surface 3D</option>
-          <option>Courbes par maturité</option>
-          <option>Heatmap</option>
-        </select>
-      </div>
-    </div>
-    
-    <button className="finance-button">
-      Générer la surface
     </button>
   </div>
 );
@@ -383,10 +184,24 @@ const Tools = () => {
               </div>
               
               {activeCalculator === "blackscholes" && <BlackScholesCalculator />}
-              {activeCalculator === "binomial" && (
+              {activeCalculator === "binomial" && <BinomialCalculator />}
+              {activeCalculator === "bonds" && <BondCalculator />}
+              {activeCalculator === "forwards" && (
                 <div className="finance-card p-6 flex flex-col items-center justify-center min-h-[300px]">
                   <Calculator className="h-12 w-12 text-finance-steel mb-4" />
-                  <h3 className="text-xl font-medium mb-2">Calculatrice Binomiale</h3>
+                  <h3 className="text-xl font-medium mb-2">Calculatrice Forwards & Futures</h3>
+                  <p className="text-finance-lightgray text-center mb-6">
+                    Cette calculatrice sera disponible prochainement.
+                  </p>
+                  <button className="finance-button-outline">
+                    Être notifié lors de la sortie
+                  </button>
+                </div>
+              )}
+              {activeCalculator === "swaps" && (
+                <div className="finance-card p-6 flex flex-col items-center justify-center min-h-[300px]">
+                  <Calculator className="h-12 w-12 text-finance-steel mb-4" />
+                  <h3 className="text-xl font-medium mb-2">Calculatrice de Swaps</h3>
                   <p className="text-finance-lightgray text-center mb-6">
                     Cette calculatrice sera disponible prochainement.
                   </p>
@@ -436,7 +251,20 @@ const Tools = () => {
                 </div>
               </div>
               
-              {activeCalculator === "volsurface" && <VolatilitySurfaceViewer />}
+              {activeCalculator === "volsurface" && (
+                <div className="finance-card p-6 flex flex-col items-center justify-center min-h-[300px]">
+                  <LineChart className="h-12 w-12 text-finance-steel mb-4" />
+                  <h3 className="text-xl font-medium mb-2">Visualiseur de Surface de Volatilité</h3>
+                  <p className="text-finance-lightgray text-center mb-6">
+                    Ce visualiseur sera disponible prochainement.
+                  </p>
+                  <button className="finance-button-outline">
+                    Être notifié lors de la sortie
+                  </button>
+                </div>
+              )}
+              {activeCalculator === "yieldcurve" && <YieldCurveVisualizer />}
+              {activeCalculator === "greekssim" && <GreeksSimulator />}
             </div>
           )}
           
@@ -449,35 +277,52 @@ const Tools = () => {
                   icon={Calculator} 
                   title="Calculatrice Black-Scholes" 
                   description="Évaluez rapidement les options vanilles et obtenez les Greeks correspondants."
+                  onClick={() => {
+                    setActiveTab("calculators");
+                    setActiveCalculator("blackscholes");
+                  }}
                 />
                 <ToolCard 
                   icon={Calculator} 
                   title="Modèle binomial" 
                   description="Évaluez les options avec un modèle binomial personnalisable."
-                  locked={true}
+                  onClick={() => {
+                    setActiveTab("calculators");
+                    setActiveCalculator("binomial");
+                  }}
                 />
                 <ToolCard 
                   icon={LineChart} 
                   title="Visualiseur de surface de vol" 
                   description="Explorez les surfaces de volatilité implicite pour différents sous-jacents."
+                  locked={true}
                 />
                 <ToolCard 
                   icon={Calculator} 
                   title="Calculateur d'obligations" 
                   description="Évaluez les obligations et analysez leur sensibilité aux variations de taux."
-                  locked={true}
+                  onClick={() => {
+                    setActiveTab("calculators");
+                    setActiveCalculator("bonds");
+                  }}
                 />
                 <ToolCard 
                   icon={LineChart} 
                   title="Visualiseur de courbe de taux" 
                   description="Affichez et manipulez les courbes de taux zéro-coupon et forward."
-                  locked={true}
+                  onClick={() => {
+                    setActiveTab("visualizers");
+                    setActiveCalculator("yieldcurve");
+                  }}
                 />
                 <ToolCard 
                   icon={Calculator} 
                   title="Simulateur de Greeks" 
                   description="Simulez l'évolution des Greeks en fonction des mouvements de marché."
-                  locked={true}
+                  onClick={() => {
+                    setActiveTab("visualizers");
+                    setActiveCalculator("greekssim");
+                  }}
                 />
               </div>
             </div>
