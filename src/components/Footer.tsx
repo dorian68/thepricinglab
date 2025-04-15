@@ -1,8 +1,11 @@
 
-import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Mail, Linkedin, Github, Twitter } from "lucide-react";
 
 const Footer = () => {
+  // Use useLocation to verify we're inside router context
+  const location = useLocation();
+
   return (
     <footer className="bg-finance-charcoal border-t border-finance-steel/20 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -18,34 +21,34 @@ const Footer = () => {
             <h4 className="text-md font-medium mb-3 text-finance-offwhite">Navigation</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-finance-lightgray hover:text-finance-accent text-sm">
+                <a href="/" className="text-finance-lightgray hover:text-finance-accent text-sm">
                   Accueil
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/courses/fundamentals" className="text-finance-lightgray hover:text-finance-accent text-sm">
+                <a href="/courses/fundamentals" className="text-finance-lightgray hover:text-finance-accent text-sm">
                   Cours
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/dashboard" className="text-finance-lightgray hover:text-finance-accent text-sm">
+                <a href="/dashboard" className="text-finance-lightgray hover:text-finance-accent text-sm">
                   Dashboard
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/projects" className="text-finance-lightgray hover:text-finance-accent text-sm">
+                <a href="/projects" className="text-finance-lightgray hover:text-finance-accent text-sm">
                   Projets
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/tools" className="text-finance-lightgray hover:text-finance-accent text-sm">
+                <a href="/tools" className="text-finance-lightgray hover:text-finance-accent text-sm">
                   Outils
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/mentoring" className="text-finance-lightgray hover:text-finance-accent text-sm">
+                <a href="/mentoring" className="text-finance-lightgray hover:text-finance-accent text-sm">
                   Mentorat
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
@@ -54,24 +57,24 @@ const Footer = () => {
             <h4 className="text-md font-medium mb-3 text-finance-offwhite">Légal</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/terms" className="text-finance-lightgray hover:text-finance-accent text-sm">
+                <a href="/terms" className="text-finance-lightgray hover:text-finance-accent text-sm">
                   Conditions d'utilisation
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/privacy" className="text-finance-lightgray hover:text-finance-accent text-sm">
+                <a href="/privacy" className="text-finance-lightgray hover:text-finance-accent text-sm">
                   Politique de confidentialité
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/cookies" className="text-finance-lightgray hover:text-finance-accent text-sm">
+                <a href="/cookies" className="text-finance-lightgray hover:text-finance-accent text-sm">
                   Cookies
-                </Link>
+                </a>
               </li>
               <li>
-                <Link to="/refund" className="text-finance-lightgray hover:text-finance-accent text-sm">
+                <a href="/refund" className="text-finance-lightgray hover:text-finance-accent text-sm">
                   Politique de remboursement
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
