@@ -1,3 +1,4 @@
+
 {
   "navbar": {
     "courses": "Courses",
@@ -263,7 +264,7 @@
     "backToList": "Back to Exercise List",
     "objectives": "Learning Objectives",
     "prerequisites": "Prerequisites",
-    "simulation": "Interactive Simulation",
+    "interactive": "Interactive Simulation",
     "completionPoints": "500 points for completion",
     "startExercise": "Start Exercise",
     "prevStep": "Previous Step",
@@ -383,5 +384,163 @@
     "membersPageComing": "Members Directory Coming Soon",
     "membersPageComingDesc": "We're building a comprehensive members directory with profiles, achievements, and networking features. Be the first to know when it launches!",
     "getNotified": "Get Notified"
+  },
+  "languageSwitcher": {
+    "en": "English",
+    "fr": "French"
+  },
+  "stats": {
+    "modules": "Modules",
+    "exercises": "Exercises",
+    "badges": "Badges to unlock",
+    "simulators": "Simulators"
+  },
+  "pricing": {
+    "title": "Choose Your Learning Path",
+    "description": "Access to learning materials tailored to your needs and goals",
+    "free": {
+      "title": "Discovery Pack",
+      "price": "Free",
+      "feature1": "Basic modules & 1 survival wave",
+      "feature2": "Basic quizzes (untimed)",
+      "feature3": "Read-only forum access",
+      "feature4": "Limited tools access",
+      "cta": "Start for Free"
+    },
+    "pro": {
+      "title": "Pro Pack",
+      "price": "19€",
+      "feature1": "All courses & pricing modules",
+      "feature2": "Full survival mode access",
+      "feature3": "Advanced quizzes & real conditions",
+      "feature4": "Badges, leaderboard & scoring",
+      "feature5": "Pair programming & team projects",
+      "cta": "Go Pro"
+    },
+    "mentor": {
+      "title": "Mentorship Pack",
+      "price": "49€",
+      "feature1": "Everything in Pro Pack",
+      "feature2": "Premium community access",
+      "feature3": "Live sessions with experts (2x/month)",
+      "feature4": "Personalized coaching",
+      "feature5": "Priority access to career modules",
+      "cta": "Get Mentored"
+    },
+    "discount": {
+      "title": "Early Bird Special - 30% Off!",
+      "description": "Limited offer for the first 100 subscribers. Lock in your discount today!",
+      "cta": "Claim Your Discount"
+    }
+  },
+  "gamification": {
+    "badges": {
+      "title": "Badges & Achievements",
+      "description": "Unlock thematic badges as you progress through the platform.",
+      "recent": "Recent Badges"
+    },
+    "leaderboard": {
+      "title": "Rankings & Competitions",
+      "description": "Measure yourself against other users via leaderboards."
+    },
+    "challenges": {
+      "title": "Daily and Weekly Challenges",
+      "description": "Take on challenges to earn points and improve your ranking."
+    },
+    "progress": {
+      "level": "Level 8",
+      "status": "Intermediate",
+      "progression": "Progress"
+    },
+    "performance": {
+      "title": "Performance",
+      "accuracy": "Accuracy",
+      "exercises": "Exercises",
+      "challenges": "Challenges"
+    },
+    "dashboard": "View my dashboard"
+  },
+  "cta": {
+    "title": "Ready to start the journey?",
+    "description": "Join our community of enthusiasts and master financial product pricing through an interactive and playful experience.",
+    "signup": "Sign up for free",
+    "explore": "Explore modules"
+  },
+  "freemium": {
+    "banner": {
+      "title": "Just 1 more wave to unlock the world of pros!",
+      "description": "Join the best quants of your generation.",
+      "details": "See all plans",
+      "upgrade": "Go Pro (19€/month)"
+    },
+    "progressLock": {
+      "title": "You've unlocked access to the 'Intermediate' level!",
+      "description": "Ready to boost your pricing mastery?",
+      "features": {
+        "advanced": "Advanced exercises (Black-Scholes, Monte Carlo, exotics...)",
+        "waves": "Higher survival mode waves",
+        "quizzes": "Timed quizzes",
+        "projects": "Collaborative projects & pair programming",
+        "leaderboard": "Rankings and badges to collect"
+      },
+      "cta": "Upgrade to Pro"
+    }
+  },
+  "tools": {
+    "blackScholes": {
+      "title": "Black-Scholes Calculator",
+      "description": "Calculate option prices and Greeks using the Black-Scholes-Merton model",
+      "spotPrice": "Spot Price",
+      "strike": "Strike Price",
+      "volatility": "Volatility (%)",
+      "timeToExpiry": "Time to Expiry (Years)",
+      "riskFreeRate": "Risk-Free Rate (%)",
+      "dividend": "Dividend Yield (%)",
+      "optionType": "Option Type",
+      "calculate": "Calculate",
+      "optionPrice": "Option Price",
+      "about": "About Black-Scholes",
+      "aboutText": "The Black-Scholes model is a mathematical model for pricing European-style options. It assumes that the price of the underlying follows a geometric Brownian motion with constant volatility and that markets are frictionless."
+    },
+    "greeks": {
+      "title": "Greeks Simulator",
+      "description": "Visualize how option Greeks change with respect to different parameters",
+      "greekToShow": "Greek to Display",
+      "spotRange": "Spot Price Range",
+      "volatilityRange": "Volatility Range (%)",
+      "timeRange": "Time Range (Years)",
+      "from": "From",
+      "to": "To",
+      "simulate": "Simulate",
+      "resetDefaults": "Reset Defaults",
+      "about": "About Greeks",
+      "aboutText": "Greeks measure the sensitivity of option prices to various factors. Delta measures price change relative to underlying, gamma measures the rate of change of delta, vega measures sensitivity to volatility, and theta measures time decay."
+    },
+    "yieldCurve": {
+      "title": "Yield Curve Visualizer",
+      "description": "Visualize and analyze zero-coupon yield curves and forward rates",
+      "currency": "Currency",
+      "date": "Date",
+      "display": "Display",
+      "spotRates": "Spot Rates",
+      "forwardRates": "Forward Rates",
+      "about": "About Yield Curves",
+      "aboutText": "Yield curves display zero-coupon bond yields for different maturities. Spot rates represent current yields while forward rates anticipate future spot rates. These curves are essential for interest rate product pricing and macroeconomic analysis."
+    },
+    "binomial": {
+      "title": "Binomial Calculator",
+      "description": "Price options using the binomial tree model with visual representation",
+      "spotPrice": "Spot Price",
+      "strike": "Strike Price",
+      "volatility": "Volatility (%)",
+      "timeToExpiry": "Time to Expiry (Years)",
+      "riskFreeRate": "Risk-Free Rate (%)",
+      "steps": "Number of Steps",
+      "optionType": "Option Type",
+      "calculate": "Calculate",
+      "optionPrice": "Option Price",
+      "about": "About Binomial Model",
+      "aboutText": "The binomial model is a numerical method for option valuation. It discretizes time to expiration into multiple steps, with two possible movements at each step (up or down). This model is particularly useful for American options and path-dependent exotic structures."
+    }
   }
 }

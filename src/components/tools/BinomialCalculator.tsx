@@ -1,271 +1,264 @@
 
 import { useState } from "react";
-import { Tree, TreeNode } from "react-d3-tree";
+import { Info } from "lucide-react";
+import Tree from "react-d3-tree";
 
-// Types for binomial tree nodes
-type BinomialNode = {
-  name: string;
-  attributes: {
-    price: number;
-    optionValue?: number;
-  };
-  children?: BinomialNode[];
+// Custom node types for the binomial tree
+type NodeData = {
+  id: string;
+  price: number;
+  probability?: number;
+  isCall?: boolean;
+  optionValue?: number;
+};
+
+// Custom component for tree nodes
+const CustomNode = ({ nodeDatum }: { nodeDatum: any }) => {
+  const nodeData = nodeDatum as NodeData;
+  return (
+    <g>
+      <circle r={20} fill={nodeData.isCall ? "#4A89DC" : "#ea384c"} />
+      <text
+        dy=".31em"
+        fontSize={9}
+        fontFamily="Arial"
+        textAnchor="middle"
+        fill="white"
+        style={{ pointerEvents: "none" }}
+      >
+        {nodeData.price.toFixed(2)}
+      </text>
+      {nodeData.optionValue !== undefined && (
+        <text
+          dy="-.5em"
+          dx="1.5em"
+          fontSize={8}
+          fontFamily="Arial"
+          textAnchor="middle"
+          fill="#e5e5e5"
+        >
+          {nodeData.optionValue.toFixed(2)}
+        </text>
+      )}
+    </g>
+  );
 };
 
 const BinomialCalculator = () => {
-  const [spot, setSpot] = useState<number>(100);
+  const [spotPrice, setSpotPrice] = useState<number>(100);
   const [strike, setStrike] = useState<number>(100);
-  const [volatility, setVolatility] = useState<number>(0.2);
-  const [riskFreeRate, setRiskFreeRate] = useState<number>(0.05);
-  const [timeToMaturity, setTimeToMaturity] = useState<number>(1);
+  const [volatility, setVolatility] = useState<number>(20);
+  const [timeToExpiry, setTimeToExpiry] = useState<number>(1);
+  const [riskFreeRate, setRiskFreeRate] = useState<number>(5);
   const [steps, setSteps] = useState<number>(3);
   const [optionType, setOptionType] = useState<string>("call");
-  const [callPrice, setCallPrice] = useState<number | null>(null);
-  const [putPrice, setPutPrice] = useState<number | null>(null);
-  const [treeData, setTreeData] = useState<BinomialNode | null>(null);
-  
-  // Function to calculate option price using binomial model
-  const calculate = () => {
+  const [treeData, setTreeData] = useState<any>(null);
+  const [optionPrice, setOptionPrice] = useState<number | null>(null);
+
+  const calculateBinomialTree = () => {
+    // Convert inputs to proper formats for calculations
+    const S = spotPrice;
+    const K = strike;
+    const sigma = volatility / 100;
+    const T = timeToExpiry;
+    const r = riskFreeRate / 100;
+    const N = steps;
+    const isCall = optionType === "call";
+
     // Time step
-    const dt = timeToMaturity / steps;
+    const dt = T / N;
     
-    // Calculate up and down factors
-    const up = Math.exp(volatility * Math.sqrt(dt));
-    const down = 1 / up;
+    // Up and down factors
+    const u = Math.exp(sigma * Math.sqrt(dt));
+    const d = 1 / u;
     
-    // Calculate risk-neutral probability
-    const p = (Math.exp(riskFreeRate * dt) - down) / (up - down);
-    
-    // Initialize stock price tree
-    const stockTree: number[][] = Array(steps + 1).fill(0).map(() => Array(steps + 1).fill(0));
-    
-    // Initialize option price tree
-    const optionTree: number[][] = Array(steps + 1).fill(0).map(() => Array(steps + 1).fill(0));
-    
-    // Build stock price tree
-    for (let i = 0; i <= steps; i++) {
+    // Risk-neutral probability
+    const p = (Math.exp(r * dt) - d) / (u - d);
+
+    // Create price tree
+    let prices: number[][] = [];
+    for (let i = 0; i <= N; i++) {
+      prices[i] = [];
       for (let j = 0; j <= i; j++) {
-        stockTree[i][j] = spot * Math.pow(up, j) * Math.pow(down, i - j);
+        prices[i][j] = S * Math.pow(u, j) * Math.pow(d, i - j);
       }
     }
-    
-    // Calculate option values at expiration
-    for (let j = 0; j <= steps; j++) {
-      if (optionType === "call") {
-        optionTree[steps][j] = Math.max(0, stockTree[steps][j] - strike);
+
+    // Create option value tree (backward induction)
+    let optionValues: number[][] = [];
+    for (let i = 0; i <= N; i++) {
+      optionValues[i] = [];
+    }
+
+    // Terminal payoffs
+    for (let j = 0; j <= N; j++) {
+      if (isCall) {
+        optionValues[N][j] = Math.max(0, prices[N][j] - K);
       } else {
-        optionTree[steps][j] = Math.max(0, strike - stockTree[steps][j]);
+        optionValues[N][j] = Math.max(0, K - prices[N][j]);
       }
     }
-    
+
     // Backward induction
-    for (let i = steps - 1; i >= 0; i--) {
+    for (let i = N - 1; i >= 0; i--) {
       for (let j = 0; j <= i; j++) {
-        optionTree[i][j] = Math.exp(-riskFreeRate * dt) * (p * optionTree[i + 1][j + 1] + (1 - p) * optionTree[i + 1][j]);
+        optionValues[i][j] = Math.exp(-r * dt) * (p * optionValues[i + 1][j + 1] + (1 - p) * optionValues[i + 1][j]);
       }
     }
-    
-    // Set the calculated prices
-    if (optionType === "call") {
-      setCallPrice(optionTree[0][0]);
-      setPutPrice(null);
-    } else {
-      setCallPrice(null);
-      setPutPrice(optionTree[0][0]);
-    }
-    
-    // Create tree data for visualization
-    const createTreeNode = (i: number, j: number): BinomialNode => {
-      if (i > steps) return { name: "", attributes: { price: 0 } };
+
+    // Set option price
+    setOptionPrice(optionValues[0][0]);
+
+    // Structure the tree data for d3 visualization
+    const createTreeNodes = (i: number, j: number): any => {
+      if (i > N) return null;
       
-      return {
-        name: `S_${i},${j}`,
+      const node = {
+        name: `${i}-${j}`,
         attributes: {
-          price: parseFloat(stockTree[i][j].toFixed(2)),
-          optionValue: parseFloat(optionTree[i][j].toFixed(2))
+          price: prices[i][j],
+          optionValue: optionValues[i][j]
         },
-        children: i < steps ? [
-          createTreeNode(i + 1, j),
-          createTreeNode(i + 1, j + 1)
-        ] : []
+        price: prices[i][j],
+        optionValue: optionValues[i][j],
+        isCall: isCall,
+        children: []
       };
+
+      if (i < N) {
+        const upChild = createTreeNodes(i + 1, j + 1);
+        const downChild = createTreeNodes(i + 1, j);
+        if (upChild) node.children.push(upChild);
+        if (downChild) node.children.push(downChild);
+      }
+
+      return node;
     };
-    
-    setTreeData(createTreeNode(0, 0));
+
+    const treeRoot = createTreeNodes(0, 0);
+    setTreeData(treeRoot);
   };
-  
+
   return (
     <div className="finance-card p-6">
-      <h3 className="text-xl font-medium mb-6">Calculatrice Binomiale</h3>
+      <h3 className="text-xl font-medium mb-6">Calculateur Binomial</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Prix spot</label>
-              <input
-                type="number"
-                value={spot}
-                onChange={(e) => setSpot(parseFloat(e.target.value) || 0)}
-                className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Prix d'exercice</label>
-              <input
-                type="number"
-                value={strike}
-                onChange={(e) => setStrike(parseFloat(e.target.value) || 0)}
-                className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Volatilité (décimal)</label>
-              <input
-                type="number"
-                step="0.01"
-                value={volatility}
-                onChange={(e) => setVolatility(parseFloat(e.target.value) || 0)}
-                className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Taux d'intérêt (décimal)</label>
-              <input
-                type="number"
-                step="0.01"
-                value={riskFreeRate}
-                onChange={(e) => setRiskFreeRate(parseFloat(e.target.value) || 0)}
-                className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Temps jusqu'à maturité (années)</label>
-              <input
-                type="number"
-                step="0.1"
-                value={timeToMaturity}
-                onChange={(e) => setTimeToMaturity(parseFloat(e.target.value) || 0)}
-                className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Nombre d'étapes</label>
-              <input
-                type="number"
-                min="1"
-                max="5"
-                value={steps}
-                onChange={(e) => setSteps(parseInt(e.target.value) || 1)}
-                className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
-              />
-              <p className="text-finance-lightgray text-xs mt-1">Limité à 5 pour la visualisation</p>
-            </div>
-            
-            <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Type d'option</label>
-              <select
-                value={optionType}
-                onChange={(e) => setOptionType(e.target.value)}
-                className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
-              >
-                <option value="call">Call</option>
-                <option value="put">Put</option>
-              </select>
-            </div>
-            
-            <button
-              onClick={calculate}
-              className="finance-button w-full"
-            >
-              Calculer
-            </button>
-          </div>
+          <label className="block text-finance-lightgray text-sm mb-1">Prix Spot</label>
+          <input 
+            type="number" 
+            value={spotPrice}
+            onChange={(e) => setSpotPrice(Number(e.target.value))}
+            className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
+          />
         </div>
         
         <div>
-          <h4 className="text-finance-offwhite font-medium mb-4">Résultats</h4>
-          
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="finance-card p-4">
-              <p className="text-finance-lightgray text-sm mb-1">Prix {optionType === "call" ? "Call" : "Put"}</p>
-              <p className="text-2xl font-medium text-finance-offwhite">
-                {optionType === "call" 
-                  ? callPrice !== null ? callPrice.toFixed(2) : "—" 
-                  : putPrice !== null ? putPrice.toFixed(2) : "—"}
-              </p>
-            </div>
-            
-            <div className="finance-card p-4">
-              <p className="text-finance-lightgray text-sm mb-1">Modèle</p>
-              <p className="text-lg font-medium text-finance-offwhite">Binomial CRR</p>
-            </div>
-          </div>
-          
-          <div className="finance-card p-4 bg-finance-charcoal/50 mb-4">
-            <h5 className="text-finance-offwhite font-medium mb-2">Paramètres du modèle</h5>
-            <table className="w-full text-sm">
-              <tbody>
-                <tr>
-                  <td className="text-finance-lightgray py-1">Facteur de hausse (u)</td>
-                  <td className="text-finance-offwhite text-right py-1">
-                    {Math.exp(volatility * Math.sqrt(timeToMaturity / steps)).toFixed(4)}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="text-finance-lightgray py-1">Facteur de baisse (d)</td>
-                  <td className="text-finance-offwhite text-right py-1">
-                    {(1 / Math.exp(volatility * Math.sqrt(timeToMaturity / steps))).toFixed(4)}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="text-finance-lightgray py-1">Probabilité risque-neutre (p)</td>
-                  <td className="text-finance-offwhite text-right py-1">
-                    {((Math.exp(riskFreeRate * (timeToMaturity / steps)) - (1 / Math.exp(volatility * Math.sqrt(timeToMaturity / steps)))) / 
-                      (Math.exp(volatility * Math.sqrt(timeToMaturity / steps)) - (1 / Math.exp(volatility * Math.sqrt(timeToMaturity / steps))))).toFixed(4)}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          
-          {treeData && (
-            <div className="relative h-60 w-full bg-finance-charcoal/30 rounded border border-finance-steel/20 overflow-hidden">
-              <div className="p-2 text-finance-accent text-xs absolute top-0 left-0 z-10">
-                Arbre binomial (visualisation simplifiée)
-              </div>
-              
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-finance-offwhite font-medium">S₀ = {spot.toFixed(2)}</p>
-                  <p className="text-finance-accent">V₀ = {optionType === "call" ? callPrice?.toFixed(2) : putPrice?.toFixed(2)}</p>
-                
-                  <div className="mt-4 flex justify-center space-x-8">
-                    <div>
-                      <p className="text-finance-offwhite">S₁ᵘ = {(spot * Math.exp(volatility * Math.sqrt(timeToMaturity / steps))).toFixed(2)}</p>
-                    </div>
-                    <div>
-                      <p className="text-finance-offwhite">S₁ᵈ = {(spot / Math.exp(volatility * Math.sqrt(timeToMaturity / steps))).toFixed(2)}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          <label className="block text-finance-lightgray text-sm mb-1">Strike</label>
+          <input 
+            type="number" 
+            value={strike}
+            onChange={(e) => setStrike(Number(e.target.value))}
+            className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-finance-lightgray text-sm mb-1">Volatilité (%)</label>
+          <input 
+            type="number" 
+            value={volatility}
+            onChange={(e) => setVolatility(Number(e.target.value))}
+            className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-finance-lightgray text-sm mb-1">Temps à Maturité (années)</label>
+          <input 
+            type="number" 
+            value={timeToExpiry}
+            onChange={(e) => setTimeToExpiry(Number(e.target.value))}
+            className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
+            step="0.1"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-finance-lightgray text-sm mb-1">Taux sans risque (%)</label>
+          <input 
+            type="number" 
+            value={riskFreeRate}
+            onChange={(e) => setRiskFreeRate(Number(e.target.value))}
+            className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-finance-lightgray text-sm mb-1">Nombre d'étapes</label>
+          <input 
+            type="number" 
+            value={steps}
+            onChange={(e) => setSteps(Number(e.target.value))}
+            className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
+            min="1"
+            max="5"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-finance-lightgray text-sm mb-1">Type d'option</label>
+          <select 
+            value={optionType}
+            onChange={(e) => setOptionType(e.target.value)}
+            className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
+          >
+            <option value="call">Call</option>
+            <option value="put">Put</option>
+          </select>
         </div>
       </div>
       
-      <div className="border-t border-finance-steel/20 pt-4 mt-4">
-        <p className="text-finance-lightgray text-sm">
-          Le modèle binomial (Cox-Ross-Rubinstein) divise la période jusqu'à l'expiration en étapes discrètes. À chaque étape, 
-          le prix du sous-jacent peut monter ou descendre par un facteur déterminé par la volatilité. Cette approche est particulièrement
-          utile pour évaluer les options américaines qui peuvent être exercées avant la maturité.
-        </p>
+      <button 
+        onClick={calculateBinomialTree} 
+        className="finance-button mb-6"
+      >
+        Calculer
+      </button>
+      
+      {optionPrice !== null && (
+        <div className="mb-6 p-4 bg-finance-charcoal/50 rounded border border-finance-steel/30">
+          <p className="text-finance-offwhite">
+            Prix de l'option: <span className="font-bold text-finance-accent">{optionPrice.toFixed(4)}</span>
+          </p>
+        </div>
+      )}
+      
+      {treeData && (
+        <div className="h-80 bg-finance-charcoal/30 rounded border border-finance-steel/20 mb-6">
+          <Tree 
+            data={treeData}
+            pathFunc="step"
+            orientation="vertical"
+            renderCustomNodeElement={CustomNode}
+            separation={{ siblings: 1, nonSiblings: 1.2 }}
+            translate={{ x: 300, y: 40 }}
+            zoom={0.7}
+          />
+        </div>
+      )}
+      
+      <div className="bg-finance-charcoal/50 p-4 rounded-lg border border-finance-steel/20 flex items-start">
+        <Info className="h-5 w-5 text-finance-accent flex-shrink-0 mt-0.5 mr-3" />
+        <div>
+          <h4 className="text-finance-offwhite font-medium mb-1">À propos du modèle binomial</h4>
+          <p className="text-finance-lightgray text-sm">
+            Le modèle binomial est une méthode numérique pour l'évaluation d'options. Il discrétise le temps jusqu'à expiration en étapes multiples, 
+            avec deux mouvements possibles à chaque étape (up ou down). Ce modèle est particulièrement utile pour les options américaines et 
+            les structures exotiques path-dependent.
+          </p>
+        </div>
       </div>
     </div>
   );

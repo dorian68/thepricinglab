@@ -1,3 +1,4 @@
+
 {
   "navbar": {
     "courses": "Cours",
@@ -263,7 +264,7 @@
     "backToList": "Retour à la Liste d'Exercices",
     "objectives": "Objectifs d'Apprentissage",
     "prerequisites": "Prérequis",
-    "simulation": "Simulation Interactive",
+    "interactive": "Simulation Interactive",
     "completionPoints": "500 points pour la complétion",
     "startExercise": "Démarrer l'Exercice",
     "prevStep": "Étape Précédente",
@@ -387,5 +388,159 @@
   "languageSwitcher": {
     "en": "Anglais",
     "fr": "Français"
+  },
+  "stats": {
+    "modules": "Modules",
+    "exercises": "Exercices",
+    "badges": "Badges à débloquer",
+    "simulators": "Simulateurs"
+  },
+  "pricing": {
+    "title": "Choisissez Votre Parcours d'Apprentissage",
+    "description": "Accès aux contenus adaptés à vos besoins et objectifs",
+    "free": {
+      "title": "Pack Découverte",
+      "price": "Gratuit",
+      "feature1": "Modules de base & 1 vague de survie",
+      "feature2": "Quiz basiques (non chronométrés)",
+      "feature3": "Accès forum en lecture seule",
+      "feature4": "Accès limité aux outils",
+      "cta": "Commencer gratuitement"
+    },
+    "pro": {
+      "title": "Pack Pro",
+      "price": "19€",
+      "feature1": "Tous les cours & modules de pricing",
+      "feature2": "Accès complet au mode survie",
+      "feature3": "Quiz avancés & conditions réelles",
+      "feature4": "Badges, classement & scoring",
+      "feature5": "Pair programming & projets d'équipe",
+      "cta": "Passer Pro"
+    },
+    "mentor": {
+      "title": "Pack Mentorat",
+      "price": "49€",
+      "feature1": "Tout ce qui est dans le Pack Pro",
+      "feature2": "Accès à une communauté Premium",
+      "feature3": "Sessions live avec experts (2x/mois)",
+      "feature4": "Accompagnement personnalisé",
+      "feature5": "Accès prioritaire aux modules carrière",
+      "cta": "Être Mentoré"
+    },
+    "discount": {
+      "title": "Offre Early Bird - 30% de réduction !",
+      "description": "Offre limitée pour les 100 premiers abonnés. Profitez de votre remise dès aujourd'hui !",
+      "cta": "Réclamer votre remise"
+    }
+  },
+  "gamification": {
+    "badges": {
+      "title": "Badges et Accomplissements",
+      "description": "Débloquez des badges thématiques à mesure que vous progressez.",
+      "recent": "Badges Récents"
+    },
+    "leaderboard": {
+      "title": "Classements et Compétitions",
+      "description": "Mesurez-vous aux autres utilisateurs via les leaderboards."
+    },
+    "challenges": {
+      "title": "Défis Quotidiens et Hebdomadaires",
+      "description": "Relevez des défis pour gagner des points et améliorer votre classement."
+    },
+    "progress": {
+      "level": "Niveau 8",
+      "status": "Intermédiaire",
+      "progression": "Progression"
+    },
+    "performance": {
+      "title": "Performance",
+      "accuracy": "Précision",
+      "exercises": "Exercices",
+      "challenges": "Défis"
+    },
+    "dashboard": "Voir mon tableau de bord"
+  },
+  "cta": {
+    "title": "Prêt à commencer l'aventure ?",
+    "description": "Rejoignez notre communauté de passionnés et maîtrisez le pricing des produits financiers à travers une expérience interactive et ludique.",
+    "signup": "S'inscrire gratuitement",
+    "explore": "Explorer les modules"
+  },
+  "freemium": {
+    "banner": {
+      "title": "Plus que 1 vague avant de débloquer le monde des pros !",
+      "description": "Rejoins les meilleurs quants de ta génération.",
+      "details": "Voir tous les forfaits",
+      "upgrade": "Passer Pro (19€/mois)"
+    },
+    "progressLock": {
+      "title": "Tu viens de débloquer l'accès au niveau 'Intermédiaire' !",
+      "description": "Prêt à booster ta maîtrise du pricing ?",
+      "features": {
+        "advanced": "Exercices avancés (Black-Scholes, Monte Carlo, exotiques...)",
+        "waves": "Vagues supérieures du mode survie",
+        "quizzes": "Quiz chronométrés",
+        "projects": "Projets collaboratifs & pair programming",
+        "leaderboard": "Classements et badges à collectionner"
+      },
+      "cta": "Passer en mode Pro"
+    }
+  },
+  "tools": {
+    "blackScholes": {
+      "title": "Calculateur Black-Scholes",
+      "description": "Calculez les prix d'options et les Greeks avec le modèle Black-Scholes-Merton",
+      "spotPrice": "Prix Spot",
+      "strike": "Prix d'Exercise",
+      "volatility": "Volatilité (%)",
+      "timeToExpiry": "Temps à Maturité (Années)",
+      "riskFreeRate": "Taux Sans Risque (%)",
+      "dividend": "Rendement des Dividendes (%)",
+      "optionType": "Type d'Option",
+      "calculate": "Calculer",
+      "optionPrice": "Prix de l'Option",
+      "about": "À propos de Black-Scholes",
+      "aboutText": "Le modèle Black-Scholes est un modèle mathématique pour l'évaluation d'options de style européen. Il suppose que le prix du sous-jacent suit un mouvement brownien géométrique avec une volatilité constante et que les marchés sont sans friction."
+    },
+    "greeks": {
+      "title": "Simulateur de Greeks",
+      "description": "Visualisez comment les Greeks évoluent en fonction des différents paramètres",
+      "greekToShow": "Greek à Afficher",
+      "spotRange": "Plage de Prix Spot",
+      "volatilityRange": "Plage de Volatilité (%)",
+      "timeRange": "Plage de Temps (Années)",
+      "from": "De",
+      "to": "À",
+      "simulate": "Simuler",
+      "resetDefaults": "Réinitialiser",
+      "about": "À propos des Greeks",
+      "aboutText": "Les Greeks mesurent la sensibilité des prix d'options à divers facteurs. Delta mesure le changement de prix par rapport au sous-jacent, gamma mesure le taux de variation du delta, vega mesure la sensibilité à la volatilité, et theta mesure la décroissance temporelle."
+    },
+    "yieldCurve": {
+      "title": "Visualiseur de Courbe de Taux",
+      "description": "Visualisez et analysez les courbes de rendement zéro-coupon et les taux forward",
+      "currency": "Devise",
+      "date": "Date",
+      "display": "Affichage",
+      "spotRates": "Taux Spot",
+      "forwardRates": "Taux Forward",
+      "about": "À propos des Courbes de Taux",
+      "aboutText": "Les courbes de taux affichent les rendements des obligations zéro-coupon pour différentes maturités. Les taux spot représentent les rendements actuels tandis que les taux forward anticipent les taux spot futurs. Ces courbes sont essentielles pour le pricing des produits de taux et l'analyse macroéconomique."
+    },
+    "binomial": {
+      "title": "Calculateur Binomial",
+      "description": "Évaluez les options avec le modèle binomial et sa représentation visuelle",
+      "spotPrice": "Prix Spot",
+      "strike": "Prix d'Exercise",
+      "volatility": "Volatilité (%)",
+      "timeToExpiry": "Temps à Maturité (Années)",
+      "riskFreeRate": "Taux Sans Risque (%)",
+      "steps": "Nombre d'Étapes",
+      "optionType": "Type d'Option",
+      "calculate": "Calculer",
+      "optionPrice": "Prix de l'Option",
+      "about": "À propos du Modèle Binomial",
+      "aboutText": "Le modèle binomial est une méthode numérique pour l'évaluation d'options. Il discrétise le temps jusqu'à expiration en étapes multiples, avec deux mouvements possibles à chaque étape (up ou down). Ce modèle est particulièrement utile pour les options américaines et les structures exotiques path-dependent."
+    }
   }
 }
