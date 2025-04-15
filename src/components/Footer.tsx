@@ -1,11 +1,8 @@
 
-import { useLocation } from "react-router-dom";
 import { Mail, Linkedin, Github, Twitter } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const Footer = () => {
-  // Use useLocation to verify we're inside router context
-  const location = useLocation();
   const { t } = useTranslation();
 
   return (
