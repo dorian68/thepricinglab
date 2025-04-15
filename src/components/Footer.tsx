@@ -1,4 +1,3 @@
-
 import { Mail, Linkedin, Github, Twitter } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -21,32 +20,32 @@ const Footer = () => {
             <ul className="space-y-2">
               <li>
                 <a href="/" className="text-finance-lightgray hover:text-finance-accent text-sm">
-                  {t('nav.home')}
+                  Accueil
                 </a>
               </li>
               <li>
                 <a href="/courses/fundamentals" className="text-finance-lightgray hover:text-finance-accent text-sm">
-                  {t('nav.courses')}
+                  Cours
                 </a>
               </li>
               <li>
                 <a href="/dashboard" className="text-finance-lightgray hover:text-finance-accent text-sm">
-                  {t('nav.dashboard')}
+                  Tableau de bord
                 </a>
               </li>
               <li>
                 <a href="/projects" className="text-finance-lightgray hover:text-finance-accent text-sm">
-                  {t('nav.projects')}
+                  Projets
                 </a>
               </li>
               <li>
                 <a href="/tools" className="text-finance-lightgray hover:text-finance-accent text-sm">
-                  {t('nav.tools')}
+                  Outils
                 </a>
               </li>
               <li>
                 <a href="/mentoring" className="text-finance-lightgray hover:text-finance-accent text-sm">
-                  {t('nav.mentoring')}
+                  Mentorat
                 </a>
               </li>
             </ul>

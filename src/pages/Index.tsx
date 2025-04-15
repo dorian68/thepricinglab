@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -70,34 +69,26 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="flex flex-col">
               <h1 className="text-3xl md:text-5xl font-bold mb-6 leading-tight text-finance-offwhite terminal-text">
-                Le <span className="finance-gradient text-transparent bg-clip-text">HackerRank</span> de la finance quantitative
+                Prépare-toi à entrer <br />
+                <span className="finance-gradient text-transparent bg-clip-text">dans la salle des marchés</span>
               </h1>
               
               <p className="text-finance-lightgray text-lg mb-8">
-                Maîtrisez le pricing des produits financiers et la gestion des risques à travers une expérience interactive, gamifiée et communautaire.
+                Formation d'élite destinée aux étudiants en finance qui souhaitent maîtriser les méthodes de pricing utilisées quotidiennement par les professionnels.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/courses" className="finance-button text-center">
-                  Découvrir les modules
+                  Commencer le parcours
                 </Link>
                 <Link to="/signup" className="finance-button-outline text-center">
-                  S'inscrire gratuitement
+                  S'inscrire maintenant
                 </Link>
               </div>
               
               <div className="mt-8 flex items-center space-x-6">
                 <div className="flex items-center">
-                  <Award className="h-5 w-5 text-finance-accent mr-2" />
-                  <span className="text-finance-lightgray text-sm">+500 Exercices</span>
-                </div>
-                <div className="flex items-center">
-                  <Users className="h-5 w-5 text-finance-accent mr-2" />
-                  <span className="text-finance-lightgray text-sm">+10K Utilisateurs</span>
-                </div>
-                <div className="flex items-center">
-                  <Trophy className="h-5 w-5 text-finance-accent mr-2" />
-                  <span className="text-finance-lightgray text-sm">+50 Défis hebdo</span>
+                  <span className="text-finance-lightgray text-sm">MAÎTRISE. TECHNIQUE. MARCHÉS.</span>
                 </div>
               </div>
             </div>
