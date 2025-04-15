@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500;600&display=swap');
+
+@layer base {
+  :root {
+    --background: 222 8% 13%;
+    --foreground: 0 0% 93%;
+
+    --card: 224 11% 15%;
+    --card-foreground: 0 0% 93%;
+
+    --popover: 224 11% 15%;
+    --popover-foreground: 0 0% 93%;
+
+    --primary: 358 68% 57%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 8% 23%;
+    --secondary-foreground: 0 0% 93%;
+
+    --muted: 220 8% 23%;
+    --muted-foreground: 215 16% 65%;
+
+    --accent: 0 59% 40%;
+    --accent-foreground: 0 0% 93%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 224 11% 20%;
+    --input: 224 11% 20%;
+    --ring: 358 68% 57%;
+
+    --radius: 0.375rem;
+
+    --sidebar-background: 224 13% 12%;
+    --sidebar-foreground: 0 0% 93%;
+    --sidebar-primary: 358 68% 57%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 225 11% 18%;
+    --sidebar-accent-foreground: 0 0% 93%;
+    --sidebar-border: 224 11% 20%;
+    --sidebar-ring: 358 68% 57%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-finance-dark text-finance-offwhite;
+    font-family: 'Inter', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Roboto Mono', monospace;
+  }
+}
+
+@layer components {
+  .finance-gradient {
+    @apply bg-gradient-to-r from-finance-burgundy to-finance-accent/80;
+  }
+
+  .finance-card {
+    @apply bg-finance-charcoal border border-finance-steel/30 rounded-md;
+  }
+
+  .finance-button {
+    @apply bg-finance-burgundy hover:bg-finance-accent transition-colors duration-300 text-finance-offwhite font-semibold py-2 px-4 rounded shadow-lg;
+  }
+
+  .finance-button-outline {
+    @apply border border-finance-burgundy hover:border-finance-accent text-finance-burgundy hover:text-finance-accent transition-colors duration-300 font-semibold py-2 px-4 rounded shadow-lg;
+  }
+
+  .terminal-text {
+    font-family: 'Roboto Mono', monospace;
+  }
+}
