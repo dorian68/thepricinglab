@@ -30,6 +30,34 @@
     "andOur": "et notre",
     "privacy": "politique de confidentialité"
   },
+  "footer": {
+    "description": "Formation d'élite pour les futurs professionnels des marchés financiers.",
+    "navigation": "Navigation",
+    "legal": "Légal",
+    "terms": "Conditions d'utilisation",
+    "privacy": "Politique de confidentialité",
+    "cookies": "Cookies",
+    "refund": "Politique de remboursement",
+    "contact": "Contact",
+    "copyright": "Tous droits réservés."
+  },
+  "projects": {
+    "title": "Challenges & Projets",
+    "subtitle": "Mettez vos connaissances à l'épreuve avec nos challenges pratiques et comparez vos résultats avec d'autres membres de la communauté.",
+    "monthlyChallenge": "Challenge du mois",
+    "upcoming": "Prochains challenges",
+    "leaderboard": "Leaderboard",
+    "previousChallenge": "Challenge précédent: Interest Rates Modeling",
+    "completed": "Terminé le",
+    "participant": "Participant",
+    "score": "Score",
+    "reward": "Récompense",
+    "viewAll": "Voir tous les participants",
+    "joinCommunity": "Rejoignez la communauté",
+    "communityDescription": "Participez à nos challenges mensuels et échangez avec d'autres passionnés de finance quantitative. L'abonnement donne accès à tous les challenges et aux ressources premium.",
+    "subscribe": "S'abonner pour 19€/mois",
+    "discover": "Découvrir la formation"
+  },
   "languageSwitcher": {
     "en": "Anglais",
     "fr": "Français"

@@ -1,8 +1,8 @@
-
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Link } from "react-router-dom";
 import { Calendar, Clock, Trophy, ArrowRight, Users, FileText, BarChart3 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface ProjectCardProps {
   title: string;
@@ -24,57 +24,61 @@ const ProjectCard = ({
   participants,
   active,
   path
-}: ProjectCardProps) => (
-  <div className={`finance-card p-6 ${active ? "border-finance-accent/30" : ""}`}>
-    <div className="flex justify-between items-start mb-4">
-      <h3 className="text-xl font-medium text-finance-offwhite">{title}</h3>
-      {active ? (
-        <span className="terminal-text text-xs px-2 py-1 bg-finance-accent/10 rounded text-finance-accent">
-          ACTIF
+}: ProjectCardProps) => {
+  const { t } = useTranslation();
+  
+  return (
+    <div className={`finance-card p-6 ${active ? "border-finance-accent/30" : ""}`}>
+      <div className="flex justify-between items-start mb-4">
+        <h3 className="text-xl font-medium text-finance-offwhite">{title}</h3>
+        {active ? (
+          <span className="terminal-text text-xs px-2 py-1 bg-finance-accent/10 rounded text-finance-accent">
+            ACTIF
+          </span>
+        ) : (
+          <span className="terminal-text text-xs px-2 py-1 bg-finance-steel/10 rounded text-finance-lightgray">
+            À VENIR
+          </span>
+        )}
+      </div>
+      
+      <p className="text-finance-lightgray text-sm mb-6">{description}</p>
+      
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="flex items-center">
+          <Calendar className="h-4 w-4 text-finance-accent mr-2" />
+          <span className="text-finance-lightgray text-xs">{startDate}</span>
+        </div>
+        <div className="flex items-center">
+          <Clock className="h-4 w-4 text-finance-accent mr-2" />
+          <span className="text-finance-lightgray text-xs">{duration}</span>
+        </div>
+        <div className="flex items-center">
+          <BarChart3 className="h-4 w-4 text-finance-accent mr-2" />
+          <span className="text-finance-lightgray text-xs">{difficulty}</span>
+        </div>
+        <div className="flex items-center">
+          <Users className="h-4 w-4 text-finance-accent mr-2" />
+          <span className="text-finance-lightgray text-xs">{participants} participants</span>
+        </div>
+      </div>
+      
+      <Link 
+        to={path}
+        className={`flex justify-between items-center p-3 rounded ${
+          active 
+            ? "bg-finance-burgundy/10 text-finance-accent hover:bg-finance-burgundy/20 transition-colors duration-300" 
+            : "bg-finance-steel/10 text-finance-lightgray cursor-not-allowed"
+        }`}
+      >
+        <span className="text-sm font-medium">
+          {active ? "Voir les détails" : "Bientôt disponible"}
         </span>
-      ) : (
-        <span className="terminal-text text-xs px-2 py-1 bg-finance-steel/10 rounded text-finance-lightgray">
-          À VENIR
-        </span>
-      )}
+        <ArrowRight className="h-4 w-4" />
+      </Link>
     </div>
-    
-    <p className="text-finance-lightgray text-sm mb-6">{description}</p>
-    
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <div className="flex items-center">
-        <Calendar className="h-4 w-4 text-finance-accent mr-2" />
-        <span className="text-finance-lightgray text-xs">{startDate}</span>
-      </div>
-      <div className="flex items-center">
-        <Clock className="h-4 w-4 text-finance-accent mr-2" />
-        <span className="text-finance-lightgray text-xs">{duration}</span>
-      </div>
-      <div className="flex items-center">
-        <BarChart3 className="h-4 w-4 text-finance-accent mr-2" />
-        <span className="text-finance-lightgray text-xs">{difficulty}</span>
-      </div>
-      <div className="flex items-center">
-        <Users className="h-4 w-4 text-finance-accent mr-2" />
-        <span className="text-finance-lightgray text-xs">{participants} participants</span>
-      </div>
-    </div>
-    
-    <Link 
-      to={path}
-      className={`flex justify-between items-center p-3 rounded ${
-        active 
-          ? "bg-finance-burgundy/10 text-finance-accent hover:bg-finance-burgundy/20 transition-colors duration-300" 
-          : "bg-finance-steel/10 text-finance-lightgray cursor-not-allowed"
-      }`}
-    >
-      <span className="text-sm font-medium">
-        {active ? "Voir les détails" : "Bientôt disponible"}
-      </span>
-      <ArrowRight className="h-4 w-4" />
-    </Link>
-  </div>
-);
+  );
+};
 
 // Leaderboard entry component
 const LeaderboardEntry = ({ 
@@ -118,6 +122,8 @@ const LeaderboardEntry = ({
 );
 
 const Projects = () => {
+  const { t } = useTranslation();
+  
   return (
     <div className="flex flex-col min-h-screen bg-finance-dark text-finance-offwhite">
       <Navbar />
@@ -126,10 +132,9 @@ const Projects = () => {
       <header className="py-12 px-6 border-b border-finance-steel/10">
         <div className="max-w-7xl mx-auto">
           <div className="text-center">
-            <h1 className="text-3xl font-bold mb-4 terminal-text">Challenges & Projets</h1>
+            <h1 className="text-3xl font-bold mb-4 terminal-text">{t('projects.title')}</h1>
             <p className="text-finance-lightgray text-lg max-w-2xl mx-auto">
-              Mettez vos connaissances à l'épreuve avec nos challenges pratiques
-              et comparez vos résultats avec d'autres membres de la communauté.
+              {t('projects.subtitle')}
             </p>
           </div>
         </div>
@@ -138,7 +143,7 @@ const Projects = () => {
       {/* Active Project */}
       <section className="py-12 px-6 bg-finance-charcoal/20">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl font-bold mb-8 terminal-text">Challenge du mois</h2>
+          <h2 className="text-2xl font-bold mb-8 terminal-text">{t('projects.monthlyChallenge')}</h2>
           
           <div className="finance-card p-8 border-l-4 border-l-finance-accent">
             <div className="flex flex-col md:flex-row justify-between md:items-center mb-6">
@@ -214,7 +219,7 @@ const Projects = () => {
       {/* Upcoming Projects */}
       <section className="py-12 px-6">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl font-bold mb-8 terminal-text">Prochains challenges</h2>
+          <h2 className="text-2xl font-bold mb-8 terminal-text">{t('projects.upcoming')}</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <ProjectCard
@@ -267,19 +272,19 @@ const Projects = () => {
       {/* Leaderboard Section */}
       <section className="py-12 px-6 bg-finance-charcoal/20 border-t border-finance-steel/10">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold mb-8 text-center terminal-text">Leaderboard</h2>
+          <h2 className="text-2xl font-bold mb-8 text-center terminal-text">{t('projects.leaderboard')}</h2>
           
           <div className="finance-card p-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-medium">Challenge précédent: Interest Rates Modeling</h3>
-              <span className="text-xs text-finance-lightgray">Terminé le 31 mars 2025</span>
+              <h3 className="font-medium">{t('projects.previousChallenge')}</h3>
+              <span className="text-xs text-finance-lightgray">{t('projects.completed')} 31 mars 2025</span>
             </div>
             
             <div className="mb-4">
               <div className="grid grid-cols-3 py-2 text-finance-lightgray text-sm">
-                <div>Participant</div>
-                <div className="text-center">Score</div>
-                <div className="text-right">Récompense</div>
+                <div>{t('projects.participant')}</div>
+                <div className="text-center">{t('projects.score')}</div>
+                <div className="text-right">{t('projects.reward')}</div>
               </div>
               
               <LeaderboardEntry rank={1} name="Thomas Laurent" score={98.5} />
@@ -296,7 +301,7 @@ const Projects = () => {
             
             <div className="text-center">
               <Link to="/projects/interest-rates/leaderboard" className="text-finance-accent text-sm flex items-center justify-center">
-                Voir tous les participants <ArrowRight className="ml-1 h-4 w-4" />
+                {t('projects.viewAll')} <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </div>
           </div>
@@ -306,17 +311,16 @@ const Projects = () => {
       {/* Community CTA */}
       <section className="py-12 px-6 bg-finance-charcoal/50 border-t border-finance-steel/10">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl font-bold mb-4 terminal-text">Rejoignez la communauté</h2>
+          <h2 className="text-2xl font-bold mb-4 terminal-text">{t('projects.joinCommunity')}</h2>
           <p className="text-finance-lightgray mb-8">
-            Participez à nos challenges mensuels et échangez avec d'autres passionnés de finance quantitative.
-            L'abonnement donne accès à tous les challenges et aux ressources premium.
+            {t('projects.communityDescription')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/signup" className="finance-button text-center">
-              S'abonner pour 19€/mois
+              {t('projects.subscribe')}
             </Link>
             <Link to="/courses" className="finance-button-outline text-center">
-              Découvrir la formation
+              {t('projects.discover')}
             </Link>
           </div>
         </div>
