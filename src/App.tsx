@@ -12,6 +12,11 @@ import Tools from "./pages/Tools";
 import Mentoring from "./pages/Mentoring";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import Notebooks from "./pages/Notebooks";
+import Exercises from "./pages/Exercises";
+import Community from "./pages/Community";
+import SurvivalMode from "./pages/SurvivalMode";
+import Leaderboard from "./pages/Leaderboard";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +34,11 @@ const App = () => (
           <Route path="/tools" element={<Tools />} />
           <Route path="/mentoring" element={<Mentoring />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/notebooks" element={<Notebooks />} />
+          <Route path="/exercises" element={<Exercises />} />
+          <Route path="/community" element={<Community />} />
+          <Route path="/survival-mode" element={<SurvivalMode />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

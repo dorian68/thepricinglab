@@ -1,298 +1,400 @@
 
 {
-  "nav": {
-    "home": "Accueil",
+  "navbar": {
     "courses": "Cours",
-    "dashboard": "Dashboard",
+    "dashboard": "Tableau de bord",
     "projects": "Projets",
     "tools": "Outils",
     "mentoring": "Mentorat",
-    "login": "Se connecter",
-    "signup": "S'inscrire"
-  },
-  "courses": {
-    "fundamentals": "Fondamentaux",
-    "advanced": "Vanilles avancés",
-    "complex": "Produits complexes",
-    "bonus": "Bonus"
-  },
-  "login": {
-    "title": "Connexion",
-    "subtitle": "Accédez à votre espace d'apprentissage",
-    "email": "Email",
-    "password": "Mot de passe",
-    "forgotPassword": "Mot de passe oublié?",
-    "loginButton": "Se connecter",
-    "noAccount": "Pas encore de compte?",
-    "signupLink": "S'inscrire",
-    "termsPrefix": "En vous connectant, vous acceptez nos",
-    "terms": "conditions d'utilisation",
-    "andOur": "et notre",
-    "privacy": "politique de confidentialité"
+    "community": "Communauté",
+    "login": "Connexion"
   },
   "footer": {
-    "description": "Formation d'élite pour les futurs professionnels des marchés financiers.",
-    "navigation": "Navigation",
-    "legal": "Légal",
-    "terms": "Conditions d'utilisation",
-    "privacy": "Politique de confidentialité",
-    "cookies": "Cookies",
-    "refund": "Politique de remboursement",
+    "company": "Entreprise",
+    "about": "À propos",
+    "careers": "Carrières",
+    "legal": "Mentions légales",
     "contact": "Contact",
-    "copyright": "Tous droits réservés."
+    "courses": "Cours",
+    "fundamentals": "Fondamentaux",
+    "vanillas": "Options Vanilles",
+    "exotics": "Produits Exotiques",
+    "resources": "Ressources",
+    "documentation": "Documentation",
+    "tutorials": "Tutoriels",
+    "certification": "Certification",
+    "faq": "FAQ",
+    "pricing": "Tarification",
+    "free": "Gratuit",
+    "premium": "Premium",
+    "enterprise": "Entreprise",
+    "copyright": "© 2025 QuantFinance, Inc. Tous droits réservés.",
+    "terms": "Conditions",
+    "privacy": "Confidentialité"
   },
   "home": {
     "hero": {
-      "title1": "Prépare-toi à entrer dans la",
-      "title2": "salle des marchés.",
-      "description": "Formation d'élite destinée aux étudiants en finance qui souhaitent maîtriser les méthodes de pricing utilisées quotidiennement par les professionnels.",
-      "startCourse": "Commencer le parcours",
-      "signUp": "S'inscrire maintenant",
-      "tagline": "MAÎTRISE. TECHNIQUE. MARCHÉS.",
-      "terminal": "TRADING TERMINAL ACTIVATED"
+      "title1": "Maîtrisez la",
+      "title2": "Finance Quantitative",
+      "description": "Apprenez la modélisation financière avancée, le pricing de produits dérivés et la gestion des risques avec des exercices interactifs et des simulations réalistes.",
+      "startCourse": "Commencer un cours",
+      "signUp": "S'inscrire",
+      "tagline": "UTILISÉ PAR DES TRADERS DES MEILLEURES INSTITUTIONS",
+      "terminal": "# derivatives_pricing -t european_options -m black_scholes"
     },
     "approach": {
-      "title": "Notre approche pédagogique",
-      "description": "Une formation conçue par des professionnels des marchés, pour préparer les futurs talents à exceller dans ce domaine exigeant."
+      "title": "Notre Approche",
+      "description": "Apprenez par la pratique avec des outils interactifs conçus par des professionnels de la finance pour des professionnels de la finance."
     },
     "features": {
       "pragmatic": {
-        "title": "Pragmatique",
-        "description": "Des méthodes et techniques directement applicables en milieu professionnel. Aucune théorie sans application concrète."
+        "title": "Apprentissage Pragmatique",
+        "description": "Concentration sur les concepts applicables et les problèmes réels à travers des exercices interactifs."
       },
       "tech": {
-        "title": "Tech-friendly",
-        "description": "Maîtrise des outils technologiques utilisés en salle des marchés (Python, Excel, Bloomberg, etc)."
+        "title": "Stack Technologique Moderne",
+        "description": "Utilisez Python, R et d'autres outils modernes que les professionnels quantitatifs utilisent quotidiennement."
       },
       "job": {
-        "title": "Orientée emploi",
-        "description": "Notre programme est conçu en collaboration avec des recruteurs pour maximiser votre employabilité."
+        "title": "Compétences Professionnelles",
+        "description": "Développez les compétences exactes que les employeurs recherchent chez les analystes quant et les traders."
       },
       "certified": {
-        "title": "Certifiée",
-        "description": "Obtenez une certification reconnue par les professionnels du secteur, validant vos compétences techniques."
+        "title": "Certifié par l'Industrie",
+        "description": "Obtenez des certificats reconnus par les principales institutions financières mondiales."
       }
     },
     "curriculum": {
-      "title": "Parcours de formation",
-      "description": "Un programme structuré et progressif pour maîtriser les compétences de pricing essentielles.",
-      "allModules": "Tous les modules"
+      "title": "Programme Complet",
+      "description": "Notre programme couvre tout, des fondamentaux du pricing d'options au calcul stochastique avancé et aux modèles de risque sophistiqués."
     },
     "modules": {
       "blackScholes": {
-        "title": "Black-Scholes & Modèles fondamentaux",
+        "title": "Fondamentaux de Black-Scholes",
         "level": "FONDAMENTAUX",
-        "description": "Maîtrisez les bases du pricing d'options vanilles et comprenez les hypothèses sous-jacentes aux modèles standards."
+        "description": "Maîtrisez le modèle fondamental de la théorie du pricing d'options et de l'évaluation des dérivés."
       },
       "volatility": {
-        "title": "Volatilité implicite & Surfaces",
-        "level": "VANILLES AVANCÉS",
-        "description": "Analysez les structures de volatilité, calibrez les modèles et interprétez les signaux de marché."
+        "title": "Structures de Volatilité Implicite",
+        "level": "AVANCÉ",
+        "description": "Comprenez les surfaces de volatilité, le skew et la structure par terme pour des décisions de trading plus intelligentes."
       },
       "exotic": {
-        "title": "Dérivés exotiques & Path-dependent",
-        "level": "PRODUITS COMPLEXES",
-        "description": "Techniques de pricing pour options asiatiques, barrières, et produits autocallables."
+        "title": "Options Exotiques & Barrières",
+        "level": "COMPLEXE",
+        "description": "Apprenez à évaluer et à couvrir les produits dérivés path-dependent et exotiques."
       },
       "greeks": {
-        "title": "Greeks & Stratégies de couverture",
-        "level": "VANILLES AVANCÉS",
-        "description": "Gérez le risque de vos positions avec une compréhension approfondie des sensibilités."
+        "title": "Greeks & Sensibilités",
+        "level": "FONDAMENTAUX",
+        "description": "Maîtrisez les sensibilités aux risques et les techniques de couverture pour les portefeuilles d'options."
       },
       "monteCarlo": {
-        "title": "Monte Carlo pour le pricing",
-        "level": "PRODUITS COMPLEXES",
-        "description": "Implémentez des simulations Monte Carlo pour valoriser des produits dérivés complexes."
+        "title": "Méthodes Monte Carlo",
+        "level": "COMPLEXE",
+        "description": "Implémentez des techniques de simulation numérique pour l'évaluation de dérivés complexes."
       },
       "stressTesting": {
-        "title": "Stress Testing & Scénarios",
-        "level": "BONUS",
-        "description": "Anticipez les mouvements de marché extrêmes et leurs impacts sur vos valorisations."
+        "title": "Stress Tests & Risque",
+        "level": "AVANCÉ",
+        "description": "Concevez et implémentez des stress tests pour des portefeuilles de dérivés dans des scénarios extrêmes."
       }
     },
     "testimonials": {
-      "title": "Témoignages",
-      "description": "Ce que nos anciens élèves disent après avoir suivi notre formation.",
+      "title": "Ce que Disent Nos Étudiants",
+      "description": "Rejoignez des milliers de professionnels qui ont transformé leur carrière grâce à notre plateforme.",
       "alexandre": {
-        "quote": "J'ai pu intégrer une desk d'equity derivatives grâce aux compétences acquises sur The Pricing Lab. La différence entre cette formation et mes cours théoriques à l'université était frappante.",
-        "author": "Alexandre M.",
-        "position": "Junior Quant Trader, BNP Paribas"
+        "quote": "Les outils de pricing interactifs et les données de marché en temps réel ont rendu les concepts complexes tangibles. J'ai obtenu un poste de trader quant après avoir terminé la certification.",
+        "author": "Alexandre Martin",
+        "position": "Trader Dérivés, BNP Paribas"
       },
       "sarah": {
-        "quote": "L'aspect technique et la rigueur de cette formation m'ont permis de me démarquer lors des entretiens d'embauche. J'ai aujourd'hui une longueur d'avance sur mes collègues sortis d'écoles prestigieuses.",
-        "author": "Sarah K.",
-        "position": "Risk Analyst, JP Morgan"
+        "quote": "J'ai fait la transition des mathématiques pures vers la finance quantitative en seulement 6 mois grâce au curriculum rigoureux mais pratique.",
+        "author": "Sarah Johnson",
+        "position": "Analyste Quantitative, Goldman Sachs"
       },
       "thomas": {
-        "quote": "Mon manager a été impressionné par ma capacité à comprendre les mécanismes de pricing dès mon arrivée. Cette formation est un investissement qui a déjà été rentabilisé par mon bonus de première année.",
-        "author": "Thomas D.",
-        "position": "Structurer, Société Générale"
+        "quote": "Les fonctionnalités communautaires et les défis de codage de la plateforme m'ont aidé à construire un portfolio solide qui a impressionné mon employeur actuel.",
+        "author": "Thomas Dupont",
+        "position": "Risk Manager, Société Générale"
       },
-      "joinCta": "Rejoindre la formation"
+      "joinCta": "Rejoindre la Communauté"
     },
     "cta": {
-      "title": "Prêt à transformer ta carrière?",
-      "description": "Accès illimité à tous nos modules, outils et challenges pour seulement 19€/mois. Investissement minimal, impact maximal sur ton futur professionnel.",
-      "subscribe": "S'abonner pour 19€/mois",
-      "explore": "Explorer les modules"
+      "title": "Faites Passer Votre Carrière Financière au Niveau Supérieur",
+      "description": "Acquérez les compétences quantitatives qui vous distinguent sur le marché concurrentiel d'aujourd'hui.",
+      "subscribe": "S'abonner Maintenant",
+      "explore": "Explorer les Cours"
     }
   },
+  "courses": {
+    "fundamentals": "Fondamentaux",
+    "advanced": "Méthodes Avancées",
+    "complex": "Produits Complexes",
+    "bonus": "Ressources Bonus"
+  },
   "coursesPage": {
-    "title": "Modules de formation",
-    "subtitle": "Une progression pédagogique structurée des fondamentaux aux techniques avancées de pricing utilisées en salle des marchés.",
+    "title": "Nos Cours",
+    "subtitle": "Formation complète en finance quantitative, des bases aux méthodes avancées",
     "stats": {
       "modules": "12 modules",
-      "hours": "48+ heures",
-      "exercises": "24 exercices pratiques"
+      "hours": "+60 heures",
+      "exercises": "+100 exercices"
     },
-    "heroTagline": "EXPERTISE. PRÉCISION. TRADING.",
-    "topics": "Sujets traités",
-    "locked": "Module verrouillé",
-    "access": "Accéder au module",
-    "unlockModules": "Débloquer tous les modules",
-    "subscriptionAccess": "Accès complet avec l'abonnement à 19€/mois",
+    "heroTagline": "> pricing_mastery.start()",
+    "approach": {
+      "title": "Notre Approche",
+      "description": "Programme testé par l'industrie avec une pratique concrète."
+    },
+    "modules": "Modules",
+    "topics": "Sujets",
+    "levels": {
+      "beginner": "Débutant",
+      "intermediate": "Intermédiaire",
+      "advanced": "Avancé"
+    },
     "fundamentals": {
       "level": "FONDAMENTAUX",
-      "description": "Les bases essentielles pour comprendre les mécanismes de pricing et construire une expertise solide.",
+      "description": "Concepts et modèles essentiels qui forment la base de la finance quantitative",
       "blackScholes": {
-        "title": "Introduction au Pricing et Black-Scholes",
-        "duration": "3h 20min",
-        "description": "Les bases essentielles pour comprendre les mécanismes de pricing d'options.",
+        "title": "Black-Scholes & Modèles Fondamentaux",
+        "duration": "6 heures",
+        "description": "Maîtrisez le modèle fondamental de la théorie du pricing d'options avec une dérivation et une implémentation étape par étape",
         "topics": {
-          "probabilities": "Probabilités",
-          "brownian": "Mouvement Brownien",
-          "derivation": "Dérivation B-S",
-          "putCall": "Put-Call Parity"
+          "probabilities": "Théorie des probabilités",
+          "brownian": "Mouvement brownien",
+          "derivation": "Dérivation BS",
+          "putCall": "Parité put-call"
         }
       },
       "yieldCurves": {
-        "title": "Taux d'intérêt et courbes de rendement",
-        "duration": "2h 45min",
-        "description": "Comprendre et modéliser les courbes de taux pour la valorisation.",
+        "title": "Courbes de Taux & Structure par Terme",
+        "duration": "5 heures",
+        "description": "Comprendre la construction des courbes de rendement, les techniques de bootstrapping et leurs applications dans le pricing des dérivés",
         "topics": {
-          "zeroCoupon": "Zéro-coupons",
-          "interpolation": "Interpolation",
+          "zeroCoupon": "Obligations zéro-coupon",
+          "interpolation": "Interpolation de courbe",
           "bootstrapping": "Bootstrapping",
-          "discounting": "Discounting"
+          "discounting": "Méthodes d'actualisation"
         }
       },
       "greeks": {
-        "title": "Greeks et sensibilités",
-        "duration": "4h 10min",
-        "description": "Maîtriser les mesures de risque et les techniques de couverture.",
+        "title": "Greeks & Sensibilités",
+        "duration": "8 heures",
+        "description": "Maîtrisez les sensibilités au risque (Delta, Gamma, Vega, Theta, Rho) et les stratégies de couverture pratiques",
         "topics": {
-          "hedging": "Couverture"
+          "hedging": "Couverture dynamique"
         }
       }
     },
     "advanced": {
-      "level": "VANILLES AVANCÉS",
-      "description": "Techniques sophistiquées pour valoriser et gérer les produits vanilles dans des environnements complexes.",
+      "level": "AVANCÉ",
+      "description": "Techniques sophistiquées pour modéliser des phénomènes de marché complexes et des stratégies de pricing",
       "impliedVol": {
-        "title": "Volatilité implicite et structures",
-        "duration": "5h 30min",
-        "description": "Analyser et interpréter les surfaces de volatilité du marché.",
+        "title": "Structures de Volatilité Implicite",
+        "duration": "8 heures",
+        "description": "Explorez les surfaces de volatilité, smile, skew et structure par terme pour un pricing d'options plus réaliste",
         "topics": {
-          "calibration": "Calibration"
+          "calibration": "Calibration de surface"
         }
       },
       "volProducts": {
-        "title": "Produits de volatilité",
-        "duration": "4h 15min",
-        "description": "Maitriser les indices de volatilité et leurs dérivés.",
+        "title": "Produits de Volatilité & Trading",
+        "duration": "7 heures",
+        "description": "Maîtrisez les variance swaps, volatility swaps, futures et options VIX, et les stratégies de ciblage de volatilité",
         "topics": {
-          "varianceSwaps": "Variance Swaps",
-          "volSwaps": "Vol Swaps",
-          "volTargeting": "Vol Targeting"
+          "varianceSwaps": "Variance swaps",
+          "volSwaps": "Vol swaps",
+          "volTargeting": "Ciblage de vol"
         }
       }
     },
     "complex": {
       "level": "PRODUITS COMPLEXES",
-      "description": "Maîtrisez les méthodes de pricing pour les produits structurés et exotiques.",
+      "description": "Techniques avancées de pricing et de couverture pour les dérivés exotiques et les produits structurés",
       "exotic": {
-        "title": "Options exotiques et barrières",
-        "duration": "6h 40min",
-        "description": "Pricing des produits dérivés complexes avec discontinuités.",
+        "title": "Options Exotiques & Barrières",
+        "duration": "9 heures",
+        "description": "Apprenez à évaluer et à couvrir les options path-dependent et les produits à barrière avec diverses méthodes",
         "topics": {
-          "knockInOut": "Knock-in/out",
-          "touch": "Touch",
-          "digitals": "Digitals",
-          "corridors": "Corridors"
+          "knockInOut": "Options knock-in/out",
+          "touch": "Options one-touch",
+          "digitals": "Options digitales",
+          "corridors": "Options corridor"
         }
       },
       "monteCarlo": {
-        "title": "Monte Carlo pour produits path-dependent",
-        "duration": "7h 15min",
-        "description": "Techniques avancées de simulation pour options dépendantes du chemin.",
+        "title": "Monte Carlo pour Options Path-Dependent",
+        "duration": "10 heures",
+        "description": "Implémentez de puissantes techniques de simulation Monte Carlo pour l'évaluation de dérivés complexes",
         "topics": {
-          "asian": "Asiatiques",
-          "lookback": "Lookback",
-          "simulation": "Simulation",
-          "varianceReduction": "Réduction variance"
+          "asian": "Options asiatiques",
+          "lookback": "Options lookback",
+          "simulation": "Simulation de chemins",
+          "varianceReduction": "Réduction de variance"
         }
       }
     },
     "cta": {
-      "title": "Accédez à tous les modules",
-      "description": "Débloquez l'intégralité du contenu et progressez à votre rythme avec l'abonnement mensuel à The Pricing Lab.",
-      "learnMore": "En savoir plus"
+      "title": "Prêt à Maîtriser la Finance Quantitative ?",
+      "description": "Rejoignez des milliers de professionnels qui ont transformé leur carrière avec notre plateforme.",
+      "subscribe": "S'abonner Maintenant",
+      "learnMore": "En Savoir Plus"
+    },
+    "locked": "Contenu Premium",
+    "access": "Commencer l'Apprentissage",
+    "unlockModules": "Débloquer Tous les Modules",
+    "subscriptionAccess": "L'abonnement premium vous donne accès à tous les modules et fonctionnalités"
+  },
+  "notebooks": {
+    "title": "Notebooks Interactifs",
+    "subtitle": "Pratiquez avec des notebooks de code exécutables pour maîtriser les concepts de finance quantitative",
+    "popularity": "Popularité",
+    "updated": "Mis à jour",
+    "open": "Ouvrir le Notebook",
+    "upload": "Importer un Notebook",
+    "create": "Créer un Nouveau",
+    "sections": "Sections du Notebook",
+    "exportPdf": "Exporter en PDF",
+    "exportNotebook": "Exporter le Notebook",
+    "save": "Enregistrer",
+    "run": "Exécuter le Code",
+    "backToLibrary": "Retour à la Bibliothèque",
+    "share": "Partager",
+    "nextSection": "Section Suivante"
+  },
+  "exercises": {
+    "title": "Exercices & Simulations",
+    "subtitle": "Pratiquez avec des exercices interactifs et des simulations de marché réalistes",
+    "simulation": "Avec Simulation",
+    "completionRate": "de complétion",
+    "popularity": "Popularité",
+    "start": "Commencer l'Exercice",
+    "filter": "Filtrer",
+    "survivalMode": "Mode Survie",
+    "searchPlaceholder": "Rechercher des exercices...",
+    "backToList": "Retour à la Liste d'Exercices",
+    "objectives": "Objectifs d'Apprentissage",
+    "prerequisites": "Prérequis",
+    "simulation": "Simulation Interactive",
+    "completionPoints": "500 points pour la complétion",
+    "startExercise": "Démarrer l'Exercice",
+    "prevStep": "Étape Précédente",
+    "nextStep": "Étape Suivante",
+    "finish": "Terminer"
+  },
+  "survivalMode": {
+    "title": "Mode Survie",
+    "subtitle": "Testez vos connaissances en finance quantitative dans un quiz rapide et stimulant",
+    "howToPlay": "Comment Jouer",
+    "rules": {
+      "title1": "Affrontez les Vagues",
+      "desc1": "Chaque vague contient des défis de pricing de plus en plus difficiles qui testent vos connaissances",
+      "title2": "Restez en Vie",
+      "desc2": "Vous avez 3 vies. Chaque réponse incorrecte vous coûte une vie. Quand vous n'en avez plus, c'est game over",
+      "title3": "Marquez des Points",
+      "desc3": "Gagnez des points pour chaque réponse correcte. Plus vous répondez vite, plus vous gagnez de points"
+    },
+    "waves": "Vagues de Défi",
+    "backToExercises": "Retour aux Exercices",
+    "startGame": "Démarrer le Jeu",
+    "leaderboard": "Classement",
+    "rank": "Rang",
+    "player": "Joueur",
+    "score": "Score",
+    "level": "Niveau",
+    "streak": "Série",
+    "quit": "Quitter le Jeu",
+    "question": "Question",
+    "explanation": "Explication",
+    "tip": "Astuce",
+    "tipText": "Pour le pricing Black-Scholes, rappelez-vous que la formule suppose une distribution log-normale des rendements et une volatilité constante",
+    "gameOver": "Partie Terminée",
+    "gameOverSubtitle": "Voyez comment vous vous êtes débrouillé et comment vous vous comparez aux autres",
+    "results": "Vos Résultats",
+    "totalScore": "Score Total",
+    "correctIncorrect": "Correct / Incorrect",
+    "timeAccuracy": "Temps & Précision",
+    "currentStreak": "Série Actuelle",
+    "levelProgress": "Progression de Niveau",
+    "newBadgeUnlocked": "Nouveau Badge Débloqué !",
+    "survivorBadge": "Vous avez gagné le badge 'Survivant' pour avoir complété 5 vagues",
+    "viewFullLeaderboard": "Voir le Classement Complet",
+    "backToExercises": "Retour aux Exercices",
+    "playAgain": "Rejouer",
+    "nextQuestion": "Question Suivante",
+    "nextWave": "Vague Suivante",
+    "seeResults": "Voir les Résultats"
+  },
+  "leaderboard": {
+    "title": "Classement",
+    "subtitle": "Voyez qui mène la course dans la maîtrise de la finance quantitative",
+    "searchPlaceholder": "Rechercher des joueurs...",
+    "filter": "Filtrer",
+    "tabs": {
+      "global": "Global",
+      "monthly": "Mensuel",
+      "weekly": "Hebdomadaire",
+      "survival": "Mode Survie",
+      "friends": "Amis"
+    },
+    "table": {
+      "rank": "Rang",
+      "player": "Joueur",
+      "score": "Score",
+      "level": "Niveau",
+      "streak": "Série",
+      "accuracy": "Précision"
+    },
+    "selectPlayer": "Sélectionnez un Joueur",
+    "selectPlayerDesc": "Cliquez sur n'importe quel joueur dans le classement pour voir ses statistiques détaillées",
+    "recentActivities": "Activités Récentes",
+    "achievementBadges": "Badges de Réalisation",
+    "viewAll": "Voir Tout",
+    "playerDetails": {
+      "rank": "Rang",
+      "score": "Score",
+      "level": "Niveau",
+      "streak": "Série",
+      "exercises": "Exercices Complétés",
+      "courses": "Cours Complétés",
+      "accuracy": "Taux de Précision",
+      "memberSince": "Membre Depuis",
+      "lastActive": "Dernière Activité",
+      "badges": "Badges"
     }
   },
-  "projects": {
-    "title": "Challenges & Projets",
-    "subtitle": "Mettez vos connaissances à l'épreuve avec nos challenges pratiques et comparez vos résultats avec d'autres membres de la communauté.",
-    "monthlyChallenge": "Challenge du mois",
-    "upcoming": "Prochains challenges",
-    "leaderboard": "Classement",
-    "previousChallenge": "Challenge précédent: Modélisation des taux d'intérêt",
-    "completed": "Terminé le",
-    "participant": "Participant",
-    "score": "Score",
-    "reward": "Récompense",
-    "viewAll": "Voir tous les participants",
-    "joinCommunity": "Rejoignez la communauté",
-    "communityDescription": "Participez à nos challenges mensuels et échangez avec d'autres passionnés de finance quantitative. L'abonnement donne accès à tous les challenges et aux ressources premium.",
-    "subscribe": "S'abonner pour 19€/mois",
-    "discover": "Découvrir la formation",
-    "active": "ACTIF",
-    "upcoming": "À VENIR",
-    "endsIn": "TERMINE DANS 5 JOURS",
-    "description": "Description",
-    "requirements": "Exigences",
-    "rewards": "Récompenses",
-    "viewDetails": "Voir les détails",
-    "notAvailable": "Bientôt disponible",
-    "resources": "Ressources & Données",
-    "optionPricingTitle": "Option Pricing Competition",
-    "optionPricingDesc": "Développez le pricer le plus précis pour un portefeuille d'options sur actions.",
-    "implementPython": "Implémenter en Python ou R",
-    "handleSmile": "Gérer les effets de volatilité smile",
-    "includeDocumentation": "Inclure documentation du modèle",
-    "optimizePerformance": "Optimiser pour la performance",
-    "firstPrize": "1er: 6 mois d'abonnement gratuit",
-    "secondPrize": "2e: 3 mois d'abonnement gratuit",
-    "thirdPrize": "3e: 1 mois d'abonnement gratuit",
-    "allParticipants": "Tous: Badge \"Quant Trader\"",
-    "monteCarloTitle": "Monte Carlo for Exotics",
-    "monteCarloDesc": "Utilisez les méthodes Monte Carlo pour évaluer des options exotiques et comparez vos résultats à des benchmarks.",
-    "portfolioOptTitle": "Optimisation de Portefeuille",
-    "portfolioOptDesc": "Construisez un portefeuille optimal selon différentes contraintes et métriques de risque.",
-    "volSurfaceTitle": "Volatility Surface Calibration",
-    "volSurfaceDesc": "Calibrez des modèles de volatilité aux prix de marché d'options et reconstruisez la surface complète.",
-    "algoTradingTitle": "Trading Algorithmique",
-    "algoTradingDesc": "Développez une stratégie de trading algorithmique basée sur la volatilité et évaluez sa performance.",
-    "starts": "Début le",
-    "duration": "durée",
-    "difficulty": "Difficulté",
-    "participants": "participants",
-    "advanced": "Avancé",
-    "intermediate": "Intermédiaire",
-    "expert": "Expert",
-    "weeks": "semaines"
-  },
-  "languageSwitcher": {
-    "en": "Anglais",
-    "fr": "Français"
+  "community": {
+    "title": "Communauté",
+    "subtitle": "Connectez-vous avec d'autres passionnés de finance quantitative, partagez vos connaissances et collaborez",
+    "notifications": "Notifications",
+    "newTopic": "Nouveau Sujet",
+    "tabs": {
+      "forum": "Forum",
+      "events": "Événements",
+      "members": "Membres"
+    },
+    "searchTopics": "Rechercher des sujets...",
+    "allCategories": "Toutes les Catégories",
+    "categories": "Catégories",
+    "recentTopics": "Sujets Récents",
+    "sortByRecent": "Trier par plus récent",
+    "sortByPopular": "Trier par plus populaire",
+    "sortByActivity": "Trier par activité",
+    "lastReply": "Dernière réponse",
+    "readMore": "Lire plus",
+    "upcomingEvents": "Événements à Venir",
+    "registerNow": "S'inscrire Maintenant",
+    "pastEvents": "Événements Passés",
+    "noPastEvents": "Aucun événement passé à afficher",
+    "noPastEventsDesc": "Restez à l'écoute pour nos prochains événements et revenez plus tard pour les enregistrements et les documents des événements passés",
+    "communityPoll": "Sondage Communautaire",
+    "proposeEvent": "Proposer un Événement",
+    "proposeEventDesc": "Vous avez une idée pour un webinaire, un hackathon ou une rencontre ? Partagez-la avec la communauté !",
+    "submitProposal": "Soumettre une Proposition d'Événement",
+    "onlineMembers": "Membres en Ligne",
+    "membersPageComing": "Annuaire des Membres Bientôt Disponible",
+    "membersPageComingDesc": "Nous construisons un annuaire complet des membres avec des profils, des réalisations et des fonctionnalités de réseautage. Soyez le premier à être informé de son lancement !",
+    "getNotified": "Être Notifié"
   }
 }
