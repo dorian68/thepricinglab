@@ -21,7 +21,7 @@ const Navbar = () => {
             <div className="hidden md:block">
               <div className="ml-10 flex items-center space-x-4">
                 <Link to="/" className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium">
-                  {t('nav.home')}
+                  Accueil
                 </Link>
                 
                 <div className="relative">
@@ -29,7 +29,7 @@ const Navbar = () => {
                     onClick={() => setDropdownOpen(!dropdownOpen)}
                     className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium flex items-center"
                   >
-                    {t('nav.courses')} <ChevronDown className="ml-1 h-4 w-4" />
+                    Cours <ChevronDown className="ml-1 h-4 w-4" />
                   </button>
                   
                   {dropdownOpen && (
@@ -40,28 +40,28 @@ const Navbar = () => {
                           className="block px-4 py-2 text-sm text-finance-offwhite hover:bg-finance-steel/20"
                           role="menuitem"
                         >
-                          {t('courses.fundamentals')}
+                          Fondamentaux
                         </Link>
                         <Link
                           to="/courses/advanced"
                           className="block px-4 py-2 text-sm text-finance-offwhite hover:bg-finance-steel/20"
                           role="menuitem"
                         >
-                          {t('courses.advanced')}
+                          Avancé
                         </Link>
                         <Link
                           to="/courses/complex"
                           className="block px-4 py-2 text-sm text-finance-offwhite hover:bg-finance-steel/20"
                           role="menuitem"
                         >
-                          {t('courses.complex')}
+                          Complexe
                         </Link>
                         <Link
                           to="/courses/bonus"
                           className="block px-4 py-2 text-sm text-finance-offwhite hover:bg-finance-steel/20"
                           role="menuitem"
                         >
-                          {t('courses.bonus')}
+                          Bonus
                         </Link>
                       </div>
                     </div>
@@ -69,16 +69,19 @@ const Navbar = () => {
                 </div>
                 
                 <Link to="/dashboard" className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium">
-                  {t('nav.dashboard')}
+                  Tableau de bord
                 </Link>
-                <Link to="/projects" className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium">
-                  {t('nav.projects')}
+                <Link to="/exercises" className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium">
+                  Exercices
+                </Link>
+                <Link to="/survival-mode" className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium">
+                  Mode Survie
+                </Link>
+                <Link to="/community" className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium">
+                  Communauté
                 </Link>
                 <Link to="/tools" className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium">
-                  {t('nav.tools')}
-                </Link>
-                <Link to="/mentoring" className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium">
-                  {t('nav.mentoring')}
+                  Outils
                 </Link>
               </div>
             </div>
@@ -87,10 +90,10 @@ const Navbar = () => {
             <LanguageSwitcher />
             <div className="ml-4 flex items-center md:ml-6">
               <Link to="/login" className="finance-button-outline mr-4">
-                {t('nav.login')}
+                Connexion
               </Link>
               <Link to="/signup" className="finance-button">
-                {t('nav.signup')}
+                Inscription
               </Link>
             </div>
           </div>
@@ -117,59 +120,59 @@ const Navbar = () => {
               to="/"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              {t('nav.home')}
+              Accueil
             </Link>
             <Link
               to="/courses/fundamentals"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              {t('courses.fundamentals')}
+              Cours Fondamentaux
             </Link>
             <Link
               to="/courses/advanced"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              {t('courses.advanced')}
-            </Link>
-            <Link
-              to="/courses/complex"
-              className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
-            >
-              {t('courses.complex')}
+              Cours Avancés
             </Link>
             <Link
               to="/dashboard"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              {t('nav.dashboard')}
+              Tableau de bord
             </Link>
             <Link
-              to="/projects"
+              to="/exercises"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              {t('nav.projects')}
+              Exercices
+            </Link>
+            <Link
+              to="/survival-mode"
+              className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+            >
+              Mode Survie
+            </Link>
+            <Link
+              to="/community"
+              className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+            >
+              Communauté
             </Link>
             <Link
               to="/tools"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              {t('nav.tools')}
-            </Link>
-            <Link
-              to="/mentoring"
-              className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
-            >
-              {t('nav.mentoring')}
+              Outils
             </Link>
             <div className="mt-3 flex justify-start px-3">
               <LanguageSwitcher />
             </div>
             <div className="pt-4 pb-3 border-t border-finance-steel/20">
               <Link to="/login" className="finance-button-outline block w-full text-center mb-2">
-                {t('nav.login')}
+                Connexion
               </Link>
               <Link to="/signup" className="finance-button block w-full text-center">
-                {t('nav.signup')}
+                Inscription
               </Link>
             </div>
           </div>
