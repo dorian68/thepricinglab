@@ -26,6 +26,7 @@ import ImpliedVolCourse from "./pages/courses/ImpliedVol";
 import VolProductsCourse from "./pages/courses/VolProducts";
 import ExoticOptionsCourse from "./pages/courses/ExoticOptions";
 import MonteCarloCourse from "./pages/courses/MonteCarlo";
+import Pricing from "./pages/Pricing";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
         <Route path="/community" element={<Community />} />
         <Route path="/survival-mode" element={<SurvivalMode />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
+        <Route path="/pricing" element={<Pricing />} />
         <Route path="/courses/advanced" element={<CourseAdvanced />} />
         <Route path="/courses/fundamentals/black-scholes" element={<BlackScholesCourse />} />
         <Route path="/courses/fundamentals/yield-curves" element={<YieldCurvesCourse />} />

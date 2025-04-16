@@ -5,10 +5,10 @@ import Footer from "../components/Footer";
 import MarketVisuals from "../components/MarketVisuals";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Code, Trophy, Users, BarChart3, Zap, ArrowRight } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { BookOpen, Code, Trophy, Users, BarChart3, Zap, ArrowRight, GraduationCap, Rocket, Star } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import PricingDialog from "../components/PricingDialog";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -112,8 +112,139 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Modules */}
+      {/* Pricing Tiers */}
       <section className="py-16 px-6 bg-[#141821]">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">{t('pricing.title')} <span className="text-[#ea384c]">{t('pricing.highlight')}</span></h2>
+            <p className="text-[#8E9196] max-w-2xl mx-auto">
+              {t('pricing.description')}
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-[#1A1F2C] p-6 rounded-lg border border-[#2A2F3C] hover:border-[#ea384c] transition-colors relative">
+              <div className="flex items-center mb-4">
+                <div className="p-2 rounded-full bg-[#141821] mr-3">
+                  <Star className="h-5 w-5 text-yellow-400" />
+                </div>
+                <h3 className="text-xl font-medium">{t('pricing.freemium.title')}</h3>
+              </div>
+              <div className="mb-6">
+                <div className="text-2xl font-bold text-[#ea384c]">{t('pricing.freemium.price')}</div>
+                <p className="text-[#8E9196] text-sm mt-1">{t('pricing.freemium.description')}</p>
+              </div>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-center text-[#8E9196]">
+                  <span className="mr-2 text-green-500">✓</span>
+                  <span>{t('pricing.freemium.feature1')}</span>
+                </li>
+                <li className="flex items-center text-[#8E9196]">
+                  <span className="mr-2 text-green-500">✓</span>
+                  <span>{t('pricing.freemium.feature2')}</span>
+                </li>
+                <li className="flex items-center text-[#8E9196]">
+                  <span className="mr-2 text-green-500">✓</span>
+                  <span>{t('pricing.freemium.feature3')}</span>
+                </li>
+                <li className="flex items-center text-[#8E9196]">
+                  <span className="mr-2 text-green-500">✓</span>
+                  <span>{t('pricing.freemium.feature4')}</span>
+                </li>
+              </ul>
+              <Button variant="financeOutline" className="w-full" asChild>
+                <Link to="/signup?plan=freemium">
+                  {t('pricing.freemium.cta')}
+                </Link>
+              </Button>
+            </div>
+            
+            <div className="bg-[#1A1F2C] p-6 rounded-lg border border-[#ea384c] hover:border-[#ea384c] transition-colors relative">
+              <div className="bg-[#ea384c] text-white text-xs font-bold uppercase py-1 px-2 rounded absolute -mt-9 ml-4">{t('pricing.recommended')}</div>
+              <div className="flex items-center mb-4">
+                <div className="p-2 rounded-full bg-[#141821] mr-3">
+                  <GraduationCap className="h-5 w-5 text-blue-400" />
+                </div>
+                <h3 className="text-xl font-medium">{t('pricing.student.title')}</h3>
+              </div>
+              <div className="mb-6">
+                <div className="text-2xl font-bold text-[#ea384c]">19€ <span className="text-sm text-[#8E9196] font-normal">{t('pricing.monthly')}</span></div>
+                <p className="text-[#8E9196] text-sm mt-1">{t('pricing.student.description')}</p>
+              </div>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-center text-[#8E9196]">
+                  <span className="mr-2 text-green-500">✓</span>
+                  <span>{t('pricing.student.feature1')}</span>
+                </li>
+                <li className="flex items-center text-[#8E9196]">
+                  <span className="mr-2 text-green-500">✓</span>
+                  <span>{t('pricing.student.feature2')}</span>
+                </li>
+                <li className="flex items-center text-[#8E9196]">
+                  <span className="mr-2 text-green-500">✓</span>
+                  <span>{t('pricing.student.feature3')}</span>
+                </li>
+                <li className="flex items-center text-[#8E9196]">
+                  <span className="mr-2 text-green-500">✓</span>
+                  <span>{t('pricing.student.feature4')}</span>
+                </li>
+                <li className="flex items-center text-[#8E9196]">
+                  <span className="mr-2 text-green-500">✓</span>
+                  <span>{t('pricing.student.feature5')}</span>
+                </li>
+              </ul>
+              <Button variant="finance" className="w-full" asChild>
+                <Link to="/signup?plan=student">
+                  {t('pricing.student.cta')}
+                </Link>
+              </Button>
+            </div>
+            
+            <div className="bg-[#1A1F2C] p-6 rounded-lg border border-[#2A2F3C] hover:border-[#ea384c] transition-colors relative">
+              <div className="flex items-center mb-4">
+                <div className="p-2 rounded-full bg-[#141821] mr-3">
+                  <Rocket className="h-5 w-5 text-[#ea384c]" />
+                </div>
+                <h3 className="text-xl font-medium">{t('pricing.pro.title')}</h3>
+              </div>
+              <div className="mb-6">
+                <div className="text-2xl font-bold text-[#ea384c]">49€ <span className="text-sm text-[#8E9196] font-normal">{t('pricing.monthly')}</span></div>
+                <p className="text-[#8E9196] text-sm mt-1">{t('pricing.pro.description')}</p>
+              </div>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-center text-[#8E9196]">
+                  <span className="mr-2 text-green-500">✓</span>
+                  <span>{t('pricing.pro.feature1')}</span>
+                </li>
+                <li className="flex items-center text-[#8E9196]">
+                  <span className="mr-2 text-green-500">✓</span>
+                  <span>{t('pricing.pro.feature2')}</span>
+                </li>
+                <li className="flex items-center text-[#8E9196]">
+                  <span className="mr-2 text-green-500">✓</span>
+                  <span>{t('pricing.pro.feature3')}</span>
+                </li>
+                <li className="flex items-center text-[#8E9196]">
+                  <span className="mr-2 text-green-500">✓</span>
+                  <span>{t('pricing.pro.feature4')}</span>
+                </li>
+                <li className="flex items-center text-[#8E9196]">
+                  <span className="mr-2 text-green-500">✓</span>
+                  <span>{t('pricing.pro.feature5')}</span>
+                </li>
+              </ul>
+              <Button variant="finance" className="w-full" asChild>
+                <Link to="/signup?plan=pro">
+                  {t('pricing.pro.cta')}
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Modules */}
+      <section className="py-16 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">{t('home.curriculum.title')} <span className="text-[#ea384c]">{t('home.modules.highlight')}</span></h2>
@@ -133,11 +264,11 @@ const Index = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-[#8E9196]">
-                {t('home.modules.courses.description')}
+                {t('home.modules.fundamentals.description')}
               </CardContent>
               <CardFooter>
-                <Link to="/courses" className="text-[#ea384c] hover:text-red-400 flex items-center">
-                  {t('home.modules.courses.cta')} <ArrowRight size={16} className="ml-2" />
+                <Link to="/courses#fundamentals" className="text-[#ea384c] hover:text-red-400 flex items-center">
+                  {t('home.modules.fundamentals.cta')} <ArrowRight size={16} className="ml-2" />
                 </Link>
               </CardFooter>
             </Card>
@@ -249,86 +380,13 @@ const Index = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Dialog>
-              <DialogTrigger asChild>
+            <PricingDialog 
+              trigger={
                 <Button variant="finance">
                   {t('pricing.title')}
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-[#1A1F2C] text-white border-[#2A2F3C]">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl font-bold">{t('pricing.title')}</DialogTitle>
-                  <DialogDescription className="text-[#8E9196]">
-                    {t('pricing.subtitle')}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                  <div className="bg-[#141821] p-6 rounded-lg border border-[#2A2F3C]">
-                    <h3 className="text-xl font-bold mb-2">{t('pricing.basic.title')}</h3>
-                    <div className="text-2xl font-bold text-[#ea384c] mb-4">29€ <span className="text-sm text-[#8E9196] font-normal">{t('pricing.monthly')}</span></div>
-                    <ul className="space-y-2 mb-6">
-                      <li className="flex items-center">
-                        <span className="mr-2 text-green-500">✓</span>
-                        <span>{t('pricing.basic.feature1')}</span>
-                      </li>
-                      <li className="flex items-center">
-                        <span className="mr-2 text-green-500">✓</span>
-                        <span>{t('pricing.basic.feature2')}</span>
-                      </li>
-                      <li className="flex items-center">
-                        <span className="mr-2 text-green-500">✓</span>
-                        <span>{t('pricing.basic.feature3')}</span>
-                      </li>
-                      <li className="flex items-center">
-                        <span className="mr-2 text-green-500">✓</span>
-                        <span>{t('pricing.basic.feature4')}</span>
-                      </li>
-                    </ul>
-                    <Button variant="finance" className="w-full" asChild>
-                      <Link to="/signup?plan=basic">
-                        {t('pricing.basic.cta')}
-                      </Link>
-                    </Button>
-                  </div>
-                  
-                  <div className="bg-[#141821] p-6 rounded-lg border border-[#ea384c]">
-                    <div className="bg-[#ea384c] text-white text-xs font-bold uppercase py-1 px-2 rounded absolute -mt-9 ml-4">{t('pricing.pro.recommended')}</div>
-                    <h3 className="text-xl font-bold mb-2">{t('pricing.pro.title')}</h3>
-                    <div className="text-2xl font-bold text-[#ea384c] mb-4">49€ <span className="text-sm text-[#8E9196] font-normal">{t('pricing.monthly')}</span></div>
-                    <ul className="space-y-2 mb-6">
-                      <li className="flex items-center">
-                        <span className="mr-2 text-green-500">✓</span>
-                        <span>{t('pricing.pro.feature1')}</span>
-                      </li>
-                      <li className="flex items-center">
-                        <span className="mr-2 text-green-500">✓</span>
-                        <span>{t('pricing.pro.feature2')}</span>
-                      </li>
-                      <li className="flex items-center">
-                        <span className="mr-2 text-green-500">✓</span>
-                        <span>{t('pricing.pro.feature3')}</span>
-                      </li>
-                      <li className="flex items-center">
-                        <span className="mr-2 text-green-500">✓</span>
-                        <span>{t('pricing.pro.feature4')}</span>
-                      </li>
-                      <li className="flex items-center">
-                        <span className="mr-2 text-green-500">✓</span>
-                        <span>{t('pricing.pro.feature5')}</span>
-                      </li>
-                    </ul>
-                    <Button variant="finance" className="w-full" asChild>
-                      <Link to="/signup?plan=pro">
-                        {t('pricing.pro.cta')}
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-                <div className="mt-6 text-center text-[#8E9196] text-sm">
-                  {t('pricing.guarantee')}
-                </div>
-              </DialogContent>
-            </Dialog>
+              }
+            />
             
             <Tooltip>
               <TooltipTrigger asChild>
