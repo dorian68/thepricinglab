@@ -19,6 +19,13 @@ import SurvivalMode from "./pages/SurvivalMode";
 import Leaderboard from "./pages/Leaderboard";
 import ExerciseDetail from "./pages/ExerciseDetail";
 import CourseAdvanced from "./pages/CourseAdvanced";
+import BlackScholesCourse from "./pages/courses/BlackScholes";
+import YieldCurvesCourse from "./pages/courses/YieldCurves";
+import GreeksCourse from "./pages/courses/Greeks";
+import ImpliedVolCourse from "./pages/courses/ImpliedVol";
+import VolProductsCourse from "./pages/courses/VolProducts";
+import ExoticOptionsCourse from "./pages/courses/ExoticOptions";
+import MonteCarloCourse from "./pages/courses/MonteCarlo";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +50,13 @@ const App = () => (
         <Route path="/survival-mode" element={<SurvivalMode />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/courses/advanced" element={<CourseAdvanced />} />
+        <Route path="/courses/fundamentals/black-scholes" element={<BlackScholesCourse />} />
+        <Route path="/courses/fundamentals/yield-curves" element={<YieldCurvesCourse />} />
+        <Route path="/courses/fundamentals/greeks" element={<GreeksCourse />} />
+        <Route path="/courses/advanced/implied-vol" element={<ImpliedVolCourse />} />
+        <Route path="/courses/advanced/vol-products" element={<VolProductsCourse />} />
+        <Route path="/courses/complex/exotic-options" element={<ExoticOptionsCourse />} />
+        <Route path="/courses/complex/monte-carlo" element={<MonteCarloCourse />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
