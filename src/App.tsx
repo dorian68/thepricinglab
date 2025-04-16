@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -31,6 +30,7 @@ import MonteCarloCourse from "./pages/courses/MonteCarlo";
 import Pricing from "./pages/Pricing";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import Practice from "./pages/Practice";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +66,7 @@ const App = () => (
           <Route path="/quizzes" element={<Exercises />} /> {/* Placeholder for future Quiz page */}
           <Route path="/advanced-simulations" element={<Exercises />} /> {/* Placeholder for future Simulations page */}
           <Route path="/progress" element={<Dashboard />} /> {/* Placeholder that redirects to dashboard for now */}
+          <Route path="/training-lab" element={<Practice />} /> {/* New unified Training Lab page */}
           <Route path="/courses/advanced" element={<CourseAdvanced />} />
           <Route path="/courses/fundamentals/black-scholes" element={<BlackScholesCourse />} />
           <Route path="/courses/fundamentals/yield-curves" element={<YieldCurvesCourse />} />
