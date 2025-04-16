@@ -21,7 +21,7 @@ const Navbar = () => {
             <div className="hidden md:block">
               <div className="ml-10 flex items-center space-x-4">
                 <Link to="/" className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium">
-                  Accueil
+                  {t('navbar.home')}
                 </Link>
                 
                 <div className="relative">
@@ -29,39 +29,60 @@ const Navbar = () => {
                     onClick={() => setDropdownOpen(!dropdownOpen)}
                     className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium flex items-center"
                   >
-                    Cours <ChevronDown className="ml-1 h-4 w-4" />
+                    {t('navbar.courses')} <ChevronDown className="ml-1 h-4 w-4" />
                   </button>
                   
                   {dropdownOpen && (
                     <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-finance-charcoal ring-1 ring-black ring-opacity-5">
                       <div className="py-1" role="menu" aria-orientation="vertical">
                         <Link
-                          to="/courses/fundamentals"
+                          to="/courses/fundamentals/black-scholes"
                           className="block px-4 py-2 text-sm text-finance-offwhite hover:bg-finance-steel/20"
                           role="menuitem"
                         >
-                          Fondamentaux
+                          {t('coursesPage.fundamentals.blackScholes.title')}
                         </Link>
                         <Link
-                          to="/courses/advanced"
+                          to="/courses/fundamentals/yield-curves"
                           className="block px-4 py-2 text-sm text-finance-offwhite hover:bg-finance-steel/20"
                           role="menuitem"
                         >
-                          Avancé
+                          {t('coursesPage.fundamentals.yieldCurves.title')}
                         </Link>
                         <Link
-                          to="/courses/complex"
+                          to="/courses/fundamentals/greeks"
                           className="block px-4 py-2 text-sm text-finance-offwhite hover:bg-finance-steel/20"
                           role="menuitem"
                         >
-                          Complexe
+                          {t('coursesPage.fundamentals.greeks.title')}
                         </Link>
                         <Link
-                          to="/courses/bonus"
+                          to="/courses/advanced/implied-vol"
                           className="block px-4 py-2 text-sm text-finance-offwhite hover:bg-finance-steel/20"
                           role="menuitem"
                         >
-                          Bonus
+                          {t('coursesPage.advanced.impliedVol.title')}
+                        </Link>
+                        <Link
+                          to="/courses/advanced/vol-products"
+                          className="block px-4 py-2 text-sm text-finance-offwhite hover:bg-finance-steel/20"
+                          role="menuitem"
+                        >
+                          {t('coursesPage.advanced.volProducts.title')}
+                        </Link>
+                        <Link
+                          to="/courses/complex/exotic-options"
+                          className="block px-4 py-2 text-sm text-finance-offwhite hover:bg-finance-steel/20"
+                          role="menuitem"
+                        >
+                          {t('coursesPage.complex.exotic.title')}
+                        </Link>
+                        <Link
+                          to="/courses/complex/monte-carlo"
+                          className="block px-4 py-2 text-sm text-finance-offwhite hover:bg-finance-steel/20"
+                          role="menuitem"
+                        >
+                          {t('coursesPage.complex.monteCarlo.title')}
                         </Link>
                       </div>
                     </div>
@@ -69,19 +90,19 @@ const Navbar = () => {
                 </div>
                 
                 <Link to="/dashboard" className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium">
-                  Tableau de bord
+                  {t('navbar.dashboard')}
                 </Link>
                 <Link to="/exercises" className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium">
-                  Exercices
+                  {t('navbar.exercises')}
                 </Link>
                 <Link to="/survival-mode" className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium">
-                  Mode Survie
+                  {t('navbar.survivalMode')}
                 </Link>
                 <Link to="/community" className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium">
-                  Communauté
+                  {t('navbar.community')}
                 </Link>
                 <Link to="/tools" className="text-finance-offwhite hover:text-finance-accent px-3 py-2 text-sm font-medium">
-                  Outils
+                  {t('navbar.tools')}
                 </Link>
               </div>
             </div>
@@ -90,10 +111,10 @@ const Navbar = () => {
             <LanguageSwitcher />
             <div className="ml-4 flex items-center md:ml-6">
               <Link to="/login" className="finance-button-outline mr-4">
-                Connexion
+                {t('navbar.login')}
               </Link>
               <Link to="/signup" className="finance-button">
-                Inscription
+                {t('navbar.signup')}
               </Link>
             </div>
           </div>
@@ -102,7 +123,7 @@ const Navbar = () => {
               onClick={() => setIsOpen(!isOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-finance-offwhite hover:text-finance-accent focus:outline-none"
             >
-              <span className="sr-only">Ouvrir le menu</span>
+              <span className="sr-only">{t('navbar.openMenu')}</span>
               {isOpen ? (
                 <X className="block h-6 w-6" aria-hidden="true" />
               ) : (
@@ -120,59 +141,65 @@ const Navbar = () => {
               to="/"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              Accueil
+              {t('navbar.home')}
             </Link>
             <Link
-              to="/courses/fundamentals"
+              to="/courses/fundamentals/black-scholes"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              Cours Fondamentaux
+              {t('coursesPage.fundamentals.blackScholes.title')}
             </Link>
             <Link
-              to="/courses/advanced"
+              to="/courses/fundamentals/yield-curves"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              Cours Avancés
+              {t('coursesPage.fundamentals.yieldCurves.title')}
+            </Link>
+            <Link
+              to="/courses/fundamentals/greeks"
+              className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+            >
+              {t('coursesPage.fundamentals.greeks.title')}
             </Link>
             <Link
               to="/dashboard"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              Tableau de bord
+              {t('navbar.dashboard')}
             </Link>
             <Link
               to="/exercises"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              Exercices
+              {t('navbar.exercises')}
             </Link>
             <Link
               to="/survival-mode"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              Mode Survie
+              {t('navbar.survivalMode')}
             </Link>
             <Link
               to="/community"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              Communauté
+              {t('navbar.community')}
             </Link>
             <Link
               to="/tools"
               className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              Outils
+              {t('navbar.tools')}
             </Link>
             <div className="mt-3 flex justify-start px-3">
               <LanguageSwitcher />
             </div>
             <div className="pt-4 pb-3 border-t border-finance-steel/20">
               <Link to="/login" className="finance-button-outline block w-full text-center mb-2">
-                Connexion
+                {t('navbar.login')}
               </Link>
               <Link to="/signup" className="finance-button block w-full text-center">
-                Inscription
+                {t('navbar.signup')}
               </Link>
             </div>
           </div>

@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -332,7 +333,7 @@ const Index = () => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="financeOutline" asChild>
-                  <Link to="/courses/fundamentals">
+                  <Link to="/courses/fundamentals/black-scholes">
                     {t('home.cta.freeCourse')}
                   </Link>
                 </Button>

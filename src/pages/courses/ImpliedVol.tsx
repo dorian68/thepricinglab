@@ -31,22 +31,22 @@ const ImpliedVolCourse = () => {
   // Course content
   const lessons = [
     { 
-      title: "Introduction to Implied Volatility",
+      title: t('coursesPage.advanced.impliedVol.lessons.intro'),
       duration: "20 min", 
       type: "lecture"
     },
     { 
-      title: "Historical vs. Implied Volatility",
+      title: t('coursesPage.advanced.impliedVol.lessons.historical'),
       duration: "25 min", 
       type: "lecture"
     },
     { 
-      title: "Volatility Surface",
+      title: t('coursesPage.advanced.impliedVol.lessons.surface'),
       duration: "35 min", 
       type: "lecture"
     },
     { 
-      title: "Smile and Skew Patterns",
+      title: t('coursesPage.advanced.impliedVol.lessons.smile'),
       duration: "30 min", 
       type: "lecture"
     },
@@ -56,17 +56,17 @@ const ImpliedVolCourse = () => {
       type: "lecture"
     },
     { 
-      title: "Exercise: Calculating Implied Volatility",
+      title: t('coursesPage.advanced.impliedVol.lessons.exercise'),
       duration: "50 min", 
       type: "exercise"
     },
     { 
-      title: "Notebook: Volatility Smile Analysis",
+      title: t('coursesPage.advanced.impliedVol.lessons.notebook'),
       duration: "60 min", 
       type: "notebook"
     },
     { 
-      title: "Quiz: Implied Volatility",
+      title: t('coursesPage.advanced.impliedVol.lessons.quiz'),
       duration: "15 min", 
       type: "quiz"
     }
@@ -96,7 +96,7 @@ const ImpliedVolCourse = () => {
         <div className="max-w-7xl mx-auto">
           {/* Breadcrumb */}
           <div className="flex items-center text-sm text-finance-lightgray mb-8">
-            <Link to="/" className="hover:text-finance-accent">
+            <Link to="/courses" className="hover:text-finance-accent">
               {t('navbar.courses')}
             </Link>
             <ChevronRight className="h-4 w-4 mx-2" />
@@ -146,7 +146,7 @@ const ImpliedVolCourse = () => {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center">
                       <GraduationCap className="h-5 w-5 text-finance-accent mr-2" />
-                      <span className="text-finance-offwhite font-medium">Niveau</span>
+                      <span className="text-finance-offwhite font-medium">{t('coursesPage.level')}</span>
                     </div>
                     <Badge variant="achievement">{t('coursesPage.levels.intermediate')}</Badge>
                   </div>
@@ -154,7 +154,7 @@ const ImpliedVolCourse = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <Clock className="h-5 w-5 text-finance-accent mr-2" />
-                      <span className="text-finance-offwhite font-medium">Durée estimée</span>
+                      <span className="text-finance-offwhite font-medium">{t('coursesPage.duration')}</span>
                     </div>
                     <span className="text-finance-lightgray">{t('coursesPage.advanced.impliedVol.duration')}</span>
                   </div>
@@ -162,15 +162,15 @@ const ImpliedVolCourse = () => {
               </div>
               
               <div className="finance-card p-6">
-                <h3 className="text-lg font-medium mb-4">Débloquer ce cours</h3>
+                <h3 className="text-lg font-medium mb-4">{t('coursesPage.unlock')}</h3>
                 <p className="text-finance-lightgray text-sm mb-6">
-                  Les cours avancés sont disponibles exclusivement avec un abonnement premium.
+                  {t('coursesPage.premiumDescription')}
                 </p>
                 <Link to="/signup" className="finance-button w-full flex items-center justify-center">
-                  S'abonner pour accéder <ArrowRight className="ml-2 h-4 w-4" />
+                  {t('coursesPage.subscribe')} <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
                 <p className="mt-4 text-xs text-finance-lightgray text-center">
-                  Déjà abonné? <Link to="/login" className="text-finance-accent hover:underline">Connexion</Link>
+                  {t('coursesPage.alreadySubscribed')} <Link to="/login" className="text-finance-accent hover:underline">{t('navbar.login')}</Link>
                 </p>
               </div>
             </div>
@@ -187,7 +187,7 @@ const ImpliedVolCourse = () => {
                       </div>
                       <h2 className="terminal-text text-2xl mb-4">{t('coursesPage.advanced.impliedVol.title')}</h2>
                       <Link to="/signup" className="finance-button inline-flex items-center">
-                        <Play className="mr-2 h-4 w-4" /> Débloquer ce contenu
+                        <Play className="mr-2 h-4 w-4" /> {t('coursesPage.unlockContent')}
                       </Link>
                     </div>
                   </div>
@@ -217,16 +217,16 @@ const ImpliedVolCourse = () => {
                   
                   <div className="bg-finance-charcoal/30 rounded-md p-8 mb-6 text-center">
                     <Lock className="h-10 w-10 text-finance-accent mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">Contenu Premium</h3>
+                    <h3 className="text-lg font-medium mb-2">{t('coursesPage.premiumContent')}</h3>
                     <p className="text-finance-lightgray mb-6 max-w-md mx-auto">
-                      Ce cours avancé sur la volatilité implicite n'est accessible qu'aux membres premium. Améliorez votre abonnement pour accéder à ce contenu.
+                      {t('coursesPage.impliedVolPremiumDesc')}
                     </p>
                     <div className="space-y-3">
                       <Link to="/signup" className="finance-button block w-full sm:w-auto sm:inline-block">
-                        Débloquer maintenant
+                        {t('coursesPage.unlockNow')}
                       </Link>
                       <Link to="/courses" className="block w-full sm:w-auto sm:inline-block text-finance-lightgray hover:text-finance-offwhite mt-3">
-                        Découvrir autres cours
+                        {t('coursesPage.discoverOther')}
                       </Link>
                     </div>
                   </div>
@@ -234,39 +234,39 @@ const ImpliedVolCourse = () => {
                   <div className="finance-card p-4 mb-6 bg-finance-steel/10">
                     <h4 className="flex items-center text-finance-offwhite font-medium mb-2">
                       <BookOpen className="h-4 w-4 mr-2 text-finance-accent" />
-                      Aperçu du cours
+                      {t('coursesPage.coursePreview')}
                     </h4>
                     <p className="text-sm text-finance-lightgray">
-                      Ce cours approfondit le concept de volatilité implicite, en explorant comment elle diffère de la volatilité historique et comment elle forme des structures complexes comme les smiles et les skews. Vous apprendrez également à calibrer des surfaces de volatilité pour valoriser des produits dérivés.
+                      {t('coursesPage.advanced.impliedVol.preview')}
                     </p>
                   </div>
                   
                   <div className="mt-6 pt-6 border-t border-finance-steel/10">
-                    <h3 className="text-lg font-medium mb-4">Compétences que vous acquerrez</h3>
+                    <h3 className="text-lg font-medium mb-4">{t('coursesPage.skillsAcquired')}</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="flex items-start p-3 bg-finance-steel/10 rounded-md">
                         <div className="p-1.5 rounded-full bg-finance-burgundy/20 mr-3">
                           <Check className="h-3.5 w-3.5 text-finance-accent" />
                         </div>
-                        <span className="text-sm text-finance-lightgray">Analyse des surfaces de volatilité</span>
+                        <span className="text-sm text-finance-lightgray">{t('coursesPage.advanced.impliedVol.skills.analysis')}</span>
                       </div>
                       <div className="flex items-start p-3 bg-finance-steel/10 rounded-md">
                         <div className="p-1.5 rounded-full bg-finance-burgundy/20 mr-3">
                           <Check className="h-3.5 w-3.5 text-finance-accent" />
                         </div>
-                        <span className="text-sm text-finance-lightgray">Interprétation des skews et smiles</span>
+                        <span className="text-sm text-finance-lightgray">{t('coursesPage.advanced.impliedVol.skills.skews')}</span>
                       </div>
                       <div className="flex items-start p-3 bg-finance-steel/10 rounded-md">
                         <div className="p-1.5 rounded-full bg-finance-burgundy/20 mr-3">
                           <Check className="h-3.5 w-3.5 text-finance-accent" />
                         </div>
-                        <span className="text-sm text-finance-lightgray">Calibration de modèles de volatilité</span>
+                        <span className="text-sm text-finance-lightgray">{t('coursesPage.advanced.impliedVol.skills.calibration')}</span>
                       </div>
                       <div className="flex items-start p-3 bg-finance-steel/10 rounded-md">
                         <div className="p-1.5 rounded-full bg-finance-burgundy/20 mr-3">
                           <Check className="h-3.5 w-3.5 text-finance-accent" />
                         </div>
-                        <span className="text-sm text-finance-lightgray">Pricing d'options avec vols implicites</span>
+                        <span className="text-sm text-finance-lightgray">{t('coursesPage.advanced.impliedVol.skills.pricing')}</span>
                       </div>
                     </div>
                   </div>
