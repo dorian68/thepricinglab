@@ -39,6 +39,7 @@ const StrategySelector: React.FC<StrategySelectorProps> = ({
             strategy={strategy}
             isSelected={selectedStrategy.id === strategy.id}
             onClick={() => onStrategyChange(strategy)}
+            t={t}
           />
         ))}
       </TabsContent>
@@ -50,6 +51,7 @@ const StrategySelector: React.FC<StrategySelectorProps> = ({
             strategy={strategy}
             isSelected={selectedStrategy.id === strategy.id}
             onClick={() => onStrategyChange(strategy)}
+            t={t}
           />
         ))}
       </TabsContent>
@@ -61,9 +63,14 @@ interface StrategyCardProps {
   strategy: Strategy;
   isSelected: boolean;
   onClick: () => void;
+  t: (key: string) => string;
 }
 
-const StrategyCard: React.FC<StrategyCardProps> = ({ strategy, isSelected, onClick }) => {
+const StrategyCard: React.FC<StrategyCardProps> = ({ strategy, isSelected, onClick, t }) => {
+  // Try to find translations for strategy name and description
+  const strategyName = safeTranslate(t, `strategies.${strategy.id}.name`, strategy.name);
+  const strategyDescription = safeTranslate(t, `strategies.${strategy.id}.description`, strategy.description);
+
   return (
     <Card 
       className={`p-3 cursor-pointer hover:bg-finance-steel/10 transition-colors ${
@@ -71,8 +78,8 @@ const StrategyCard: React.FC<StrategyCardProps> = ({ strategy, isSelected, onCli
       }`}
       onClick={onClick}
     >
-      <h3 className="font-medium text-finance-offwhite">{strategy.name}</h3>
-      <p className="text-xs text-finance-offwhite/80 mt-1 line-clamp-2">{strategy.description}</p>
+      <h3 className="font-medium text-finance-offwhite">{strategyName}</h3>
+      <p className="text-xs text-finance-offwhite/80 mt-1 line-clamp-2">{strategyDescription}</p>
     </Card>
   );
 };

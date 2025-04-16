@@ -15,11 +15,13 @@ export const safeTranslate = (
   defaultValue?: string, 
   lng?: string
 ): string => {
+  // Use the translation function with a default value
   const result = t(key, { defaultValue: defaultValue || extractLabel(key) });
   
-  // If the result contains [caption] or exactly matches the key, it means the translation is missing
+  // If the result exactly matches the key or contains square brackets, consider it missing
   if (result === key || (typeof result === 'string' && result.includes('[') && result.includes(']'))) {
     console.warn(`Missing translation: ${key}${lng ? ` in ${lng}` : ''}`);
+    // Return the default value or a humanized version of the key
     return defaultValue || extractLabel(key);
   }
   
@@ -51,7 +53,11 @@ export const extractLabel = (key: string): string => {
  * @returns Boolean indicating if translation exists
  */
 export const hasTranslation = (t: TFunction, key: string): boolean => {
-  // Fix: Explicitly cast the result to unknown first, then to string to avoid the 'never' type issue
+  // First cast to unknown, then to string to handle the typing correctly
   const result = t(key, { returnObjects: true }) as unknown;
-  return typeof result === 'string' && result !== key && !(String(result).includes('[') && String(result).includes(']'));
+  
+  // Check if the result is a valid string and not a fallback
+  return typeof result === 'string' && 
+         result !== key && 
+         !(String(result).includes('[') && String(result).includes(']'));
 };

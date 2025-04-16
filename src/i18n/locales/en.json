@@ -37,6 +37,35 @@
     "en": "English",
     "fr": "Français"
   },
+  "bugReport": {
+    "title": "Report a Bug",
+    "description": "Help us improve The Trading Lab by reporting issues you encounter.",
+    "category": "Bug Category",
+    "selectCategory": "Select a category",
+    "categoryUI": "User Interface",
+    "categoryFunctionality": "Functionality",
+    "categoryPerformance": "Performance",
+    "categoryCourseContent": "Course Content",
+    "categoryOther": "Other",
+    "bugTitle": "Bug Title",
+    "titlePlaceholder": "Briefly describe the issue",
+    "detailedDescription": "Detailed Description",
+    "descriptionPlaceholder": "Describe the bug in detail, steps to reproduce it, and expected behavior",
+    "urlLabel": "URL where the bug occurs",
+    "screenshot": "Screenshot (optional)",
+    "dropImage": "Drag and drop an image or",
+    "browseFiles": "Browse Files",
+    "submitReport": "Submit Report"
+  },
+  "footer": {
+    "products": "Products",
+    "company": "Company",
+    "legal": "Legal",
+    "terms": "Terms of Use",
+    "privacy": "Privacy Policy",
+    "cookies": "Cookies",
+    "copyright": "All rights reserved"
+  },
   "trainingLab": {
     "title": "Training Lab",
     "subtitle": "Interactive exercises and challenges to test your knowledge",
