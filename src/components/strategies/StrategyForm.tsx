@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Strategy, OptionLeg } from '../../types/strategies';
@@ -35,13 +34,16 @@ const StrategyForm: React.FC<StrategyFormProps> = ({ strategy, onParametersChang
     const numValue = parseFloat(value);
     
     if (!isNaN(numValue)) {
-      setLocalStrategy((prev) => ({
-        ...prev,
+      const updatedStrategy = {
+        ...localStrategy,
         parameters: {
-          ...prev.parameters,
+          ...localStrategy.parameters,
           [name]: numValue,
         },
-      }));
+      };
+      
+      setLocalStrategy(updatedStrategy);
+      onParametersChange(updatedStrategy);
     }
   };
 
@@ -52,27 +54,17 @@ const StrategyForm: React.FC<StrategyFormProps> = ({ strategy, onParametersChang
       [field]: field === 'quantity' || field === 'strike' ? parseFloat(value) : value,
     };
 
-    setLocalStrategy((prev) => ({
-      ...prev,
+    const updatedStrategy = {
+      ...localStrategy,
       parameters: {
-        ...prev.parameters,
+        ...localStrategy.parameters,
         legs: updatedLegs,
       },
-    }));
+    };
+
+    setLocalStrategy(updatedStrategy);
+    onParametersChange(updatedStrategy);
   };
-
-  const applyChanges = () => {
-    onParametersChange(localStrategy);
-  };
-
-  // Update on any change with debounce
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      applyChanges();
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [localStrategy]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

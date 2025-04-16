@@ -10,28 +10,39 @@ import { defaultStrategies } from '../../utils/options/strategyDefaults';
 import { Strategy } from '../../types/strategies';
 import { calculateStrategyResults } from '../../utils/options/strategyCalculator';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { safeTranslate } from '../../utils/translationUtils';
+import { Calculator } from 'lucide-react';
 
 const Strategies = () => {
   const { t } = useTranslation();
   const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(defaultStrategies[0]);
+  const [formStrategy, setFormStrategy] = useState<Strategy>(defaultStrategies[0]);
   const [results, setResults] = useState<any>(null);
 
   useEffect(() => {
     // Calculate initial results for the default strategy
     const initialResults = calculateStrategyResults(selectedStrategy);
     setResults(initialResults);
+    setFormStrategy(selectedStrategy);
   }, []);
 
   const handleStrategyChange = (strategy: Strategy) => {
     setSelectedStrategy(strategy);
+    setFormStrategy(strategy);
     const newResults = calculateStrategyResults(strategy);
     setResults(newResults);
   };
 
   const handleParametersChange = (updatedStrategy: Strategy) => {
-    setSelectedStrategy(updatedStrategy);
-    const newResults = calculateStrategyResults(updatedStrategy);
+    // Only update the form state, don't calculate yet
+    setFormStrategy(updatedStrategy);
+  };
+
+  const handleCalculate = () => {
+    // Update the selected strategy and calculate results
+    setSelectedStrategy(formStrategy);
+    const newResults = calculateStrategyResults(formStrategy);
     setResults(newResults);
   };
 
@@ -66,9 +77,19 @@ const Strategies = () => {
                 {safeTranslate(t, 'strategies.parameters', 'Parameters')}
               </h2>
               <StrategyForm 
-                strategy={selectedStrategy} 
+                strategy={formStrategy} 
                 onParametersChange={handleParametersChange} 
               />
+              <div className="mt-6 flex justify-end">
+                <Button 
+                  variant="finance" 
+                  onClick={handleCalculate}
+                  className="flex items-center"
+                >
+                  <Calculator className="mr-2 h-4 w-4" />
+                  {safeTranslate(t, 'strategies.calculate', 'Calculate')}
+                </Button>
+              </div>
             </Card>
           </div>
         </div>
