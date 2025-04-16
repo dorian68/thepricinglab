@@ -53,7 +53,11 @@ const Index = () => {
             </div>
             
             <div className="relative aspect-[4/3] bg-black/60 rounded-lg overflow-hidden">
-              <div className="bg-[url('/lovable-uploads/bf767635-7fdf-4661-88ea-ecfb8f95eb5d.png')] bg-cover bg-center w-full h-full"></div>
+              <div 
+                className="bg-[url('/lovable-uploads/bf767635-7fdf-4661-88ea-ecfb8f95eb5d.png')] 
+                bg-cover bg-center w-full h-full 
+                opacity-80 filter brightness-75 contrast-125"
+              ></div>
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="font-mono text-[#ea384c] bg-black/80 px-4 py-3 border border-red-900/30 rounded text-sm tracking-wider">
                   TRADING TERMINAL ACTIVATED
