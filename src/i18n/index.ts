@@ -6,7 +6,7 @@ import enTranslation from './locales/en.json';
 import frTranslation from './locales/fr.json';
 
 i18n
-  // Use language detector
+  // Use language detector with higher order of detection
   .use(LanguageDetector)
   // Pass the i18n instance to react-i18next
   .use(initReactI18next)
@@ -22,6 +22,10 @@ i18n
     },
     fallbackLng: 'fr',
     debug: false,
+    detection: {
+      order: ['localStorage', 'navigator', 'htmlTag'],
+      caches: ['localStorage'],
+    },
     interpolation: {
       escapeValue: false // React already safes from xss
     }

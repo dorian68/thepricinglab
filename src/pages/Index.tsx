@@ -5,9 +5,10 @@ import Footer from "../components/Footer";
 import MarketVisuals from "../components/MarketVisuals";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Code, Trophy, Users, BarChart3, Zap, ArrowRight } from "lucide-react";
+import { BookOpen, Code, Trophy, Users, BarChart3, Zap, ArrowRight, TrendingUp } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -34,12 +35,16 @@ const Index = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/courses" className="bg-[#ea384c] hover:bg-red-700 text-white font-medium py-3 px-6 rounded transition-colors duration-200 text-center">
-                  Commencer le parcours
-                </Link>
-                <Link to="/signup" className="border border-[#ea384c] text-[#ea384c] hover:bg-red-600/10 font-medium py-3 px-6 rounded transition-colors duration-200 text-center">
-                  S'inscrire maintenant
-                </Link>
+                <Button variant="finance" asChild>
+                  <Link to="/courses">
+                    Commencer le parcours
+                  </Link>
+                </Button>
+                <Button variant="financeOutline" asChild>
+                  <Link to="/signup">
+                    S'inscrire maintenant
+                  </Link>
+                </Button>
               </div>
               
               <div className="mt-8">
@@ -59,8 +64,45 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Notre Mission */}
+      {/* Cours d'actif Section */}
       <section className="py-16 px-6 bg-[#141821]">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Cours d'un <span className="text-[#ea384c]">Actif</span></h2>
+            <p className="text-[#8E9196] max-w-2xl mx-auto">
+              Analysez l'évolution des cours et apprenez à interpréter les graphiques pour prendre des décisions éclairées.
+            </p>
+          </div>
+          
+          <div className="relative rounded-lg overflow-hidden shadow-2xl">
+            <img 
+              src="/lovable-uploads/3dce3f83-e875-47e1-8a3d-1c81196b0ed4.png" 
+              alt="Cours d'un actif" 
+              className="w-full h-auto object-cover rounded-lg"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#141821]/80 via-transparent to-transparent flex items-center">
+              <div className="p-8">
+                <div className="inline-flex items-center bg-[#ea384c]/10 px-3 py-1 rounded-full text-xs font-medium text-[#ea384c] mb-4">
+                  <TrendingUp size={14} className="mr-1" />
+                  Analyse technique
+                </div>
+                <h3 className="text-3xl font-bold mb-4">Maîtrisez l'analyse des <span className="text-[#ea384c]">tendances</span></h3>
+                <p className="text-[#8E9196] mb-6 max-w-md">
+                  Apprenez à identifier les supports, les résistances et les figures chartistes pour prévoir l'évolution des marchés.
+                </p>
+                <Button variant="finance" asChild>
+                  <Link to="/courses/technical-analysis">
+                    Découvrir le cours
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Notre Mission */}
+      <section className="py-16 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Notre <span className="text-[#ea384c]">Mission</span></h2>
@@ -104,7 +146,7 @@ const Index = () => {
       </section>
 
       {/* Modules */}
-      <section className="py-16 px-6">
+      <section className="py-16 px-6 bg-[#141821]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Nos <span className="text-[#ea384c]">Modules</span></h2>
@@ -232,7 +274,7 @@ const Index = () => {
       </section>
 
       {/* Call to Action */}
-      <section className="py-16 px-6 bg-[#141821]">
+      <section className="py-16 px-6">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6">Prêt à <span className="text-[#ea384c]">développer</span> vos compétences financières?</h2>
           <p className="text-[#8E9196] mb-8">
@@ -242,9 +284,9 @@ const Index = () => {
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Dialog>
               <DialogTrigger asChild>
-                <button className="bg-[#ea384c] hover:bg-red-700 text-white font-medium py-3 px-8 rounded-md transition-colors duration-200">
+                <Button variant="finance">
                   Voir nos tarifs
-                </button>
+                </Button>
               </DialogTrigger>
               <DialogContent className="bg-[#1A1F2C] text-white border-[#2A2F3C]">
                 <DialogHeader>
@@ -275,9 +317,11 @@ const Index = () => {
                         <span>Accès au forum communautaire</span>
                       </li>
                     </ul>
-                    <Link to="/signup?plan=debutant" className="block text-center bg-[#ea384c] hover:bg-red-700 text-white font-medium py-2 rounded transition-colors duration-200">
-                      Choisir cette offre
-                    </Link>
+                    <Button variant="finance" className="w-full" asChild>
+                      <Link to="/signup?plan=debutant">
+                        Choisir cette offre
+                      </Link>
+                    </Button>
                   </div>
                   
                   <div className="bg-[#141821] p-6 rounded-lg border border-[#ea384c]">
@@ -306,9 +350,11 @@ const Index = () => {
                         <span>Certificat de compétence</span>
                       </li>
                     </ul>
-                    <Link to="/signup?plan=pro" className="block text-center bg-[#ea384c] hover:bg-red-700 text-white font-medium py-2 rounded transition-colors duration-200">
-                      Choisir cette offre
-                    </Link>
+                    <Button variant="finance" className="w-full" asChild>
+                      <Link to="/signup?plan=pro">
+                        Choisir cette offre
+                      </Link>
+                    </Button>
                   </div>
                 </div>
                 <div className="mt-6 text-center text-[#8E9196] text-sm">
@@ -319,9 +365,11 @@ const Index = () => {
             
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link to="/courses/fundamentals" className="border border-[#ea384c] text-[#ea384c] hover:bg-red-600/10 font-medium py-3 px-8 rounded-md transition-colors duration-200">
-                  Cours gratuit d'introduction
-                </Link>
+                <Button variant="financeOutline" asChild>
+                  <Link to="/courses/fundamentals">
+                    Cours gratuit d'introduction
+                  </Link>
+                </Button>
               </TooltipTrigger>
               <TooltipContent className="bg-[#1A1F2C] border-[#2A2F3C] text-white">
                 <p>Commencez gratuitement avec notre cours d'introduction</p>
