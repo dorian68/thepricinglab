@@ -79,8 +79,7 @@ call_price = black_scholes(S, K, T, r, sigma, 'call')
 put_price = black_scholes(S, K, T, r, sigma, 'put')
 
 print(f"Call option price: ${call_price:.2f}")
-print(f"Put option price: ${put_price:.2f}")
-</code></pre>
+print(f"Put option price: ${put_price:.2f}")</code></pre>
 
       <h3>The Greeks: Sensitivities that Matter</h3>
       <p>The "Greeks" are the sensitivities of option prices to various factors:</p>
