@@ -2,11 +2,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Minus, Maximize, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import ChatWidget from './ChatWidget';
 
 const ChatBubble: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [position, setPosition] = useState({ x: 20, y: window.innerHeight - 100 });
+  const [position, setPosition] = useState({ 
+    x: Math.min(20, window.innerWidth - 100), 
+    y: Math.min(window.innerHeight - 100, window.innerHeight - 20) 
+  });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const bubbleRef = useRef<HTMLDivElement>(null);
@@ -42,6 +46,7 @@ const ChatBubble: React.FC = () => {
   const onDrag = (e: MouseEvent) => {
     if (!isDragging) return;
     
+    // Limiter la position pour que la bulle reste toujours visible dans la fenêtre
     const newX = Math.max(0, Math.min(window.innerWidth - 70, e.clientX - dragStart.x));
     const newY = Math.max(0, Math.min(window.innerHeight - 70, e.clientY - dragStart.y));
     
@@ -70,8 +75,14 @@ const ChatBubble: React.FC = () => {
     };
   }, [isDragging]);
 
-  // Ajuster la position si la fenêtre est redimensionnée
+  // Ajuster la position initiale et lors du redimensionnement
   useEffect(() => {
+    // Position initiale sécurisée
+    setPosition({
+      x: Math.min(20, window.innerWidth - 70),
+      y: Math.min(window.innerHeight - 100, window.innerHeight - 70)
+    });
+    
     const handleResize = () => {
       setPosition(prev => ({
         x: Math.min(prev.x, window.innerWidth - 70),
@@ -116,12 +127,7 @@ const ChatBubble: React.FC = () => {
               </div>
               <div className="flex flex-col h-[calc(100%-3rem)]">
                 <div className="flex-grow p-3 overflow-y-auto bg-gray-50 dark:bg-finance-dark/50">
-                  {/* Contenu du chat ici - à remplacer par ChatWidget */}
-                  <div className="space-y-4">
-                    <div className="bg-finance-accent/10 p-2 rounded-lg rounded-tl-none max-w-[80%] ml-2">
-                      <p className="text-sm">Bonjour ! Comment puis-je vous aider avec votre apprentissage des options financières aujourd'hui ?</p>
-                    </div>
-                  </div>
+                  <ChatWidget />
                 </div>
                 <div className="p-3 border-t border-gray-200 dark:border-finance-steel/10 flex gap-2">
                   <input 

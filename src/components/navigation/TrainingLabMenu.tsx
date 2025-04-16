@@ -27,16 +27,16 @@ const TrainingLabMenu = () => {
           description="Évaluez vos connaissances" 
         />
         <NavMenuItem 
-          to="/advanced-simulations" 
+          to="/practice" 
           icon={BarChart4} 
-          title="Simulations Avancées" 
+          title="Pratique Guidée" 
           description="Modèles stochastiques et pricing" 
         />
         <NavMenuItem 
-          to="/progress" 
+          to="/leaderboard" 
           icon={Trophy} 
-          title="Votre Progression" 
-          description="Badges et performances" 
+          title="Classement" 
+          description="Progressez et comparez vos performances" 
         />
       </ul>
     </div>

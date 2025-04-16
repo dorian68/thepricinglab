@@ -22,7 +22,9 @@
     "logout": "Logout",
     "theme": "Theme",
     "language": "Language",
-    "blog": "Blog"
+    "blog": "Blog",
+    "bugs": "Report Bug",
+    "trainingLab": "Training Lab"
   },
   "language": {
     "en": "English",
@@ -33,6 +35,51 @@
     "tooltip": "Change the site language",
     "en": "English",
     "fr": "Français"
+  },
+  "trainingLab": {
+    "title": "Training Lab",
+    "subtitle": "Interactive exercises and challenges to test your knowledge",
+    "exercises": "Interactive Exercises",
+    "survival": "Survival Mode",
+    "quizzes": "Progressive Quizzes",
+    "practice": "Guided Practice",
+    "leaderboard": "Leaderboard",
+    "performance": "Your Performance",
+    "progress": "Track Progress"
+  },
+  "chat": {
+    "title": "Trading Lab Assistant",
+    "placeholder": "Type your message...",
+    "send": "Send",
+    "welcomeMessage": "Hello! How can I help you with your financial options learning today?",
+    "tipMessage": "You can ask me about option pricing, volatility models, or trading strategies."
+  },
+  "bugReport": {
+    "title": "Report a Bug",
+    "subtitle": "Help us improve The Trading Lab by reporting issues you encounter",
+    "category": "Bug Category",
+    "titleLabel": "Bug Title",
+    "description": "Detailed Description",
+    "url": "URL where the bug occurs",
+    "screenshot": "Screenshot (optional)",
+    "dropImage": "Drag and drop an image or",
+    "browse": "Browse files",
+    "send": "Submit Report",
+    "categories": {
+      "select": "Select a category",
+      "ui": "User Interface",
+      "functionality": "Functionality",
+      "performance": "Performance",
+      "courseContent": "Course Content",
+      "other": "Other"
+    },
+    "placeholders": {
+      "title": "Briefly describe the issue",
+      "description": "Describe the bug in detail, steps to reproduce, and expected behavior",
+      "url": "https://..."
+    },
+    "success": "Bug report submitted successfully",
+    "error": "Error submitting bug report"
   },
   "blog": {
     "title": "Blog",
@@ -157,7 +204,29 @@
     "goodPerformance": "Good job! Keep practicing to improve your speed and accuracy.",
     "needPractice": "You might need more practice with these concepts. Try reviewing the related courses.",
     "returnToWaves": "Return to Waves",
-    "tryAgain": "Try Again"
+    "tryAgain": "Try Again",
+    "lives": "Lives",
+    "combo": "Combo",
+    "rules": {
+      "title": "Game Rules",
+      "lives": "You have 3 lives to complete the wave",
+      "timer": "Answer before time runs out",
+      "combo": "Chain correct answers for combos and more points",
+      "threshold": "Reach 80% success to unlock the next wave"
+    },
+    "gameOver": {
+      "excellent": "Congratulations!",
+      "good": "Well done!",
+      "failed": "Wave Failed",
+      "score": "Final Score",
+      "combo": "Max Combo",
+      "accuracy": "Accuracy",
+      "nextLevel": "Next Level",
+      "suggestions": "Improvement Suggestions:",
+      "reviewTopics": "Review the concepts of {{topic1}} and {{topic2}}",
+      "practiceSpeed": "Work on your calculation speed",
+      "practiceLevel": "Practice with level {{level}} exercises"
+    }
   },
   "home": {
     "hero": {

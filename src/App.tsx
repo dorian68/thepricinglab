@@ -39,6 +39,7 @@ import AdvancedWave from './pages/survival/AdvancedWave';
 import ExpertWave from './pages/survival/ExpertWave';
 import MasterWave from './pages/survival/MasterWave';
 import LegendaryWave from './pages/survival/LegendaryWave';
+import BugReport from './pages/BugReport';
 import NotFound from './pages/NotFound';
 import AppShell from './components/AppShell';
 
@@ -89,6 +90,7 @@ const App = () => {
                 <Route path="/survival-mode/expert" element={<ExpertWave />} />
                 <Route path="/survival-mode/master" element={<MasterWave />} />
                 <Route path="/survival-mode/legendary" element={<LegendaryWave />} />
+                <Route path="/bug-report" element={<BugReport />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>

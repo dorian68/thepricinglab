@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { 
-  Home, BookOpen, Dumbbell, Users, CreditCard, Wrench, FileText
+  Home, BookOpen, Dumbbell, Users, CreditCard, Wrench, FileText, Bug
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -82,6 +82,13 @@ const DesktopNav = () => {
                 to="/blog" 
                 icon={FileText} 
                 label="Blog" 
+              />
+              
+              {/* Bug Report */}
+              <NavItem 
+                to="/bug-report" 
+                icon={Bug} 
+                label="Bugs" 
               />
             </NavigationMenuList>
           </NavigationMenu>
