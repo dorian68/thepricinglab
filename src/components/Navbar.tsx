@@ -1,19 +1,17 @@
 
 import React from 'react';
-import AppShell from './AppShell';
 
 /**
  * Compatibility component to transition from the old Navbar to AppShell
- * This component simply renders AppShell, which contains ModernNavbar
+ * This component simply renders nothing since we're using the AppShell directly
  * 
- * @deprecated Use <AppShell> directly in your layout instead
+ * @deprecated Do not use this component. Use the global AppShell layout instead.
  */
 const Navbar: React.FC = () => {
-  console.warn('Deprecated: Please use AppShell instead of Navbar. This component will be removed in a future update.');
+  console.warn('Deprecated: Do not use <Navbar> component directly anymore. The navbar is now part of the AppShell layout. This component will be removed in a future update.');
   
-  return (
-    <AppShell />
-  );
+  // Render nothing - the navbar is now part of the global layout
+  return null;
 };
 
 export default Navbar;
