@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import MarketVisuals from "../components/MarketVisuals";
-import { ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const Index = () => {
