@@ -31,12 +31,6 @@ const DesktopNav = () => {
         <div className="ml-10">
           <NavigationMenu>
             <NavigationMenuList>
-              {/* Home */}
-              <NavItem 
-                to="/" 
-                icon={Home} 
-                label={t('navbar.home')} 
-              />
               
               {/* Courses */}
               <NavItem 
@@ -45,20 +39,12 @@ const DesktopNav = () => {
               >
                 <CoursesMenu />
               </NavItem>
-              
-              {/* Training Lab - Highlighted Section */}
-              <NavItem 
-                icon={Dumbbell} 
-                label={t('navbar.trainingLab')}
-                highlighted={true}
-              >
-                <TrainingLabMenu />
-              </NavItem>
-              
+
               {/* Trading Lab Section */}
               <NavItem 
                 icon={BarChart3} 
                 label={t('navbar.tradingLab', 'Trading Lab')}
+                highlighted={true}
               >
                 <TradingLabMenu />
               </NavItem>
@@ -93,12 +79,6 @@ const DesktopNav = () => {
                 label={t('navbar.blog')} 
               />
               
-              {/* Bug Report */}
-              <NavItem 
-                to="/bug-report" 
-                icon={Bug} 
-                label={t('navbar.bugs')} 
-              />
             </NavigationMenuList>
           </NavigationMenu>
         </div>
