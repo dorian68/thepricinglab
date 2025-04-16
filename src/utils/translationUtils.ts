@@ -18,7 +18,7 @@ export const safeTranslate = (
   const result = t(key, { defaultValue: defaultValue || extractLabel(key) });
   
   // If the result contains [caption] or exactly matches the key, it means the translation is missing
-  if (result === key || result.includes('[') && result.includes(']')) {
+  if (result === key || (typeof result === 'string' && result.includes('[') && result.includes(']'))) {
     console.warn(`Missing translation: ${key}${lng ? ` in ${lng}` : ''}`);
     return defaultValue || extractLabel(key);
   }
@@ -52,5 +52,5 @@ export const extractLabel = (key: string): string => {
  */
 export const hasTranslation = (t: TFunction, key: string): boolean => {
   const result = t(key, { returnObjects: true });
-  return typeof result === 'string' && result !== key && !result.includes('[') && !result.includes(']');
+  return typeof result === 'string' && result !== key && !(result.includes('[') && result.includes(']'));
 };

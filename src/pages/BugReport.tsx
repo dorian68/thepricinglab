@@ -1,17 +1,17 @@
 
 import React from "react";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 import { useTranslation } from "react-i18next";
 import { Bug, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Footer from "../components/Footer";
+import AppShell from "../components/AppShell";
 
 const BugReport = () => {
   const { t } = useTranslation();
 
   return (
     <div className="flex flex-col min-h-screen bg-finance-dark text-finance-offwhite">
-      <Navbar />
+      <AppShell />
       
       <main className="flex-1 py-10 px-6">
         <div className="max-w-3xl mx-auto">
