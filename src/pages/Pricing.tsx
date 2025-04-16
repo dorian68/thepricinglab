@@ -8,6 +8,14 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, GraduationCap, Trophy, Rocket, Star, Lock, Check, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const PricingPage = () => {
   const { t } = useTranslation();
@@ -268,7 +276,7 @@ const PricingPage = () => {
                     
                     <Button 
                       variant={tier.id === "freemium" ? "financeOutline" : "finance"} 
-                      className="w-full" 
+                      className="w-full mt-auto" 
                       asChild
                     >
                       <Link to={tier.href}>
@@ -346,7 +354,7 @@ const PricingPage = () => {
                       
                       <Button 
                         variant={tier.id === "freemium" ? "financeOutline" : "finance"} 
-                        className="w-full" 
+                        className="w-full mt-auto" 
                         asChild
                       >
                         <Link to={`${tier.href}&billing=annual`}>
@@ -370,54 +378,54 @@ const PricingPage = () => {
           </h2>
           
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="border-b border-[#2A2F3C]">
-                  <th className="text-left py-4 px-4 w-1/3">{t('pricing.comparison.feature')}</th>
-                  <th className="text-center py-4 px-4 w-1/5">
+            <Table>
+              <TableHeader>
+                <TableRow className="border-b border-[#2A2F3C]">
+                  <TableHead className="text-left py-4 px-4 w-1/3 text-finance-offwhite">{t('pricing.comparison.feature')}</TableHead>
+                  <TableHead className="text-center py-4 px-4 w-1/5 text-finance-offwhite">
                     <div className="flex flex-col items-center">
                       <Star className="h-5 w-5 text-yellow-400 mb-2" />
                       {t('pricing.freemium.title')}
                       <span className="text-[#8E9196] text-sm">{t('pricing.freemium.price')}</span>
                     </div>
-                  </th>
-                  <th className="text-center py-4 px-4 w-1/5">
+                  </TableHead>
+                  <TableHead className="text-center py-4 px-4 w-1/5 text-finance-offwhite">
                     <div className="flex flex-col items-center">
                       <GraduationCap className="h-5 w-5 text-blue-400 mb-2" />
                       {t('pricing.student.title')}
                       <span className="text-finance-accent text-sm">19€ / {t('pricing.monthly')}</span>
                     </div>
-                  </th>
-                  <th className="text-center py-4 px-4 w-1/5">
+                  </TableHead>
+                  <TableHead className="text-center py-4 px-4 w-1/5 text-finance-offwhite">
                     <div className="flex flex-col items-center">
                       <Rocket className="h-5 w-5 text-finance-accent mb-2" />
                       {t('pricing.pro.title')}
                       <span className="text-finance-accent text-sm">49€ / {t('pricing.monthly')}</span>
                     </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {featureComparison.map((category, categoryIndex) => (
                   <React.Fragment key={categoryIndex}>
-                    <tr className="bg-[#1A1F2C]/30">
-                      <td colSpan={4} className="py-3 px-4 font-medium">{category.category}</td>
-                    </tr>
+                    <TableRow className="bg-[#1A1F2C]/30">
+                      <TableCell colSpan={4} className="py-3 px-4 font-medium text-finance-offwhite">{category.category}</TableCell>
+                    </TableRow>
                     {category.features.map((feature, featureIndex) => (
-                      <tr 
+                      <TableRow 
                         key={`${categoryIndex}-${featureIndex}`} 
                         className="border-b border-[#2A2F3C]/30"
                       >
-                        <td className="py-3 px-4 text-[#8E9196]">{feature.name}</td>
-                        <td className="py-3 px-4 text-center">{renderFeatureAvailability(feature.freemium)}</td>
-                        <td className="py-3 px-4 text-center">{renderFeatureAvailability(feature.student)}</td>
-                        <td className="py-3 px-4 text-center">{renderFeatureAvailability(feature.pro)}</td>
-                      </tr>
+                        <TableCell className="py-3 px-4 text-[#8E9196]">{feature.name}</TableCell>
+                        <TableCell className="py-3 px-4 text-center">{renderFeatureAvailability(feature.freemium)}</TableCell>
+                        <TableCell className="py-3 px-4 text-center">{renderFeatureAvailability(feature.student)}</TableCell>
+                        <TableCell className="py-3 px-4 text-center">{renderFeatureAvailability(feature.pro)}</TableCell>
+                      </TableRow>
                     ))}
                   </React.Fragment>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </div>
       </section>
