@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu"
 import { cva } from "class-variance-authority"
@@ -42,6 +43,11 @@ const NavigationMenuItem = NavigationMenuPrimitive.Item
 
 const navigationMenuTriggerStyle = cva(
   "group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+)
+
+// Adding a highlighted version for the Training Lab section
+const navigationMenuTriggerHighlightedStyle = cva(
+  "group inline-flex h-10 w-max items-center justify-center rounded-md bg-finance-accent/10 px-4 py-2 text-sm font-medium text-finance-accent transition-colors hover:bg-finance-accent/20 hover:text-finance-accent focus:bg-finance-accent/20 focus:text-finance-accent focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-finance-accent/30 data-[state=open]:bg-finance-accent/30"
 )
 
 const NavigationMenuTrigger = React.forwardRef<
@@ -117,6 +123,7 @@ NavigationMenuIndicator.displayName =
 
 export {
   navigationMenuTriggerStyle,
+  navigationMenuTriggerHighlightedStyle,
   NavigationMenu,
   NavigationMenuList,
   NavigationMenuItem,

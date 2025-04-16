@@ -53,12 +53,19 @@ const App = () => (
           <Route path="/exercises" element={<Exercises />} />
           <Route path="/exercises/:id" element={<ExerciseDetail />} />
           <Route path="/community" element={<Community />} />
+          <Route path="/community/forum" element={<Community />} />
+          <Route path="/community/challenges" element={<Community />} />
+          <Route path="/community/pair-programming" element={<Community />} />
+          <Route path="/community/leaderboard" element={<Leaderboard />} />
           <Route path="/survival-mode" element={<SurvivalMode />} />
           <Route path="/survival-mode/wave/:id" element={<SurvivalWaveDetail />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/quizzes" element={<Exercises />} /> {/* Placeholder for future Quiz page */}
+          <Route path="/advanced-simulations" element={<Exercises />} /> {/* Placeholder for future Simulations page */}
+          <Route path="/progress" element={<Dashboard />} /> {/* Placeholder that redirects to dashboard for now */}
           <Route path="/courses/advanced" element={<CourseAdvanced />} />
           <Route path="/courses/fundamentals/black-scholes" element={<BlackScholesCourse />} />
           <Route path="/courses/fundamentals/yield-curves" element={<YieldCurvesCourse />} />
@@ -67,6 +74,11 @@ const App = () => (
           <Route path="/courses/advanced/vol-products" element={<VolProductsCourse />} />
           <Route path="/courses/complex/exotic-options" element={<ExoticOptionsCourse />} />
           <Route path="/courses/complex/monte-carlo" element={<MonteCarloCourse />} />
+          {/* Tool routes */}
+          <Route path="/tools/volatility-calculator" element={<Tools />} />
+          <Route path="/tools/black-scholes" element={<Tools />} />
+          <Route path="/tools/monte-carlo" element={<Tools />} />
+          <Route path="/tools/model-calibration" element={<Tools />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -22,7 +23,8 @@ import {
   Calculator,
   Activity,
   Waves,
-  Sigma
+  Sigma,
+  FileText
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
@@ -35,6 +37,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
+  navigationMenuTriggerHighlightedStyle,
 } from "@/components/ui/navigation-menu";
 
 const ModernNavbar = () => {
@@ -141,9 +144,9 @@ const ModernNavbar = () => {
                     </NavigationMenuContent>
                   </NavigationMenuItem>
                   
-                  {/* Training Lab */}
+                  {/* Training Lab - Highlighted Section */}
                   <NavigationMenuItem>
-                    <NavigationMenuTrigger>
+                    <NavigationMenuTrigger className={navigationMenuTriggerHighlightedStyle()}>
                       <Dumbbell className="w-4 h-4 mr-2" />
                       Training Lab
                     </NavigationMenuTrigger>
@@ -372,6 +375,14 @@ const ModernNavbar = () => {
                       </div>
                     </NavigationMenuContent>
                   </NavigationMenuItem>
+                  
+                  {/* Blog */}
+                  <NavigationMenuItem>
+                    <Link to="/blog" className={navigationMenuTriggerStyle()}>
+                      <FileText className="w-4 h-4 mr-2" />
+                      Blog
+                    </Link>
+                  </NavigationMenuItem>
                 </NavigationMenuList>
               </NavigationMenu>
             </div>
@@ -450,8 +461,8 @@ const ModernNavbar = () => {
               </Link>
             </div>
             
-            {/* Mobile Training Lab */}
-            <div className="space-y-1 pl-3 border-l border-finance-steel/20">
+            {/* Mobile Training Lab - Highlighted */}
+            <div className="space-y-1 pl-3 border-l border-finance-accent/30 bg-finance-accent/5 rounded-md py-2">
               <h3 className="flex items-center px-3 py-1 text-xs text-finance-accent font-medium uppercase">
                 <Dumbbell className="w-3 h-3 mr-2" />
                 Training Lab
@@ -480,6 +491,12 @@ const ModernNavbar = () => {
               >
                 Simulations Avancées
               </Link>
+              <Link
+                to="/progress"
+                className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+              >
+                Progression & Badges
+              </Link>
             </div>
             
             {/* Mobile Community */}
@@ -501,12 +518,27 @@ const ModernNavbar = () => {
                 Défis Hebdomadaires
               </Link>
               <Link
+                to="/community/pair-programming"
+                className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+              >
+                Pair Programming
+              </Link>
+              <Link
                 to="/community/leaderboard"
                 className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
               >
-                Leaderboard
+                Leaderboard & Hackathons
               </Link>
             </div>
+            
+            {/* Mobile Pricing */}
+            <Link
+              to="/pricing"
+              className="flex items-center px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+            >
+              <CreditCard className="w-4 h-4 mr-2" />
+              Tarifs
+            </Link>
             
             {/* Mobile Tools */}
             <div className="space-y-1 pl-3 border-l border-finance-steel/20">
@@ -514,6 +546,12 @@ const ModernNavbar = () => {
                 <Wrench className="w-3 h-3 mr-2" />
                 Outils
               </h3>
+              <Link
+                to="/tools/volatility-calculator"
+                className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+              >
+                Calculatrices de Volatilité
+              </Link>
               <Link
                 to="/tools/black-scholes"
                 className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
@@ -526,14 +564,21 @@ const ModernNavbar = () => {
               >
                 Monte Carlo
               </Link>
+              <Link
+                to="/tools/model-calibration"
+                className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+              >
+                Calibration de Modèles
+              </Link>
             </div>
             
+            {/* Mobile Blog */}
             <Link
-              to="/pricing"
+              to="/blog"
               className="flex items-center px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
-              <CreditCard className="w-4 h-4 mr-2" />
-              Tarifs
+              <FileText className="w-4 h-4 mr-2" />
+              Blog
             </Link>
             
             <div className="mt-3 flex justify-start px-3">
