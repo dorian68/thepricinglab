@@ -1,8 +1,12 @@
 
-import React, { useEffect } from 'react';
+import React, { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 
-const AdminRouteGuard = ({ children }) => {
+interface AdminRouteGuardProps {
+  children: ReactNode;
+}
+
+const AdminRouteGuard = ({ children }: AdminRouteGuardProps) => {
   const location = useLocation();
   const isAuthenticated = localStorage.getItem('isAdminAuthenticated') === 'true';
 
@@ -12,7 +16,7 @@ const AdminRouteGuard = ({ children }) => {
     return <Navigate to="/admin-login" state={{ from: location }} replace />;
   }
 
-  return children;
+  return <>{children}</>;
 };
 
 export default AdminRouteGuard;

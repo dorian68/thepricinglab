@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,19 +11,28 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Lock, Shield } from 'lucide-react';
 import { safeTranslate } from '../../utils/translationUtils';
 
+interface LoginFormValues {
+  username: string;
+  password: string;
+}
+
 const AdminLogin = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   
-  const handleLogin = (e) => {
-    e.preventDefault();
-    
+  // Initialize react-hook-form
+  const form = useForm<LoginFormValues>({
+    defaultValues: {
+      username: '',
+      password: ''
+    }
+  });
+  
+  const onSubmit = (data: LoginFormValues) => {
     // In a real app, this would be a proper authentication check
     // For this demo, we'll use a hardcoded admin username/password
-    if (username === 'admin' && password === 'admin123') {
+    if (data.username === 'admin' && data.password === 'admin123') {
       // Store authentication in localStorage or a proper auth state
       localStorage.setItem('isAdminAuthenticated', 'true');
       navigate('/admin-dashboard');
@@ -57,42 +67,57 @@ const AdminLogin = () => {
               </div>
             )}
             
-            <form onSubmit={handleLogin}>
-              <div className="grid gap-4">
-                <div className="grid gap-2">
-                  <FormLabel htmlFor="username" className="text-finance-offwhite">
-                    {safeTranslate(t, 'admin.username', 'Username')}
-                  </FormLabel>
-                  <Input
-                    id="username"
-                    type="text"
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="bg-finance-dark text-finance-offwhite"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <div className="flex items-center justify-between">
-                    <FormLabel htmlFor="password" className="text-finance-offwhite">
-                      {safeTranslate(t, 'admin.password', 'Password')}
-                    </FormLabel>
-                  </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="bg-finance-dark text-finance-offwhite"
-                  />
-                </div>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-finance-offwhite">
+                        {safeTranslate(t, 'admin.username', 'Username')}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="admin"
+                          autoCapitalize="none"
+                          autoCorrect="off"
+                          className="bg-finance-dark text-finance-offwhite"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-finance-offwhite">
+                        {safeTranslate(t, 'admin.password', 'Password')}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="••••••••"
+                          className="bg-finance-dark text-finance-offwhite"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
                 <Button className="w-full mt-2 flex items-center justify-center" type="submit">
                   <Lock className="mr-2 h-4 w-4" />
                   {safeTranslate(t, 'admin.login', 'Login')}
                 </Button>
-              </div>
-            </form>
+              </form>
+            </Form>
           </CardContent>
           <CardFooter className="flex justify-center">
             <p className="text-sm text-finance-steel">
