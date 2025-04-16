@@ -126,10 +126,10 @@ const Index = () => {
             <Card className="bg-[#1A1F2C] border-[#2A2F3C] hover:border-[#ea384c] transition-colors">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <BookOpen className="mr-2 text-[#ea384c]" /> {t('home.modules.courses.title')}
+                  <BookOpen className="mr-2 text-[#ea384c]" /> {t('coursesPage.fundamentals.level')}
                 </CardTitle>
                 <CardDescription className="text-[#8E9196]">
-                  {t('home.modules.courses.subtitle')}
+                  {t('coursesPage.fundamentals.description')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-[#8E9196]">
@@ -164,10 +164,10 @@ const Index = () => {
             <Card className="bg-[#1A1F2C] border-[#2A2F3C] hover:border-[#ea384c] transition-colors">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <BarChart3 className="mr-2 text-[#ea384c]" /> {t('home.modules.exercises.title')}
+                  <BarChart3 className="mr-2 text-[#ea384c]" /> {t('exercises.title')}
                 </CardTitle>
                 <CardDescription className="text-[#8E9196]">
-                  {t('home.modules.exercises.subtitle')}
+                  {t('exercises.subtitle')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-[#8E9196]">
@@ -183,10 +183,10 @@ const Index = () => {
             <Card className="bg-[#1A1F2C] border-[#2A2F3C] hover:border-[#ea384c] transition-colors">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Users className="mr-2 text-[#ea384c]" /> {t('home.modules.community.title')}
+                  <Users className="mr-2 text-[#ea384c]" /> {t('community.title')}
                 </CardTitle>
                 <CardDescription className="text-[#8E9196]">
-                  {t('home.modules.community.subtitle')}
+                  {t('community.subtitle')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-[#8E9196]">
@@ -202,7 +202,7 @@ const Index = () => {
             <Card className="bg-[#1A1F2C] border-[#2A2F3C] hover:border-[#ea384c] transition-colors">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Code className="mr-2 text-[#ea384c]" /> {t('home.modules.tools.title')}
+                  <Code className="mr-2 text-[#ea384c]" /> {t('navbar.tools')}
                 </CardTitle>
                 <CardDescription className="text-[#8E9196]">
                   {t('home.modules.tools.subtitle')}
@@ -221,10 +221,10 @@ const Index = () => {
             <Card className="bg-[#1A1F2C] border-[#2A2F3C] hover:border-[#ea384c] transition-colors">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Trophy className="mr-2 text-[#ea384c]" /> {t('home.modules.leaderboard.title')}
+                  <Trophy className="mr-2 text-[#ea384c]" /> {t('leaderboard.title')}
                 </CardTitle>
                 <CardDescription className="text-[#8E9196]">
-                  {t('home.modules.leaderboard.subtitle')}
+                  {t('leaderboard.subtitle')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-[#8E9196]">
@@ -252,7 +252,7 @@ const Index = () => {
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="finance">
-                  {t('home.cta.pricing')}
+                  {t('pricing.title')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="bg-[#1A1F2C] text-white border-[#2A2F3C]">

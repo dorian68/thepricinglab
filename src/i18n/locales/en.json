@@ -1,3 +1,4 @@
+
 {
   "navbar": {
     "courses": "Courses",
@@ -38,6 +39,9 @@
       "title": "Our Approach",
       "description": "Learn through hands-on practice with interactive tools built by finance professionals for finance professionals."
     },
+    "mission": {
+      "highlight": "to Excellence"
+    },
     "features": {
       "pragmatic": {
         "title": "Pragmatic Learning",
@@ -62,6 +66,7 @@
       "allModules": "All Modules"
     },
     "modules": {
+      "highlight": "Modules",
       "blackScholes": {
         "title": "Black-Scholes Fundamentals",
         "level": "FUNDAMENTALS",
@@ -96,13 +101,39 @@
         "title": "Survival Mode Training",
         "level": "INTERACTIVE",
         "description": "Test your pricing knowledge under pressure with real-time market scenarios.",
+        "subtitle": "Interactive Challenges",
         "cta": "Start Training"
       },
       "tools": {
         "title": "Financial Tools Suite",
         "level": "UTILITIES",
         "description": "Access professional-grade calculators and visualization tools for derivatives pricing.",
+        "subtitle": "Professional Calculators",
         "cta": "Explore Tools"
+      },
+      "courses": {
+        "title": "Financial Courses",
+        "description": "Comprehensive courses on option pricing, derivatives valuation, and risk management.",
+        "subtitle": "Structured Learning",
+        "cta": "Browse Courses"
+      },
+      "exercises": {
+        "title": "Practical Exercises",
+        "description": "Interactive exercises and challenges to test and improve your quantitative skills.",
+        "subtitle": "Skills Practice",
+        "cta": "Try Exercises"
+      },
+      "community": {
+        "title": "Quant Community",
+        "description": "Join a community of finance professionals, share knowledge and collaborate on projects.",
+        "subtitle": "Connect & Learn",
+        "cta": "Join Community"
+      },
+      "leaderboard": {
+        "title": "Performance Rankings",
+        "description": "Track your progress and compare your performance with other finance professionals.",
+        "subtitle": "Measure Progress",
+        "cta": "View Rankings"
       }
     },
     "testimonials": {
@@ -128,8 +159,12 @@
     "cta": {
       "title": "Take Your Finance Career to the Next Level",
       "description": "Gain the quantitative skills that make you stand out in today's competitive market.",
+      "highlight": "Today",
       "subscribe": "Subscribe Now",
-      "explore": "Explore Courses"
+      "explore": "Explore Courses",
+      "freeCourse": "Try Free Course",
+      "tooltip": "No credit card required to access our starter content.",
+      "pricing": "View Pricing"
     }
   },
   "courses": {
@@ -416,8 +451,10 @@
   },
   "pricing": {
     "title": "Choose Your Learning Path",
-    "description": "Access to learning materials tailored to your needs and goals",
-    "free": {
+    "subtitle": "Access to learning materials tailored to your needs and goals",
+    "monthly": "monthly",
+    "guarantee": "30-day money-back guarantee if you're not satisfied",
+    "basic": {
       "title": "Discovery Pack",
       "price": "Free",
       "feature1": "Basic modules & 1 survival wave",
@@ -429,6 +466,7 @@
     "pro": {
       "title": "Pro Pack",
       "price": "19€",
+      "recommended": "MOST POPULAR",
       "feature1": "All courses & pricing modules",
       "feature2": "Full survival mode access",
       "feature3": "Advanced quizzes & real conditions",

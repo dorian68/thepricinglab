@@ -1,3 +1,4 @@
+
 {
   "navbar": {
     "courses": "Cours",
@@ -38,6 +39,9 @@
       "title": "Notre Approche",
       "description": "Apprenez par la pratique avec des outils interactifs conçus par des professionnels de la finance pour des professionnels de la finance."
     },
+    "mission": {
+      "highlight": "vers l'Excellence"
+    },
     "features": {
       "pragmatic": {
         "title": "Apprentissage Pragmatique",
@@ -62,6 +66,7 @@
       "allModules": "Tous les Modules"
     },
     "modules": {
+      "highlight": "Modules",
       "blackScholes": {
         "title": "Fondamentaux de Black-Scholes",
         "level": "FONDAMENTAUX",
@@ -96,13 +101,39 @@
         "title": "Formation en Mode Survie",
         "level": "INTERACTIF",
         "description": "Testez vos connaissances en pricing sous pression avec des scénarios de marché en temps réel.",
+        "subtitle": "Défis Interactifs",
         "cta": "Commencer l'Entraînement"
       },
       "tools": {
         "title": "Suite d'Outils Financiers",
         "level": "UTILITAIRES",
         "description": "Accédez à des calculateurs et des outils de visualisation de qualité professionnelle pour le pricing des dérivés.",
+        "subtitle": "Calculateurs Professionnels",
         "cta": "Explorer les Outils"
+      },
+      "courses": {
+        "title": "Cours Financiers",
+        "description": "Cours complets sur le pricing d'options, l'évaluation de dérivés et la gestion des risques.",
+        "subtitle": "Apprentissage Structuré",
+        "cta": "Parcourir les Cours"
+      },
+      "exercises": {
+        "title": "Exercices Pratiques",
+        "description": "Exercices interactifs et défis pour tester et améliorer vos compétences quantitatives.",
+        "subtitle": "Pratique des Compétences",
+        "cta": "Essayer les Exercices"
+      },
+      "community": {
+        "title": "Communauté Quant",
+        "description": "Rejoignez une communauté de professionnels de la finance, partagez vos connaissances et collaborez sur des projets.",
+        "subtitle": "Connecter & Apprendre",
+        "cta": "Rejoindre la Communauté"
+      },
+      "leaderboard": {
+        "title": "Classements de Performance",
+        "description": "Suivez votre progression et comparez vos performances avec d'autres professionnels de la finance.",
+        "subtitle": "Mesurer la Progression",
+        "cta": "Voir les Classements"
       }
     },
     "testimonials": {
@@ -128,8 +159,12 @@
     "cta": {
       "title": "Faites Passer Votre Carrière Financière au Niveau Supérieur",
       "description": "Acquérez les compétences quantitatives qui vous distinguent sur le marché concurrentiel d'aujourd'hui.",
+      "highlight": "Aujourd'hui",
       "subscribe": "S'abonner Maintenant",
-      "explore": "Explorer les Cours"
+      "explore": "Explorer les Cours",
+      "freeCourse": "Essayer un Cours Gratuit",
+      "tooltip": "Pas de carte de crédit requise pour accéder à notre contenu de démarrage.",
+      "pricing": "Voir les Tarifs"
     }
   },
   "courses": {
@@ -416,8 +451,10 @@
   },
   "pricing": {
     "title": "Choisissez Votre Parcours d'Apprentissage",
-    "description": "Accès aux contenus adaptés à vos besoins et objectifs",
-    "free": {
+    "subtitle": "Accès aux contenus adaptés à vos besoins et objectifs",
+    "monthly": "mensuel",
+    "guarantee": "Garantie de remboursement de 30 jours si vous n'êtes pas satisfait",
+    "basic": {
       "title": "Pack Découverte",
       "price": "Gratuit",
       "feature1": "Modules de base & 1 vague de survie",
@@ -429,6 +466,7 @@
     "pro": {
       "title": "Pack Pro",
       "price": "19€",
+      "recommended": "PLUS POPULAIRE",
       "feature1": "Tous les cours & modules de pricing",
       "feature2": "Accès complet au mode survie",
       "feature3": "Quiz avancés & conditions réelles",
