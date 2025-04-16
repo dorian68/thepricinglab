@@ -18,47 +18,25 @@ const ChatBubble: React.FC = () => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const calculateSafePosition = () => {
-      const chatWidth = isOpen ? 320 : 70;
-      const chatHeight = isOpen ? 400 : 70;
-      
-      return {
-        x: Math.max(0, Math.min(window.innerWidth - chatWidth, position.x)),
-        y: Math.max(0, Math.min(window.innerHeight - chatHeight, position.y))
-      };
-    };
-
-    const handleResize = () => {
-      setPosition(calculateSafePosition());
-    };
-
+    // Set initial position anchored to bottom right
     setPosition({
       x: window.innerWidth - 80,
       y: window.innerHeight - 100
     });
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (isOpen) {
+    const handleResize = () => {
+      // Keep bubble in viewport on resize
       setPosition(prev => {
-        const chatWidth = 320;
-        const chatHeight = 400;
-        
-        const newX = prev.x + chatWidth > window.innerWidth 
-          ? window.innerWidth - chatWidth 
-          : prev.x;
-        
-        const newY = prev.y - chatHeight + 70 < 0 
-          ? 0 
-          : prev.y - chatHeight + 70;
-        
+        const bubbleSize = 70;
+        const newX = Math.min(window.innerWidth - bubbleSize, prev.x);
+        const newY = Math.min(window.innerHeight - bubbleSize, prev.y);
         return { x: newX, y: newY };
       });
-    }
-  }, [isOpen]);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const toggleChat = () => {
     if (isMinimized) {
@@ -79,7 +57,11 @@ const ChatBubble: React.FC = () => {
   };
 
   const startDrag = (e: React.MouseEvent) => {
-    if (e.target !== bubbleRef.current && e.target !== chatContainerRef.current) return;
+    if (e.target !== bubbleRef.current && 
+        (chatContainerRef.current && !chatContainerRef.current.contains(e.target as Node))) return;
+    
+    if ((e.target as HTMLElement).closest('button[role="button"]')) return;
+    
     e.preventDefault();
     setIsDragging(true);
     setDragStart({
@@ -91,8 +73,9 @@ const ChatBubble: React.FC = () => {
   const onDrag = (e: MouseEvent) => {
     if (!isDragging) return;
     
-    const chatWidth = isOpen ? 320 : 70;
-    const chatHeight = isOpen ? 400 : 70;
+    const bubbleSize = 70;
+    const chatWidth = isOpen ? 320 : bubbleSize;
+    const chatHeight = isOpen ? 400 : bubbleSize;
     
     const newX = Math.max(0, Math.min(window.innerWidth - chatWidth, e.clientX - dragStart.x));
     const newY = Math.max(0, Math.min(window.innerHeight - chatHeight, e.clientY - dragStart.y));
@@ -132,8 +115,9 @@ const ChatBubble: React.FC = () => {
     if (!isDragging || !e.touches[0]) return;
     
     const touch = e.touches[0];
-    const chatWidth = isOpen ? 320 : 70;
-    const chatHeight = isOpen ? 400 : 70;
+    const bubbleSize = 70;
+    const chatWidth = isOpen ? 320 : bubbleSize;
+    const chatHeight = isOpen ? 400 : bubbleSize;
     
     const newX = Math.max(0, Math.min(window.innerWidth - chatWidth, touch.clientX - dragStart.x));
     const newY = Math.max(0, Math.min(window.innerHeight - chatHeight, touch.clientY - dragStart.y));
@@ -146,7 +130,10 @@ const ChatBubble: React.FC = () => {
 
   const startDragTouch = (e: React.TouchEvent) => {
     if (!e.touches[0]) return;
-    if (e.target !== bubbleRef.current && e.target !== chatContainerRef.current) return;
+    if (e.target !== bubbleRef.current && 
+        (chatContainerRef.current && !chatContainerRef.current.contains(e.target as Node))) return;
+    
+    if ((e.target as HTMLElement).closest('button[role="button"]')) return;
     
     const touch = e.touches[0];
     setIsDragging(true);
@@ -156,30 +143,54 @@ const ChatBubble: React.FC = () => {
     });
   };
 
+  // Calculate chat position based on bubble position to ensure it stays in viewport
+  const getChatPosition = () => {
+    const chatWidth = 320;
+    const chatHeight = 400;
+    const bubbleSize = 70;
+    
+    // Default position above the bubble
+    let chatY = position.y - chatHeight + bubbleSize;
+    
+    // If too close to the top, position below the bubble
+    if (chatY < 0) {
+      chatY = position.y;
+    }
+    
+    // Ensure chat is within right edge
+    let chatX = position.x - chatWidth + bubbleSize;
+    
+    // If would go offscreen left, position at left edge
+    if (chatX < 0) {
+      chatX = 0;
+    }
+    
+    // If bubble close to right edge, align right edge of chat with right edge of screen
+    if (position.x > window.innerWidth - bubbleSize) {
+      chatX = window.innerWidth - chatWidth;
+    }
+    
+    return {
+      x: chatX,
+      y: chatY
+    };
+  };
+
   return (
-    <div
-      style={{
-        position: 'fixed',
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-        zIndex: 1000,
-        transition: isDragging ? 'none' : 'all 0.2s ease-in-out'
-      }}
-      className="select-none"
-    >
-      {isOpen ? (
+    <>
+      {isOpen && (
         <div
           ref={chatContainerRef}
           onMouseDown={startDrag}
           onTouchStart={startDragTouch}
-          className={`bg-white dark:bg-finance-charcoal rounded-lg shadow-lg overflow-hidden transition-all 
+          className={`fixed bg-white dark:bg-finance-charcoal rounded-lg shadow-lg overflow-hidden transition-all 
             ${isMinimized ? 'w-auto h-auto p-0' : 'w-80 h-96'}`}
           style={{
-            position: 'absolute',
-            bottom: '0',
-            right: '0',
-            transform: 'translate(0, -100%)',
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)'
+            left: `${getChatPosition().x}px`,
+            top: `${getChatPosition().y}px`,
+            zIndex: 1000,
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
+            transition: isDragging ? 'none' : 'all 0.2s ease-in-out'
           }}
         >
           {!isMinimized && (
@@ -224,17 +235,22 @@ const ChatBubble: React.FC = () => {
             </Button>
           )}
         </div>
-      ) : (
-        <Button 
-          onClick={toggleChat} 
-          size="icon" 
-          ref={bubbleRef}
-          className="h-14 w-14 bg-finance-accent shadow-lg hover:bg-finance-accent/80 text-white rounded-full flex items-center justify-center"
-        >
-          <MessageCircle className="h-6 w-6" />
-        </Button>
       )}
-    </div>
+      
+      <Button 
+        onClick={toggleChat} 
+        size="icon" 
+        ref={bubbleRef}
+        className="fixed h-14 w-14 bg-finance-accent shadow-lg hover:bg-finance-accent/80 text-white rounded-full flex items-center justify-center z-50"
+        style={{
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+          transition: isDragging ? 'none' : 'all 0.2s ease-in-out'
+        }}
+      >
+        <MessageCircle className="h-6 w-6" />
+      </Button>
+    </>
   );
 };
 
