@@ -54,7 +54,7 @@ const Index = () => {
             
             <div className="relative aspect-[4/3] bg-black/60 rounded-lg overflow-hidden">
               <div 
-                className="bg-[url('/lovable-uploads/bf767635-7fdf-4661-88ea-ecfb8f95eb5d.png')] 
+                className="bg-[url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3')] 
                 bg-cover bg-center w-full h-full 
                 opacity-80 filter brightness-75 contrast-125"
               ></div>
