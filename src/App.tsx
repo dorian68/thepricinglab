@@ -51,6 +51,11 @@ import Scenarios from './pages/trading/Scenarios';
 import Strategies from './pages/trading/Strategies';
 import Performance from './pages/trading/Performance';
 
+// Admin Pages
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminRouteGuard from './components/admin/AdminRouteGuard';
+
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -106,6 +111,14 @@ const App = () => {
                 <Route path="/trading/scenarios" element={<Scenarios />} />
                 <Route path="/trading/strategies" element={<Strategies />} />
                 <Route path="/trading/performance" element={<Performance />} />
+                
+                {/* Admin Routes */}
+                <Route path="/admin-login" element={<AdminLogin />} />
+                <Route path="/admin-dashboard" element={
+                  <AdminRouteGuard>
+                    <AdminDashboard />
+                  </AdminRouteGuard>
+                } />
                 
                 <Route path="*" element={<NotFound />} />
               </Route>
