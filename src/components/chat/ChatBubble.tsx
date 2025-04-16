@@ -18,24 +18,47 @@ const ChatBubble: React.FC = () => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleResize = () => {
-      setPosition(prev => {
-        const newX = Math.min(prev.x, window.innerWidth - 80);
-        const newY = Math.min(prev.y, window.innerHeight - 80);
-        return { x: newX, y: newY };
-      });
+    const calculateSafePosition = () => {
+      const chatWidth = isOpen ? 320 : 70;
+      const chatHeight = isOpen ? 400 : 70;
+      
+      return {
+        x: Math.max(0, Math.min(window.innerWidth - chatWidth, position.x)),
+        y: Math.max(0, Math.min(window.innerHeight - chatHeight, position.y))
+      };
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    const handleResize = () => {
+      setPosition(calculateSafePosition());
+    };
 
-  useEffect(() => {
     setPosition({
       x: window.innerWidth - 80,
       y: window.innerHeight - 100
     });
-  }, []);
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setPosition(prev => {
+        const chatWidth = 320;
+        const chatHeight = 400;
+        
+        const newX = prev.x + chatWidth > window.innerWidth 
+          ? window.innerWidth - chatWidth 
+          : prev.x;
+        
+        const newY = prev.y - chatHeight + 70 < 0 
+          ? 0 
+          : prev.y - chatHeight + 70;
+        
+        return { x: newX, y: newY };
+      });
+    }
+  }, [isOpen]);
 
   const toggleChat = () => {
     if (isMinimized) {
@@ -151,6 +174,13 @@ const ChatBubble: React.FC = () => {
           onTouchStart={startDragTouch}
           className={`bg-white dark:bg-finance-charcoal rounded-lg shadow-lg overflow-hidden transition-all 
             ${isMinimized ? 'w-auto h-auto p-0' : 'w-80 h-96'}`}
+          style={{
+            position: 'absolute',
+            bottom: '0',
+            right: '0',
+            transform: 'translate(0, -100%)',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)'
+          }}
         >
           {!isMinimized && (
             <>
