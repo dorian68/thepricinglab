@@ -1,4 +1,3 @@
-
 {
   "app": {
     "title": "The Pricing Lab",
@@ -449,5 +448,132 @@
     "accessSurvival": "Access Survival Mode",
     "quizAvailable": "quizzes available",
     "explore": "Explore"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Insights and educational content about quantitative finance",
+    "search": "Search articles...",
+    "clearFilters": "Clear filters",
+    "featuredPost": "Featured Post",
+    "allPosts": "All Posts",
+    "searchResults": "Search Results",
+    "noResults": "No posts found",
+    "tryDifferent": "Try different search terms or filters",
+    "viewAllPosts": "View all posts",
+    "readMore": "Read more",
+    "browseTags": "Browse by Tags",
+    "description": "Learn from our experts about financial derivatives, volatility modeling, and trading strategies",
+    "newsletter": {
+      "title": "Subscribe to our Newsletter",
+      "description": "Get the latest insights and updates delivered to your inbox",
+      "placeholder": "Your email address",
+      "subscribe": "Subscribe"
+    }
+  },
+  "coursesPage": {
+    "title": "Courses",
+    "subtitle": "Structured learning paths from fundamentals to advanced quantitative finance",
+    "description": "Comprehensive courses on financial derivatives, volatility modeling, and quantitative trading strategies",
+    "startCourse": "Start Course",
+    "unlock": "Unlock Course",
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced",
+    "expert": "Expert",
+    "fundamentals": {
+      "tab": "Fundamentals",
+      "title": "Fundamental Courses",
+      "blackScholes": {
+        "title": "Black-Scholes Model",
+        "description": "Master the cornerstone option pricing model that revolutionized financial markets."
+      },
+      "yieldCurves": {
+        "title": "Yield Curves",
+        "description": "Understand interest rate term structures and their applications in derivatives pricing."
+      },
+      "greeks": {
+        "title": "Option Greeks",
+        "description": "Master delta, gamma, vega, theta, and their role in risk management."
+      }
+    },
+    "advanced": {
+      "tab": "Advanced",
+      "title": "Advanced Courses",
+      "description": "Dive deeper into complex financial models and advanced trading concepts",
+      "impliedVol": {
+        "title": "Implied Volatility",
+        "description": "Explore the volatility smile, term structure, and surface calibration techniques."
+      },
+      "volProducts": {
+        "title": "Volatility Products",
+        "description": "Learn about VIX, variance swaps, and volatility derivatives trading."
+      },
+      "hedging": {
+        "title": "Dynamic Hedging",
+        "description": "Master advanced hedging techniques for complex option portfolios."
+      }
+    },
+    "complex": {
+      "tab": "Complex",
+      "title": "Complex Products",
+      "exotic": {
+        "title": "Exotic Options",
+        "description": "Price and hedge barrier, Asian, lookback, and other exotic derivatives."
+      },
+      "monteCarlo": {
+        "title": "Monte Carlo Methods",
+        "description": "Implement simulation techniques for pricing path-dependent options."
+      },
+      "stochastic": {
+        "title": "Stochastic Calculus",
+        "description": "Master the mathematical foundations of modern quantitative finance."
+      }
+    },
+    "learning": {
+      "title": "Enhance Your Learning",
+      "subtitle": "Combine courses with interactive exercises and mentoring to accelerate your progress",
+      "mentoring": "Get Mentoring",
+      "practice": "Practice Exercises"
+    },
+    "difficulty": "Required Level",
+    "unlockCourse": "Unlock This Course",
+    "advancedCoursesInfo": "Advanced courses are exclusively available with a premium subscription.",
+    "subscribeToAccess": "Subscribe to access",
+    "alreadySubscribed": "Already subscribed?",
+    "unlockContent": "Unlock this content",
+    "skillsGained": "Skills You'll Gain",
+    "volSkillsDescription": "Mastery of volatility surfaces, complex product pricing, volatility-based trading strategies",
+    "backToExercises": "Back to exercises",
+    "unlockNow": "Unlock now",
+    "duration": "Estimated Duration"
+  },
+  "exercisesPage": {
+    "title": "Practice Exercises",
+    "subtitle": "Apply your knowledge with hands-on financial modeling exercises",
+    "description": "Solve real-world quantitative finance problems with our interactive exercises",
+    "categories": "Exercise Categories",
+    "difficulty": "Difficulty",
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced",
+    "expert": "Expert",
+    "all": "All Exercises",
+    "pricing": "Option Pricing",
+    "pricingDesc": "Apply Black-Scholes, Monte Carlo, and other pricing methods",
+    "volatility": "Volatility Modeling",
+    "volatilityDesc": "Practice with volatility surfaces, skew, and term structures",
+    "greeks": "Greeks & Hedging",
+    "greeksDesc": "Calculate risk measures and implement hedging strategies",
+    "strategies": "Trading Strategies",
+    "strategiesDesc": "Design and implement complex option trading strategies",
+    "completionRate": "Completion rate",
+    "popularity": "Popularity",
+    "filter": "Filter",
+    "sort": "Sort by",
+    "newest": "Newest",
+    "popular": "Most Popular",
+    "difficult": "Most Difficult",
+    "duration": "Estimated Duration",
+    "hours": "hours"
   }
 }

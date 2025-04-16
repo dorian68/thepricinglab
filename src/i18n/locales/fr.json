@@ -1,4 +1,3 @@
-
 {
   "app": {
     "title": "The Pricing Lab",
@@ -449,5 +448,111 @@
     "accessSurvival": "Accéder au Mode Survie",
     "quizAvailable": "quiz disponibles",
     "explore": "Explorer"
+  },
+  "coursesPage": {
+    "title": "Cours",
+    "subtitle": "Parcours d'apprentissage structurés des fondamentaux à la finance quantitative avancée",
+    "description": "Cours complets sur les produits dérivés financiers, la modélisation de la volatilité et les stratégies de trading quantitatif",
+    "startCourse": "Commencer le cours",
+    "unlock": "Débloquer le cours",
+    "beginner": "Débutant",
+    "intermediate": "Intermédiaire",
+    "advanced": "Avancé",
+    "expert": "Expert",
+    "fundamentals": {
+      "tab": "Fondamentaux",
+      "title": "Cours Fondamentaux",
+      "blackScholes": {
+        "title": "Modèle de Black-Scholes",
+        "description": "Maîtrisez le modèle d'évaluation d'options qui a révolutionné les marchés financiers."
+      },
+      "yieldCurves": {
+        "title": "Courbes de Rendement",
+        "description": "Comprenez les structures de taux d'intérêt et leurs applications dans l'évaluation des produits dérivés."
+      },
+      "greeks": {
+        "title": "Grecques des Options",
+        "description": "Maîtrisez delta, gamma, vega, theta et leur rôle dans la gestion des risques."
+      }
+    },
+    "advanced": {
+      "tab": "Avancé",
+      "title": "Cours Avancés",
+      "description": "Plongez plus profondément dans les modèles financiers complexes et les concepts avancés de trading",
+      "impliedVol": {
+        "title": "Volatilité Implicite",
+        "description": "Explorez le smile de volatilité, la structure par terme et les techniques de calibration de surface."
+      },
+      "volProducts": {
+        "title": "Produits de Volatilité",
+        "description": "Découvrez le VIX, les swaps de variance et le trading de produits dérivés de volatilité."
+      },
+      "hedging": {
+        "title": "Couverture Dynamique",
+        "description": "Maîtrisez les techniques avancées de couverture pour les portefeuilles d'options complexes."
+      }
+    },
+    "complex": {
+      "tab": "Complexe",
+      "title": "Produits Complexes",
+      "exotic": {
+        "title": "Options Exotiques",
+        "description": "Évaluez et couvrez les options à barrière, asiatiques, lookback et autres produits dérivés exotiques."
+      },
+      "monteCarlo": {
+        "title": "Méthodes Monte Carlo",
+        "description": "Implémentez des techniques de simulation pour l'évaluation d'options dépendantes du chemin."
+      },
+      "stochastic": {
+        "title": "Calcul Stochastique",
+        "description": "Maîtrisez les fondements mathématiques de la finance quantitative moderne."
+      }
+    },
+    "learning": {
+      "title": "Améliorez Votre Apprentissage",
+      "subtitle": "Combinez les cours avec des exercices interactifs et du mentorat pour accélérer votre progression",
+      "mentoring": "Obtenir du Mentorat",
+      "practice": "Exercices Pratiques"
+    },
+    "difficulty": "Niveau Requis",
+    "unlockCourse": "Débloquer ce Cours",
+    "advancedCoursesInfo": "Les cours avancés sont disponibles exclusivement avec un abonnement premium.",
+    "subscribeToAccess": "S'abonner pour accéder",
+    "alreadySubscribed": "Déjà abonné ?",
+    "unlockContent": "Débloquer ce contenu",
+    "skillsGained": "Compétences Acquises",
+    "volSkillsDescription": "Maîtrise de la surface de volatilité, pricing de produits complexes, stratégies de trading basées sur la volatilité",
+    "backToExercises": "Retour aux exercices",
+    "unlockNow": "Débloquer maintenant",
+    "duration": "Durée Estimée"
+  },
+  "exercisesPage": {
+    "title": "Exercices Pratiques",
+    "subtitle": "Appliquez vos connaissances avec des exercices pratiques de modélisation financière",
+    "description": "Résolvez des problèmes réels de finance quantitative avec nos exercices interactifs",
+    "categories": "Catégories d'Exercices",
+    "difficulty": "Difficulté",
+    "beginner": "Débutant",
+    "intermediate": "Intermédiaire",
+    "advanced": "Avancé",
+    "expert": "Expert",
+    "all": "Tous les Exercices",
+    "pricing": "Évaluation d'Options",
+    "pricingDesc": "Appliquez Black-Scholes, Monte Carlo et d'autres méthodes d'évaluation",
+    "volatility": "Modélisation de la Volatilité",
+    "volatilityDesc": "Pratiquez avec les surfaces de volatilité, le skew et les structures par terme",
+    "greeks": "Grecques & Couverture",
+    "greeksDesc": "Calculez les mesures de risque et implémentez des stratégies de couverture",
+    "strategies": "Stratégies de Trading",
+    "strategiesDesc": "Concevez et implémentez des stratégies complexes de trading d'options",
+    "completionRate": "Taux de complétion",
+    "popularity": "Popularité",
+    "filter": "Filtrer",
+    "sort": "Trier par",
+    "newest": "Plus récent",
+    "popular": "Plus populaire",
+    "difficult": "Plus difficile",
+    "duration": "Durée Estimée",
+    "hours": "heures"
   }
 }

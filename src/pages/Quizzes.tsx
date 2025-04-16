@@ -28,10 +28,10 @@ const QuizSection = ({ title, description, quizCount, icon: Icon, to }: {
             <h3 className="text-xl font-medium mb-2">{title}</h3>
             <p className="text-finance-lightgray mb-4">{description}</p>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-finance-lightgray">{quizCount} {t('quizzes.quizAvailable')}</span>
+              <span className="text-sm text-finance-lightgray">{quizCount} {safeTranslate(t, 'quizzes.quizAvailable')}</span>
               <Button asChild size="sm" variant="outline">
                 <Link to={to}>
-                  {t('quizzes.explore')} <ChevronRight className="ml-1 h-4 w-4" />
+                  {safeTranslate(t, 'quizzes.explore')} <ChevronRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>
             </div>

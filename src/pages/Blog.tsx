@@ -15,11 +15,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { blogPosts } from "@/data/blog-posts";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { safeTranslate } from "../utils/translationUtils";
 
 const featuredTags = ["Options", "Black-Scholes", "Monte Carlo", "Volatility", "Quant Interview", "Python"];
 
@@ -61,8 +61,8 @@ const Blog = () => {
   return (
     <>
       <Helmet>
-        <title>{t("blog.title")} | The Pricing Lab</title>
-        <meta name="description" content={t("blog.description")} />
+        <title>{safeTranslate(t, "blog.title")} | The Pricing Lab</title>
+        <meta name="description" content={safeTranslate(t, "blog.description")} />
         <meta name="keywords" content="quantitative finance, options pricing, Black-Scholes, Monte Carlo, volatility surface, quant interview" />
         <link rel="canonical" href="https://thepricinglab.com/blog" />
       </Helmet>
@@ -75,12 +75,12 @@ const Blog = () => {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink>
-                <Link to="/">{t("navbar.home")}</Link>
+                <Link to="/">{safeTranslate(t, "navbar.home")}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{t("blog.title")}</BreadcrumbPage>
+              <BreadcrumbPage>{safeTranslate(t, "blog.title")}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -88,10 +88,10 @@ const Blog = () => {
         {/* Hero Section */}
         <div className="mb-12 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            {t("blog.title")}
+            {safeTranslate(t, "blog.title")}
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            {t("blog.subtitle")}
+            {safeTranslate(t, "blog.subtitle")}
           </p>
         </div>
         
@@ -101,7 +101,7 @@ const Blog = () => {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder={t("blog.search")}
+              placeholder={safeTranslate(t, "blog.search")}
               className="pl-8"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -127,7 +127,7 @@ const Blog = () => {
                 onClick={resetFilters}
                 className="ml-2"
               >
-                {t("blog.clearFilters")}
+                {safeTranslate(t, "blog.clearFilters")}
               </Button>
             )}
           </div>
@@ -136,7 +136,7 @@ const Blog = () => {
         {/* Featured Post */}
         {filteredPosts.length > 0 && !searchTerm && !activeTag && (
           <div className="mb-12">
-            <h2 className="text-2xl font-bold mb-6">{t("blog.featuredPost")}</h2>
+            <h2 className="text-2xl font-bold mb-6">{safeTranslate(t, "blog.featuredPost")}</h2>
             <Link to={`/blog/${filteredPosts[0].slug}`} className="block">
               <Card className="overflow-hidden transition-all hover:shadow-lg">
                 <div className="relative aspect-video overflow-hidden bg-muted">
@@ -165,7 +165,7 @@ const Blog = () => {
                     <span>{filteredPosts[0].readingTime} min read</span>
                   </div>
                   <div className="flex items-center font-medium">
-                    {t("blog.readMore")}
+                    {safeTranslate(t, "blog.readMore")}
                     <ArrowRight className="ml-1 h-4 w-4" />
                   </div>
                 </CardFooter>
@@ -177,19 +177,19 @@ const Blog = () => {
         {/* All Posts */}
         <div className="mb-12">
           <h2 className="text-2xl font-bold mb-6">
-            {searchTerm || activeTag ? t("blog.searchResults") : t("blog.allPosts")}
+            {searchTerm || activeTag ? safeTranslate(t, "blog.searchResults") : safeTranslate(t, "blog.allPosts")}
           </h2>
           
           {filteredPosts.length === 0 ? (
             <div className="text-center py-12">
-              <h3 className="text-xl font-medium mb-2">{t("blog.noResults")}</h3>
-              <p className="text-muted-foreground">{t("blog.tryDifferent")}</p>
+              <h3 className="text-xl font-medium mb-2">{safeTranslate(t, "blog.noResults")}</h3>
+              <p className="text-muted-foreground">{safeTranslate(t, "blog.tryDifferent")}</p>
               <Button 
                 variant="outline" 
                 onClick={resetFilters}
                 className="mt-4"
               >
-                {t("blog.viewAllPosts")}
+                {safeTranslate(t, "blog.viewAllPosts")}
               </Button>
             </div>
           ) : (
@@ -235,7 +235,7 @@ const Blog = () => {
         {/* Tags Section */}
         <div className="mb-12">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">{t("blog.browseTags")}</h2>
+            <h2 className="text-2xl font-bold">{safeTranslate(t, "blog.browseTags")}</h2>
             <Tag className="h-5 w-5" />
           </div>
           <div className="flex flex-wrap gap-2">
@@ -255,15 +255,15 @@ const Blog = () => {
         {/* Newsletter */}
         <div className="mb-12 bg-muted p-8 rounded-lg">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl font-bold mb-4">{t("blog.newsletter.title")}</h2>
-            <p className="mb-6">{t("blog.newsletter.description")}</p>
+            <h2 className="text-2xl font-bold mb-4">{safeTranslate(t, "blog.newsletter.title")}</h2>
+            <p className="mb-6">{safeTranslate(t, "blog.newsletter.description")}</p>
             <div className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
               <Input 
                 type="email" 
-                placeholder={t("blog.newsletter.placeholder")}
+                placeholder={safeTranslate(t, "blog.newsletter.placeholder")}
                 className="flex-grow"
               />
-              <Button>{t("blog.newsletter.subscribe")}</Button>
+              <Button>{safeTranslate(t, "blog.newsletter.subscribe")}</Button>
             </div>
           </div>
         </div>

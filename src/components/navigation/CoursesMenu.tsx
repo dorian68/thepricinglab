@@ -2,47 +2,48 @@
 import React from "react";
 import { NavMenuItem, NavMenuSection } from "./NavMenuSection";
 import { useTranslation } from "react-i18next";
+import { safeTranslate } from "../../utils/translationUtils";
 
 const CoursesMenu = () => {
   const { t } = useTranslation();
   
   return (
     <div className="grid grid-cols-2 gap-3 p-4 w-[500px]">
-      <NavMenuSection title="Fondamentaux">
+      <NavMenuSection title={safeTranslate(t, 'courses.fundamentals')}>
         <NavMenuItem 
           to="/courses/fundamentals/black-scholes" 
-          title={t('coursesPage.fundamentals.blackScholes.title')} 
+          title={safeTranslate(t, 'coursesPage.fundamentals.blackScholes.title')} 
         />
         <NavMenuItem 
           to="/courses/fundamentals/yield-curves" 
-          title={t('coursesPage.fundamentals.yieldCurves.title')} 
+          title={safeTranslate(t, 'coursesPage.fundamentals.yieldCurves.title')} 
         />
         <NavMenuItem 
           to="/courses/fundamentals/greeks" 
-          title={t('coursesPage.fundamentals.greeks.title')} 
+          title={safeTranslate(t, 'coursesPage.fundamentals.greeks.title')} 
         />
       </NavMenuSection>
       
       <div>
-        <NavMenuSection title="Avancé">
+        <NavMenuSection title={safeTranslate(t, 'courses.advanced')}>
           <NavMenuItem 
             to="/courses/advanced/implied-vol" 
-            title={t('coursesPage.advanced.impliedVol.title')} 
+            title={safeTranslate(t, 'coursesPage.advanced.impliedVol.title')} 
           />
           <NavMenuItem 
             to="/courses/advanced/vol-products" 
-            title={t('coursesPage.advanced.volProducts.title')} 
+            title={safeTranslate(t, 'coursesPage.advanced.volProducts.title')} 
           />
         </NavMenuSection>
         
-        <NavMenuSection title="Complexe">
+        <NavMenuSection title={safeTranslate(t, 'courses.complex')}>
           <NavMenuItem 
             to="/courses/complex/exotic-options" 
-            title={t('coursesPage.complex.exotic.title')} 
+            title={safeTranslate(t, 'coursesPage.complex.exotic.title')} 
           />
           <NavMenuItem 
             to="/courses/complex/monte-carlo" 
-            title={t('coursesPage.complex.monteCarlo.title')} 
+            title={safeTranslate(t, 'coursesPage.complex.monteCarlo.title')} 
           />
         </NavMenuSection>
       </div>
