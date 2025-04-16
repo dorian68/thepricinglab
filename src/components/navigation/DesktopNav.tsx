@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { 
-  Home, BookOpen, Dumbbell, Users, CreditCard, Wrench, FileText, Bug
+  Home, BookOpen, Dumbbell, Users, CreditCard, Wrench, FileText, Bug, BarChart3
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,7 @@ import {
 import NavItem from "./NavItem";
 import LanguageSwitcher from "../LanguageSwitcher";
 import TrainingLabMenu from "./TrainingLabMenu";
+import TradingLabMenu from "./TradingLabMenu";
 import CoursesMenu from "./CoursesMenu";
 import CommunityMenu from "./CommunityMenu";
 import ToolsMenu from "./ToolsMenu";
@@ -52,6 +53,14 @@ const DesktopNav = () => {
                 highlighted={true}
               >
                 <TrainingLabMenu />
+              </NavItem>
+              
+              {/* Trading Lab - New Section */}
+              <NavItem 
+                icon={BarChart3} 
+                label={t('navbar.tradingLab', 'Trading Lab')}
+              >
+                <TradingLabMenu />
               </NavItem>
               
               {/* Community */}

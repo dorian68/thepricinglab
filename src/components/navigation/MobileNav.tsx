@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { 
-  X, Home, BookOpen, Dumbbell, Users, CreditCard, Wrench, FileText
+  X, Home, BookOpen, Dumbbell, Users, CreditCard, Wrench, FileText, Bug, BarChart3
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LanguageSwitcher from "../LanguageSwitcher";
@@ -106,6 +106,43 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
             Progression & Badges
           </Link>
         </MobileNavSection>
+
+        {/* Mobile Trading Lab - New Section */}
+        <MobileNavSection 
+          title="Trading Lab" 
+          icon={BarChart3} 
+        >
+          <Link
+            to="/trading/exercises"
+            className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+          >
+            Exercices
+          </Link>
+          <Link
+            to="/trading/backtest"
+            className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+          >
+            Backtest
+          </Link>
+          <Link
+            to="/trading/scenarios"
+            className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+          >
+            Scénarios
+          </Link>
+          <Link
+            to="/trading/strategies"
+            className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+          >
+            Stratégies
+          </Link>
+          <Link
+            to="/trading/performance"
+            className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+          >
+            Performances
+          </Link>
+        </MobileNavSection>
         
         {/* Mobile Community */}
         <MobileNavSection title={t('navbar.community')} icon={Users}>
@@ -179,6 +216,15 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
         >
           <FileText className="w-4 h-4 mr-2" />
           Blog
+        </Link>
+        
+        {/* Mobile Bug Report */}
+        <Link
+          to="/bug-report"
+          className="flex items-center px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+        >
+          <Bug className="w-4 h-4 mr-2" />
+          {t('navbar.bugs')}
         </Link>
         
         <div className="mt-3 flex justify-start px-3">

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { LucideIcon } from "lucide-react";
@@ -7,6 +8,7 @@ import {
   navigationMenuTriggerStyle,
   NavigationMenuTrigger,
   NavigationMenuContent,
+  navigationMenuTriggerHighlightedStyle,
 } from "@/components/ui/navigation-menu";
 
 interface NavItemProps {
@@ -38,7 +40,10 @@ const NavItem = ({ to, icon: Icon, label, children, highlighted = false }: NavIt
   // Otherwise, render a simple link
   return (
     <NavigationMenuItem>
-      <Link to={to || "/"} className={navigationMenuTriggerStyle()}>
+      <Link 
+        to={to || "/"} 
+        className={navigationMenuTriggerStyle() + (highlighted ? " text-finance-accent bg-finance-accent/10 hover:bg-finance-accent/20" : "")}
+      >
         {Icon && <Icon className="w-4 h-4 mr-2" />}
         {label}
       </Link>

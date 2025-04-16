@@ -43,6 +43,13 @@ import BugReport from './pages/BugReport';
 import NotFound from './pages/NotFound';
 import AppShell from './components/AppShell';
 
+// New Trading Lab pages
+import TradingExercises from './pages/trading/TradingExercises';
+import Backtest from './pages/trading/Backtest';
+import Scenarios from './pages/trading/Scenarios';
+import Strategies from './pages/trading/Strategies';
+import Performance from './pages/trading/Performance';
+
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -91,6 +98,14 @@ const App = () => {
                 <Route path="/survival-mode/master" element={<MasterWave />} />
                 <Route path="/survival-mode/legendary" element={<LegendaryWave />} />
                 <Route path="/bug-report" element={<BugReport />} />
+                
+                {/* Trading Lab Routes */}
+                <Route path="/trading/exercises" element={<TradingExercises />} />
+                <Route path="/trading/backtest" element={<Backtest />} />
+                <Route path="/trading/scenarios" element={<Scenarios />} />
+                <Route path="/trading/strategies" element={<Strategies />} />
+                <Route path="/trading/performance" element={<Performance />} />
+                
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>
