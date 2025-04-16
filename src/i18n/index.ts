@@ -20,11 +20,12 @@ i18n
         translation: frTranslation
       }
     },
-    fallbackLng: 'fr',
+    fallbackLng: 'en',
     debug: false,
     detection: {
-      order: ['localStorage', 'navigator', 'htmlTag'],
+      order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
+      lookupLocalStorage: 'i18nextLng',
     },
     interpolation: {
       escapeValue: false // React already safes from xss

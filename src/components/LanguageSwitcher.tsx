@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -7,10 +7,20 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 const LanguageSwitcher = () => {
   const { i18n, t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState(i18n.language?.split('-')[0] || 'en');
+
+  useEffect(() => {
+    // Ensure we're using the base language code without regional suffixes
+    setCurrentLanguage(i18n.language?.split('-')[0] || 'en');
+  }, [i18n.language]);
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
+    setCurrentLanguage(lng);
     setIsOpen(false);
+    
+    // Save to localStorage with the correct format
+    localStorage.setItem('i18nextLng', lng);
   };
 
   return (
@@ -24,7 +34,7 @@ const LanguageSwitcher = () => {
           >
             <Globe className="w-5 h-5" />
             <span className="ml-1 hidden sm:inline">
-              {i18n.language === 'en' ? 'EN' : 'FR'}
+              {currentLanguage === 'en' ? 'EN' : 'FR'}
             </span>
           </button>
         </TooltipTrigger>
@@ -39,7 +49,7 @@ const LanguageSwitcher = () => {
             <button
               onClick={() => changeLanguage('fr')}
               className={`w-full text-left px-4 py-2 text-sm ${
-                i18n.language === 'fr' ? 'text-finance-accent' : 'text-finance-offwhite'
+                currentLanguage === 'fr' ? 'text-finance-accent' : 'text-finance-offwhite'
               } hover:bg-finance-steel/20`}
               role="menuitem"
             >
@@ -48,7 +58,7 @@ const LanguageSwitcher = () => {
             <button
               onClick={() => changeLanguage('en')}
               className={`w-full text-left px-4 py-2 text-sm ${
-                i18n.language === 'en' ? 'text-finance-accent' : 'text-finance-offwhite'
+                currentLanguage === 'en' ? 'text-finance-accent' : 'text-finance-offwhite'
               } hover:bg-finance-steel/20`}
               role="menuitem"
             >
