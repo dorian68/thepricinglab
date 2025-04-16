@@ -286,5 +286,96 @@
     "complex": "Produits Complexes",
     "bonus": "Matériel Bonus",
     "subscription": "Plans d'Abonnement"
+  },
+  "pricing": {
+    "title": "Choisissez le plan qui vous convient",
+    "subtitle": "Accédez à des outils professionnels de trading et d'apprentissage en finance quantitative.",
+    "monthly": "Mensuel",
+    "annual": "Annuel",
+    "annualSavings": "Économisez 20% avec un abonnement annuel",
+    "recommended": "RECOMMANDÉ",
+    "comparison": {
+      "title": "Comparaison des fonctionnalités",
+      "feature": "Fonctionnalité",
+      "category1": "Contenu d'apprentissage",
+      "category2": "Exercices et pratique",
+      "category3": "Outils et simulation",
+      "category4": "Fonctionnalités professionnelles",
+      "fundamentals": "Cours fondamentaux",
+      "intermediate": "Cours intermédiaires",
+      "advanced": "Cours avancés",
+      "basicExercises": "Exercices de base",
+      "intermediateExercises": "Exercices intermédiaires",
+      "advancedExercises": "Exercices avancés",
+      "survivalMode": "Mode Survie",
+      "basicTools": "Outils de base",
+      "advancedTools": "Outils avancés",
+      "notebooks": "Carnets interactifs",
+      "certificates": "Certificats",
+      "linkedinIntegration": "Intégration LinkedIn",
+      "performanceReports": "Rapports de performance",
+      "projectChallenges": "Défis de projets",
+      "gptAssistant": "Assistant IA"
+    },
+    "faq": {
+      "title": "Questions fréquentes",
+      "question1": "Comment puis-je changer de plan ?",
+      "answer1": "Vous pouvez modifier votre plan à tout moment depuis votre tableau de bord. Le changement prendra effet à la prochaine période de facturation.",
+      "question2": "Offrez-vous des remboursements ?",
+      "answer2": "Oui, nous offrons une garantie de remboursement de 30 jours si vous n'êtes pas satisfait de votre abonnement.",
+      "question3": "Puis-je annuler à tout moment ?",
+      "answer3": "Absolument. Il n'y a pas d'engagement à long terme et vous pouvez annuler votre abonnement à tout moment.",
+      "question4": "Les mises à jour sont-elles incluses ?",
+      "answer4": "Oui, toutes les mises à jour de contenu et de fonctionnalités sont automatiquement disponibles pour votre niveau d'abonnement."
+    },
+    "cta": {
+      "title": "Prêt à améliorer vos compétences en finance ?",
+      "highlight": "maintenant",
+      "description": "Rejoignez des milliers de professionnels et d'étudiants qui perfectionnent leurs compétences en finance quantitative.",
+      "start": "Commencer maintenant",
+      "try": "Essayer gratuitement"
+    },
+    "freemium": {
+      "title": "Gratuit",
+      "price": "0€",
+      "description": "Pour les débutants qui souhaitent explorer les bases de la finance quantitative.",
+      "badge": "GRATUIT",
+      "cta": "S'inscrire gratuitement",
+      "feature1": "Accès aux cours fondamentaux",
+      "feature2": "Calculateur Black-Scholes de base",
+      "feature3": "Exercices limités",
+      "feature4": "Communauté d'entraide"
+    },
+    "student": {
+      "title": "Étudiant",
+      "description": "Idéal pour les étudiants et universitaires qui veulent approfondir leurs connaissances.",
+      "badge": "POPULAIRE",
+      "cta": "Choisir le plan Étudiant",
+      "feature1": "Tous les cours fondamentaux et intermédiaires",
+      "feature2": "Calculateurs et outils avancés",
+      "feature3": "Exercices illimités",
+      "feature4": "Mode Survie complet",
+      "feature5": "Certification de base"
+    },
+    "pro": {
+      "title": "Professionnel",
+      "description": "Pour les professionnels et traders qui ont besoin d'outils haut de gamme.",
+      "badge": "COMPLET",
+      "cta": "Choisir le plan Pro",
+      "feature1": "Accès à tous les cours et contenus",
+      "feature2": "Suite complète d'outils de trading",
+      "feature3": "Modèles exotiques et avancés",
+      "feature4": "Backtest et scénarios illimités",
+      "feature5": "Certification professionnelle",
+      "feature6": "Carnets interactifs personnalisables",
+      "feature7": "Assistant IA pour le trading",
+      "feature8": "Support prioritaire"
+    },
+    "hero": {
+      "title": "Des tarifs simples pour tous les",
+      "highlight": "niveaux d'expertise",
+      "description": "Que vous soyez étudiant, enseignant ou professionnel, nous avons un plan adapté à vos besoins."
+    },
+    "guarantee": "Garantie satisfait ou remboursé de 30 jours"
   }
 }

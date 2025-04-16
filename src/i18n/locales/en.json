@@ -286,5 +286,96 @@
     "complex": "Complex Products",
     "bonus": "Bonus Material",
     "subscription": "Subscription Plans"
+  },
+  "pricing": {
+    "title": "Choose the right plan for you",
+    "subtitle": "Access professional trading tools and learning resources for quantitative finance.",
+    "monthly": "Monthly",
+    "annual": "Annual",
+    "annualSavings": "Save 20% with annual billing",
+    "recommended": "RECOMMENDED",
+    "comparison": {
+      "title": "Feature Comparison",
+      "feature": "Feature",
+      "category1": "Learning Content",
+      "category2": "Exercises & Practice",
+      "category3": "Tools & Simulation",
+      "category4": "Professional Features",
+      "fundamentals": "Fundamental Courses",
+      "intermediate": "Intermediate Courses",
+      "advanced": "Advanced Courses",
+      "basicExercises": "Basic Exercises",
+      "intermediateExercises": "Intermediate Exercises",
+      "advancedExercises": "Advanced Exercises",
+      "survivalMode": "Survival Mode",
+      "basicTools": "Basic Tools",
+      "advancedTools": "Advanced Tools",
+      "notebooks": "Interactive Notebooks",
+      "certificates": "Certificates",
+      "linkedinIntegration": "LinkedIn Integration",
+      "performanceReports": "Performance Reports",
+      "projectChallenges": "Project Challenges",
+      "gptAssistant": "AI Assistant"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "question1": "How can I change my plan?",
+      "answer1": "You can change your plan at any time from your dashboard. The change will take effect on your next billing period.",
+      "question2": "Do you offer refunds?",
+      "answer2": "Yes, we offer a 30-day money-back guarantee if you're not satisfied with your subscription.",
+      "question3": "Can I cancel anytime?",
+      "answer3": "Absolutely. There are no long-term commitments, and you can cancel your subscription at any time.",
+      "question4": "Are updates included?",
+      "answer4": "Yes, all content and feature updates are automatically available for your subscription tier."
+    },
+    "cta": {
+      "title": "Ready to upgrade your finance skills?",
+      "highlight": "now",
+      "description": "Join thousands of professionals and students who are leveling up their quantitative finance skills.",
+      "start": "Get started now",
+      "try": "Try for free"
+    },
+    "freemium": {
+      "title": "Free",
+      "price": "$0",
+      "description": "For beginners looking to explore the basics of quantitative finance.",
+      "badge": "FREE",
+      "cta": "Sign up for free",
+      "feature1": "Access to fundamental courses",
+      "feature2": "Basic Black-Scholes calculator",
+      "feature3": "Limited exercises",
+      "feature4": "Community support"
+    },
+    "student": {
+      "title": "Student",
+      "description": "Perfect for students and academics who want to deepen their knowledge.",
+      "badge": "POPULAR",
+      "cta": "Choose Student plan",
+      "feature1": "All fundamental and intermediate courses",
+      "feature2": "Advanced calculators and tools",
+      "feature3": "Unlimited exercises",
+      "feature4": "Full Survival Mode access",
+      "feature5": "Basic certification"
+    },
+    "pro": {
+      "title": "Professional",
+      "description": "For professionals and traders who need premium tools.",
+      "badge": "COMPLETE",
+      "cta": "Choose Pro plan",
+      "feature1": "Access to all courses and content",
+      "feature2": "Complete suite of trading tools",
+      "feature3": "Exotic and advanced models",
+      "feature4": "Unlimited backtesting and scenarios",
+      "feature5": "Professional certification",
+      "feature6": "Customizable interactive notebooks",
+      "feature7": "AI trading assistant",
+      "feature8": "Priority support"
+    },
+    "hero": {
+      "title": "Simple pricing for all",
+      "highlight": "expertise levels",
+      "description": "Whether you're a student, educator, or professional, we have a plan that fits your needs."
+    },
+    "guarantee": "30-day money-back guarantee"
   }
 }
