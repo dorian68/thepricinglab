@@ -5,6 +5,7 @@ import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import { Toaster } from 'sonner';
+import ChatBubble from './components/chat/ChatBubble';
 
 import i18n from './i18n';
 import Home from './pages/Home';
@@ -109,6 +110,8 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>
+            {/* Place ChatBubble outside of the routing context but still inside BrowserRouter */}
+            <ChatBubble />
           </BrowserRouter>
         </QueryClientProvider>
       </HelmetProvider>

@@ -5,10 +5,10 @@ import ChatBubble from './chat/ChatBubble';
 
 const AppShell: React.FC = () => {
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <Outlet />
-      <ChatBubble />
-    </>
+      {/* Move ChatBubble outside of the main AppShell */}
+    </div>
   );
 };
 
