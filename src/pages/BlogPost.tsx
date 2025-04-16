@@ -1,0 +1,344 @@
+
+import React from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { Helmet } from "react-helmet-async";
+import { 
+  ArrowLeft, 
+  Share2, 
+  Linkedin, 
+  Facebook, 
+  Twitter, 
+  Copy, 
+  ArrowRight,
+  Clock,
+  Calendar
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { blogPosts } from "@/data/blog-posts";
+import { useToast } from "@/hooks/use-toast";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+
+const BlogPost = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const post = React.useMemo(() => 
+    blogPosts.find(post => post.slug === slug), 
+    [slug]
+  );
+
+  const relatedPosts = React.useMemo(() => {
+    if (!post) return [];
+    
+    // Find posts with similar tags, excluding the current post
+    return blogPosts
+      .filter(p => p.id !== post.id)
+      .map(p => {
+        // Calculate the number of matching tags
+        const matchingTags = p.tags.filter(tag => post.tags.includes(tag)).length;
+        return { ...p, matchingTags };
+      })
+      .sort((a, b) => b.matchingTags - a.matchingTags) // Sort by most matching tags
+      .slice(0, 3); // Get top 3
+  }, [post]);
+
+  if (!post) {
+    return (
+      <>
+        <Navbar />
+        <div className="container mx-auto px-4 py-12 text-center">
+          <h1 className="text-3xl font-bold mb-4">{t("blog.postNotFound")}</h1>
+          <p className="mb-6 text-muted-foreground">{t("blog.postNotFoundDesc")}</p>
+          <Button onClick={() => navigate("/blog")}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            {t("blog.backToBlog")}
+          </Button>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast({
+      title: t("blog.linkCopied"),
+      description: t("blog.linkCopiedDesc"),
+    });
+  };
+
+  const shareOnTwitter = () => {
+    window.open(
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(window.location.href)}`,
+      "_blank"
+    );
+  };
+
+  const shareOnLinkedIn = () => {
+    window.open(
+      `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`,
+      "_blank"
+    );
+  };
+
+  const shareOnFacebook = () => {
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`,
+      "_blank"
+    );
+  };
+
+  return (
+    <>
+      <Helmet>
+        <title>{post.title} | The Pricing Lab Blog</title>
+        <meta name="description" content={post.excerpt} />
+        <meta name="keywords" content={post.tags.join(", ")} />
+        <meta property="og:title" content={post.title} />
+        <meta property="og:description" content={post.excerpt} />
+        <meta property="og:image" content={post.coverImage} />
+        <meta property="og:url" content={window.location.href} />
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <link rel="canonical" href={`https://thepricinglab.com/blog/${post.slug}`} />
+      </Helmet>
+      
+      <Navbar />
+      
+      <main className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Breadcrumbs */}
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink as={Link} to="/">
+                {t("navbar.home")}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink as={Link} to="/blog">
+                {t("blog.title")}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{post.title}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        
+        {/* Article Header */}
+        <div className="mb-8">
+          <div className="flex gap-2 mb-4">
+            {post.tags.map((tag) => (
+              <Badge key={tag} variant="outline">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+          
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
+            {post.title}
+          </h1>
+          
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <Avatar className="h-10 w-10 mr-3">
+                <AvatarImage src={post.author.avatar} alt={post.author.name} />
+                <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-medium">{post.author.name}</p>
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <Calendar className="mr-1 h-3 w-3" />
+                  <span className="mr-3">{post.date}</span>
+                  <Clock className="mr-1 h-3 w-3" />
+                  <span>{post.readingTime} min read</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="icon" onClick={shareOnTwitter}>
+                      <Twitter className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t("blog.shareOnTwitter")}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="icon" onClick={shareOnLinkedIn}>
+                      <Linkedin className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t("blog.shareOnLinkedIn")}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="icon" onClick={shareOnFacebook}>
+                      <Facebook className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t("blog.shareOnFacebook")}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="icon" onClick={copyToClipboard}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t("blog.copyLink")}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          </div>
+        </div>
+        
+        {/* Featured Image */}
+        <div className="mb-8 rounded-lg overflow-hidden">
+          <img 
+            src={post.coverImage} 
+            alt={post.title} 
+            className="w-full object-cover aspect-video"
+          />
+        </div>
+        
+        {/* Article Content */}
+        <div className="prose prose-lg max-w-none mb-12" dangerouslySetInnerHTML={{ __html: post.content }} />
+        
+        {/* Author Bio */}
+        <div className="bg-muted p-6 rounded-lg mb-12">
+          <div className="flex items-start">
+            <Avatar className="h-16 w-16 mr-6">
+              <AvatarImage src={post.author.avatar} alt={post.author.name} />
+              <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div>
+              <h3 className="text-xl font-bold mb-2">{post.author.name}</h3>
+              <p className="text-muted-foreground mb-3">{post.author.bio}</p>
+              <div className="flex space-x-2">
+                {post.author.social?.twitter && (
+                  <Button variant="outline" size="sm" asChild>
+                    <a href={post.author.social.twitter} target="_blank" rel="noreferrer">
+                      <Twitter className="h-4 w-4 mr-1" />
+                      Twitter
+                    </a>
+                  </Button>
+                )}
+                {post.author.social?.linkedin && (
+                  <Button variant="outline" size="sm" asChild>
+                    <a href={post.author.social.linkedin} target="_blank" rel="noreferrer">
+                      <Linkedin className="h-4 w-4 mr-1" />
+                      LinkedIn
+                    </a>
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Related Posts */}
+        {relatedPosts.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold mb-6">{t("blog.relatedPosts")}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {relatedPosts.map((relatedPost) => (
+                <Link to={`/blog/${relatedPost.slug}`} key={relatedPost.id}>
+                  <Card className="h-full flex flex-col hover:shadow-md transition-all">
+                    <div className="relative aspect-video overflow-hidden bg-muted">
+                      <img 
+                        src={relatedPost.coverImage} 
+                        alt={relatedPost.title}
+                        className="object-cover w-full h-full transition-transform hover:scale-105 duration-300"
+                      />
+                    </div>
+                    <CardHeader className="flex-grow">
+                      <CardTitle className="line-clamp-2">{relatedPost.title}</CardTitle>
+                    </CardHeader>
+                    <CardFooter className="pt-0">
+                      <div className="flex items-center text-xs text-muted-foreground">
+                        <Clock className="mr-1 h-3 w-3" />
+                        <span>{relatedPost.readingTime} min read</span>
+                      </div>
+                    </CardFooter>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Navigation */}
+        <div className="flex justify-between mb-8">
+          <Button variant="outline" asChild>
+            <Link to="/blog">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              {t("blog.backToBlog")}
+            </Link>
+          </Button>
+          
+          <Button variant="outline" asChild>
+            <Link to={post.relatedCourse ? `/courses/${post.relatedCourse}` : "/courses"}>
+              {t("blog.exploreCourses")}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      </main>
+      
+      <Footer />
+    </>
+  );
+};
+
+export default BlogPost;

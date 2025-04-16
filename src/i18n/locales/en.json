@@ -21,11 +21,44 @@
     "settings": "Settings",
     "logout": "Logout",
     "theme": "Theme",
-    "language": "Language"
+    "language": "Language",
+    "blog": "Blog"
   },
   "language": {
     "en": "English",
     "fr": "French"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Insights, tutorials and practical guides for quantitative finance professionals and enthusiasts",
+    "description": "The Pricing Lab blog features in-depth articles on option pricing, models, and quantitative finance concepts with practical code examples.",
+    "search": "Search articles...",
+    "clearFilters": "Clear filters",
+    "featuredPost": "Featured Article",
+    "allPosts": "All Articles",
+    "searchResults": "Search Results",
+    "noResults": "No articles found",
+    "tryDifferent": "Try different keywords or clear filters",
+    "viewAllPosts": "View All Articles",
+    "browseTags": "Browse by Topic",
+    "readMore": "Read More",
+    "postNotFound": "Article Not Found",
+    "postNotFoundDesc": "The article you're looking for doesn't exist or has been moved.",
+    "backToBlog": "Back to Blog",
+    "relatedPosts": "Related Articles",
+    "shareOnTwitter": "Share on Twitter",
+    "shareOnLinkedIn": "Share on LinkedIn",
+    "shareOnFacebook": "Share on Facebook",
+    "copyLink": "Copy Link",
+    "linkCopied": "Link Copied",
+    "linkCopiedDesc": "Article link copied to clipboard",
+    "exploreCourses": "Explore Related Courses",
+    "newsletter": {
+      "title": "Subscribe to Our Newsletter",
+      "description": "Get the latest articles, tutorials, and updates on quantitative finance direct to your inbox.",
+      "placeholder": "Your email address",
+      "subscribe": "Subscribe"
+    }
   },
   "home": {
     "hero": {
@@ -94,6 +127,12 @@
       "leaderboard": {
         "description": "Track your progress, compete with peers, and earn certifications for your achievements.",
         "cta": "View Leaderboard"
+      },
+      "blog": {
+        "title": "Quant Finance Blog",
+        "subtitle": "Deep insights and practical guides",
+        "description": "Learn from industry experts with our articles on pricing methods, model implementation, and trading strategies.",
+        "cta": "Read Blog Articles"
       }
     },
     "cta": {

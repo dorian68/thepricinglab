@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import Home from "./pages/Home";
 import Index from "./pages/Index";
 import Courses from "./pages/Courses";
@@ -27,43 +28,49 @@ import VolProductsCourse from "./pages/courses/VolProducts";
 import ExoticOptionsCourse from "./pages/courses/ExoticOptions";
 import MonteCarloCourse from "./pages/courses/MonteCarlo";
 import Pricing from "./pages/Pricing";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <Toaster />
-      <Sonner />
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/courses" element={<Courses />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/projects" element={<Projects />} />
-        <Route path="/tools" element={<Tools />} />
-        <Route path="/mentoring" element={<Mentoring />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/notebooks" element={<Notebooks />} />
-        <Route path="/exercises" element={<Exercises />} />
-        <Route path="/exercises/:id" element={<ExerciseDetail />} />
-        <Route path="/community" element={<Community />} />
-        <Route path="/survival-mode" element={<SurvivalMode />} />
-        <Route path="/leaderboard" element={<Leaderboard />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/courses/advanced" element={<CourseAdvanced />} />
-        <Route path="/courses/fundamentals/black-scholes" element={<BlackScholesCourse />} />
-        <Route path="/courses/fundamentals/yield-curves" element={<YieldCurvesCourse />} />
-        <Route path="/courses/fundamentals/greeks" element={<GreeksCourse />} />
-        <Route path="/courses/advanced/implied-vol" element={<ImpliedVolCourse />} />
-        <Route path="/courses/advanced/vol-products" element={<VolProductsCourse />} />
-        <Route path="/courses/complex/exotic-options" element={<ExoticOptionsCourse />} />
-        <Route path="/courses/complex/monte-carlo" element={<MonteCarloCourse />} />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
-  </QueryClientProvider>
+  <HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Toaster />
+        <Sonner />
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/tools" element={<Tools />} />
+          <Route path="/mentoring" element={<Mentoring />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/notebooks" element={<Notebooks />} />
+          <Route path="/exercises" element={<Exercises />} />
+          <Route path="/exercises/:id" element={<ExerciseDetail />} />
+          <Route path="/community" element={<Community />} />
+          <Route path="/survival-mode" element={<SurvivalMode />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/courses/advanced" element={<CourseAdvanced />} />
+          <Route path="/courses/fundamentals/black-scholes" element={<BlackScholesCourse />} />
+          <Route path="/courses/fundamentals/yield-curves" element={<YieldCurvesCourse />} />
+          <Route path="/courses/fundamentals/greeks" element={<GreeksCourse />} />
+          <Route path="/courses/advanced/implied-vol" element={<ImpliedVolCourse />} />
+          <Route path="/courses/advanced/vol-products" element={<VolProductsCourse />} />
+          <Route path="/courses/complex/exotic-options" element={<ExoticOptionsCourse />} />
+          <Route path="/courses/complex/monte-carlo" element={<MonteCarloCourse />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;
