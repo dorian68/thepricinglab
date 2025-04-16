@@ -48,7 +48,7 @@ const DesktopNav = () => {
               {/* Training Lab - Highlighted Section */}
               <NavItem 
                 icon={Dumbbell} 
-                label="Training Lab"
+                label={t('navbar.trainingLab')}
                 highlighted={true}
               >
                 <TrainingLabMenu />
@@ -88,7 +88,7 @@ const DesktopNav = () => {
               <NavItem 
                 to="/bug-report" 
                 icon={Bug} 
-                label="Bugs" 
+                label={t('navbar.bugs')} 
               />
             </NavigationMenuList>
           </NavigationMenu>

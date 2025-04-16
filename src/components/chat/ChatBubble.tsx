@@ -8,8 +8,8 @@ const ChatBubble: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [position, setPosition] = useState({ 
-    x: Math.min(20, window.innerWidth - 100), 
-    y: Math.min(window.innerHeight - 100, window.innerHeight - 20) 
+    x: 20, 
+    y: window.innerHeight - 100 
   });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -79,7 +79,7 @@ const ChatBubble: React.FC = () => {
   useEffect(() => {
     // Position initiale sécurisée
     setPosition({
-      x: Math.min(20, window.innerWidth - 70),
+      x: 20,
       y: Math.min(window.innerHeight - 100, window.innerHeight - 70)
     });
     

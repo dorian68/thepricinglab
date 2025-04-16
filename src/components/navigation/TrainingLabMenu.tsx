@@ -2,41 +2,44 @@
 import React from "react";
 import { Zap, List, Brain, BarChart4, Trophy } from "lucide-react";
 import { NavMenuItem } from "./NavMenuSection";
+import { useTranslation } from "react-i18next";
 
 const TrainingLabMenu = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="p-4 w-[380px]">
-      <p className="text-sm text-finance-accent mb-4 font-medium">Exercices interactifs, simulations et défis pour renforcer vos compétences en pricing d'options</p>
+      <p className="text-sm text-finance-accent mb-4 font-medium">{t('trainingLab.subtitle')}</p>
       <ul className="space-y-3">
         <NavMenuItem 
           to="/exercises" 
           icon={List} 
-          title="Exercices Interactifs" 
-          description="Exercices guidés par niveau" 
+          title={t('trainingLab.exercises')} 
+          description={t('exercises.subtitle')} 
         />
         <NavMenuItem 
           to="/survival-mode" 
           icon={Zap} 
-          title="Mode Survie" 
-          description="Défis chronométrés par difficulté" 
+          title={t('survivalMode.title')} 
+          description={t('survivalMode.subtitle')} 
         />
         <NavMenuItem 
           to="/quizzes" 
           icon={Brain} 
-          title="Quiz Progressifs" 
-          description="Évaluez vos connaissances" 
+          title={t('trainingLab.quizzes')} 
+          description={t('trainingLab.progress')} 
         />
         <NavMenuItem 
           to="/practice" 
           icon={BarChart4} 
-          title="Pratique Guidée" 
-          description="Modèles stochastiques et pricing" 
+          title={t('trainingLab.practice')} 
+          description={t('trainingLab.performance')} 
         />
         <NavMenuItem 
           to="/leaderboard" 
           icon={Trophy} 
-          title="Classement" 
-          description="Progressez et comparez vos performances" 
+          title={t('trainingLab.leaderboard')} 
+          description={t('leaderboard.subtitle')} 
         />
       </ul>
     </div>

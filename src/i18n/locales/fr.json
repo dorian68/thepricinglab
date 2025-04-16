@@ -1,4 +1,3 @@
-
 {
   "app": {
     "title": "The Pricing Lab",
@@ -22,7 +21,9 @@
     "logout": "Déconnexion",
     "theme": "Thème",
     "language": "Langue",
-    "blog": "Blog"
+    "blog": "Blog",
+    "bugs": "Signaler un bug",
+    "trainingLab": "Training Lab"
   },
   "language": {
     "en": "Anglais",
@@ -33,6 +34,51 @@
     "tooltip": "Changer la langue du site",
     "en": "English",
     "fr": "Français"
+  },
+  "trainingLab": {
+    "title": "Training Lab",
+    "subtitle": "Exercices interactifs et défis pour tester vos connaissances",
+    "exercises": "Exercices Interactifs",
+    "survival": "Mode Survie",
+    "quizzes": "Quiz Progressifs",
+    "practice": "Pratique Guidée",
+    "leaderboard": "Classement",
+    "performance": "Votre Performance",
+    "progress": "Suivez votre progression"
+  },
+  "chat": {
+    "title": "Assistant Trading Lab",
+    "placeholder": "Tapez votre message...",
+    "send": "Envoyer",
+    "welcomeMessage": "Bonjour ! Comment puis-je vous aider avec votre apprentissage des options financières aujourd'hui ?",
+    "tipMessage": "Vous pouvez me poser des questions sur le pricing d'options, les modèles de volatilité, ou les stratégies de trading."
+  },
+  "bugReport": {
+    "title": "Signaler un Bug",
+    "subtitle": "Aidez-nous à améliorer The Trading Lab en signalant les problèmes que vous rencontrez",
+    "category": "Catégorie du bug",
+    "titleLabel": "Titre du bug",
+    "description": "Description détaillée",
+    "url": "URL où le bug se produit",
+    "screenshot": "Capture d'écran (optionnel)",
+    "dropImage": "Glissez-déposez une image ou",
+    "browse": "Parcourir les fichiers",
+    "send": "Envoyer le rapport",
+    "categories": {
+      "select": "Sélectionnez une catégorie",
+      "ui": "Interface utilisateur",
+      "functionality": "Fonctionnalité",
+      "performance": "Performance",
+      "courseContent": "Contenu du cours",
+      "other": "Autre"
+    },
+    "placeholders": {
+      "title": "Décrivez brièvement le problème",
+      "description": "Décrivez en détail le bug, les étapes pour le reproduire et le comportement attendu",
+      "url": "https://..."
+    },
+    "success": "Rapport de bug envoyé avec succès",
+    "error": "Erreur lors de l'envoi du rapport de bug"
   },
   "blog": {
     "title": "Blog",
