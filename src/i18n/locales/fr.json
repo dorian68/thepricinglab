@@ -1,3 +1,4 @@
+
 {
   "app": {
     "title": "The Pricing Lab",
@@ -54,158 +55,6 @@
     "welcomeMessage": "Bonjour ! Comment puis-je vous aider avec votre apprentissage des options financières aujourd'hui ?",
     "tipMessage": "Vous pouvez me poser des questions sur le pricing d'options, les modèles de volatilité, ou les stratégies de trading."
   },
-  "bugReport": {
-    "title": "Signaler un Bug",
-    "subtitle": "Aidez-nous à améliorer The Trading Lab en signalant les problèmes que vous rencontrez",
-    "category": "Catégorie du bug",
-    "titleLabel": "Titre du bug",
-    "description": "Description détaillée",
-    "url": "URL où le bug se produit",
-    "screenshot": "Capture d'écran (optionnel)",
-    "dropImage": "Glissez-déposez une image ou",
-    "browse": "Parcourir les fichiers",
-    "send": "Envoyer le rapport",
-    "categories": {
-      "select": "Sélectionnez une catégorie",
-      "ui": "Interface utilisateur",
-      "functionality": "Fonctionnalité",
-      "performance": "Performance",
-      "courseContent": "Contenu du cours",
-      "other": "Autre"
-    },
-    "placeholders": {
-      "title": "Décrivez brièvement le problème",
-      "description": "Décrivez en détail le bug, les étapes pour le reproduire et le comportement attendu",
-      "url": "https://..."
-    },
-    "success": "Rapport de bug envoyé avec succès",
-    "error": "Erreur lors de l'envoi du rapport de bug"
-  },
-  "blog": {
-    "title": "Blog",
-    "subtitle": "Analyses, tutoriels et guides pratiques pour les professionnels et passionnés de finance quantitative",
-    "description": "Le blog The Pricing Lab propose des articles approfondis sur la tarification des options, les modèles et les concepts de finance quantitative avec des exemples de code pratiques.",
-    "search": "Rechercher des articles...",
-    "clearFilters": "Effacer les filtres",
-    "featuredPost": "Article en vedette",
-    "allPosts": "Tous les articles",
-    "searchResults": "Résultats de recherche",
-    "noResults": "Aucun article trouvé",
-    "tryDifferent": "Essayez différents mots-clés ou effacez les filtres",
-    "viewAllPosts": "Voir tous les articles",
-    "browseTags": "Parcourir par sujet",
-    "readMore": "Lire la suite",
-    "postNotFound": "Article non trouvé",
-    "postNotFoundDesc": "L'article que vous recherchez n'existe pas ou a été déplacé.",
-    "backToBlog": "Retour au blog",
-    "relatedPosts": "Articles connexes",
-    "shareOnTwitter": "Partager sur Twitter",
-    "shareOnLinkedIn": "Partager sur LinkedIn",
-    "shareOnFacebook": "Partager sur Facebook",
-    "copyLink": "Copier le lien",
-    "linkCopied": "Lien copié",
-    "linkCopiedDesc": "Lien de l'article copié dans le presse-papier",
-    "exploreCourses": "Explorer les cours associés",
-    "newsletter": {
-      "title": "Abonnez-vous à notre newsletter",
-      "description": "Recevez les derniers articles, tutoriels et mises à jour sur la finance quantitative directement dans votre boîte de réception.",
-      "placeholder": "Votre adresse email",
-      "subscribe": "S'abonner"
-    }
-  },
-  "survivalMode": {
-    "title": "Mode Survie",
-    "subtitle": "Testez vos compétences en pricing sous pression et voyez jusqu'où vous pouvez aller",
-    "description": "Le mode survie vous met au défi de résoudre des problèmes de pricing de plus en plus difficiles, contre la montre. Voyez combien de challenges vous pouvez résoudre avant que le temps ne s'écoule!",
-    "stats": {
-      "waves": "{{count}} Vagues de difficulté",
-      "challenges": "{{count}}+ Défis en tout",
-      "timeLimit": "Temps limité par défi",
-      "highestWave": "Vague max atteinte",
-      "completed": "Défis complétés",
-      "success": "Taux de réussite",
-      "avgTime": "Temps moyen",
-      "ranking": "Classement global"
-    },
-    "yourStats": "Vos statistiques",
-    "progress": "Progression globale",
-    "availableWaves": "Vagues disponibles",
-    "subscription": {
-      "title": "Débloquez toutes les vagues",
-      "description": "Avec un abonnement, obtenez accès à toutes les vagues du mode survie et mettez vos compétences à l'épreuve avec des défis avancés",
-      "unlock": "Débloquer toutes les vagues",
-      "comparePlans": "Comparer les plans"
-    },
-    "difficulty": {
-      "easy": "Débutant",
-      "medium": "Intermédiaire",
-      "hard": "Difficile",
-      "expert": "Expert",
-      "master": "Maître",
-      "legendary": "Légendaire"
-    },
-    "waves": {
-      "beginner": {
-        "title": "Fondamentaux",
-        "description": "Commencez avec les bases des options vanilles et des modèles de pricing simples"
-      },
-      "intermediate": {
-        "title": "Tactiques intermédiaires",
-        "description": "Maîtrisez les arbres binomiaux et les options américaines avec des contraintes de temps"
-      },
-      "advanced": {
-        "title": "Défis avancés",
-        "description": "Relevez des challenges de volatilité stochastique et de produits exotiques européens"
-      },
-      "expert": {
-        "title": "Expertise quantitative",
-        "description": "Plongez dans les options à dépendance de chemin et les options à barrière"
-      },
-      "master": {
-        "title": "Maîtrise structurée",
-        "description": "Abordez les produits structurés complexes et les options multi-actifs"
-      },
-      "legendary": {
-        "title": "Légende financière",
-        "description": "Affrontez les défis ultimes avec des modèles d'IA, taux stochastiques et XVA"
-      }
-    },
-    "challenges": "défis",
-    "perChallenge": "par défi",
-    "topics": "Sujets couverts",
-    "startWave": "Commencer cette vague",
-    "unlockWave": "Débloquer cette vague",
-    "leaderboard": "Classement",
-    "viewFull": "Voir classement complet",
-    "rank": "Rang",
-    "player": "Joueur",
-    "highestWave": "Vague max",
-    "challenges": "Défis réussis",
-    "success": "Réussite",
-    "avgTime": "Temps moy.",
-    "backToWaves": "Retour aux vagues",
-    "score": "Score",
-    "challenge": "Défi",
-    "readyToStart": "Prêt à commencer ?",
-    "waveDescription": "Vous êtes sur le point de commencer {{wave}} avec {{challenges}} défis. Vous aurez {{time}} secondes pour chaque défi. Bonne chance !",
-    "startChallenge": "Commencer le défi",
-    "currentChallenge": "Défi actuel",
-    "challengeContent": "Le contenu du défi serait affiché ici (formules, graphiques, données)",
-    "enterAnswer": "Entrez votre réponse...",
-    "skip": "Passer",
-    "submit": "Soumettre la réponse",
-    "correctAnswer": "Correct ! Bien joué !",
-    "incorrectAnswer": "Incorrect. La bonne approche serait montrée ici.",
-    "congratulations": "Félicitations !",
-    "challengeFailed": "Défi terminé",
-    "finalScore": "Votre score final : {{score}}/{{total}}",
-    "accuracy": "Précision",
-    "excellentPerformance": "Performance excellente ! Vous avez maîtrisé ce niveau de difficulté !",
-    "goodPerformance": "Bon travail ! Continuez à pratiquer pour améliorer votre vitesse et précision.",
-    "needPractice": "Vous pourriez avoir besoin de plus de pratique avec ces concepts. Essayez de revoir les cours associés.",
-    "returnToWaves": "Retour aux vagues",
-    "tryAgain": "Réessayer"
-  },
   "home": {
     "hero": {
       "title1": "Maîtrisez la Finance Quantitative",
@@ -213,7 +62,8 @@
       "description": "Apprenez à évaluer des produits dérivés complexes, comprendre les surfaces de volatilité et implémenter des modèles de pointe avec notre plateforme pratique.",
       "startCourse": "Commencer à Apprendre",
       "signUp": "S'inscrire",
-      "tagline": "DES FONDAMENTAUX AUX MODÈLES AVANCÉS"
+      "tagline": "DES FONDAMENTAUX AUX MODÈLES AVANCÉS",
+      "terminal": "TERMINAL DE TRADING ACTIVÉ"
     },
     "approach": {
       "title": "Notre Approche",
@@ -231,6 +81,10 @@
         "title": "Excellence Technique",
         "description": "Accent sur les méthodes computationnelles et l'implémentation de modèles utilisant des techniques standards de l'industrie."
       },
+      "job": {
+        "title": "Pertinence Professionnelle",
+        "description": "Compétences directement applicables aux rôles en finance quantitative dans les banques d'investissement et les sociétés de trading."
+      },
       "certified": {
         "title": "Pertinence pour l'Industrie",
         "description": "Programme conçu en partenariat avec des analystes quantitatifs des meilleures banques d'investissement."
@@ -238,10 +92,41 @@
     },
     "curriculum": {
       "title": "Programme",
-      "description": "Notre plateforme offre une large gamme de modules couvrant tous les aspects de la modélisation financière et des stratégies de trading."
+      "description": "Notre plateforme offre une large gamme de modules couvrant tous les aspects de la modélisation financière et des stratégies de trading.",
+      "allModules": "Tous les Modules"
     },
     "modules": {
       "highlight": "Complet",
+      "blackScholes": {
+        "title": "Modèle de Black-Scholes",
+        "level": "Fondamental",
+        "description": "Maîtrisez le modèle d'évaluation d'options qui a révolutionné les marchés financiers."
+      },
+      "volatility": {
+        "title": "Surface de Volatilité",
+        "level": "Intermédiaire",
+        "description": "Comprenez les sourires de volatilité, les skews et les structures à terme sur les marchés d'options."
+      },
+      "exotic": {
+        "title": "Options Exotiques",
+        "level": "Avancé",
+        "description": "Évaluez et couvrez des produits dérivés complexes comme les barrières, asiatiques et lookbacks."
+      },
+      "greeks": {
+        "title": "Grecs des Options",
+        "level": "Intermédiaire",
+        "description": "Maîtrisez delta, gamma, vega, theta et leur rôle dans la gestion des risques."
+      },
+      "monteCarlo": {
+        "title": "Méthodes Monte Carlo",
+        "level": "Avancé",
+        "description": "Implémentez des techniques de simulation pour l'évaluation d'options dépendantes du chemin."
+      },
+      "stressTesting": {
+        "title": "Tests de Stress",
+        "level": "Avancé",
+        "description": "Analysez les portefeuilles d'options dans des scénarios de marché extrêmes."
+      },
       "courses": {
         "description": "Des options vanilles aux produits dérivés exotiques, apprenez la théorie et la pratique à travers des tutoriels interactifs.",
         "cta": "Parcourir les Cours"
@@ -265,7 +150,6 @@
         "cta": "Rejoindre la Communauté"
       },
       "tools": {
-        "title": "Outils Interactifs",
         "subtitle": "Travaillez avec des outils professionnels",
         "description": "Utilisez notre suite de calculateurs et de visualiseurs pour comprendre des concepts financiers complexes.",
         "cta": "Explorer les Outils"
@@ -275,371 +159,35 @@
         "cta": "Voir le Classement"
       }
     },
+    "testimonials": {
+      "title": "Ce Que Disent Nos Utilisateurs",
+      "description": "Écoutez des professionnels et des étudiants qui ont transformé leurs compétences en finance quantitative avec notre plateforme.",
+      "joinCta": "Rejoignez Notre Communauté",
+      "alexandre": {
+        "quote": "L'approche pratique des modèles d'évaluation d'options m'a aidé à réussir mes entretiens pour un poste de quant dans une grande banque d'investissement.",
+        "author": "Alexandre D.",
+        "position": "Trader de Dérivés, Paris"
+      },
+      "sarah": {
+        "quote": "Enfin une plateforme qui explique les surfaces de volatilité d'une manière qui m'a fait sens. Les outils interactifs changent la donne.",
+        "author": "Sarah M.",
+        "position": "Risk Manager, Londres"
+      },
+      "thomas": {
+        "quote": "En tant que personne passant du milieu académique à la finance, cette plateforme a comblé le fossé entre la théorie mathématique et l'implémentation réelle.",
+        "author": "Thomas K.",
+        "position": "Doctorant, ETH Zurich"
+      }
+    },
     "cta": {
       "title": "Prêt à Devenir un",
       "highlight": "Maître Quant?",
       "description": "Rejoignez des milliers de professionnels et d'étudiants qui perfectionnent leurs compétences en finance quantitative.",
       "subscribe": "Choisir un Plan",
+      "explore": "Explorer les Cours",
       "freeCourse": "Essayer un Cours Gratuit",
       "tooltip": "Accédez gratuitement à notre cours sur le modèle BSM"
     }
-  },
-  "pricing": {
-    "title": "Plans Tarifaires",
-    "subtitle": "Choisissez le plan qui correspond à vos objectifs d'apprentissage",
-    "description": "Des fondamentaux gratuits à la formation professionnelle avancée, nous avons un plan pour chaque niveau",
-    "highlight": "Tarifaires",
-    "monthly": "mensuel",
-    "annual": "annuel",
-    "annualSavings": "Économisez 20% avec la facturation annuelle",
-    "guarantee": "Garantie de remboursement de 30 jours. Sans questions.",
-    "recommended": "Plus Populaire",
-    "freemium": {
-      "title": "Gratuit",
-      "price": "Gratuit",
-      "description": "Parfait pour les débutants explorant la finance quantitative",
-      "feature1": "Accès aux cours fondamentaux",
-      "feature2": "Quiz et exercices de base",
-      "feature3": "1 vague en mode survie",
-      "feature4": "Accès à la communauté",
-      "cta": "Commencer Gratuitement",
-      "badge": "Gratuit"
-    },
-    "student": {
-      "title": "Pack Étudiant",
-      "description": "Apprentissage essentiel pour les étudiants en finance",
-      "feature1": "Toutes les fonctionnalités gratuites",
-      "feature2": "Cours et exercices intermédiaires",
-      "feature3": "Accès complet au mode survie",
-      "feature4": "Rapports de performance",
-      "feature5": "Certificats de module de base",
-      "cta": "Choisir Étudiant",
-      "badge": "Étudiant"
-    },
-    "pro": {
-      "title": "Pack Pro",
-      "description": "Boîte à outils complète pour les aspirants professionnels de la finance",
-      "feature1": "Toutes les fonctionnalités étudiantes",
-      "feature2": "Cours et modèles avancés",
-      "feature3": "Défis professionnels",
-      "feature4": "Préparation aux entretiens",
-      "feature5": "Certificats vérifiés LinkedIn",
-      "feature6": "Défis mensuels avec classement",
-      "feature7": "Assistant IA Quant",
-      "feature8": "Études de cas réels",
-      "cta": "Choisir Pro",
-      "badge": "Pro"
-    },
-    "hero": {
-      "title": "Choisissez le Plan Adapté à Votre",
-      "highlight": "Parcours Financier",
-      "description": "De l'exploration des fondamentaux à la maîtrise des méthodes quantitatives avancées, nous proposons des options flexibles qui évoluent avec vos compétences"
-    },
-    "comparison": {
-      "title": "Comparer les Plans",
-      "feature": "Fonctionnalité",
-      "category1": "Contenu des Cours",
-      "category2": "Exercices & Simulations",
-      "category3": "Outils & Ressources",
-      "category4": "Développement Professionnel",
-      "fundamentals": "Modules Fondamentaux",
-      "intermediate": "Modules Intermédiaires",
-      "advanced": "Modules Avancés",
-      "basicExercises": "Exercices de Base",
-      "intermediateExercises": "Exercices Intermédiaires",
-      "advancedExercises": "Exercices Avancés",
-      "survivalMode": "Défis du Mode Survie",
-      "basicTools": "Calculateurs de Base",
-      "advancedTools": "Outils Avancés",
-      "notebooks": "Carnets Interactifs",
-      "certificates": "Certificats de Cours",
-      "linkedinIntegration": "Intégration LinkedIn",
-      "performanceReports": "Rapports de Performance",
-      "projectChallenges": "Défis de Projet",
-      "gptAssistant": "Assistant IA Quant"
-    },
-    "faq": {
-      "title": "Questions Fréquentes",
-      "question1": "Puis-je mettre à niveau mon plan ultérieurement?",
-      "answer1": "Oui, vous pouvez mettre à niveau votre plan à tout moment. Votre paiement sera calculé au prorata en fonction du temps restant dans votre abonnement actuel.",
-      "question2": "Offrez-vous des réductions pour étudiants?",
-      "answer2": "Nous proposons des tarifs académiques spéciaux pour les étudiants avec un email universitaire valide. Contactez notre équipe de support pour plus d'informations.",
-      "question3": "Qu'est-ce qui est inclus dans le mode survie?",
-      "answer3": "Le mode survie propose des exercices chronométrés de difficulté croissante, testant votre capacité à résoudre des problèmes de finance quantitative sous pression. Les utilisateurs gratuits accèdent à la première vague, tandis que les abonnés débloquent tous les défis.",
-      "question4": "Comment fonctionnent les certificats?",
-      "answer4": "Les abonnés Pro reçoivent des certificats vérifiables à l'achèvement des modules de cours. Ces certificats peuvent être directement intégrés à LinkedIn et présentent les compétences spécifiques en finance quantitative que vous avez maîtrisées."
-    },
-    "cta": {
-      "title": "Accélérez Votre Carrière",
-      "highlight": "Financière Aujourd'hui",
-      "description": "Rejoignez des milliers de professionnels qui ont fait progresser leurs compétences et leurs opportunités de carrière avec notre plateforme",
-      "start": "Commencer",
-      "try": "Essayer les Modules Gratuits"
-    }
-  },
-  "coursesPage": {
-    "title": "Modules de Cours",
-    "subtitle": "Maîtrisez l'art et la science de la finance quantitative avec notre parcours d'apprentissage structuré",
-    "stats": {
-      "modules": "{{count}}+ Modules de Cours",
-      "hours": "100+ Heures de Contenu",
-      "exercises": "300+ Exercices Pratiques"
-    },
-    "badges": {
-      "freemium": "Accès Gratuit",
-      "student": "Plan Étudiant",
-      "pro": "Plan Pro"
-    },
-    "heroTagline": "CONSTAMMENT MIS À JOUR AVEC LES DERNIERS MODÈLES ET TECHNIQUES",
-    "topics": "Sujets Clés",
-    "access": "Commencer l'Apprentissage",
-    "locked": "Mise à Niveau Requise",
-    "upgrade": "Mettre à Niveau pour Accéder",
-    "unlockModules": "Débloquer Tous les Modules",
-    "unlockIntermediateModules": "Débloquer les Modules Intermédiaires",
-    "unlockAdvancedModules": "Débloquer les Modules Avancés",
-    "subscriptionAccess": "Obtenez un accès complet avec un abonnement",
-    "studentPlanAccess": "Disponible avec le Plan Étudiant (19€/mois)",
-    "proPlanAccess": "Disponible avec le Plan Pro (49€/mois)",
-    "requiredPlan": "Nécessite un abonnement {{plan}}",
-    "fundamentals": {
-      "level": "Fondamental",
-      "description": "Maîtrisez les éléments essentiels de la finance quantitative avec nos cours adaptés aux débutants. Aucune expérience préalable requise.",
-      "timeValue": {
-        "title": "Valeur Temporelle de l'Argent",
-        "duration": "2-3 heures",
-        "description": "Comprendre le concept financier fondamental de l'évolution de la valeur de l'argent dans le temps",
-        "topics": {
-          "compound": "Intérêt Composé",
-          "present": "Valeur Actuelle",
-          "future": "Valeur Future",
-          "rates": "Taux d'Intérêt"
-        }
-      },
-      "blackScholes": {
-        "title": "Modèle de Black-Scholes",
-        "duration": "4-5 heures",
-        "description": "Apprenez le modèle fondamental de pricing d'options qui a révolutionné les marchés financiers",
-        "topics": {
-          "probabilities": "Théorie des Probabilités",
-          "brownian": "Mouvement Brownien",
-          "derivation": "Dérivation du Modèle",
-          "putCall": "Parité Put-Call"
-        }
-      },
-      "vanillaOptions": {
-        "title": "Options Vanilles",
-        "duration": "3-4 heures",
-        "description": "Explorez les fondamentaux des options d'achat et de vente et leurs stratégies de trading",
-        "topics": {
-          "calls": "Options d'Achat",
-          "puts": "Options de Vente",
-          "payoffs": "Diagrammes de Payoff",
-          "strategies": "Stratégies de Base"
-        }
-      },
-      "impliedVol": {
-        "title": "Bases de la Volatilité Implicite",
-        "duration": "3-4 heures",
-        "description": "Comprendre comment l'attente de volatilité du marché est dérivée des prix des options",
-        "topics": {
-          "definition": "Définition du Concept",
-          "calculation": "Méthodes de Calcul",
-          "historical": "Comparaison Historique",
-          "trading": "Applications au Trading"
-        }
-      },
-      "deltaHedging": {
-        "title": "Couverture Delta",
-        "duration": "2-3 heures",
-        "description": "Apprenez la technique fondamentale de gestion du risque des options en utilisant l'actif sous-jacent",
-        "topics": {
-          "definition": "Concept de Delta",
-          "implementation": "Implémentation de la Couverture",
-          "rebalancing": "Rééquilibrage Dynamique",
-          "costs": "Coûts de Transaction"
-        }
-      }
-    },
-    "intermediate": {
-      "level": "Intermédiaire",
-      "description": "Développez vos connaissances avec des modèles et techniques plus avancés. Une compréhension de base des options et des probabilités est recommandée.",
-      "binomialTrees": {
-        "title": "Arbres Binomiaux & Trinomiaux",
-        "duration": "4-5 heures",
-        "description": "Maîtrisez les méthodes basées sur les arbres pour évaluer les options et autres dérivés",
-        "topics": {
-          "oneStep": "Arbres à Un Pas",
-          "multiStep": "Arbres à Plusieurs Pas",
-          "convergence": "Propriétés de Convergence",
-          "american": "Options Américaines"
-        }
-      },
-      "americanOptions": {
-        "title": "Options Américaines",
-        "duration": "3-4 heures",
-        "description": "Explorez l'évaluation et les décisions d'exercice anticipé pour les options de style américain",
-        "topics": {
-          "earlyExercise": "Exercice Anticipé",
-          "boundary": "Frontière d'Exercice",
-          "trees": "Méthodes en Réseau",
-          "numerical": "Solutions Numériques"
-        }
-      },
-      "localVol": {
-        "title": "Volatilité Locale",
-        "duration": "4-5 heures",
-        "description": "Comprendre comment modéliser une volatilité qui varie selon les prix d'exercice et les dates d'expiration",
-        "topics": {
-          "surfaces": "Surfaces de Volatilité",
-          "modeling": "Équation de Dupire",
-          "fitting": "Calibration au Marché",
-          "limitations": "Limitations du Modèle"
-        }
-      },
-      "greeks": {
-        "title": "Grecs des Options",
-        "duration": "4-5 heures",
-        "description": "Maîtrisez les mesures de sensibilité qui décrivent comment les prix des options changent avec les conditions du marché",
-        "topics": {
-          "delta": "Delta (Sensibilité au Prix)",
-          "gamma": "Gamma (Changement de Delta)",
-          "vega": "Vega (Sensibilité à la Volatilité)",
-          "theta": "Theta (Érosion Temporelle)",
-          "hedging": "Couverture par les Grecs"
-        }
-      },
-      "monteCarlo": {
-        "title": "Méthodes Monte Carlo",
-        "duration": "5-6 heures",
-        "description": "Apprenez les techniques de simulation essentielles pour évaluer des dérivés complexes",
-        "topics": {
-          "basics": "Processus Aléatoires",
-          "pathGeneration": "Génération de Trajectoires",
-          "varianceReduction": "Réduction de Variance",
-          "implementation": "Implémentation"
-        }
-      }
-    },
-    "advanced": {
-      "level": "Avancé",
-      "description": "Plongez dans des modèles sophistiqués, des produits exotiques et des techniques d'évaluation professionnelles. Pour les praticiens expérimentés et les aspirants quants.",
-      "exoticOptions": {
-        "title": "Options Exotiques",
-        "duration": "5-6 heures",
-        "description": "Explorez des dérivés complexes au-delà des calls et puts standard",
-        "topics": {
-          "barrier": "Options à Barrière",
-          "asian": "Options Asiatiques",
-          "lookback": "Options Lookback",
-          "quanto": "Options Quanto"
-        }
-      },
-      "structuredProducts": {
-        "title": "Produits Structurés",
-        "duration": "6-7 heures",
-        "description": "Maîtrisez la conception et l'évaluation de stratégies d'investissement packagées",
-        "topics": {
-          "autocall": "Autocalls",
-          "reverseConvertible": "Reverse Convertibles",
-          "capital": "Notes à Capital Protégé",
-          "structures": "Structures Personnalisées"
-        }
-      },
-      "stochasticModels": {
-        "title": "Modèles Stochastiques",
-        "duration": "7-8 heures",
-        "description": "Implémentez des processus stochastiques avancés pour une évaluation plus précise",
-        "topics": {
-          "heston": "Modèle de Heston",
-          "sabr": "Modèle SABR",
-          "hullWhite": "Modèle de Hull-White",
-          "calibration": "Calibration de Modèle"
-        }
-      },
-      "smileSkew": {
-        "title": "Smile & Skew de Volatilité",
-        "duration": "5-6 heures",
-        "description": "Comprendre et modéliser les modèles de volatilité implicite non plats observés sur les marchés",
-        "topics": {
-          "patterns": "Motifs de Marché",
-          "modeling": "Modélisation Mathématique",
-          "trading": "Stratégies de Trading",
-          "risk": "Gestion des Risques"
-        }
-      },
-      "xva": {
-        "title": "Cadre XVA",
-        "duration": "6-7 heures",
-        "description": "Maîtrisez les ajustements de valorisation cruciaux pour l'évaluation moderne des dérivés",
-        "topics": {
-          "cva": "Ajustement de Valeur de Crédit",
-          "dva": "Ajustement de Valeur de Dette",
-          "fva": "Ajustement de Valeur de Financement",
-          "calculation": "Calcul Pratique"
-        }
-      },
-      "stochasticRates": {
-        "title": "Taux d'Intérêt Stochastiques",
-        "duration": "6-7 heures",
-        "description": "Implémentez des modèles pour les dérivés de taux d'intérêt avec des processus stochastiques",
-        "topics": {
-          "shortRate": "Modèles de Taux Court",
-          "hjm": "Heath-Jarvis-Morton",
-          "calibration": "Calibration de Courbe de Rendement",
-          "applications": "Applications à Revenu Fixe"
-        }
-      },
-      "mlPricing": {
-        "title": "Pricing par Machine Learning",
-        "duration": "7-8 heures",
-        "description": "Appliquez des techniques de ML de pointe à la modélisation financière et à l'évaluation des dérivés",
-        "topics": {
-          "regression": "Méthodes de Régression",
-          "boosting": "Gradient Boosting",
-          "calibration": "Calibration de Modèle",
-          "comparison": "vs. Modèles Traditionnels"
-        }
-      }
-    },
-    "subscription": {
-      "title": "Choisissez le Plan Adapté à Votre Parcours d'Apprentissage",
-      "description": "Nos formules d'abonnement sont conçues pour évoluer avec vos compétences et ambitions en finance quantitative",
-      "freemium": "Commencez avec un accès gratuit aux cours et exercices fondamentaux",
-      "student": "Débloquez du contenu intermédiaire et améliorez votre apprentissage avec le suivi des performances",
-      "pro": "Obtenez un accès complet au matériel avancé et aux ressources de développement professionnel",
-      "viewPlans": "Voir Tous les Plans",
-      "tryFree": "Essayer le Contenu Gratuit"
-    }
-  },
-  "exercises": {
-    "title": "Exercices & Défis",
-    "subtitle": "Développez vos compétences par une pratique progressive"
-  },
-  "leaderboard": {
-    "title": "Classement",
-    "subtitle": "Voyez comment vous vous classez parmi les autres quants"
-  },
-  "community": {
-    "title": "Communauté",
-    "subtitle": "Connectez-vous avec d'autres passionnés de finance quantitative"
-  },
-  "notebooks": {
-    "title": "Carnets Interactifs",
-    "subtitle": "Exécutez du code et explorez des modèles dans votre navigateur",
-    "sections": "Sections du Carnet",
-    "popularity": "Popularité",
-    "updated": "Mis à jour",
-    "open": "Ouvrir le Carnet",
-    "exportPdf": "Exporter en PDF",
-    "exportNotebook": "Exporter le Carnet",
-    "save": "Enregistrer",
-    "run": "Exécuter",
-    "share": "Partager",
-    "nextSection": "Section Suivante",
-    "backToLibrary": "Retour à la Bibliothèque",
-    "upload": "Télécharger un Carnet",
-    "create": "Créer un Nouveau"
   },
   "courses": {
     "fundamentals": "Fondamentaux",

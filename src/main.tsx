@@ -1,10 +1,11 @@
 
+import React from 'react' 
 import { createRoot } from 'react-dom/client'
+// Import i18n configuration first to ensure it's loaded before components
+import './i18n'
 import App from './App.tsx'
 import './index.css'
-import './i18n' // Import i18n configuration
 import { TooltipProvider } from "@/components/ui/tooltip"
-import React from 'react' // Add React import
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

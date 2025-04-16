@@ -57,7 +57,20 @@ const ModulePreview = ({ title, level, description }: { title: string, level: st
 );
 
 const Home = () => {
-  const { t } = useTranslation();
+  const { t, i18n, ready } = useTranslation();
+  
+  // Safe translation function that provides fallbacks
+  const safeTranslate = (key: string, defaultValue?: string) => {
+    if (!ready) return defaultValue || key.split('.').pop();
+    
+    const result = t(key);
+    // If the result is the same as the key, it means the translation is missing
+    if (result === key) {
+      console.warn(`Missing translation: ${key} in ${i18n.language}`);
+      return defaultValue || key.split('.').pop() || key;
+    }
+    return result;
+  };
   
   return (
     <div className="flex flex-col min-h-screen bg-finance-dark text-finance-offwhite">
@@ -72,26 +85,28 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="flex flex-col">
               <h1 className="text-3xl md:text-5xl font-bold mb-6 leading-tight text-finance-offwhite terminal-text">
-                {t('home.hero.title1')}<br />
-                <span className="finance-gradient text-transparent bg-clip-text">{t('home.hero.title2')}</span>
+                {safeTranslate('home.hero.title1', 'Master Quantitative Finance')}<br />
+                <span className="finance-gradient text-transparent bg-clip-text">
+                  {safeTranslate('home.hero.title2', 'Like a Trading Pro')}
+                </span>
               </h1>
               
               <p className="text-finance-lightgray text-lg mb-8">
-                {t('home.hero.description')}
+                {safeTranslate('home.hero.description', 'Learn to price complex financial derivatives, understand volatility surfaces, and implement cutting-edge models with our hands-on platform.')}
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/courses/fundamentals/black-scholes" className="finance-button text-center">
-                  {t('home.hero.startCourse')}
+                  {safeTranslate('home.hero.startCourse', 'Start Learning')}
                 </Link>
                 <Link to="/signup" className="finance-button-outline text-center">
-                  {t('home.hero.signUp')}
+                  {safeTranslate('home.hero.signUp', 'Sign Up')}
                 </Link>
               </div>
               
               <div className="mt-12 flex items-center">
                 <span className="terminal-text uppercase tracking-wider text-sm text-finance-accent font-semibold mr-8">
-                  {t('home.hero.tagline')}
+                  {safeTranslate('home.hero.tagline', 'FROM FUNDAMENTALS TO ADVANCED MODELS')}
                 </span>
               </div>
             </div>
@@ -100,7 +115,7 @@ const Home = () => {
               <div className="bg-[url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3')] bg-cover bg-center w-full h-full opacity-60 mix-blend-overlay"></div>
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="terminal-text text-finance-accent bg-finance-charcoal/80 px-4 py-3 border border-finance-burgundy/30 rounded text-sm tracking-wider">
-                  {t('home.hero.terminal')}
+                  {safeTranslate('home.hero.terminal', 'TRADING TERMINAL ACTIVATED')}
                 </div>
               </div>
             </div>
@@ -112,32 +127,34 @@ const Home = () => {
       <section className="py-16 md:py-24 px-6 border-b border-finance-steel/10">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4 terminal-text">{t('home.approach.title')}</h2>
+            <h2 className="text-3xl font-bold mb-4 terminal-text">
+              {safeTranslate('home.approach.title', 'Our Innovative Approach')}
+            </h2>
             <p className="text-finance-lightgray max-w-2xl mx-auto">
-              {t('home.approach.description')}
+              {safeTranslate('home.approach.description', 'Our platform combines theoretical knowledge with practical applications to help you master complex financial models and valuation techniques.')}
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Feature 
               icon={BookOpen} 
-              title={t('home.features.pragmatic.title')} 
-              description={t('home.features.pragmatic.description')}
+              title={safeTranslate('home.features.pragmatic.title', 'Practical Learning')} 
+              description={safeTranslate('home.features.pragmatic.description', 'Hands-on exercises and real-world problems to bridge the gap between theory and practice.')}
             />
             <Feature 
               icon={BarChart} 
-              title={t('home.features.tech.title')} 
-              description={t('home.features.tech.description')}
+              title={safeTranslate('home.features.tech.title', 'Technical Excellence')} 
+              description={safeTranslate('home.features.tech.description', 'Focus on computational methods and implementing models using industry-standard techniques.')}
             />
             <Feature 
               icon={Users} 
-              title={t('home.features.job.title')} 
-              description={t('home.features.job.description')}
+              title={safeTranslate('home.features.job.title', 'Career Relevant')} 
+              description={safeTranslate('home.features.job.description', 'Skills directly applicable to quantitative finance roles in investment banks and trading firms.')}
             />
             <Feature 
               icon={Award} 
-              title={t('home.features.certified.title')} 
-              description={t('home.features.certified.description')}
+              title={safeTranslate('home.features.certified.title', 'Industry Relevance')} 
+              description={safeTranslate('home.features.certified.description', 'Curriculum designed in partnership with quantitative analysts from top investment banks.')}
             />
           </div>
         </div>
@@ -148,46 +165,49 @@ const Home = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12">
             <div>
-              <h2 className="text-3xl font-bold mb-4 terminal-text">{t('home.curriculum.title')}</h2>
+              <h2 className="text-3xl font-bold mb-4 terminal-text">
+                {safeTranslate('home.curriculum.title', 'Comprehensive Curriculum')}
+              </h2>
               <p className="text-finance-lightgray max-w-2xl">
-                {t('home.curriculum.description')}
+                {safeTranslate('home.curriculum.description', 'Our platform offers a wide range of modules covering all aspects of financial modeling and trading strategies.')}
               </p>
             </div>
             <Link to="/courses" className="mt-4 md:mt-0 finance-button flex items-center">
-              {t('home.curriculum.allModules')} <ArrowRight className="ml-2 h-4 w-4" />
+              {safeTranslate('home.curriculum.allModules', 'All Modules')} 
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <ModulePreview 
-              title={t('home.modules.blackScholes.title')} 
-              level={t('home.modules.blackScholes.level')} 
-              description={t('home.modules.blackScholes.description')}
+              title={safeTranslate('home.modules.blackScholes.title', 'Black-Scholes Model')} 
+              level={safeTranslate('home.modules.blackScholes.level', 'Fundamental')} 
+              description={safeTranslate('home.modules.blackScholes.description', 'Master the cornerstone option pricing model that revolutionized financial markets.')}
             />
             <ModulePreview 
-              title={t('home.modules.volatility.title')} 
-              level={t('home.modules.volatility.level')} 
-              description={t('home.modules.volatility.description')}
+              title={safeTranslate('home.modules.volatility.title', 'Volatility Surface')} 
+              level={safeTranslate('home.modules.volatility.level', 'Intermediate')} 
+              description={safeTranslate('home.modules.volatility.description', 'Understand volatility smiles, skews, and term structures across option markets.')}
             />
             <ModulePreview 
-              title={t('home.modules.exotic.title')} 
-              level={t('home.modules.exotic.level')} 
-              description={t('home.modules.exotic.description')}
+              title={safeTranslate('home.modules.exotic.title', 'Exotic Options')} 
+              level={safeTranslate('home.modules.exotic.level', 'Advanced')} 
+              description={safeTranslate('home.modules.exotic.description', 'Price and hedge complex derivatives like barriers, Asians, and lookbacks.')}
             />
             <ModulePreview 
-              title={t('home.modules.greeks.title')} 
-              level={t('home.modules.greeks.level')} 
-              description={t('home.modules.greeks.description')}
+              title={safeTranslate('home.modules.greeks.title', 'Option Greeks')} 
+              level={safeTranslate('home.modules.greeks.level', 'Intermediate')} 
+              description={safeTranslate('home.modules.greeks.description', 'Master delta, gamma, vega, theta, and their role in risk management.')}
             />
             <ModulePreview 
-              title={t('home.modules.monteCarlo.title')} 
-              level={t('home.modules.monteCarlo.level')} 
-              description={t('home.modules.monteCarlo.description')}
+              title={safeTranslate('home.modules.monteCarlo.title', 'Monte Carlo Methods')} 
+              level={safeTranslate('home.modules.monteCarlo.level', 'Advanced')} 
+              description={safeTranslate('home.modules.monteCarlo.description', 'Implement simulation techniques for pricing path-dependent options.')}
             />
             <ModulePreview 
-              title={t('home.modules.stressTesting.title')} 
-              level={t('home.modules.stressTesting.level')} 
-              description={t('home.modules.stressTesting.description')}
+              title={safeTranslate('home.modules.stressTesting.title', 'Stress Testing')} 
+              level={safeTranslate('home.modules.stressTesting.level', 'Advanced')} 
+              description={safeTranslate('home.modules.stressTesting.description', 'Analyze option portfolios under extreme market scenarios.')}
             />
           </div>
         </div>
@@ -197,33 +217,36 @@ const Home = () => {
       <section className="py-16 md:py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4 terminal-text">{t('home.testimonials.title')}</h2>
+            <h2 className="text-3xl font-bold mb-4 terminal-text">
+              {safeTranslate('home.testimonials.title', 'What Our Users Say')}
+            </h2>
             <p className="text-finance-lightgray max-w-2xl mx-auto">
-              {t('home.testimonials.description')}
+              {safeTranslate('home.testimonials.description', 'Hear from professionals and students who have transformed their quantitative finance skills with our platform.')}
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Testimonial 
-              quote={t('home.testimonials.alexandre.quote')}
-              author={t('home.testimonials.alexandre.author')}
-              position={t('home.testimonials.alexandre.position')}
+              quote={safeTranslate('home.testimonials.alexandre.quote', 'The practical approach to option pricing models helped me ace my interviews for a quant role at a major investment bank.')}
+              author={safeTranslate('home.testimonials.alexandre.author', 'Alexandre D.')}
+              position={safeTranslate('home.testimonials.alexandre.position', 'Derivatives Trader, Paris')}
             />
             <Testimonial 
-              quote={t('home.testimonials.sarah.quote')}
-              author={t('home.testimonials.sarah.author')}
-              position={t('home.testimonials.sarah.position')}
+              quote={safeTranslate('home.testimonials.sarah.quote', 'Finally a platform that explains volatility surfaces in a way that made sense to me. The interactive tools are game-changing.')}
+              author={safeTranslate('home.testimonials.sarah.author', 'Sarah M.')}
+              position={safeTranslate('home.testimonials.sarah.position', 'Risk Manager, London')}
             />
             <Testimonial 
-              quote={t('home.testimonials.thomas.quote')}
-              author={t('home.testimonials.thomas.author')}
-              position={t('home.testimonials.thomas.position')}
+              quote={safeTranslate('home.testimonials.thomas.quote', 'As someone transitioning from academia to finance, this platform bridged the gap between mathematical theory and actual implementation.')}
+              author={safeTranslate('home.testimonials.thomas.author', 'Thomas K.')}
+              position={safeTranslate('home.testimonials.thomas.position', 'PhD Student, ETH Zurich')}
             />
           </div>
           
           <div className="mt-12 text-center">
             <Link to="/signup" className="finance-button inline-flex items-center">
-              {t('home.testimonials.joinCta')} <ArrowRight className="ml-2 h-4 w-4" />
+              {safeTranslate('home.testimonials.joinCta', 'Join Our Community')} 
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </div>
         </div>
@@ -232,16 +255,18 @@ const Home = () => {
       {/* Subscription CTA */}
       <section className="py-16 px-6 bg-finance-charcoal/50 border-y border-finance-steel/10">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl font-bold mb-4 terminal-text">{t('home.cta.title')}</h2>
+          <h2 className="text-2xl font-bold mb-4 terminal-text">
+            {safeTranslate('home.cta.title', 'Ready to Become a Quant Master?')}
+          </h2>
           <p className="text-finance-lightgray mb-8">
-            {t('home.cta.description')}
+            {safeTranslate('home.cta.description', 'Join thousands of professionals and students who are leveling up their quantitative finance skills.')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/signup" className="finance-button text-center">
-              {t('home.cta.subscribe')}
+              {safeTranslate('home.cta.subscribe', 'Choose a Plan')}
             </Link>
             <Link to="/courses" className="finance-button-outline text-center">
-              {t('home.cta.explore')}
+              {safeTranslate('home.cta.explore', 'Explore Courses')}
             </Link>
           </div>
         </div>

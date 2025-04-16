@@ -5,6 +5,7 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import enTranslation from './locales/en.json';
 import frTranslation from './locales/fr.json';
 
+// Initialize i18next
 i18n
   // Use language detector with higher order of detection
   .use(LanguageDetector)
@@ -21,7 +22,7 @@ i18n
       }
     },
     fallbackLng: 'en',
-    debug: false,
+    debug: process.env.NODE_ENV === 'development',
     detection: {
       order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
@@ -29,7 +30,19 @@ i18n
     },
     interpolation: {
       escapeValue: false // React already safes from xss
+    },
+    // Add missing key handling to show a more user-friendly fallback
+    saveMissing: true,
+    missingKeyHandler: (lng, ns, key) => {
+      console.warn(`Missing translation key: ${key} for language: ${lng}`);
+    },
+    parseMissingKeyHandler: (key) => {
+      // If a key is missing, return a more user-friendly fallback
+      return `[${key.split('.').pop()}]`;
     }
   });
+
+// Force loading of translations
+i18n.loadNamespaces('translation');
 
 export default i18n;

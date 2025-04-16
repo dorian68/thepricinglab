@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { safeTranslate } from '../utils/translationUtils';
 
 const LanguageSwitcher = () => {
   const { i18n, t } = useTranslation();
@@ -23,6 +24,9 @@ const LanguageSwitcher = () => {
     localStorage.setItem('i18nextLng', lng);
   };
 
+  // Use our safe translation utility
+  const st = (key: string, defaultValue?: string) => safeTranslate(t, key, defaultValue, i18n.language);
+
   return (
     <div className="relative">
       <Tooltip>
@@ -30,7 +34,7 @@ const LanguageSwitcher = () => {
           <button
             className="flex items-center text-finance-offwhite hover:text-finance-accent"
             onClick={() => setIsOpen(!isOpen)}
-            aria-label={t('languageSwitcher.switchLanguage')}
+            aria-label={st('languageSwitcher.switchLanguage', 'Switch Language')}
           >
             <Globe className="w-5 h-5" />
             <span className="ml-1 hidden sm:inline">
@@ -39,7 +43,7 @@ const LanguageSwitcher = () => {
           </button>
         </TooltipTrigger>
         <TooltipContent className="bg-[#1A1F2C] border-[#2A2F3C] text-white">
-          <p>{t('languageSwitcher.tooltip')}</p>
+          <p>{st('languageSwitcher.tooltip', 'Change the site language')}</p>
         </TooltipContent>
       </Tooltip>
       
@@ -53,7 +57,7 @@ const LanguageSwitcher = () => {
               } hover:bg-finance-steel/20`}
               role="menuitem"
             >
-              {t('languageSwitcher.fr')}
+              {st('languageSwitcher.fr', 'Français')}
             </button>
             <button
               onClick={() => changeLanguage('en')}
@@ -62,7 +66,7 @@ const LanguageSwitcher = () => {
               } hover:bg-finance-steel/20`}
               role="menuitem"
             >
-              {t('languageSwitcher.en')}
+              {st('languageSwitcher.en', 'English')}
             </button>
           </div>
         </div>

@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -11,44 +10,57 @@ import { Button } from "@/components/ui/button";
 import PricingDialog from "../components/PricingDialog";
 
 const Index = () => {
-  const { t } = useTranslation();
+  const { t, i18n, ready } = useTranslation();
+  
+  const safeTranslate = (key: string, defaultValue?: string) => {
+    if (!ready) return defaultValue || key.split('.').pop();
+    
+    const result = t(key);
+    if (result === key) {
+      console.warn(`Missing translation: ${key} in ${i18n.language}`);
+      return defaultValue || key.split('.').pop() || key;
+    }
+    return result;
+  };
   
   return (
     <div className="flex flex-col min-h-screen bg-[#1A1F2C] text-white">
       <Navbar />
       
-      {/* Animated background canvas */}
       <MarketVisuals />
       
-      {/* Hero Section */}
       <section className="relative py-20 md:py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="flex flex-col">
               <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-                {t('home.hero.title1')}<br />
-                <span className="text-[#ea384c]">{t('home.hero.title2')}</span>
+                {safeTranslate('home.hero.title1', 'Master Quantitative Finance')}<br />
+                <span className="text-[#ea384c]">
+                  {safeTranslate('home.hero.title2', 'Like a Trading Pro')}
+                </span>
               </h1>
               
               <p className="text-[#8E9196] text-lg mt-6 mb-8">
-                {t('home.hero.description')}
+                {safeTranslate('home.hero.description', 'Learn to price complex financial derivatives, understand volatility surfaces, and implement cutting-edge models with our hands-on platform.')}
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button variant="finance" asChild>
                   <Link to="/courses">
-                    {t('home.hero.startCourse')}
+                    {safeTranslate('home.hero.startCourse', 'Start Course')}
                   </Link>
                 </Button>
                 <Button variant="financeOutline" asChild>
                   <Link to="/signup">
-                    {t('home.hero.signUp')}
+                    {safeTranslate('home.hero.signUp', 'Sign Up')}
                   </Link>
                 </Button>
               </div>
               
               <div className="mt-8">
-                <span className="font-mono text-[#ea384c] tracking-wider text-sm font-medium">{t('home.hero.tagline')}</span>
+                <span className="font-mono text-[#ea384c] tracking-wider text-sm font-medium">
+                  {safeTranslate('home.hero.tagline', 'FROM FUNDAMENTALS TO ADVANCED MODELS')}
+                </span>
               </div>
             </div>
             
@@ -68,13 +80,17 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Notre Mission */}
       <section className="py-16 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">{t('home.approach.title')} <span className="text-[#ea384c]">{t('home.mission.highlight')}</span></h2>
+            <h2 className="text-3xl font-bold mb-4">
+              {safeTranslate('home.approach.title', 'Our Approach')} 
+              <span className="text-[#ea384c]">
+                {safeTranslate('home.mission.highlight', 'Innovative')}
+              </span>
+            </h2>
             <p className="text-[#8E9196] max-w-2xl mx-auto">
-              {t('home.approach.description')}
+              {safeTranslate('home.approach.description', 'Our platform combines theoretical knowledge with practical applications to help you master complex financial models and valuation techniques.')}
             </p>
           </div>
           
@@ -83,9 +99,9 @@ const Index = () => {
               <div className="mb-4 text-[#ea384c]">
                 <BookOpen size={32} />
               </div>
-              <h3 className="text-xl font-semibold mb-2">{t('home.features.pragmatic.title')}</h3>
+              <h3 className="text-xl font-semibold mb-2">{safeTranslate('home.features.pragmatic.title', 'Pragmatic Approach')}</h3>
               <p className="text-[#8E9196]">
-                {t('home.features.pragmatic.description')}
+                {safeTranslate('home.features.pragmatic.description', 'Learn through practical examples and real-world applications.')}
               </p>
             </div>
             
@@ -93,9 +109,9 @@ const Index = () => {
               <div className="mb-4 text-[#ea384c]">
                 <Code size={32} />
               </div>
-              <h3 className="text-xl font-semibold mb-2">{t('home.features.tech.title')}</h3>
+              <h3 className="text-xl font-semibold mb-2">{safeTranslate('home.features.tech.title', 'Technical Skills')}</h3>
               <p className="text-[#8E9196]">
-                {t('home.features.tech.description')}
+                {safeTranslate('home.features.tech.description', 'Master advanced technical analysis and trading strategies.')}
               </p>
             </div>
             
@@ -103,22 +119,21 @@ const Index = () => {
               <div className="mb-4 text-[#ea384c]">
                 <Trophy size={32} />
               </div>
-              <h3 className="text-xl font-semibold mb-2">{t('home.features.certified.title')}</h3>
+              <h3 className="text-xl font-semibold mb-2">{safeTranslate('home.features.certified.title', 'Certified Expert')}</h3>
               <p className="text-[#8E9196]">
-                {t('home.features.certified.description')}
+                {safeTranslate('home.features.certified.description', 'Gain the expertise to trade with confidence.')}
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Pricing Tiers */}
       <section className="py-16 px-6 bg-[#141821]">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">{t('pricing.title')} <span className="text-[#ea384c]">{t('pricing.highlight')}</span></h2>
+            <h2 className="text-3xl font-bold mb-4">{safeTranslate('pricing.title', 'Pricing')} <span className="text-[#ea384c]">{safeTranslate('pricing.highlight', 'Choose Your Plan')}</span></h2>
             <p className="text-[#8E9196] max-w-2xl mx-auto">
-              {t('pricing.description')}
+              {safeTranslate('pricing.description', 'Explore our various pricing tiers to find the best fit for your needs.')}
             </p>
           </div>
           
@@ -128,74 +143,74 @@ const Index = () => {
                 <div className="p-2 rounded-full bg-[#141821] mr-3">
                   <Star className="h-5 w-5 text-yellow-400" />
                 </div>
-                <h3 className="text-xl font-medium">{t('pricing.freemium.title')}</h3>
+                <h3 className="text-xl font-medium">{safeTranslate('pricing.freemium.title', 'Free Premium')}</h3>
               </div>
               <div className="mb-6">
-                <div className="text-2xl font-bold text-[#ea384c]">{t('pricing.freemium.price')}</div>
-                <p className="text-[#8E9196] text-sm mt-1">{t('pricing.freemium.description')}</p>
+                <div className="text-2xl font-bold text-[#ea384c]">{safeTranslate('pricing.freemium.price', 'Free')}</div>
+                <p className="text-[#8E9196] text-sm mt-1">{safeTranslate('pricing.freemium.description', 'Access to basic features and educational resources.')}</p>
               </div>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center text-[#8E9196]">
                   <span className="mr-2 text-green-500">✓</span>
-                  <span>{t('pricing.freemium.feature1')}</span>
+                  <span>{safeTranslate('pricing.freemium.feature1', 'Basic Features')}</span>
                 </li>
                 <li className="flex items-center text-[#8E9196]">
                   <span className="mr-2 text-green-500">✓</span>
-                  <span>{t('pricing.freemium.feature2')}</span>
+                  <span>{safeTranslate('pricing.freemium.feature2', 'Educational Resources')}</span>
                 </li>
                 <li className="flex items-center text-[#8E9196]">
                   <span className="mr-2 text-green-500">✓</span>
-                  <span>{t('pricing.freemium.feature3')}</span>
+                  <span>{safeTranslate('pricing.freemium.feature3', 'Interactive Tutorials')}</span>
                 </li>
                 <li className="flex items-center text-[#8E9196]">
                   <span className="mr-2 text-green-500">✓</span>
-                  <span>{t('pricing.freemium.feature4')}</span>
+                  <span>{safeTranslate('pricing.freemium.feature4', 'Community Support')}</span>
                 </li>
               </ul>
               <Button variant="financeOutline" className="w-full" asChild>
                 <Link to="/signup?plan=freemium">
-                  {t('pricing.freemium.cta')}
+                  {safeTranslate('pricing.freemium.cta', 'Sign Up')}
                 </Link>
               </Button>
             </div>
             
             <div className="bg-[#1A1F2C] p-6 rounded-lg border border-[#ea384c] hover:border-[#ea384c] transition-colors relative">
-              <div className="bg-[#ea384c] text-white text-xs font-bold uppercase py-1 px-2 rounded absolute -mt-9 ml-4">{t('pricing.recommended')}</div>
+              <div className="bg-[#ea384c] text-white text-xs font-bold uppercase py-1 px-2 rounded absolute -mt-9 ml-4">{safeTranslate('pricing.recommended', 'Recommended')}</div>
               <div className="flex items-center mb-4">
                 <div className="p-2 rounded-full bg-[#141821] mr-3">
                   <GraduationCap className="h-5 w-5 text-blue-400" />
                 </div>
-                <h3 className="text-xl font-medium">{t('pricing.student.title')}</h3>
+                <h3 className="text-xl font-medium">{safeTranslate('pricing.student.title', 'Student Plan')}</h3>
               </div>
               <div className="mb-6">
-                <div className="text-2xl font-bold text-[#ea384c]">19€ <span className="text-sm text-[#8E9196] font-normal">{t('pricing.monthly')}</span></div>
-                <p className="text-[#8E9196] text-sm mt-1">{t('pricing.student.description')}</p>
+                <div className="text-2xl font-bold text-[#ea384c]">19€ <span className="text-sm text-[#8E9196] font-normal">{safeTranslate('pricing.monthly', 'Monthly')}</span></div>
+                <p className="text-[#8E9196] text-sm mt-1">{safeTranslate('pricing.student.description', 'Access to premium features and educational resources.')}</p>
               </div>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center text-[#8E9196]">
                   <span className="mr-2 text-green-500">✓</span>
-                  <span>{t('pricing.student.feature1')}</span>
+                  <span>{safeTranslate('pricing.student.feature1', 'Premium Features')}</span>
                 </li>
                 <li className="flex items-center text-[#8E9196]">
                   <span className="mr-2 text-green-500">✓</span>
-                  <span>{t('pricing.student.feature2')}</span>
+                  <span>{safeTranslate('pricing.student.feature2', 'Educational Resources')}</span>
                 </li>
                 <li className="flex items-center text-[#8E9196]">
                   <span className="mr-2 text-green-500">✓</span>
-                  <span>{t('pricing.student.feature3')}</span>
+                  <span>{safeTranslate('pricing.student.feature3', 'Interactive Tutorials')}</span>
                 </li>
                 <li className="flex items-center text-[#8E9196]">
                   <span className="mr-2 text-green-500">✓</span>
-                  <span>{t('pricing.student.feature4')}</span>
+                  <span>{safeTranslate('pricing.student.feature4', 'Community Support')}</span>
                 </li>
                 <li className="flex items-center text-[#8E9196]">
                   <span className="mr-2 text-green-500">✓</span>
-                  <span>{t('pricing.student.feature5')}</span>
+                  <span>{safeTranslate('pricing.student.feature5', 'Access to Live Trading')}</span>
                 </li>
               </ul>
               <Button variant="finance" className="w-full" asChild>
                 <Link to="/signup?plan=student">
-                  {t('pricing.student.cta')}
+                  {safeTranslate('pricing.student.cta', 'Sign Up')}
                 </Link>
               </Button>
             </div>
@@ -205,37 +220,37 @@ const Index = () => {
                 <div className="p-2 rounded-full bg-[#141821] mr-3">
                   <Rocket className="h-5 w-5 text-[#ea384c]" />
                 </div>
-                <h3 className="text-xl font-medium">{t('pricing.pro.title')}</h3>
+                <h3 className="text-xl font-medium">{safeTranslate('pricing.pro.title', 'Pro Plan')}</h3>
               </div>
               <div className="mb-6">
-                <div className="text-2xl font-bold text-[#ea384c]">49€ <span className="text-sm text-[#8E9196] font-normal">{t('pricing.monthly')}</span></div>
-                <p className="text-[#8E9196] text-sm mt-1">{t('pricing.pro.description')}</p>
+                <div className="text-2xl font-bold text-[#ea384c]">49€ <span className="text-sm text-[#8E9196] font-normal">{safeTranslate('pricing.monthly', 'Monthly')}</span></div>
+                <p className="text-[#8E9196] text-sm mt-1">{safeTranslate('pricing.pro.description', 'Access to advanced features and educational resources.')}</p>
               </div>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-center text-[#8E9196]">
                   <span className="mr-2 text-green-500">✓</span>
-                  <span>{t('pricing.pro.feature1')}</span>
+                  <span>{safeTranslate('pricing.pro.feature1', 'Advanced Features')}</span>
                 </li>
                 <li className="flex items-center text-[#8E9196]">
                   <span className="mr-2 text-green-500">✓</span>
-                  <span>{t('pricing.pro.feature2')}</span>
+                  <span>{safeTranslate('pricing.pro.feature2', 'Educational Resources')}</span>
                 </li>
                 <li className="flex items-center text-[#8E9196]">
                   <span className="mr-2 text-green-500">✓</span>
-                  <span>{t('pricing.pro.feature3')}</span>
+                  <span>{safeTranslate('pricing.pro.feature3', 'Interactive Tutorials')}</span>
                 </li>
                 <li className="flex items-center text-[#8E9196]">
                   <span className="mr-2 text-green-500">✓</span>
-                  <span>{t('pricing.pro.feature4')}</span>
+                  <span>{safeTranslate('pricing.pro.feature4', 'Community Support')}</span>
                 </li>
                 <li className="flex items-center text-[#8E9196]">
                   <span className="mr-2 text-green-500">✓</span>
-                  <span>{t('pricing.pro.feature5')}</span>
+                  <span>{safeTranslate('pricing.pro.feature5', 'Access to Live Trading')}</span>
                 </li>
               </ul>
               <Button variant="finance" className="w-full" asChild>
                 <Link to="/signup?plan=pro">
-                  {t('pricing.pro.cta')}
+                  {safeTranslate('pricing.pro.cta', 'Sign Up')}
                 </Link>
               </Button>
             </div>
@@ -243,13 +258,12 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Modules */}
       <section className="py-16 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">{t('home.curriculum.title')} <span className="text-[#ea384c]">{t('home.modules.highlight')}</span></h2>
+            <h2 className="text-3xl font-bold mb-4">{safeTranslate('home.curriculum.title', 'Curriculum')} <span className="text-[#ea384c]">{safeTranslate('home.modules.highlight', 'Explore Our Modules')}</span></h2>
             <p className="text-[#8E9196] max-w-2xl mx-auto">
-              {t('home.curriculum.description')}
+              {safeTranslate('home.curriculum.description', 'Discover our comprehensive curriculum and learn at your own pace.')}
             </p>
           </div>
           
@@ -257,18 +271,18 @@ const Index = () => {
             <Card className="bg-[#1A1F2C] border-[#2A2F3C] hover:border-[#ea384c] transition-colors">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <BookOpen className="mr-2 text-[#ea384c]" /> {t('coursesPage.fundamentals.level')}
+                  <BookOpen className="mr-2 text-[#ea384c]" /> {safeTranslate('coursesPage.fundamentals.level', 'Fundamentals')}
                 </CardTitle>
                 <CardDescription className="text-[#8E9196]">
-                  {t('coursesPage.fundamentals.description')}
+                  {safeTranslate('coursesPage.fundamentals.description', 'Learn the basics of financial derivatives and valuation.')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-[#8E9196]">
-                {t('home.modules.fundamentals.description')}
+                {safeTranslate('home.modules.fundamentals.description', 'Explore the theory and practice of financial derivatives.')}
               </CardContent>
               <CardFooter>
                 <Link to="/courses#fundamentals" className="text-[#ea384c] hover:text-red-400 flex items-center">
-                  {t('home.modules.fundamentals.cta')} <ArrowRight size={16} className="ml-2" />
+                  {safeTranslate('home.modules.fundamentals.cta', 'Start Course')} <ArrowRight size={16} className="ml-2" />
                 </Link>
               </CardFooter>
             </Card>
@@ -276,18 +290,18 @@ const Index = () => {
             <Card className="bg-[#1A1F2C] border-[#2A2F3C] hover:border-[#ea384c] transition-colors">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Zap className="mr-2 text-[#ea384c]" /> {t('home.modules.survival.title')}
+                  <Zap className="mr-2 text-[#ea384c]" /> {safeTranslate('home.modules.survival.title', 'Survival Mode')}
                 </CardTitle>
                 <CardDescription className="text-[#8E9196]">
-                  {t('home.modules.survival.subtitle')}
+                  {safeTranslate('home.modules.survival.subtitle', 'Improve your trading skills with our survival mode.')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-[#8E9196]">
-                {t('home.modules.survival.description')}
+                {safeTranslate('home.modules.survival.description', 'Practice trading strategies and improve your skills.')}
               </CardContent>
               <CardFooter>
                 <Link to="/survival-mode" className="text-[#ea384c] hover:text-red-400 flex items-center">
-                  {t('home.modules.survival.cta')} <ArrowRight size={16} className="ml-2" />
+                  {safeTranslate('home.modules.survival.cta', 'Start Survival Mode')} <ArrowRight size={16} className="ml-2" />
                 </Link>
               </CardFooter>
             </Card>
@@ -295,18 +309,18 @@ const Index = () => {
             <Card className="bg-[#1A1F2C] border-[#2A2F3C] hover:border-[#ea384c] transition-colors">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <BarChart3 className="mr-2 text-[#ea384c]" /> {t('exercises.title')}
+                  <BarChart3 className="mr-2 text-[#ea384c]" /> {safeTranslate('exercises.title', 'Exercises')}
                 </CardTitle>
                 <CardDescription className="text-[#8E9196]">
-                  {t('exercises.subtitle')}
+                  {safeTranslate('exercises.subtitle', 'Test your knowledge with our exercises.')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-[#8E9196]">
-                {t('home.modules.exercises.description')}
+                {safeTranslate('home.modules.exercises.description', 'Practice trading strategies and improve your skills.')}
               </CardContent>
               <CardFooter>
                 <Link to="/exercises" className="text-[#ea384c] hover:text-red-400 flex items-center">
-                  {t('home.modules.exercises.cta')} <ArrowRight size={16} className="ml-2" />
+                  {safeTranslate('home.modules.exercises.cta', 'Start Exercises')} <ArrowRight size={16} className="ml-2" />
                 </Link>
               </CardFooter>
             </Card>
@@ -314,18 +328,18 @@ const Index = () => {
             <Card className="bg-[#1A1F2C] border-[#2A2F3C] hover:border-[#ea384c] transition-colors">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Users className="mr-2 text-[#ea384c]" /> {t('community.title')}
+                  <Users className="mr-2 text-[#ea384c]" /> {safeTranslate('community.title', 'Community')}
                 </CardTitle>
                 <CardDescription className="text-[#8E9196]">
-                  {t('community.subtitle')}
+                  {safeTranslate('community.subtitle', 'Connect with other traders and learn from their experiences.')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-[#8E9196]">
-                {t('home.modules.community.description')}
+                {safeTranslate('home.modules.community.description', 'Join our community and connect with other traders.')}
               </CardContent>
               <CardFooter>
                 <Link to="/community" className="text-[#ea384c] hover:text-red-400 flex items-center">
-                  {t('home.modules.community.cta')} <ArrowRight size={16} className="ml-2" />
+                  {safeTranslate('home.modules.community.cta', 'Join Community')} <ArrowRight size={16} className="ml-2" />
                 </Link>
               </CardFooter>
             </Card>
@@ -333,18 +347,18 @@ const Index = () => {
             <Card className="bg-[#1A1F2C] border-[#2A2F3C] hover:border-[#ea384c] transition-colors">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Code className="mr-2 text-[#ea384c]" /> {t('navbar.tools')}
+                  <Code className="mr-2 text-[#ea384c]" /> {safeTranslate('navbar.tools', 'Tools')}
                 </CardTitle>
                 <CardDescription className="text-[#8E9196]">
-                  {t('home.modules.tools.subtitle')}
+                  {safeTranslate('home.modules.tools.subtitle', 'Access our trading tools and resources.')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-[#8E9196]">
-                {t('home.modules.tools.description')}
+                {safeTranslate('home.modules.tools.description', 'Explore our trading tools and resources.')}
               </CardContent>
               <CardFooter>
                 <Link to="/tools" className="text-[#ea384c] hover:text-red-400 flex items-center">
-                  {t('home.modules.tools.cta')} <ArrowRight size={16} className="ml-2" />
+                  {safeTranslate('home.modules.tools.cta', 'Access Tools')} <ArrowRight size={16} className="ml-2" />
                 </Link>
               </CardFooter>
             </Card>
@@ -352,18 +366,18 @@ const Index = () => {
             <Card className="bg-[#1A1F2C] border-[#2A2F3C] hover:border-[#ea384c] transition-colors">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Trophy className="mr-2 text-[#ea384c]" /> {t('leaderboard.title')}
+                  <Trophy className="mr-2 text-[#ea384c]" /> {safeTranslate('leaderboard.title', 'Leaderboard')}
                 </CardTitle>
                 <CardDescription className="text-[#8E9196]">
-                  {t('leaderboard.subtitle')}
+                  {safeTranslate('leaderboard.subtitle', 'Track your progress and compete with other traders.')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="text-[#8E9196]">
-                {t('home.modules.leaderboard.description')}
+                {safeTranslate('home.modules.leaderboard.description', 'Track your progress and compete with other traders.')}
               </CardContent>
               <CardFooter>
                 <Link to="/leaderboard" className="text-[#ea384c] hover:text-red-400 flex items-center">
-                  {t('home.modules.leaderboard.cta')} <ArrowRight size={16} className="ml-2" />
+                  {safeTranslate('home.modules.leaderboard.cta', 'View Leaderboard')} <ArrowRight size={16} className="ml-2" />
                 </Link>
               </CardFooter>
             </Card>
@@ -371,19 +385,18 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Call to Action */}
       <section className="py-16 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6">{t('home.cta.title')} <span className="text-[#ea384c]">{t('home.cta.highlight')}</span></h2>
+          <h2 className="text-3xl font-bold mb-6">{safeTranslate('home.cta.title', 'Call to Action')} <span className="text-[#ea384c]">{safeTranslate('home.cta.highlight', 'Join Our Community')}</span></h2>
           <p className="text-[#8E9196] mb-8">
-            {t('home.cta.description')}
+            {safeTranslate('home.cta.description', 'Connect with other traders and learn from their experiences.')}
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <PricingDialog 
               trigger={
                 <Button variant="finance">
-                  {t('pricing.title')}
+                  {safeTranslate('pricing.title', 'Pricing')}
                 </Button>
               }
             />
@@ -392,12 +405,12 @@ const Index = () => {
               <TooltipTrigger asChild>
                 <Button variant="financeOutline" asChild>
                   <Link to="/courses/fundamentals/black-scholes">
-                    {t('home.cta.freeCourse')}
+                    {safeTranslate('home.cta.freeCourse', 'Free Course')}
                   </Link>
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="bg-[#1A1F2C] border-[#2A2F3C] text-white">
-                <p>{t('home.cta.tooltip')}</p>
+                <p>{safeTranslate('home.cta.tooltip', 'Learn the basics of financial derivatives.')}</p>
               </TooltipContent>
             </Tooltip>
           </div>
