@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -15,7 +15,9 @@ import {
   Lock, 
   Star, 
   GraduationCap, 
-  Rocket 
+  Rocket,
+  CheckCircle2,
+  Clock4
 } from "lucide-react";
 import { useSurvivalWaves, getDifficultyColorClass, SubscriptionPlan } from "@/data/survival-waves";
 
@@ -26,8 +28,34 @@ const SurvivalMode = () => {
   // Get survival waves from our hook
   const survivalWaves = useSurvivalWaves(userPlan);
   
+  // Get saved progress from localStorage (simulated)
+  const [waveProgress, setWaveProgress] = useState<{[key: number]: number}>({});
+  const [completedWaves, setCompletedWaves] = useState<number[]>([]);
+  
+  useEffect(() => {
+    // Simuler le chargement des progrès de l'utilisateur
+    const progress: {[key: number]: number} = {};
+    const completed: number[] = [];
+    
+    survivalWaves.forEach(wave => {
+      const highScore = localStorage.getItem(`wave-${wave.id}-highscore`);
+      const isCompleted = localStorage.getItem(`wave-${wave.id}-completed`) === 'true';
+      
+      if (highScore) {
+        progress[wave.id] = parseInt(highScore);
+      }
+      
+      if (isCompleted) {
+        completed.push(wave.id);
+      }
+    });
+    
+    setWaveProgress(progress);
+    setCompletedWaves(completed);
+  }, [survivalWaves]);
+  
   const userStats = {
-    highestWave: 2,
+    highestWave: Math.max(...completedWaves, 0) || 2,
     totalChallenges: 25,
     successRate: 78,
     averageTime: 14.3,
@@ -158,77 +186,119 @@ const SurvivalMode = () => {
           <h2 className="text-2xl font-bold mb-8 terminal-text">{t('survivalMode.availableWaves')}</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {survivalWaves.map((wave) => (
-              <div key={wave.id} className="finance-card p-0 overflow-hidden group">
-                <div className="relative aspect-video bg-finance-charcoal">
-                  <div className={`bg-cover bg-center w-full h-full ${!wave.unlocked ? 'opacity-30' : 'opacity-50'}`} style={{ backgroundImage: `url(${wave.image})` }}></div>
+            {survivalWaves.map((wave) => {
+              const isCompleted = completedWaves.includes(wave.id);
+              const hasProgress = waveProgress[wave.id] !== undefined;
+              const waveHighScore = waveProgress[wave.id] || 0;
+              
+              return (
+                <div key={wave.id} className={`finance-card p-0 overflow-hidden group relative
+                  ${isCompleted ? 'border-green-500/30' : hasProgress ? 'border-yellow-500/30' : ''}`}
+                >
+                  {isCompleted && (
+                    <div className="absolute top-3 right-3 z-10 bg-green-900/80 p-1.5 rounded-full">
+                      <CheckCircle2 className="h-4 w-4 text-green-400" />
+                    </div>
+                  )}
                   
-                  {!wave.unlocked && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-finance-dark/40">
-                      <div className="p-3 rounded-full bg-finance-dark/60 border border-finance-steel/30">
-                        <Lock className="h-6 w-6 text-finance-accent" />
+                  {hasProgress && !isCompleted && (
+                    <div className="absolute top-3 right-3 z-10 bg-yellow-900/80 p-1.5 rounded-full">
+                      <Clock4 className="h-4 w-4 text-yellow-400" />
+                    </div>
+                  )}
+                  
+                  <div className="relative aspect-video bg-finance-charcoal">
+                    <div className={`bg-cover bg-center w-full h-full ${!wave.unlocked ? 'opacity-30' : 'opacity-50'}`} style={{ backgroundImage: `url(${wave.image})` }}></div>
+                    
+                    {!wave.unlocked && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-finance-dark/40">
+                        <div className="p-3 rounded-full bg-finance-dark/60 border border-finance-steel/30">
+                          <Lock className="h-6 w-6 text-finance-accent" />
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="absolute top-4 left-4 flex space-x-2">
+                      <span className={`terminal-text text-xs px-2 py-1 rounded text-finance-offwhite ${getDifficultyColorClass(wave.difficulty)}`}>
+                        {t(`survivalMode.difficulty.${wave.difficulty}`)}
+                      </span>
+                      
+                      <Badge variant="outline" className="bg-finance-dark/50 border-finance-steel/20 flex items-center space-x-1">
+                        {getPlanIcon(wave.requiredPlan)}
+                        <span className="text-xs">
+                          {wave.requiredPlan === 'freemium' ? t('pricing.freemium.badge') : 
+                           wave.requiredPlan === 'student' ? t('pricing.student.badge') : 
+                           t('pricing.pro.badge')}
+                        </span>
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  <div className="p-6">
+                    <h3 className="text-xl font-medium text-finance-offwhite mb-2">{wave.name}</h3>
+                    <p className="text-finance-lightgray text-sm mb-4">{wave.description}</p>
+                    
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div className="flex items-center">
+                        <Zap className="h-4 w-4 text-finance-accent mr-2" />
+                        <span className="text-finance-lightgray text-sm">{wave.challenges} {t('survivalMode.challenges')}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 text-finance-accent mr-2" />
+                        <span className="text-finance-lightgray text-sm">{wave.time}s {t('survivalMode.perChallenge')}</span>
                       </div>
                     </div>
-                  )}
-                  
-                  <div className="absolute top-4 left-4 flex space-x-2">
-                    <span className={`terminal-text text-xs px-2 py-1 rounded text-finance-offwhite ${getDifficultyColorClass(wave.difficulty)}`}>
-                      {t(`survivalMode.difficulty.${wave.difficulty}`)}
-                    </span>
                     
-                    <Badge variant="outline" className="bg-finance-dark/50 border-finance-steel/20 flex items-center space-x-1">
-                      {getPlanIcon(wave.requiredPlan)}
-                      <span className="text-xs">
-                        {wave.requiredPlan === 'freemium' ? t('pricing.freemium.badge') : 
-                         wave.requiredPlan === 'student' ? t('pricing.student.badge') : 
-                         t('pricing.pro.badge')}
-                      </span>
-                    </Badge>
+                    {hasProgress && (
+                      <div className="mb-4">
+                        <div className="flex justify-between text-xs text-finance-lightgray mb-1">
+                          <span>Score actuel</span>
+                          <span className="font-medium">{waveHighScore} pts</span>
+                        </div>
+                        <Progress 
+                          value={isCompleted ? 100 : 60} 
+                          className={`h-1.5 ${isCompleted ? 'bg-green-500' : ''}`} 
+                        />
+                      </div>
+                    )}
+                    
+                    <div className="mb-6">
+                      <h4 className="text-sm font-medium text-finance-offwhite mb-2">{t('survivalMode.topics')}:</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {wave.topics.map((topic, index) => (
+                          <span key={index} className="text-xs bg-finance-charcoal/50 px-2 py-1 rounded text-finance-lightgray">
+                            {topic}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {wave.unlocked ? (
+                      <Button 
+                        variant="finance" 
+                        className={`w-full ${isCompleted ? 'bg-green-600 hover:bg-green-700' : ''}`} 
+                        asChild
+                      >
+                        <Link to={`/survival-mode/wave/${wave.id}`}>
+                          {isCompleted 
+                            ? "Rejouer" 
+                            : hasProgress 
+                              ? "Continuer" 
+                              : t('survivalMode.startWave')} 
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    ) : (
+                      <Button variant="finance" className="w-full" asChild>
+                        <Link to={`/pricing?recommended=${wave.requiredPlan}`}>
+                          {t('survivalMode.unlockWave')} <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    )}
                   </div>
                 </div>
-                
-                <div className="p-6">
-                  <h3 className="text-xl font-medium text-finance-offwhite mb-2">{wave.name}</h3>
-                  <p className="text-finance-lightgray text-sm mb-4">{wave.description}</p>
-                  
-                  <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="flex items-center">
-                      <Zap className="h-4 w-4 text-finance-accent mr-2" />
-                      <span className="text-finance-lightgray text-sm">{wave.challenges} {t('survivalMode.challenges')}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Clock className="h-4 w-4 text-finance-accent mr-2" />
-                      <span className="text-finance-lightgray text-sm">{wave.time}s {t('survivalMode.perChallenge')}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="mb-6">
-                    <h4 className="text-sm font-medium text-finance-offwhite mb-2">{t('survivalMode.topics')}:</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {wave.topics.map((topic, index) => (
-                        <span key={index} className="text-xs bg-finance-charcoal/50 px-2 py-1 rounded text-finance-lightgray">
-                          {topic}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  {wave.unlocked ? (
-                    <Button variant="finance" className="w-full" asChild>
-                      <Link to={`/survival-mode/wave/${wave.id}`}>
-                        {t('survivalMode.startWave')} <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  ) : (
-                    <Button variant="finance" className="w-full" asChild>
-                      <Link to={`/pricing?recommended=${wave.requiredPlan}`}>
-                        {t('survivalMode.unlockWave')} <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
