@@ -15,10 +15,10 @@ export const safeTranslate = (
   defaultValue?: string, 
   lng?: string
 ): string => {
-  const result = t(key);
+  const result = t(key, { defaultValue: defaultValue || extractLabel(key) });
   
-  // If the result is the same as the key, it means the translation is missing
-  if (result === key) {
+  // If the result contains [caption] or exactly matches the key, it means the translation is missing
+  if (result === key || result.includes('[') && result.includes(']')) {
     console.warn(`Missing translation: ${key}${lng ? ` in ${lng}` : ''}`);
     return defaultValue || extractLabel(key);
   }
@@ -40,7 +40,8 @@ export const extractLabel = (key: string): string => {
   // Convert camelCase to Title Case with spaces
   return lastPart
     .replace(/([A-Z])/g, ' $1') // Add space before capital letters
-    .replace(/^./, (str) => str.toUpperCase()); // Capitalize first letter
+    .replace(/^./, (str) => str.toUpperCase()) // Capitalize first letter
+    .trim(); // Remove any extra spaces
 };
 
 /**
@@ -51,5 +52,5 @@ export const extractLabel = (key: string): string => {
  */
 export const hasTranslation = (t: TFunction, key: string): boolean => {
   const result = t(key, { returnObjects: true });
-  return typeof result === 'string' && result !== key;
+  return typeof result === 'string' && result !== key && !result.includes('[') && !result.includes(']');
 };

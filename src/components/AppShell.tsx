@@ -1,13 +1,13 @@
 
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import ChatBubble from './chat/ChatBubble';
+import ModernNavbar from './ModernNavbar';
 
 const AppShell: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
+      <ModernNavbar />
       <Outlet />
-      {/* Move ChatBubble outside of the main AppShell */}
     </div>
   );
 };
