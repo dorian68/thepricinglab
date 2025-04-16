@@ -1,8 +1,7 @@
-
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Link } from "react-router-dom";
-import { ArrowRight, BookOpen, Clock, BarChart, Lock, Check, AlertCircle } from "lucide-react";
+import { ArrowRight, BookOpen, Clock, BarChart, Lock, Check, AlertCircle, Star, GraduationCap, Rocket } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +16,7 @@ interface CourseModuleProps {
   image: string;
   locked?: boolean;
   path: string;
-  requiredPlan?: 'freemium' | 'student' | 'pro';
+  requiredPlan: 'freemium' | 'student' | 'pro';
 }
 
 const CourseModule = ({ 
@@ -155,7 +154,7 @@ const Courses = () => {
       ],
       image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3",
       path: "/courses/fundamentals/time-value",
-      requiredPlan: 'freemium'
+      requiredPlan: 'freemium' as const
     },
     {
       title: t('coursesPage.fundamentals.blackScholes.title'),
@@ -170,7 +169,7 @@ const Courses = () => {
       ],
       image: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f",
       path: "/courses/fundamentals/black-scholes",
-      requiredPlan: 'freemium'
+      requiredPlan: 'freemium' as const
     },
     {
       title: t('coursesPage.fundamentals.vanillaOptions.title'),
@@ -185,7 +184,7 @@ const Courses = () => {
       ],
       image: "https://images.unsplash.com/photo-1642104704074-907c0698cbd9",
       path: "/courses/fundamentals/vanilla-options",
-      requiredPlan: 'freemium'
+      requiredPlan: 'freemium' as const
     },
     {
       title: t('coursesPage.fundamentals.impliedVol.title'),
@@ -200,7 +199,7 @@ const Courses = () => {
       ],
       image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71",
       path: "/courses/fundamentals/implied-vol-basics",
-      requiredPlan: 'freemium'
+      requiredPlan: 'freemium' as const
     },
     {
       title: t('coursesPage.fundamentals.deltaHedging.title'),
@@ -215,7 +214,7 @@ const Courses = () => {
       ],
       image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3",
       path: "/courses/fundamentals/delta-hedging",
-      requiredPlan: 'freemium'
+      requiredPlan: 'freemium' as const
     }
   ];
   
@@ -233,7 +232,7 @@ const Courses = () => {
       ],
       image: "https://images.unsplash.com/photo-1543286386-713bdd548da4",
       path: "/courses/intermediate/binomial-trees",
-      requiredPlan: 'student'
+      requiredPlan: 'student' as const
     },
     {
       title: t('coursesPage.intermediate.americanOptions.title'),
@@ -248,7 +247,7 @@ const Courses = () => {
       ],
       image: "https://images.unsplash.com/photo-1535320903710-d993d3d77d29",
       path: "/courses/intermediate/american-options",
-      requiredPlan: 'student'
+      requiredPlan: 'student' as const
     },
     {
       title: t('coursesPage.intermediate.localVol.title'),
@@ -263,7 +262,7 @@ const Courses = () => {
       ],
       image: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e",
       path: "/courses/intermediate/local-volatility",
-      requiredPlan: 'student'
+      requiredPlan: 'student' as const
     },
     {
       title: t('coursesPage.intermediate.greeks.title'),
@@ -275,7 +274,7 @@ const Courses = () => {
       ],
       image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71",
       path: "/courses/fundamentals/greeks",
-      requiredPlan: 'student'
+      requiredPlan: 'student' as const
     },
     {
       title: t('coursesPage.intermediate.monteCarlo.title'),
@@ -290,7 +289,7 @@ const Courses = () => {
       ],
       image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
       path: "/courses/intermediate/monte-carlo",
-      requiredPlan: 'student'
+      requiredPlan: 'student' as const
     }
   ];
   
@@ -308,7 +307,7 @@ const Courses = () => {
       ],
       image: "https://images.unsplash.com/photo-1605792657660-596af9009e82",
       path: "/courses/complex/exotic-options",
-      requiredPlan: 'pro'
+      requiredPlan: 'pro' as const
     },
     {
       title: t('coursesPage.advanced.structuredProducts.title'),
@@ -323,7 +322,7 @@ const Courses = () => {
       ],
       image: "https://images.unsplash.com/photo-1642104704074-907c0698cbd9",
       path: "/courses/advanced/structured-products",
-      requiredPlan: 'pro'
+      requiredPlan: 'pro' as const
     },
     {
       title: t('coursesPage.advanced.stochasticModels.title'),
@@ -336,7 +335,7 @@ const Courses = () => {
       ],
       image: "https://images.unsplash.com/photo-1511797013134-17f1e8c093bd",
       path: "/courses/advanced/stochastic-models",
-      requiredPlan: 'pro'
+      requiredPlan: 'pro' as const
     },
     {
       title: t('coursesPage.advanced.smileSkew.title'),
@@ -351,7 +350,7 @@ const Courses = () => {
       ],
       image: "https://images.unsplash.com/photo-1569025743873-ea3a9ade89f9",
       path: "/courses/advanced/smile-skew",
-      requiredPlan: 'pro'
+      requiredPlan: 'pro' as const
     },
     {
       title: t('coursesPage.advanced.xva.title'),
@@ -364,7 +363,7 @@ const Courses = () => {
       ],
       image: "https://images.unsplash.com/photo-1534951009808-766178b47a4f",
       path: "/courses/advanced/xva",
-      requiredPlan: 'pro'
+      requiredPlan: 'pro' as const
     },
     {
       title: t('coursesPage.advanced.stochasticRates.title'),
@@ -379,7 +378,7 @@ const Courses = () => {
       ],
       image: "https://images.unsplash.com/photo-1620266757065-5813121e5157",
       path: "/courses/advanced/stochastic-rates",
-      requiredPlan: 'pro'
+      requiredPlan: 'pro' as const
     },
     {
       title: t('coursesPage.advanced.mlPricing.title'),
@@ -394,7 +393,7 @@ const Courses = () => {
       ],
       image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71",
       path: "/courses/advanced/ml-pricing",
-      requiredPlan: 'pro'
+      requiredPlan: 'pro' as const
     }
   ];
 
