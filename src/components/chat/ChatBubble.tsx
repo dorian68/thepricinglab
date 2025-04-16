@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Minus, Maximize, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,14 +14,12 @@ const ChatBubble: React.FC = () => {
   });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const bubbleRef = useRef<HTMLDivElement>(null);
+  const bubbleRef = useRef<HTMLButtonElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  // Recalcule la position quand la fenêtre est redimensionnée
   useEffect(() => {
     const handleResize = () => {
       setPosition(prev => {
-        // Assurez-vous que la bulle reste dans les limites de l'écran après redimensionnement
         const newX = Math.min(prev.x, window.innerWidth - 80);
         const newY = Math.min(prev.y, window.innerHeight - 80);
         return { x: newX, y: newY };
@@ -33,7 +30,6 @@ const ChatBubble: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Définit la position initiale en bas à droite
   useEffect(() => {
     setPosition({
       x: window.innerWidth - 80,
@@ -59,7 +55,6 @@ const ChatBubble: React.FC = () => {
     setIsMinimized(false);
   };
 
-  // Gestion du drag & drop de la bulle de chat
   const startDrag = (e: React.MouseEvent) => {
     if (e.target !== bubbleRef.current && e.target !== chatContainerRef.current) return;
     e.preventDefault();
@@ -73,9 +68,8 @@ const ChatBubble: React.FC = () => {
   const onDrag = (e: MouseEvent) => {
     if (!isDragging) return;
     
-    // Limiter la position pour que la bulle reste toujours visible dans la fenêtre
-    const chatWidth = isOpen ? 320 : 70; // Largeur estimée de la bulle ou du chat ouvert
-    const chatHeight = isOpen ? 400 : 70; // Hauteur estimée de la bulle ou du chat ouvert
+    const chatWidth = isOpen ? 320 : 70;
+    const chatHeight = isOpen ? 400 : 70;
     
     const newX = Math.max(0, Math.min(window.innerWidth - chatWidth, e.clientX - dragStart.x));
     const newY = Math.max(0, Math.min(window.innerHeight - chatHeight, e.clientY - dragStart.y));
@@ -111,7 +105,6 @@ const ChatBubble: React.FC = () => {
     };
   }, [isDragging]);
 
-  // Support tactile pour le drag
   const onDragTouch = (e: TouchEvent) => {
     if (!isDragging || !e.touches[0]) return;
     
