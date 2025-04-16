@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -37,10 +36,9 @@ import {
   AccordionTrigger
 } from "@/components/ui/accordion";
 import { blackScholes, normCDF } from "../../utils/options/blackScholes";
+import BlackScholesCalculator from "../../components/tools/BlackScholesCalculator";
 
-// Simplified Black-Scholes for Case 1
 const simplifiedBlackScholes = (S: number, K: number, sigma: number) => {
-  // r = 0, T = 1
   const d1 = (Math.log(S / K) + (0.5 * sigma * sigma)) / sigma;
   const d2 = d1 - sigma;
   
@@ -54,17 +52,15 @@ const simplifiedBlackScholes = (S: number, K: number, sigma: number) => {
   };
 };
 
-// Simple Binomial Tree Pricing
 const binomialOptionPricing = (S: number, K: number, sigma: number, steps: number = 3) => {
-  const r = 0; // Risk-free rate = 0 for simplification
-  const T = 1; // Time to maturity = 1 year
+  const r = 0;
+  const T = 1;
   
   const dt = T / steps;
   const u = Math.exp(sigma * Math.sqrt(dt));
   const d = 1 / u;
   const p = (Math.exp(r * dt) - d) / (u - d);
   
-  // Initialize the asset prices at each node
   const assetPrices = Array(steps + 1).fill(0).map(() => Array(steps + 1).fill(0));
   for (let i = 0; i <= steps; i++) {
     for (let j = 0; j <= i; j++) {
@@ -72,13 +68,11 @@ const binomialOptionPricing = (S: number, K: number, sigma: number, steps: numbe
     }
   }
   
-  // Calculate option values at expiration
   const optionValues = Array(steps + 1).fill(0).map(() => Array(steps + 1).fill(0));
   for (let j = 0; j <= steps; j++) {
     optionValues[steps][j] = Math.max(0, assetPrices[steps][j] - K);
   }
   
-  // Work backwards to calculate option values at earlier nodes
   for (let i = steps - 1; i >= 0; i--) {
     for (let j = 0; j <= i; j++) {
       optionValues[i][j] = (p * optionValues[i + 1][j + 1] + (1 - p) * optionValues[i + 1][j]) * Math.exp(-r * dt);
@@ -97,7 +91,6 @@ const binomialOptionPricing = (S: number, K: number, sigma: number, steps: numbe
   };
 };
 
-// Simple Chart Component for Case 2
 const PriceChart = ({ spotPrices, callPrices }: { spotPrices: number[], callPrices: number[] }) => {
   const maxPrice = Math.max(...callPrices) * 1.1;
   const minSpot = Math.min(...spotPrices);
@@ -105,23 +98,18 @@ const PriceChart = ({ spotPrices, callPrices }: { spotPrices: number[], callPric
 
   return (
     <div className="w-full h-64 relative bg-finance-dark border border-finance-steel/20 rounded-md">
-      {/* Y-axis */}
       <div className="absolute left-10 top-4 bottom-10 w-px bg-finance-steel/30"></div>
       
-      {/* X-axis */}
       <div className="absolute left-10 right-4 bottom-10 h-px bg-finance-steel/30"></div>
       
-      {/* Y-axis label */}
       <div className="absolute left-2 top-1/2 -translate-y-1/2 -rotate-90 text-xs text-finance-lightgray">
         Option Price
       </div>
       
-      {/* X-axis label */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs text-finance-lightgray">
         Spot Price
       </div>
       
-      {/* Data points */}
       <svg className="absolute inset-0 p-10 pb-10 pl-10" viewBox="0 0 100 100" preserveAspectRatio="none">
         <polyline
           points={spotPrices.map((spot, i) => {
@@ -138,7 +126,6 @@ const PriceChart = ({ spotPrices, callPrices }: { spotPrices: number[], callPric
   );
 };
 
-// Tree Node Visualization
 const TreeNode = ({ 
   value, 
   optionValue,
@@ -175,12 +162,10 @@ const TreeNode = ({
   );
 };
 
-// Tree Edge Visualization
 const TreeEdge = ({ x1, y1, x2, y2 }: { x1: number; y1: number; x2: number; y2: number }) => {
   return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#334155" strokeWidth="1" />;
 };
 
-// Binomial Tree Visualization
 const BinomialTreeVisualization = ({ 
   treeData,
   steps = 3
@@ -194,7 +179,6 @@ const BinomialTreeVisualization = ({
   const totalWidth = horizontalSpacing * steps;
   const totalHeight = verticalSpacing * steps;
   
-  // Generate node positions
   const nodes = [];
   const edges = [];
   
@@ -210,10 +194,8 @@ const BinomialTreeVisualization = ({
         optionValue: treeData.optionValues[i][j],
       });
       
-      // Add edges to previous nodes
       if (i > 0) {
         if (j < i) {
-          // Down edge
           edges.push({
             x1: x,
             y1: y,
@@ -223,7 +205,6 @@ const BinomialTreeVisualization = ({
         }
         
         if (j > 0) {
-          // Up edge
           edges.push({
             x1: x,
             y1: y,
@@ -239,12 +220,10 @@ const BinomialTreeVisualization = ({
     <div className="w-full overflow-x-auto">
       <svg width={totalWidth + nodeRadius * 2} height={totalHeight + nodeRadius * 2}>
         <g transform={`translate(${nodeRadius}, ${nodeRadius})`}>
-          {/* Render edges first so they're behind nodes */}
           {edges.map((edge, i) => (
             <TreeEdge key={`edge-${i}`} {...edge} />
           ))}
           
-          {/* Render nodes */}
           {nodes.map((node, i) => (
             <TreeNode key={`node-${i}`} {...node} radius={nodeRadius} />
           ))}
@@ -259,34 +238,28 @@ const BlackScholesCourse = () => {
   const [activeTab, setActiveTab] = useState("content");
   const [activeSection, setActiveSection] = useState(0);
   
-  // Case 1 - Simplified BS Calculator
   const [spot, setSpot] = useState(100);
   const [strike, setStrike] = useState(100);
   const [volatility, setVolatility] = useState(0.2);
   const [showResult, setShowResult] = useState(false);
   const simplifiedResult = simplifiedBlackScholes(spot, strike, volatility);
   
-  // Case 2 - Sensitivity Analysis
   const [spotCase2, setSpotCase2] = useState(100);
   const [strikeCase2, setStrikeCase2] = useState(100);
   const [volCase2, setVolCase2] = useState(0.2);
   
-  // Generate data points for the chart
   const spotPrices = Array.from({ length: 21 }, (_, i) => 70 + i * 3);
   const callPrices = spotPrices.map(s => 
     blackScholes(s, strikeCase2, 1, 0, 0, volCase2, 'call').price
   );
   
-  // Case 3 - Binomial vs BS
   const binomialResult = binomialOptionPricing(spot, strike, volatility, 3);
   const bsResult = blackScholes(spot, strike, 1, 0, 0, volatility, 'call').price;
   const priceDifference = Math.abs(binomialResult.price - bsResult);
   const percentDiff = (priceDifference / bsResult) * 100;
   
-  // Calculate course progress
   const progress = Math.max(10, Math.min(100, activeSection * 25));
   
-  // Course content sections
   const sections = [
     {
       id: "intro",
@@ -321,7 +294,6 @@ const BlackScholesCourse = () => {
       
       <main className="flex-1 py-8 px-6">
         <div className="max-w-7xl mx-auto">
-          {/* Breadcrumb */}
           <div className="flex items-center text-sm text-finance-lightgray mb-8">
             <Link to="/" className="hover:text-finance-accent">
               {t('navbar.courses')}
@@ -335,7 +307,6 @@ const BlackScholesCourse = () => {
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Sidebar */}
             <div className="lg:col-span-1">
               <div className="finance-card p-6 mb-6">
                 <h2 className="text-xl font-medium mb-4">{t('coursesPage.fundamentals.blackScholes.title')}</h2>
@@ -446,7 +417,6 @@ const BlackScholesCourse = () => {
               </div>
             </div>
             
-            {/* Main content */}
             <div className="lg:col-span-2">
               <div className="finance-card overflow-hidden">
                 <Tabs defaultValue="content" value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -469,7 +439,6 @@ const BlackScholesCourse = () => {
                   
                   <TabsContent value="content" className="m-0">
                     <div className="p-6">
-                      {/* Section 1: Introduction */}
                       {activeSection === 0 && (
                         <div>
                           <h2 className="text-xl font-medium mb-4">Introduction au modèle de Black-Scholes</h2>
@@ -567,7 +536,6 @@ const BlackScholesCourse = () => {
                         </div>
                       )}
                       
-                      {/* Section 2: Case 1 - Simplified BS */}
                       {activeSection === 1 && (
                         <div>
                           <h2 className="text-xl font-medium mb-4">Cas 1 - Calcul manuel simplifié d'un call</h2>
@@ -693,7 +661,6 @@ const BlackScholesCourse = () => {
                         </div>
                       )}
                       
-                      {/* Section 3: Case 2 - Sensitivity Study */}
                       {activeSection === 2 && (
                         <div>
                           <h2 className="text-xl font-medium mb-4">Cas 2 - Étude de sensibilité</h2>
@@ -809,7 +776,6 @@ const BlackScholesCourse = () => {
                         </div>
                       )}
                       
-                      {/* Section 4: Case 3 - Binomial vs BS */}
                       {activeSection === 3 && (
                         <div>
                           <h2 className="text-xl font-medium mb-4">Cas 3 - Comparaison avec le modèle binomial</h2>
@@ -895,7 +861,6 @@ const BlackScholesCourse = () => {
                         </div>
                       )}
                       
-                      {/* Section 5: Solutions and Summary */}
                       {activeSection === 4 && (
                         <div>
                           <h2 className="text-xl font-medium mb-4">Corrigé et synthèse</h2>
