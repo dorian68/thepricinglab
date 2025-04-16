@@ -1,9 +1,33 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { 
+  Menu, 
+  X, 
+  ChevronDown, 
+  Home, 
+  BookOpen, 
+  Dumbbell, 
+  Users, 
+  CreditCard, 
+  Tool,
+  Zap,
+  List,
+  Brain,
+  BarChart4,
+  Trophy,
+  MessageSquare,
+  Award,
+  Code,
+  LineChart,
+  Calculator,
+  Activity,
+  Waves,
+  Sigma
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -29,14 +53,20 @@ const ModernNavbar = () => {
             <div className="hidden md:block ml-10">
               <NavigationMenu>
                 <NavigationMenuList>
+                  {/* Home */}
                   <NavigationMenuItem>
                     <Link to="/" className={navigationMenuTriggerStyle()}>
+                      <Home className="w-4 h-4 mr-2" />
                       {t('navbar.home')}
                     </Link>
                   </NavigationMenuItem>
                   
+                  {/* Courses */}
                   <NavigationMenuItem>
-                    <NavigationMenuTrigger>{t('navbar.courses')}</NavigationMenuTrigger>
+                    <NavigationMenuTrigger>
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      {t('navbar.courses')}
+                    </NavigationMenuTrigger>
                     <NavigationMenuContent>
                       <div className="grid grid-cols-2 gap-3 p-4 w-[500px]">
                         <div>
@@ -112,8 +142,12 @@ const ModernNavbar = () => {
                     </NavigationMenuContent>
                   </NavigationMenuItem>
                   
+                  {/* Training Lab */}
                   <NavigationMenuItem>
-                    <NavigationMenuTrigger>Entraînement</NavigationMenuTrigger>
+                    <NavigationMenuTrigger>
+                      <Dumbbell className="w-4 h-4 mr-2" />
+                      Training Lab
+                    </NavigationMenuTrigger>
                     <NavigationMenuContent>
                       <div className="p-4 w-[380px]">
                         <ul className="space-y-3">
@@ -122,9 +156,11 @@ const ModernNavbar = () => {
                               to="/exercises"
                               className="flex p-2 hover:bg-finance-charcoal/50 rounded-md"
                             >
-                              <div className="mr-3 text-finance-accent">📝</div>
+                              <div className="mr-3 text-finance-accent">
+                                <List className="h-5 w-5" />
+                              </div>
                               <div>
-                                <div className="font-medium">Exercices</div>
+                                <div className="font-medium">Exercices Interactifs</div>
                                 <div className="text-sm text-finance-lightgray">Exercices guidés par niveau</div>
                               </div>
                             </Link>
@@ -134,7 +170,9 @@ const ModernNavbar = () => {
                               to="/survival-mode"
                               className="flex p-2 hover:bg-finance-charcoal/50 rounded-md"
                             >
-                              <div className="mr-3 text-finance-accent">⚡</div>
+                              <div className="mr-3 text-finance-accent">
+                                <Zap className="h-5 w-5" />
+                              </div>
                               <div>
                                 <div className="font-medium">Mode Survie</div>
                                 <div className="text-sm text-finance-lightgray">Défis chronométrés par difficulté</div>
@@ -143,13 +181,43 @@ const ModernNavbar = () => {
                           </li>
                           <li>
                             <Link 
-                              to="/practice"
+                              to="/quizzes"
                               className="flex p-2 hover:bg-finance-charcoal/50 rounded-md"
                             >
-                              <div className="mr-3 text-finance-accent">🏆</div>
+                              <div className="mr-3 text-finance-accent">
+                                <Brain className="h-5 w-5" />
+                              </div>
                               <div>
-                                <div className="font-medium">Tous les exercices</div>
-                                <div className="text-sm text-finance-lightgray">Vue complète des exercices et défis</div>
+                                <div className="font-medium">Quiz Progressifs</div>
+                                <div className="text-sm text-finance-lightgray">Évaluez vos connaissances</div>
+                              </div>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link 
+                              to="/advanced-simulations"
+                              className="flex p-2 hover:bg-finance-charcoal/50 rounded-md"
+                            >
+                              <div className="mr-3 text-finance-accent">
+                                <BarChart4 className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <div className="font-medium">Simulations Avancées</div>
+                                <div className="text-sm text-finance-lightgray">Modèles stochastiques et pricing</div>
+                              </div>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link 
+                              to="/progress"
+                              className="flex p-2 hover:bg-finance-charcoal/50 rounded-md items-center"
+                            >
+                              <div className="mr-3 text-finance-accent">
+                                <Trophy className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <div className="font-medium">Votre Progression</div>
+                                <div className="text-sm text-finance-lightgray">Badges et performances</div>
                               </div>
                             </Link>
                           </li>
@@ -158,22 +226,152 @@ const ModernNavbar = () => {
                     </NavigationMenuContent>
                   </NavigationMenuItem>
                   
+                  {/* Community */}
                   <NavigationMenuItem>
-                    <Link to="/community" className={navigationMenuTriggerStyle()}>
+                    <NavigationMenuTrigger>
+                      <Users className="w-4 h-4 mr-2" />
                       {t('navbar.community')}
-                    </Link>
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <div className="p-4 w-[380px]">
+                        <ul className="space-y-3">
+                          <li>
+                            <Link 
+                              to="/community/forum"
+                              className="flex p-2 hover:bg-finance-charcoal/50 rounded-md"
+                            >
+                              <div className="mr-3 text-finance-accent">
+                                <MessageSquare className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <div className="font-medium">Forum & Chat</div>
+                                <div className="text-sm text-finance-lightgray">Échangez avec la communauté</div>
+                              </div>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link 
+                              to="/community/challenges"
+                              className="flex p-2 hover:bg-finance-charcoal/50 rounded-md"
+                            >
+                              <div className="mr-3 text-finance-accent">
+                                <Award className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <div className="font-medium">Défis Hebdomadaires</div>
+                                <div className="text-sm text-finance-lightgray">Nouveaux problèmes chaque semaine</div>
+                              </div>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link 
+                              to="/community/pair-programming"
+                              className="flex p-2 hover:bg-finance-charcoal/50 rounded-md"
+                            >
+                              <div className="mr-3 text-finance-accent">
+                                <Code className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <div className="font-medium">Pair Programming</div>
+                                <div className="text-sm text-finance-lightgray">Codez ensemble sur des projets</div>
+                              </div>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link 
+                              to="/community/leaderboard"
+                              className="flex p-2 hover:bg-finance-charcoal/50 rounded-md"
+                            >
+                              <div className="mr-3 text-finance-accent">
+                                <LineChart className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <div className="font-medium">Leaderboard & Hackathons</div>
+                                <div className="text-sm text-finance-lightgray">Classements et événements</div>
+                              </div>
+                            </Link>
+                          </li>
+                        </ul>
+                      </div>
+                    </NavigationMenuContent>
                   </NavigationMenuItem>
                   
+                  {/* Pricing */}
                   <NavigationMenuItem>
                     <Link to="/pricing" className={navigationMenuTriggerStyle()}>
+                      <CreditCard className="w-4 h-4 mr-2" />
                       Tarifs
                     </Link>
                   </NavigationMenuItem>
                   
+                  {/* Tools */}
                   <NavigationMenuItem>
-                    <Link to="/tools" className={navigationMenuTriggerStyle()}>
+                    <NavigationMenuTrigger>
+                      <Tool className="w-4 h-4 mr-2" />
                       {t('navbar.tools')}
-                    </Link>
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <div className="p-4 w-[380px]">
+                        <ul className="space-y-3">
+                          <li>
+                            <Link 
+                              to="/tools/volatility-calculator"
+                              className="flex p-2 hover:bg-finance-charcoal/50 rounded-md"
+                            >
+                              <div className="mr-3 text-finance-accent">
+                                <Calculator className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <div className="font-medium">Calculatrices de Volatilité</div>
+                                <div className="text-sm text-finance-lightgray">Outils d'analyse de vol</div>
+                              </div>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link 
+                              to="/tools/black-scholes"
+                              className="flex p-2 hover:bg-finance-charcoal/50 rounded-md"
+                            >
+                              <div className="mr-3 text-finance-accent">
+                                <Activity className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <div className="font-medium">Simulateur Black-Scholes</div>
+                                <div className="text-sm text-finance-lightgray">Pricing d'options</div>
+                              </div>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link 
+                              to="/tools/monte-carlo"
+                              className="flex p-2 hover:bg-finance-charcoal/50 rounded-md"
+                            >
+                              <div className="mr-3 text-finance-accent">
+                                <Waves className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <div className="font-medium">Générateur Monte Carlo</div>
+                                <div className="text-sm text-finance-lightgray">Simulation de scénarios</div>
+                              </div>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link 
+                              to="/tools/model-calibration"
+                              className="flex p-2 hover:bg-finance-charcoal/50 rounded-md"
+                            >
+                              <div className="mr-3 text-finance-accent">
+                                <Sigma className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <div className="font-medium">Calibration de Modèles</div>
+                                <div className="text-sm text-finance-lightgray">Analyse de surfaces de vol</div>
+                              </div>
+                            </Link>
+                          </li>
+                        </ul>
+                      </div>
+                    </NavigationMenuContent>
                   </NavigationMenuItem>
                 </NavigationMenuList>
               </NavigationMenu>
@@ -182,12 +380,16 @@ const ModernNavbar = () => {
           <div className="hidden md:flex items-center space-x-4">
             <LanguageSwitcher />
             <div className="ml-4 flex items-center md:ml-6">
-              <Link to="/login" className="finance-button-outline mr-4">
-                {t('navbar.login')}
-              </Link>
-              <Link to="/signup" className="finance-button">
-                {t('navbar.signup')}
-              </Link>
+              <Button variant="financeOutline" size="sm" className="mr-2" asChild>
+                <Link to="/login">
+                  {t('navbar.login')}
+                </Link>
+              </Button>
+              <Button variant="finance" size="sm" asChild>
+                <Link to="/signup">
+                  {t('navbar.signup')}
+                </Link>
+              </Button>
             </div>
           </div>
           <div className="-mr-2 flex md:hidden">
@@ -211,12 +413,18 @@ const ModernNavbar = () => {
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-finance-charcoal">
             <Link
               to="/"
-              className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+              className="flex items-center px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
+              <Home className="w-4 h-4 mr-2" />
               {t('navbar.home')}
             </Link>
+            
+            {/* Mobile Courses */}
             <div className="space-y-1 pl-3 border-l border-finance-steel/20">
-              <h3 className="px-3 py-1 text-xs text-finance-accent font-medium uppercase">Cours</h3>
+              <h3 className="flex items-center px-3 py-1 text-xs text-finance-accent font-medium uppercase">
+                <BookOpen className="w-3 h-3 mr-2" />
+                Cours
+              </h3>
               <Link
                 to="/courses/fundamentals/black-scholes"
                 className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
@@ -242,13 +450,18 @@ const ModernNavbar = () => {
                 {t('coursesPage.advanced.impliedVol.title')}
               </Link>
             </div>
+            
+            {/* Mobile Training Lab */}
             <div className="space-y-1 pl-3 border-l border-finance-steel/20">
-              <h3 className="px-3 py-1 text-xs text-finance-accent font-medium uppercase">Entraînement</h3>
+              <h3 className="flex items-center px-3 py-1 text-xs text-finance-accent font-medium uppercase">
+                <Dumbbell className="w-3 h-3 mr-2" />
+                Training Lab
+              </h3>
               <Link
                 to="/exercises"
                 className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
               >
-                Exercices
+                Exercices Interactifs
               </Link>
               <Link
                 to="/survival-mode"
@@ -256,35 +469,88 @@ const ModernNavbar = () => {
               >
                 Mode Survie
               </Link>
+              <Link
+                to="/quizzes"
+                className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+              >
+                Quiz Progressifs
+              </Link>
+              <Link
+                to="/advanced-simulations"
+                className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+              >
+                Simulations Avancées
+              </Link>
             </div>
-            <Link
-              to="/community"
-              className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
-            >
-              {t('navbar.community')}
-            </Link>
+            
+            {/* Mobile Community */}
+            <div className="space-y-1 pl-3 border-l border-finance-steel/20">
+              <h3 className="flex items-center px-3 py-1 text-xs text-finance-accent font-medium uppercase">
+                <Users className="w-3 h-3 mr-2" />
+                {t('navbar.community')}
+              </h3>
+              <Link
+                to="/community/forum"
+                className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+              >
+                Forum & Chat
+              </Link>
+              <Link
+                to="/community/challenges"
+                className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+              >
+                Défis Hebdomadaires
+              </Link>
+              <Link
+                to="/community/leaderboard"
+                className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+              >
+                Leaderboard
+              </Link>
+            </div>
+            
+            {/* Mobile Tools */}
+            <div className="space-y-1 pl-3 border-l border-finance-steel/20">
+              <h3 className="flex items-center px-3 py-1 text-xs text-finance-accent font-medium uppercase">
+                <Tool className="w-3 h-3 mr-2" />
+                Outils
+              </h3>
+              <Link
+                to="/tools/black-scholes"
+                className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+              >
+                Simulateur Black-Scholes
+              </Link>
+              <Link
+                to="/tools/monte-carlo"
+                className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+              >
+                Monte Carlo
+              </Link>
+            </div>
+            
             <Link
               to="/pricing"
-              className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+              className="flex items-center px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
             >
+              <CreditCard className="w-4 h-4 mr-2" />
               Tarifs
             </Link>
-            <Link
-              to="/tools"
-              className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
-            >
-              {t('navbar.tools')}
-            </Link>
+            
             <div className="mt-3 flex justify-start px-3">
               <LanguageSwitcher />
             </div>
             <div className="pt-4 pb-3 border-t border-finance-steel/20">
-              <Link to="/login" className="finance-button-outline block w-full text-center mb-2">
-                {t('navbar.login')}
-              </Link>
-              <Link to="/signup" className="finance-button block w-full text-center">
-                {t('navbar.signup')}
-              </Link>
+              <Button variant="financeOutline" size="sm" className="w-full mb-2" asChild>
+                <Link to="/login">
+                  {t('navbar.login')}
+                </Link>
+              </Button>
+              <Button variant="finance" size="sm" className="w-full" asChild>
+                <Link to="/signup">
+                  {t('navbar.signup')}
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
