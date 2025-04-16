@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -10,7 +9,7 @@ import {
   Dumbbell, 
   Users, 
   CreditCard, 
-  Tool,
+  Wrench,
   Zap,
   List,
   Brain,
@@ -307,7 +306,7 @@ const ModernNavbar = () => {
                   {/* Tools */}
                   <NavigationMenuItem>
                     <NavigationMenuTrigger>
-                      <Tool className="w-4 h-4 mr-2" />
+                      <Wrench className="w-4 h-4 mr-2" />
                       {t('navbar.tools')}
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
@@ -512,7 +511,7 @@ const ModernNavbar = () => {
             {/* Mobile Tools */}
             <div className="space-y-1 pl-3 border-l border-finance-steel/20">
               <h3 className="flex items-center px-3 py-1 text-xs text-finance-accent font-medium uppercase">
-                <Tool className="w-3 h-3 mr-2" />
+                <Wrench className="w-3 h-3 mr-2" />
                 Outils
               </h3>
               <Link
