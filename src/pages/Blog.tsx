@@ -74,8 +74,8 @@ const Blog = () => {
         <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink as={Link} to="/">
-                {t("navbar.home")}
+              <BreadcrumbLink>
+                <Link to="/">{t("navbar.home")}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />

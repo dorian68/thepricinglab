@@ -30,10 +30,8 @@ const ModernNavbar = () => {
               <NavigationMenu>
                 <NavigationMenuList>
                   <NavigationMenuItem>
-                    <Link to="/" legacyBehavior passHref>
-                      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                        {t('navbar.home')}
-                      </NavigationMenuLink>
+                    <Link to="/" className={navigationMenuTriggerStyle()}>
+                      {t('navbar.home')}
                     </Link>
                   </NavigationMenuItem>
                   
@@ -161,26 +159,20 @@ const ModernNavbar = () => {
                   </NavigationMenuItem>
                   
                   <NavigationMenuItem>
-                    <Link to="/community" legacyBehavior passHref>
-                      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                        {t('navbar.community')}
-                      </NavigationMenuLink>
+                    <Link to="/community" className={navigationMenuTriggerStyle()}>
+                      {t('navbar.community')}
                     </Link>
                   </NavigationMenuItem>
                   
                   <NavigationMenuItem>
-                    <Link to="/pricing" legacyBehavior passHref>
-                      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                        Tarifs
-                      </NavigationMenuLink>
+                    <Link to="/pricing" className={navigationMenuTriggerStyle()}>
+                      Tarifs
                     </Link>
                   </NavigationMenuItem>
                   
                   <NavigationMenuItem>
-                    <Link to="/tools" legacyBehavior passHref>
-                      <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                        {t('navbar.tools')}
-                      </NavigationMenuLink>
+                    <Link to="/tools" className={navigationMenuTriggerStyle()}>
+                      {t('navbar.tools')}
                     </Link>
                   </NavigationMenuItem>
                 </NavigationMenuList>

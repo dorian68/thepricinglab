@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
@@ -14,7 +13,8 @@ import {
   Target, 
   Trophy,
   Zap,
-  ArrowRight
+  ArrowRight,
+  Clock
 } from "lucide-react";
 
 const Practice = () => {
