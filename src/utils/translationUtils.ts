@@ -51,6 +51,7 @@ export const extractLabel = (key: string): string => {
  * @returns Boolean indicating if translation exists
  */
 export const hasTranslation = (t: TFunction, key: string): boolean => {
-  const result = t(key, { returnObjects: true });
-  return typeof result === 'string' && result !== key && !(result.includes('[') && result.includes(']'));
+  // Fix: Explicitly cast the result to unknown first, then to string to avoid the 'never' type issue
+  const result = t(key, { returnObjects: true }) as unknown;
+  return typeof result === 'string' && result !== key && !(String(result).includes('[') && String(result).includes(']'));
 };
