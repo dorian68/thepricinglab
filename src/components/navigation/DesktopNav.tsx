@@ -55,7 +55,7 @@ const DesktopNav = () => {
                 <TrainingLabMenu />
               </NavItem>
               
-              {/* Trading Lab - New Section */}
+              {/* Trading Lab Section */}
               <NavItem 
                 icon={BarChart3} 
                 label={t('navbar.tradingLab', 'Trading Lab')}

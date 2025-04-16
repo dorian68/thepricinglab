@@ -10,7 +10,6 @@ import { defaultStrategies } from '../../utils/options/strategyDefaults';
 import { Strategy } from '../../types/strategies';
 import { calculateStrategyResults } from '../../utils/options/strategyCalculator';
 import { Card } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { safeTranslate } from '../../utils/translationUtils';
 
 const Strategies = () => {

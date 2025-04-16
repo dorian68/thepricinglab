@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import LanguageSwitcher from "../LanguageSwitcher";
 import MobileNavSection from "./MobileNavSection";
+import { safeTranslate } from "../../utils/translationUtils";
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -28,7 +29,7 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
             onClick={onClose}
             className="inline-flex items-center justify-center p-2 rounded-md text-finance-offwhite hover:text-finance-accent focus:outline-none"
           >
-            <span className="sr-only">{t('navbar.closeMenu')}</span>
+            <span className="sr-only">{safeTranslate(t, 'navbar.closeMenu', 'Close menu')}</span>
             <X className="block h-6 w-6" aria-hidden="true" />
           </button>
         </div>
@@ -38,40 +39,40 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
           className="flex items-center px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
         >
           <Home className="w-4 h-4 mr-2" />
-          {t('navbar.home')}
+          {safeTranslate(t, 'navbar.home', 'Home')}
         </Link>
         
         {/* Mobile Courses */}
-        <MobileNavSection title="Cours" icon={BookOpen}>
+        <MobileNavSection title={safeTranslate(t, 'navbar.courses', 'Cours')} icon={BookOpen}>
           <Link
             to="/courses/fundamentals/black-scholes"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            {t('coursesPage.fundamentals.blackScholes.title')}
+            {safeTranslate(t, 'coursesPage.fundamentals.blackScholes.title', 'Black-Scholes Model')}
           </Link>
           <Link
             to="/courses/fundamentals/yield-curves"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            {t('coursesPage.fundamentals.yieldCurves.title')}
+            {safeTranslate(t, 'coursesPage.fundamentals.yieldCurves.title', 'Yield Curves')}
           </Link>
           <Link
             to="/courses/fundamentals/greeks"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            {t('coursesPage.fundamentals.greeks.title')}
+            {safeTranslate(t, 'coursesPage.fundamentals.greeks.title', 'Option Greeks')}
           </Link>
           <Link
             to="/courses/advanced/implied-vol"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            {t('coursesPage.advanced.impliedVol.title')}
+            {safeTranslate(t, 'coursesPage.advanced.impliedVol.title', 'Implied Volatility')}
           </Link>
         </MobileNavSection>
         
         {/* Mobile Training Lab - Highlighted */}
         <MobileNavSection 
-          title="Training Lab" 
+          title={safeTranslate(t, 'navbar.trainingLab', 'Training Lab')} 
           icon={Dumbbell} 
           highlighted={true}
         >
@@ -79,96 +80,84 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
             to="/exercises"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            Exercices Interactifs
+            {safeTranslate(t, 'trainingLab.exercises', 'Exercices Interactifs')}
           </Link>
           <Link
             to="/survival-mode"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            Mode Survie
+            {safeTranslate(t, 'trainingLab.survivalMode', 'Mode Survie')}
           </Link>
           <Link
             to="/quizzes"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            Quiz Progressifs
-          </Link>
-          <Link
-            to="/advanced-simulations"
-            className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
-          >
-            Simulations Avancées
-          </Link>
-          <Link
-            to="/progress"
-            className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
-          >
-            Progression & Badges
+            {safeTranslate(t, 'trainingLab.quizzes', 'Quiz Progressifs')}
           </Link>
         </MobileNavSection>
 
-        {/* Mobile Trading Lab - New Section */}
+        {/* Mobile Trading Lab - Section */}
         <MobileNavSection 
-          title="Trading Lab" 
+          title={safeTranslate(t, 'navbar.tradingLab', 'Trading Lab')} 
           icon={BarChart3} 
         >
           <Link
             to="/trading/exercises"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            Exercices
+            {safeTranslate(t, 'tradingLab.exercises', 'Exercices')}
           </Link>
           <Link
             to="/trading/backtest"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            Backtest
+            {safeTranslate(t, 'tradingLab.backtest', 'Backtest')}
           </Link>
           <Link
             to="/trading/scenarios"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            Scénarios
+            {safeTranslate(t, 'tradingLab.scenarios', 'Scénarios')}
           </Link>
           <Link
             to="/trading/strategies"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            Stratégies
+            {safeTranslate(t, 'tradingLab.strategies', 'Stratégies')}
           </Link>
           <Link
             to="/trading/performance"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            Performances
+            {safeTranslate(t, 'tradingLab.performance', 'Performances')}
           </Link>
         </MobileNavSection>
         
         {/* Mobile Community */}
-        <MobileNavSection title={t('navbar.community')} icon={Users}>
+        <MobileNavSection title={safeTranslate(t, 'navbar.community', 'Communauté')} icon={Users}>
           <Link
             to="/community/forum"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            Forum & Chat
+            {safeTranslate(t, 'community.forum', 'Forum & Chat')}
           </Link>
           <Link
             to="/community/challenges"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            Défis Hebdomadaires
+            {safeTranslate(t, 'community.challenges', 'Défis Hebdomadaires')}
           </Link>
           <Link
             to="/community/pair-programming"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            Pair Programming
+            {safeTranslate(t, 'community.pairProgramming', 'Pair Programming')}
           </Link>
           <Link
             to="/community/leaderboard"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            Leaderboard & Hackathons
+            {safeTranslate(t, 'community.leaderboard', 'Leaderboard & Hackathons')}
           </Link>
         </MobileNavSection>
         
@@ -178,34 +167,34 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
           className="flex items-center px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
         >
           <CreditCard className="w-4 h-4 mr-2" />
-          Tarifs
+          {safeTranslate(t, 'navbar.pricing', 'Tarifs')}
         </Link>
         
         {/* Mobile Tools */}
-        <MobileNavSection title="Outils" icon={Wrench}>
+        <MobileNavSection title={safeTranslate(t, 'navbar.tools', 'Outils')} icon={Wrench}>
           <Link
             to="/tools/volatility-calculator"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            Calculatrices de Volatilité
+            {safeTranslate(t, 'tools.volatilityCalculator', 'Calculatrices de Volatilité')}
           </Link>
           <Link
             to="/tools/black-scholes"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            Simulateur Black-Scholes
+            {safeTranslate(t, 'tools.blackScholes', 'Simulateur Black-Scholes')}
           </Link>
           <Link
             to="/tools/monte-carlo"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            Monte Carlo
+            {safeTranslate(t, 'tools.monteCarlo', 'Monte Carlo')}
           </Link>
           <Link
             to="/tools/model-calibration"
             className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
           >
-            Calibration de Modèles
+            {safeTranslate(t, 'tools.modelCalibration', 'Calibration de Modèles')}
           </Link>
         </MobileNavSection>
         
@@ -215,7 +204,7 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
           className="flex items-center px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
         >
           <FileText className="w-4 h-4 mr-2" />
-          Blog
+          {safeTranslate(t, 'navbar.blog', 'Blog')}
         </Link>
         
         {/* Mobile Bug Report */}
@@ -224,7 +213,7 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
           className="flex items-center px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
         >
           <Bug className="w-4 h-4 mr-2" />
-          {t('navbar.bugs')}
+          {safeTranslate(t, 'navbar.bugs', 'Report Bug')}
         </Link>
         
         <div className="mt-3 flex justify-start px-3">
@@ -233,12 +222,12 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
         <div className="pt-4 pb-3 border-t border-finance-steel/20">
           <Button variant="financeOutline" size="sm" className="w-full mb-2" asChild>
             <Link to="/login">
-              {t('navbar.login')}
+              {safeTranslate(t, 'navbar.login', 'Login')}
             </Link>
           </Button>
           <Button variant="finance" size="sm" className="w-full" asChild>
             <Link to="/signup">
-              {t('navbar.signup')}
+              {safeTranslate(t, 'navbar.signup', 'Sign Up')}
             </Link>
           </Button>
         </div>
