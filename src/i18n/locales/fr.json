@@ -1,4 +1,3 @@
-
 {
   "navbar": {
     "courses": "Cours",
@@ -7,7 +6,12 @@
     "tools": "Outils",
     "mentoring": "Mentorat",
     "community": "Communauté",
-    "login": "Connexion"
+    "login": "Connexion",
+    "signup": "S'inscrire",
+    "home": "Accueil",
+    "exercises": "Exercices",
+    "survivalMode": "Mode Survie",
+    "openMenu": "Ouvrir le menu"
   },
   "footer": {
     "description": "The Pricing Lab est une plateforme d'apprentissage du pricing des produits financiers qui combine théorie, pratique et gamification.",
@@ -54,7 +58,8 @@
     },
     "curriculum": {
       "title": "Programme Complet",
-      "description": "Notre programme couvre tout, des fondamentaux du pricing d'options au calcul stochastique avancé et aux modèles de risque sophistiqués."
+      "description": "Notre programme couvre tout, des fondamentaux du pricing d'options au calcul stochastique avancé et aux modèles de risque sophistiqués.",
+      "allModules": "Tous les Modules"
     },
     "modules": {
       "blackScholes": {
@@ -86,6 +91,18 @@
         "title": "Stress Tests & Risque",
         "level": "AVANCÉ",
         "description": "Concevez et implémentez des stress tests pour des portefeuilles de dérivés dans des scénarios extrêmes."
+      },
+      "survival": {
+        "title": "Formation en Mode Survie",
+        "level": "INTERACTIF",
+        "description": "Testez vos connaissances en pricing sous pression avec des scénarios de marché en temps réel.",
+        "cta": "Commencer l'Entraînement"
+      },
+      "tools": {
+        "title": "Suite d'Outils Financiers",
+        "level": "UTILITAIRES",
+        "description": "Accédez à des calculateurs et des outils de visualisation de qualité professionnelle pour le pricing des dérivés.",
+        "cta": "Explorer les Outils"
       }
     },
     "testimonials": {
@@ -387,7 +404,9 @@
   },
   "languageSwitcher": {
     "en": "Anglais",
-    "fr": "Français"
+    "fr": "Français",
+    "switchLanguage": "Changer de langue",
+    "tooltip": "Changer la langue du site"
   },
   "stats": {
     "modules": "Modules",

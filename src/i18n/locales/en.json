@@ -1,4 +1,3 @@
-
 {
   "navbar": {
     "courses": "Courses",
@@ -7,7 +6,12 @@
     "tools": "Tools",
     "mentoring": "Mentoring",
     "community": "Community",
-    "login": "Log in"
+    "login": "Log in",
+    "signup": "Sign up",
+    "home": "Home",
+    "exercises": "Exercises",
+    "survivalMode": "Survival Mode",
+    "openMenu": "Open menu"
   },
   "footer": {
     "description": "The Pricing Lab is a platform for learning financial product pricing that combines theory, practice and gamification.",
@@ -54,7 +58,8 @@
     },
     "curriculum": {
       "title": "Comprehensive Curriculum",
-      "description": "Our curriculum covers everything from options pricing fundamentals to advanced stochastic calculus and sophisticated risk models."
+      "description": "Our curriculum covers everything from options pricing fundamentals to advanced stochastic calculus and sophisticated risk models.",
+      "allModules": "All Modules"
     },
     "modules": {
       "blackScholes": {
@@ -86,6 +91,18 @@
         "title": "Stress Testing & Risk",
         "level": "ADVANCED",
         "description": "Design and implement stress tests for derivative portfolios under extreme scenarios."
+      },
+      "survival": {
+        "title": "Survival Mode Training",
+        "level": "INTERACTIVE",
+        "description": "Test your pricing knowledge under pressure with real-time market scenarios.",
+        "cta": "Start Training"
+      },
+      "tools": {
+        "title": "Financial Tools Suite",
+        "level": "UTILITIES",
+        "description": "Access professional-grade calculators and visualization tools for derivatives pricing.",
+        "cta": "Explore Tools"
       }
     },
     "testimonials": {
@@ -387,7 +404,9 @@
   },
   "languageSwitcher": {
     "en": "English",
-    "fr": "French"
+    "fr": "French",
+    "switchLanguage": "Switch language",
+    "tooltip": "Change the language of the site"
   },
   "stats": {
     "modules": "Modules",
