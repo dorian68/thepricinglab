@@ -5,6 +5,7 @@ import { defaultStrategies } from '../../utils/options/strategyDefaults';
 import { Strategy } from '../../types/strategies';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { safeTranslate } from '../../utils/translationUtils';
 
 interface StrategySelectorProps {
   selectedStrategy: Strategy;
@@ -24,10 +25,10 @@ const StrategySelector: React.FC<StrategySelectorProps> = ({
     <Tabs defaultValue="vanilla" className="w-full">
       <TabsList className="w-full grid grid-cols-2 mb-4">
         <TabsTrigger value="vanilla" className="text-sm">
-          {t('strategies.vanilla', 'Vanilla')}
+          {safeTranslate(t, 'strategies.vanilla', 'Vanilla')}
         </TabsTrigger>
         <TabsTrigger value="advanced" className="text-sm">
-          {t('strategies.advanced', 'Avancées')}
+          {safeTranslate(t, 'strategies.advanced', 'Advanced')}
         </TabsTrigger>
       </TabsList>
 
