@@ -1,4 +1,3 @@
-
 {
   "app": {
     "title": "The Pricing Lab",
@@ -24,7 +23,8 @@
     "language": "Language",
     "blog": "Blog",
     "bugs": "Report Bug",
-    "trainingLab": "Training Lab"
+    "trainingLab": "Training Lab",
+    "pricing": "Pricing"
   },
   "language": {
     "en": "English",

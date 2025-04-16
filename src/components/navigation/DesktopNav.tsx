@@ -66,7 +66,7 @@ const DesktopNav = () => {
               <NavItem 
                 to="/pricing" 
                 icon={CreditCard} 
-                label="Tarifs" 
+                label={t('navbar.pricing', 'Tarifs')} 
               />
               
               {/* Tools */}
@@ -81,7 +81,7 @@ const DesktopNav = () => {
               <NavItem 
                 to="/blog" 
                 icon={FileText} 
-                label="Blog" 
+                label={t('navbar.blog')} 
               />
               
               {/* Bug Report */}
