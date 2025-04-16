@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -59,7 +58,7 @@ const Index = () => {
                 opacity-80 filter brightness-75 contrast-125"
               ></div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="font-mono text-[#ea384c] bg-black/80 px-4 py-3 border border-red-900/30 rounded text-sm tracking-wider">
+                <div className="bg-black/70 px-6 py-3 rounded-lg border border-[#ea384c]/30 tracking-wider uppercase text-sm font-mono text-[#ea384c] shadow-lg">
                   TRADING TERMINAL ACTIVATED
                 </div>
               </div>
