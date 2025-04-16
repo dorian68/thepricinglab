@@ -28,6 +28,12 @@
     "en": "English",
     "fr": "French"
   },
+  "languageSwitcher": {
+    "switchLanguage": "Switch language",
+    "tooltip": "Change the site language",
+    "en": "English",
+    "fr": "Français"
+  },
   "blog": {
     "title": "Blog",
     "subtitle": "Insights, tutorials and practical guides for quantitative finance professionals and enthusiasts",
@@ -59,6 +65,99 @@
       "placeholder": "Your email address",
       "subscribe": "Subscribe"
     }
+  },
+  "survivalMode": {
+    "title": "Survival Mode",
+    "subtitle": "Test your pricing skills under pressure and see how far you can go",
+    "description": "Survival mode challenges you to solve increasingly difficult pricing problems against the clock. See how many challenges you can solve before time runs out!",
+    "stats": {
+      "waves": "{{count}} Difficulty Waves",
+      "challenges": "{{count}}+ Total Challenges",
+      "timeLimit": "Limited time per challenge",
+      "highestWave": "Highest wave reached",
+      "completed": "Challenges completed",
+      "success": "Success rate",
+      "avgTime": "Average time",
+      "ranking": "Global ranking"
+    },
+    "yourStats": "Your Statistics",
+    "progress": "Overall Progress",
+    "availableWaves": "Available Waves",
+    "subscription": {
+      "title": "Unlock All Waves",
+      "description": "With a subscription, get access to all survival mode waves and test your skills with advanced challenges",
+      "unlock": "Unlock All Waves",
+      "comparePlans": "Compare Plans"
+    },
+    "difficulty": {
+      "easy": "Beginner",
+      "medium": "Intermediate",
+      "hard": "Advanced",
+      "expert": "Expert",
+      "master": "Master",
+      "legendary": "Legendary"
+    },
+    "waves": {
+      "beginner": {
+        "title": "Fundamentals",
+        "description": "Start with basics of vanilla options and simple pricing models"
+      },
+      "intermediate": {
+        "title": "Intermediate Tactics",
+        "description": "Master binomial trees and American options with time constraints"
+      },
+      "advanced": {
+        "title": "Advanced Challenges",
+        "description": "Take on stochastic volatility and European exotic products challenges"
+      },
+      "expert": {
+        "title": "Quant Expertise",
+        "description": "Dive into path-dependent options and barrier options"
+      },
+      "master": {
+        "title": "Structured Mastery",
+        "description": "Tackle complex structured products and multi-asset options"
+      },
+      "legendary": {
+        "title": "Financial Legend",
+        "description": "Face ultimate challenges with AI models, stochastic rates and XVA"
+      }
+    },
+    "challenges": "challenges",
+    "perChallenge": "per challenge",
+    "topics": "Topics covered",
+    "startWave": "Start This Wave",
+    "unlockWave": "Unlock This Wave",
+    "leaderboard": "Leaderboard",
+    "viewFull": "View Full Leaderboard",
+    "rank": "Rank",
+    "player": "Player",
+    "highestWave": "Highest Wave",
+    "challenges": "Challenges Completed",
+    "success": "Success Rate",
+    "avgTime": "Avg. Time",
+    "backToWaves": "Back to Waves",
+    "score": "Score",
+    "challenge": "Challenge",
+    "readyToStart": "Ready to Start?",
+    "waveDescription": "You're about to start {{wave}} with {{challenges}} challenges. You'll have {{time}} seconds for each challenge. Good luck!",
+    "startChallenge": "Start Challenge",
+    "currentChallenge": "Current Challenge",
+    "challengeContent": "Challenge content would be displayed here (formulas, graphs, data)",
+    "enterAnswer": "Enter your answer...",
+    "skip": "Skip",
+    "submit": "Submit Answer",
+    "correctAnswer": "Correct! Well done!",
+    "incorrectAnswer": "Incorrect. The right approach would be shown here.",
+    "congratulations": "Congratulations!",
+    "challengeFailed": "Challenge Completed",
+    "finalScore": "Your final score: {{score}}/{{total}}",
+    "accuracy": "Accuracy",
+    "excellentPerformance": "Excellent performance! You've mastered this difficulty level!",
+    "goodPerformance": "Good job! Keep practicing to improve your speed and accuracy.",
+    "needPractice": "You might need more practice with these concepts. Try reviewing the related courses.",
+    "returnToWaves": "Return to Waves",
+    "tryAgain": "Try Again"
   },
   "home": {
     "hero": {

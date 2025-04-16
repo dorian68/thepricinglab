@@ -21,11 +21,143 @@
     "settings": "Paramètres",
     "logout": "Déconnexion",
     "theme": "Thème",
-    "language": "Langue"
+    "language": "Langue",
+    "blog": "Blog"
   },
   "language": {
     "en": "Anglais",
     "fr": "Français"
+  },
+  "languageSwitcher": {
+    "switchLanguage": "Changer de langue",
+    "tooltip": "Changer la langue du site",
+    "en": "English",
+    "fr": "Français"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Analyses, tutoriels et guides pratiques pour les professionnels et passionnés de finance quantitative",
+    "description": "Le blog The Pricing Lab propose des articles approfondis sur la tarification des options, les modèles et les concepts de finance quantitative avec des exemples de code pratiques.",
+    "search": "Rechercher des articles...",
+    "clearFilters": "Effacer les filtres",
+    "featuredPost": "Article en vedette",
+    "allPosts": "Tous les articles",
+    "searchResults": "Résultats de recherche",
+    "noResults": "Aucun article trouvé",
+    "tryDifferent": "Essayez différents mots-clés ou effacez les filtres",
+    "viewAllPosts": "Voir tous les articles",
+    "browseTags": "Parcourir par sujet",
+    "readMore": "Lire la suite",
+    "postNotFound": "Article non trouvé",
+    "postNotFoundDesc": "L'article que vous recherchez n'existe pas ou a été déplacé.",
+    "backToBlog": "Retour au blog",
+    "relatedPosts": "Articles connexes",
+    "shareOnTwitter": "Partager sur Twitter",
+    "shareOnLinkedIn": "Partager sur LinkedIn",
+    "shareOnFacebook": "Partager sur Facebook",
+    "copyLink": "Copier le lien",
+    "linkCopied": "Lien copié",
+    "linkCopiedDesc": "Lien de l'article copié dans le presse-papier",
+    "exploreCourses": "Explorer les cours associés",
+    "newsletter": {
+      "title": "Abonnez-vous à notre newsletter",
+      "description": "Recevez les derniers articles, tutoriels et mises à jour sur la finance quantitative directement dans votre boîte de réception.",
+      "placeholder": "Votre adresse email",
+      "subscribe": "S'abonner"
+    }
+  },
+  "survivalMode": {
+    "title": "Mode Survie",
+    "subtitle": "Testez vos compétences en pricing sous pression et voyez jusqu'où vous pouvez aller",
+    "description": "Le mode survie vous met au défi de résoudre des problèmes de pricing de plus en plus difficiles, contre la montre. Voyez combien de challenges vous pouvez résoudre avant que le temps ne s'écoule!",
+    "stats": {
+      "waves": "{{count}} Vagues de difficulté",
+      "challenges": "{{count}}+ Défis en tout",
+      "timeLimit": "Temps limité par défi",
+      "highestWave": "Vague max atteinte",
+      "completed": "Défis complétés",
+      "success": "Taux de réussite",
+      "avgTime": "Temps moyen",
+      "ranking": "Classement global"
+    },
+    "yourStats": "Vos statistiques",
+    "progress": "Progression globale",
+    "availableWaves": "Vagues disponibles",
+    "subscription": {
+      "title": "Débloquez toutes les vagues",
+      "description": "Avec un abonnement, obtenez accès à toutes les vagues du mode survie et mettez vos compétences à l'épreuve avec des défis avancés",
+      "unlock": "Débloquer toutes les vagues",
+      "comparePlans": "Comparer les plans"
+    },
+    "difficulty": {
+      "easy": "Débutant",
+      "medium": "Intermédiaire",
+      "hard": "Difficile",
+      "expert": "Expert",
+      "master": "Maître",
+      "legendary": "Légendaire"
+    },
+    "waves": {
+      "beginner": {
+        "title": "Fondamentaux",
+        "description": "Commencez avec les bases des options vanilles et des modèles de pricing simples"
+      },
+      "intermediate": {
+        "title": "Tactiques intermédiaires",
+        "description": "Maîtrisez les arbres binomiaux et les options américaines avec des contraintes de temps"
+      },
+      "advanced": {
+        "title": "Défis avancés",
+        "description": "Relevez des challenges de volatilité stochastique et de produits exotiques européens"
+      },
+      "expert": {
+        "title": "Expertise quantitative",
+        "description": "Plongez dans les options à dépendance de chemin et les options à barrière"
+      },
+      "master": {
+        "title": "Maîtrise structurée",
+        "description": "Abordez les produits structurés complexes et les options multi-actifs"
+      },
+      "legendary": {
+        "title": "Légende financière",
+        "description": "Affrontez les défis ultimes avec des modèles d'IA, taux stochastiques et XVA"
+      }
+    },
+    "challenges": "défis",
+    "perChallenge": "par défi",
+    "topics": "Sujets couverts",
+    "startWave": "Commencer cette vague",
+    "unlockWave": "Débloquer cette vague",
+    "leaderboard": "Classement",
+    "viewFull": "Voir classement complet",
+    "rank": "Rang",
+    "player": "Joueur",
+    "highestWave": "Vague max",
+    "challenges": "Défis réussis",
+    "success": "Réussite",
+    "avgTime": "Temps moy.",
+    "backToWaves": "Retour aux vagues",
+    "score": "Score",
+    "challenge": "Défi",
+    "readyToStart": "Prêt à commencer ?",
+    "waveDescription": "Vous êtes sur le point de commencer {{wave}} avec {{challenges}} défis. Vous aurez {{time}} secondes pour chaque défi. Bonne chance !",
+    "startChallenge": "Commencer le défi",
+    "currentChallenge": "Défi actuel",
+    "challengeContent": "Le contenu du défi serait affiché ici (formules, graphiques, données)",
+    "enterAnswer": "Entrez votre réponse...",
+    "skip": "Passer",
+    "submit": "Soumettre la réponse",
+    "correctAnswer": "Correct ! Bien joué !",
+    "incorrectAnswer": "Incorrect. La bonne approche serait montrée ici.",
+    "congratulations": "Félicitations !",
+    "challengeFailed": "Défi terminé",
+    "finalScore": "Votre score final : {{score}}/{{total}}",
+    "accuracy": "Précision",
+    "excellentPerformance": "Performance excellente ! Vous avez maîtrisé ce niveau de difficulté !",
+    "goodPerformance": "Bon travail ! Continuez à pratiquer pour améliorer votre vitesse et précision.",
+    "needPractice": "Vous pourriez avoir besoin de plus de pratique avec ces concepts. Essayez de revoir les cours associés.",
+    "returnToWaves": "Retour aux vagues",
+    "tryAgain": "Réessayer"
   },
   "home": {
     "hero": {

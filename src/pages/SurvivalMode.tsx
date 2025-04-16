@@ -17,87 +17,15 @@ import {
   GraduationCap, 
   Rocket 
 } from "lucide-react";
+import { useSurvivalWaves, getDifficultyColorClass, SubscriptionPlan } from "@/data/survival-waves";
 
 const SurvivalMode = () => {
   const { t } = useTranslation();
-  const [userPlan] = useState<'freemium' | 'student' | 'pro'>('freemium'); // Simulating user's current plan
+  const [userPlan] = useState<SubscriptionPlan>('freemium'); // Simulating user's current plan
   
-  // Define different waves based on subscription
-  const survivalWaves = [
-    {
-      id: 1,
-      name: t('survivalMode.waves.beginner.title'),
-      description: t('survivalMode.waves.beginner.description'),
-      difficulty: t('survivalMode.difficulty.easy'),
-      challenges: 10,
-      time: "15",
-      topics: ["Black-Scholes", "Vanilla Options", "Basic Greeks"],
-      requiredPlan: 'freemium' as const,
-      unlocked: true,
-      image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3"
-    },
-    {
-      id: 2,
-      name: t('survivalMode.waves.intermediate.title'),
-      description: t('survivalMode.waves.intermediate.description'),
-      difficulty: t('survivalMode.difficulty.medium'),
-      challenges: 15,
-      time: "20",
-      topics: ["Binomial Trees", "American Options", "Hedging Strategies"],
-      requiredPlan: 'student' as const,
-      unlocked: userPlan === 'student' || userPlan === 'pro',
-      image: "https://images.unsplash.com/photo-1642104704074-907c0698cbd9"
-    },
-    {
-      id: 3,
-      name: t('survivalMode.waves.advanced.title'),
-      description: t('survivalMode.waves.advanced.description'),
-      difficulty: t('survivalMode.difficulty.hard'),
-      challenges: 20,
-      time: "25",
-      topics: ["Stochastic Volatility", "Monte Carlo", "European Exotics"],
-      requiredPlan: 'student' as const,
-      unlocked: userPlan === 'student' || userPlan === 'pro',
-      image: "https://images.unsplash.com/photo-1569025743873-ea3a9ade89f9"
-    },
-    {
-      id: 4,
-      name: t('survivalMode.waves.expert.title'),
-      description: t('survivalMode.waves.expert.description'),
-      difficulty: t('survivalMode.difficulty.expert'),
-      challenges: 25,
-      time: "30",
-      topics: ["Path-Dependent Options", "Barrier Options", "Asian Options", "Lookbacks"],
-      requiredPlan: 'pro' as const,
-      unlocked: userPlan === 'pro',
-      image: "https://images.unsplash.com/photo-1605792657660-596af9009e82"
-    },
-    {
-      id: 5,
-      name: t('survivalMode.waves.master.title'),
-      description: t('survivalMode.waves.master.description'),
-      difficulty: t('survivalMode.difficulty.master'),
-      challenges: 30,
-      time: "35",
-      topics: ["Structured Products", "Multi-Asset Options", "Callable/Puttable Structures"],
-      requiredPlan: 'pro' as const,
-      unlocked: userPlan === 'pro',
-      image: "https://images.unsplash.com/photo-1516245834210-c4c142787335"
-    },
-    {
-      id: 6,
-      name: t('survivalMode.waves.legendary.title'),
-      description: t('survivalMode.waves.legendary.description'),
-      difficulty: t('survivalMode.difficulty.legendary'),
-      challenges: 35,
-      time: "40",
-      topics: ["Stochastic Rates", "Market Calibration", "XVA", "Machine Learning Models"],
-      requiredPlan: 'pro' as const,
-      unlocked: userPlan === 'pro',
-      image: "https://images.unsplash.com/photo-1534951009808-766178b47a4f"
-    }
-  ];
-
+  // Get survival waves from our hook
+  const survivalWaves = useSurvivalWaves(userPlan);
+  
   const userStats = {
     highestWave: 2,
     totalChallenges: 25,
@@ -107,7 +35,7 @@ const SurvivalMode = () => {
   };
   
   // Get the subscription plan icon
-  const getPlanIcon = (requiredPlan: 'freemium' | 'student' | 'pro') => {
+  const getPlanIcon = (requiredPlan: SubscriptionPlan) => {
     switch (requiredPlan) {
       case 'freemium':
         return <Star className="h-4 w-4 text-yellow-400" />;
@@ -244,15 +172,8 @@ const SurvivalMode = () => {
                   )}
                   
                   <div className="absolute top-4 left-4 flex space-x-2">
-                    <span className={`terminal-text text-xs px-2 py-1 rounded text-finance-offwhite ${
-                      wave.difficulty === t('survivalMode.difficulty.easy') ? 'bg-green-600/80' :
-                      wave.difficulty === t('survivalMode.difficulty.medium') ? 'bg-yellow-600/80' :
-                      wave.difficulty === t('survivalMode.difficulty.hard') ? 'bg-orange-600/80' :
-                      wave.difficulty === t('survivalMode.difficulty.expert') ? 'bg-red-600/80' :
-                      wave.difficulty === t('survivalMode.difficulty.master') ? 'bg-purple-600/80' :
-                      'bg-indigo-600/80'
-                    }`}>
-                      {wave.difficulty}
+                    <span className={`terminal-text text-xs px-2 py-1 rounded text-finance-offwhite ${getDifficultyColorClass(wave.difficulty)}`}>
+                      {t(`survivalMode.difficulty.${wave.difficulty}`)}
                     </span>
                     
                     <Badge variant="outline" className="bg-finance-dark/50 border-finance-steel/20 flex items-center space-x-1">
