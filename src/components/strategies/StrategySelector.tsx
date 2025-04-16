@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { useTranslation, TFunction } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { defaultStrategies } from '../../utils/options/strategyDefaults';
 import { Strategy } from '../../types/strategies';
 import { Card } from '@/components/ui/card';
