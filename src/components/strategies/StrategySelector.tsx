@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, TFunction } from 'react-i18next';
 import { defaultStrategies } from '../../utils/options/strategyDefaults';
 import { Strategy } from '../../types/strategies';
 import { Card } from '@/components/ui/card';
@@ -63,7 +63,7 @@ interface StrategyCardProps {
   strategy: Strategy;
   isSelected: boolean;
   onClick: () => void;
-  t: (key: string) => string;
+  t: TFunction; // Updated type here
 }
 
 const StrategyCard: React.FC<StrategyCardProps> = ({ strategy, isSelected, onClick, t }) => {
