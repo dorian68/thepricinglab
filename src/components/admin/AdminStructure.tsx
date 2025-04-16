@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,6 @@ import {
 } from 'lucide-react';
 import { safeTranslate } from '../../utils/translationUtils';
 
-// Mock menu structure
 const mockMenuItems = [
   { 
     id: 1, 
@@ -58,7 +56,6 @@ const mockMenuItems = [
   },
 ];
 
-// Mock site text
 const mockSiteText = [
   { id: 1, key: 'site.title', value: 'The Trading Lab', description: 'Site title' },
   { id: 2, key: 'site.description', value: 'Advanced options trading platform for learning and practice', description: 'Meta description' },
@@ -77,12 +74,10 @@ const AdminStructure = () => {
   
   const toggleItemVisibility = (itemId, parentId = null) => {
     if (parentId === null) {
-      // Top level item
       setMenuItems(menuItems.map(item => 
         item.id === itemId ? { ...item, visible: !item.visible } : item
       ));
     } else {
-      // Child item
       setMenuItems(menuItems.map(item => 
         item.id === parentId ? {
           ...item,
@@ -116,7 +111,6 @@ const AdminStructure = () => {
   
   const moveItem = (itemId, direction, parentId = null) => {
     if (parentId === null) {
-      // Top level item
       const currentIndex = menuItems.findIndex(item => item.id === itemId);
       if ((direction === 'up' && currentIndex > 0) || 
           (direction === 'down' && currentIndex < menuItems.length - 1)) {
@@ -126,7 +120,6 @@ const AdminStructure = () => {
         setMenuItems(newItems);
       }
     } else {
-      // Child item
       const parentIndex = menuItems.findIndex(item => item.id === parentId);
       if (parentIndex !== -1) {
         const children = [...menuItems[parentIndex].children];
@@ -259,7 +252,6 @@ const AdminStructure = () => {
                               <div className="flex items-center space-x-2">
                                 <Switch 
                                   checked={child.visible}
-                                  size="sm"
                                   onCheckedChange={() => toggleItemVisibility(child.id, item.id)}
                                 />
                                 {child.visible ? (
