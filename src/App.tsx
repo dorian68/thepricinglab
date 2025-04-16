@@ -17,6 +17,7 @@ import Notebooks from "./pages/Notebooks";
 import Exercises from "./pages/Exercises";
 import Community from "./pages/Community";
 import SurvivalMode from "./pages/SurvivalMode";
+import SurvivalWaveDetail from "./pages/SurvivalWaveDetail";
 import Leaderboard from "./pages/Leaderboard";
 import ExerciseDetail from "./pages/ExerciseDetail";
 import CourseAdvanced from "./pages/CourseAdvanced";
@@ -53,6 +54,7 @@ const App = () => (
           <Route path="/exercises/:id" element={<ExerciseDetail />} />
           <Route path="/community" element={<Community />} />
           <Route path="/survival-mode" element={<SurvivalMode />} />
+          <Route path="/survival-mode/wave/:id" element={<SurvivalWaveDetail />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/blog" element={<Blog />} />
