@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -157,20 +156,20 @@ const BlogPost = () => {
         </Breadcrumb>
         
         {/* Article Header */}
-        <div className="mb-8">
-          <div className="flex gap-2 mb-4">
+        <div className="mb-12">
+          <div className="flex flex-wrap gap-2 mb-6">
             {post.tags.map((tag) => (
-              <Badge key={tag} variant="outline">
+              <Badge key={tag} variant="outline" className="text-sm">
                 {tag}
               </Badge>
             ))}
           </div>
           
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-mono">
             {post.title}
           </h1>
           
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-8 p-4 bg-card rounded-lg border border-border/50">
             <div className="flex items-center">
               <Avatar className="h-10 w-10 mr-3">
                 <AvatarImage src={post.author.avatar} alt={post.author.name} />
@@ -244,7 +243,7 @@ const BlogPost = () => {
         </div>
         
         {/* Featured Image */}
-        <div className="mb-8 rounded-lg overflow-hidden">
+        <div className="mb-12 rounded-xl overflow-hidden border border-border/50 shadow-lg">
           <img 
             src={post.coverImage} 
             alt={post.title} 
@@ -253,10 +252,31 @@ const BlogPost = () => {
         </div>
         
         {/* Article Content */}
-        <div className="prose prose-lg max-w-none mb-12" dangerouslySetInnerHTML={{ __html: post.content }} />
+        <div className="prose prose-lg dark:prose-invert max-w-none mb-12 
+          prose-headings:font-mono prose-headings:font-bold
+          prose-h1:text-3xl prose-h1:mt-12 prose-h1:mb-6
+          prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
+          prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4
+          prose-p:text-base prose-p:leading-relaxed prose-p:mb-6
+          prose-pre:bg-card prose-pre:border prose-pre:border-border/50
+          prose-pre:rounded-lg prose-pre:p-4 prose-pre:shadow-md
+          prose-pre:font-mono prose-pre:text-sm
+          prose-code:font-mono prose-code:text-primary
+          prose-strong:font-semibold prose-strong:text-primary
+          prose-blockquote:border-l-4 prose-blockquote:border-primary
+          prose-blockquote:pl-4 prose-blockquote:italic
+          prose-ul:list-disc prose-ul:pl-6
+          prose-ol:list-decimal prose-ol:pl-6
+          prose-li:mb-2
+          prose-table:border-collapse prose-table:w-full
+          prose-th:border prose-th:border-border/50 prose-th:p-2 prose-th:bg-muted
+          prose-td:border prose-td:border-border/50 prose-td:p-2
+          prose-img:rounded-lg prose-img:shadow-lg"
+          dangerouslySetInnerHTML={{ __html: post.content }} 
+        />
         
         {/* Author Bio */}
-        <div className="bg-muted p-6 rounded-lg mb-12">
+        <div className="bg-card p-8 rounded-xl border border-border/50 shadow-lg mb-12">
           <div className="flex items-start">
             <Avatar className="h-16 w-16 mr-6">
               <AvatarImage src={post.author.avatar} alt={post.author.name} />
@@ -319,7 +339,7 @@ const BlogPost = () => {
         )}
         
         {/* Navigation */}
-        <div className="flex justify-between mb-8">
+        <div className="flex justify-between mb-8 mt-12">
           <Button variant="outline" asChild>
             <Link to="/blog">
               <ArrowLeft className="mr-2 h-4 w-4" />
