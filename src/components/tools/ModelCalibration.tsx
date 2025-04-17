@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -412,7 +411,7 @@ const ModelCalibration: React.FC = () => {
                           {Object.entries(calibrationResults.parameters).map(([key, value]) => (
                             <TableRow key={key}>
                               <TableCell>{key}</TableCell>
-                              <TableCell>{value}</TableCell>
+                              <TableCell>{value as string}</TableCell>
                             </TableRow>
                           ))}
                           <TableRow>

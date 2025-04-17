@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { LineChart } from '@/components/ui/chart';
 import { Play, RefreshCw, Download, PieChart } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { setSeed, seededRandom, resetSeed } from '@/utils/seedrandom';
 
 // Définir les types pour les paramètres
 interface SimulationParams {
@@ -28,8 +29,8 @@ const generateMonteCarloPaths = (params: SimulationParams) => {
   const finalPrices = [];
   
   // Seed pour reproduire les mêmes résultats
-  Math.seedrandom = () => Math.random;
-  Math.seedrandom(42);
+  setSeed(42);
+  resetSeed();
   
   // Pour chaque simulation
   for (let sim = 0; sim < simulationCount; sim++) {
@@ -38,7 +39,7 @@ const generateMonteCarloPaths = (params: SimulationParams) => {
     
     // Pour chaque pas de temps
     for (let t = 1; t <= timeSteps; t++) {
-      const randomShock = (Math.random() - 0.5) * 2; // Normaliser entre -1 et 1
+      const randomShock = (seededRandom() - 0.5) * 2; // Normaliser entre -1 et 1
       const dS = drift * currentPrice * dt + volatility * currentPrice * randomShock * sqrtDt;
       currentPrice += dS;
       path.push(currentPrice);
