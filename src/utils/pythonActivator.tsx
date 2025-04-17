@@ -51,7 +51,10 @@ const PythonActivator: React.FC<PythonActivatorProps> = ({
         autoLoad={autoLoad}
         onLoad={() => {
           console.log('Pyodide chargé avec succès');
-          autoScanAndTransform(); // Re-transformer après chargement
+          if (scanOnLoad) {
+            // Attendre un peu plus longtemps pour s'assurer que le DOM est stable
+            setTimeout(autoScanAndTransform, 500);
+          }
         }} 
       />
     </div>

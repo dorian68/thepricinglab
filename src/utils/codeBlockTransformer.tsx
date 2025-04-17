@@ -30,6 +30,12 @@ export const transformCodeBlocks = (containerElement: HTMLElement) => {
   let pythonBlocksFound = false;
   
   preElements.forEach((preElement, index) => {
+    // Vérifier si ce bloc a déjà été transformé
+    if (preElement.getAttribute('data-transformed') === 'true') {
+      console.log(`Bloc #${index} déjà transformé, ignoré`);
+      return;
+    }
+    
     const codeElement = preElement.querySelector('code');
     if (!codeElement) return;
     
@@ -40,6 +46,9 @@ export const transformCodeBlocks = (containerElement: HTMLElement) => {
     if (language === 'python' || language === 'py') {
       pythonBlocksFound = true;
       const code = codeElement.textContent || '';
+      
+      // Marquer comme transformé pour éviter les doublons
+      preElement.setAttribute('data-transformed', 'true');
       
       // Trouver un titre potentiel dans un élément précédent (h3, h4, etc.)
       let title = "Python";
@@ -77,33 +86,30 @@ export const transformCodeBlocks = (containerElement: HTMLElement) => {
 export const autoScanAndTransform = () => {
   console.log('Auto-scan activé pour transformation Python');
   
-  // Attendre que le DOM soit complètement chargé
-  setTimeout(() => {
-    // Chercher les conteneurs potentiels (articles, sections de contenu, etc.)
-    const potentialContainers = [
-      document.querySelector('.prose'),
-      document.querySelector('.content'),
-      document.querySelector('article'),
-      document.querySelector('[data-content="exercise"]'),
-      document.querySelector('.exercise-content'),
-      document.querySelector('.blog-content'),
-      document.querySelector('[data-type="python-content"]'),
-      document.querySelector('main'),
-      // Ajoutez d'autres sélecteurs si nécessaire
-    ].filter(Boolean) as HTMLElement[];
-    
-    console.log(`Conteneurs potentiels trouvés: ${potentialContainers.length}`);
-    
-    let anyPythonBlocksFound = false;
-    
-    potentialContainers.forEach((container, idx) => {
-      console.log(`Transformation du conteneur #${idx}`);
-      const pythonBlocksFound = transformCodeBlocks(container);
-      if (pythonBlocksFound) {
-        anyPythonBlocksFound = true;
-      }
-    });
-    
-    console.log(`Python blocks found: ${anyPythonBlocksFound}`);
-  }, 1000); // Délai pour s'assurer que le DOM est chargé
+  // Chercher les conteneurs potentiels (articles, sections de contenu, etc.)
+  const potentialContainers = [
+    document.querySelector('.prose'),
+    document.querySelector('.content'),
+    document.querySelector('article'),
+    document.querySelector('[data-content="exercise"]'),
+    document.querySelector('.exercise-content'),
+    document.querySelector('.blog-content'),
+    document.querySelector('[data-type="python-content"]'),
+    document.querySelector('main'),
+    // Ajoutez d'autres sélecteurs si nécessaire
+  ].filter(Boolean) as HTMLElement[];
+  
+  console.log(`Conteneurs potentiels trouvés: ${potentialContainers.length}`);
+  
+  let anyPythonBlocksFound = false;
+  
+  potentialContainers.forEach((container, idx) => {
+    console.log(`Transformation du conteneur #${idx}`);
+    const pythonBlocksFound = transformCodeBlocks(container);
+    if (pythonBlocksFound) {
+      anyPythonBlocksFound = true;
+    }
+  });
+  
+  console.log(`Python blocks found: ${anyPythonBlocksFound}`);
 };

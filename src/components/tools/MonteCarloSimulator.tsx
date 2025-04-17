@@ -1,454 +1,1301 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useTranslation } from 'react-i18next';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LineChart } from '@/components/ui/chart';
-import { Play, RefreshCw, Download, PieChart } from 'lucide-react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { setSeed, seededRandom, resetSeed } from '@/utils/seedrandom';
-import { useTranslation } from 'react-i18next';
-import { Helmet } from 'react-helmet-async';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
+import { LineChart } from '@/components/charts/LineChart';
+import { BarChart } from '@/components/charts/BarChart';
+import { Loader, Play, RefreshCw, Download } from 'lucide-react';
+import { usePythonExecution } from '@/hooks/usePythonExecution';
+import PythonActivator from '@/utils/pythonActivator';
+import { isPyodideLoaded } from '@/services/pyodideService';
 
-interface SimulationParams {
-  initialPrice: number;
-  drift: number;
-  volatility: number;
-  timeSteps: number;
-  duration: number;
-  simulationCount: number;
-}
+const MonteCarloSimulator = () => {
+  const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState('gbm');
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [isPyodideAvailable, setIsPyodideAvailable] = useState(false);
+  const [simulation, setSimulation] = useState<any>(null);
+  const { code, setCode, result, execute, reset, isPyodideAvailable: pythonAvailable } = usePythonExecution('');
+  const chartRef = useRef<HTMLDivElement>(null);
 
-const generateMonteCarloPaths = (params: SimulationParams) => {
-  const { initialPrice, drift, volatility, timeSteps, duration, simulationCount } = params;
-  const dt = duration / timeSteps;
-  const sqrtDt = Math.sqrt(dt);
-  const paths = [];
-  const finalPrices = [];
-  
-  setSeed(42);
-  resetSeed();
-  
-  for (let sim = 0; sim < simulationCount; sim++) {
-    const path = [initialPrice];
-    let currentPrice = initialPrice;
-    
-    for (let t = 1; t <= timeSteps; t++) {
-      const randomShock = (seededRandom() - 0.5) * 2;
-      const dS = drift * currentPrice * dt + volatility * currentPrice * randomShock * sqrtDt;
-      currentPrice += dS;
-      path.push(currentPrice);
-    }
-    
-    paths.push(path);
-    finalPrices.push(currentPrice);
-  }
-  
-  finalPrices.sort((a, b) => a - b);
-  const mean = finalPrices.reduce((sum, price) => sum + price, 0) / simulationCount;
-  const median = finalPrices[Math.floor(simulationCount / 2)];
-  const min = finalPrices[0];
-  const max = finalPrices[finalPrices.length - 1];
-  const var95 = finalPrices[Math.floor(simulationCount * 0.05)];
-  const var99 = finalPrices[Math.floor(simulationCount * 0.01)];
-  
-  const formattedPaths = paths.map((path, simIndex) => {
-    return path.map((price, timeIndex) => ({
-      simulation: simIndex,
-      time: timeIndex * dt,
-      price
-    }));
-  });
-  
-  const samplePaths = [];
-  const step = Math.max(1, Math.floor(simulationCount / 20));
-  
-  for (let i = 0; i < simulationCount; i += step) {
-    samplePaths.push(formattedPaths[i]);
-  }
-  
-  const chartData = [];
-  for (let t = 0; t <= timeSteps; t++) {
-    samplePaths.forEach((path, index) => {
-      chartData.push({
-        x: path[t].time,
-        y: path[t].price,
-        series: `sim-${index}`
-      });
-    });
-  }
-  
-  const chartLines = [];
-  for (let i = 0; i < samplePaths.length; i++) {
-    const line = samplePaths[i].map(point => ({
-      x: point.time,
-      y: point.price
-    }));
-    chartLines.push({
-      id: `sim-${i}`,
-      data: line
-    });
-  }
-  
-  const simplifiedData = samplePaths.map((path, index) => {
-    return {
-      id: `sim-${index}`,
-      data: path.map(p => ({ x: p.time, y: p.price }))
-    };
-  });
-  
-  return {
-    chartData: chartLines,
-    simplifiedData,
-    stats: {
-      mean,
-      median,
-      min,
-      max,
-      var95,
-      var99
-    }
-  };
-};
-
-const MonteCarloSimulator: React.FC = () => {
-  const { t, i18n } = useTranslation();
-  const [params, setParams] = useState<SimulationParams>({
+  // GBM Parameters
+  const [gbmParams, setGbmParams] = useState({
     initialPrice: 100,
     drift: 0.05,
     volatility: 0.2,
+    timeHorizon: 1,
     timeSteps: 252,
-    duration: 1,
-    simulationCount: 100
+    numPaths: 100,
+    showConfidenceIntervals: true,
+    confidenceLevel: 0.95
   });
-  
-  const [isSimulating, setIsSimulating] = useState<boolean>(false);
-  const [results, setResults] = useState<any>(null);
-  const [selectedMode, setSelectedMode] = useState<string>("price-simulation");
-  
-  const updateParam = (key: keyof SimulationParams, value: number) => {
-    setParams(prev => ({ ...prev, [key]: value }));
+
+  // Jump Diffusion Parameters
+  const [jumpParams, setJumpParams] = useState({
+    initialPrice: 100,
+    drift: 0.05,
+    volatility: 0.15,
+    jumpIntensity: 5,
+    jumpMean: -0.05,
+    jumpStdDev: 0.1,
+    timeHorizon: 1,
+    timeSteps: 252,
+    numPaths: 100
+  });
+
+  // VaR Parameters
+  const [varParams, setVarParams] = useState({
+    initialValue: 1000000,
+    numAssets: 3,
+    timeHorizon: 10,
+    confidenceLevel: 0.99,
+    numSimulations: 10000,
+    correlationMatrix: [
+      [1.0, 0.3, 0.2],
+      [0.3, 1.0, 0.4],
+      [0.2, 0.4, 1.0]
+    ],
+    assetParams: [
+      { weight: 0.4, expectedReturn: 0.08, volatility: 0.2 },
+      { weight: 0.3, expectedReturn: 0.05, volatility: 0.1 },
+      { weight: 0.3, expectedReturn: 0.12, volatility: 0.3 }
+    ]
+  });
+
+  useEffect(() => {
+    // Vérifier si Pyodide est déjà chargé
+    setIsPyodideAvailable(isPyodideLoaded());
+    
+    // Observer pour détecter si Pyodide est chargé après le montage
+    const intervalId = setInterval(() => {
+      if (isPyodideLoaded()) {
+        setIsPyodideAvailable(true);
+        clearInterval(intervalId);
+      }
+    }, 1000);
+    
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const generateGBMCode = () => {
+    const { initialPrice, drift, volatility, timeHorizon, timeSteps, numPaths, showConfidenceIntervals, confidenceLevel } = gbmParams;
+    
+    return `
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+
+# Parameters
+S0 = ${initialPrice}        # Initial price
+mu = ${drift}               # Drift (expected return)
+sigma = ${volatility}       # Volatility
+T = ${timeHorizon}          # Time horizon in years
+dt = T / ${timeSteps}       # Time step
+n_steps = ${timeSteps}      # Number of time steps
+n_paths = ${numPaths}       # Number of simulation paths
+confidence_level = ${confidenceLevel}  # Confidence level for intervals
+
+# Initialize arrays
+time_points = np.linspace(0, T, n_steps + 1)
+S = np.zeros((n_paths, n_steps + 1))
+S[:, 0] = S0
+
+# Generate random paths
+np.random.seed(42)  # For reproducibility
+for t in range(1, n_steps + 1):
+    Z = np.random.standard_normal(n_paths)
+    S[:, t] = S[:, t-1] * np.exp((mu - 0.5 * sigma**2) * dt + sigma * np.sqrt(dt) * Z)
+
+# Calculate statistics
+mean_path = np.mean(S, axis=0)
+median_path = np.median(S, axis=0)
+std_path = np.std(S, axis=0)
+
+# Calculate confidence intervals
+z_score = norm.ppf((1 + confidence_level) / 2)
+upper_ci = mean_path + z_score * std_path / np.sqrt(n_paths)
+lower_ci = mean_path - z_score * std_path / np.sqrt(n_paths)
+
+# Final price statistics
+final_prices = S[:, -1]
+mean_final = np.mean(final_prices)
+median_final = np.median(final_prices)
+min_final = np.min(final_prices)
+max_final = np.max(final_prices)
+std_final = np.std(final_prices)
+
+# Calculate percentiles for the final distribution
+percentiles = [1, 5, 10, 25, 50, 75, 90, 95, 99]
+percentile_values = np.percentile(final_prices, percentiles)
+
+# Print statistics
+print(f"Monte Carlo Simulation Results (GBM):")
+print(f"Number of paths: {n_paths}")
+print(f"Time horizon: {T} years")
+print(f"Initial price: ${S0}")
+print(f"Expected return: {mu:.2%}")
+print(f"Volatility: {sigma:.2%}")
+print(f"\\nFinal Price Statistics:")
+print(f"Mean: ${mean_final:.2f}")
+print(f"Median: ${median_final:.2f}")
+print(f"Min: ${min_final:.2f}")
+print(f"Max: ${max_final:.2f}")
+print(f"Std Dev: ${std_final:.2f}")
+print(f"\\nPercentiles:")
+for p, v in zip(percentiles, percentile_values):
+    print(f"{p}th percentile: ${v:.2f}")
+
+# Prepare data for visualization
+result = {
+    "type": "gbm",
+    "time_points": time_points.tolist(),
+    "paths": S.tolist(),
+    "mean_path": mean_path.tolist(),
+    "median_path": median_path.tolist(),
+    "upper_ci": upper_ci.tolist(),
+    "lower_ci": lower_ci.tolist(),
+    "final_prices": final_prices.tolist(),
+    "percentiles": percentiles,
+    "percentile_values": percentile_values.tolist(),
+    "statistics": {
+        "mean": mean_final,
+        "median": median_final,
+        "min": min_final,
+        "max": max_final,
+        "std": std_final
+    }
+}
+
+# Convert to JSON for passing back to JavaScript
+import json
+print("\\n\\nDATA_START")
+print(json.dumps(result))
+print("DATA_END")
+`;
   };
-  
-  const runSimulation = () => {
+
+  const generateJumpDiffusionCode = () => {
+    const { initialPrice, drift, volatility, jumpIntensity, jumpMean, jumpStdDev, timeHorizon, timeSteps, numPaths } = jumpParams;
+    
+    return `
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Parameters
+S0 = ${initialPrice}        # Initial price
+mu = ${drift}               # Drift (expected return)
+sigma = ${volatility}       # Volatility
+lambda_j = ${jumpIntensity} # Jump intensity (average number of jumps per year)
+mu_j = ${jumpMean}          # Jump mean
+sigma_j = ${jumpStdDev}     # Jump standard deviation
+T = ${timeHorizon}          # Time horizon in years
+dt = T / ${timeSteps}       # Time step
+n_steps = ${timeSteps}      # Number of time steps
+n_paths = ${numPaths}       # Number of simulation paths
+
+# Initialize arrays
+time_points = np.linspace(0, T, n_steps + 1)
+S = np.zeros((n_paths, n_steps + 1))
+S[:, 0] = S0
+
+# Generate random paths with jumps
+np.random.seed(42)  # For reproducibility
+for t in range(1, n_steps + 1):
+    # Diffusion component
+    Z = np.random.standard_normal(n_paths)
+    diffusion = (mu - 0.5 * sigma**2) * dt + sigma * np.sqrt(dt) * Z
+    
+    # Jump component
+    jump_counts = np.random.poisson(lambda_j * dt, n_paths)
+    jumps = np.zeros(n_paths)
+    
+    for i in range(n_paths):
+        if jump_counts[i] > 0:
+            jump_sizes = np.random.normal(mu_j, sigma_j, jump_counts[i])
+            jumps[i] = np.sum(jump_sizes)
+    
+    # Combine diffusion and jumps
+    S[:, t] = S[:, t-1] * np.exp(diffusion + jumps)
+
+# Calculate statistics
+mean_path = np.mean(S, axis=0)
+median_path = np.median(S, axis=0)
+std_path = np.std(S, axis=0)
+
+# Final price statistics
+final_prices = S[:, -1]
+mean_final = np.mean(final_prices)
+median_final = np.median(final_prices)
+min_final = np.min(final_prices)
+max_final = np.max(final_prices)
+std_final = np.std(final_prices)
+
+# Calculate percentiles for the final distribution
+percentiles = [1, 5, 10, 25, 50, 75, 90, 95, 99]
+percentile_values = np.percentile(final_prices, percentiles)
+
+# Print statistics
+print(f"Monte Carlo Simulation Results (Jump Diffusion):")
+print(f"Number of paths: {n_paths}")
+print(f"Time horizon: {T} years")
+print(f"Initial price: ${S0}")
+print(f"Expected return: {mu:.2%}")
+print(f"Volatility: {sigma:.2%}")
+print(f"Jump intensity: {lambda_j} per year")
+print(f"Jump mean: {mu_j:.2%}")
+print(f"Jump std dev: {sigma_j:.2%}")
+print(f"\\nFinal Price Statistics:")
+print(f"Mean: ${mean_final:.2f}")
+print(f"Median: ${median_final:.2f}")
+print(f"Min: ${min_final:.2f}")
+print(f"Max: ${max_final:.2f}")
+print(f"Std Dev: ${std_final:.2f}")
+print(f"\\nPercentiles:")
+for p, v in zip(percentiles, percentile_values):
+    print(f"{p}th percentile: ${v:.2f}")
+
+# Prepare data for visualization
+result = {
+    "type": "jump",
+    "time_points": time_points.tolist(),
+    "paths": S.tolist(),
+    "mean_path": mean_path.tolist(),
+    "median_path": median_path.tolist(),
+    "final_prices": final_prices.tolist(),
+    "percentiles": percentiles,
+    "percentile_values": percentile_values.tolist(),
+    "statistics": {
+        "mean": mean_final,
+        "median": median_final,
+        "min": min_final,
+        "max": max_final,
+        "std": std_final
+    }
+}
+
+# Convert to JSON for passing back to JavaScript
+import json
+print("\\n\\nDATA_START")
+print(json.dumps(result))
+print("DATA_END")
+`;
+  };
+
+  const generateVaRCode = () => {
+    const { initialValue, numAssets, timeHorizon, confidenceLevel, numSimulations, correlationMatrix, assetParams } = varParams;
+    
+    // Convert asset parameters to string representation
+    const assetWeights = assetParams.map(p => p.weight).join(', ');
+    const assetReturns = assetParams.map(p => p.expectedReturn).join(', ');
+    const assetVols = assetParams.map(p => p.volatility).join(', ');
+    
+    // Convert correlation matrix to string representation
+    const corrMatrixStr = correlationMatrix.map(row => `[${row.join(', ')}]`).join(',\n        ');
+    
+    return `
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+
+# Portfolio parameters
+initial_value = ${initialValue}  # Initial portfolio value
+n_assets = ${numAssets}          # Number of assets
+time_horizon = ${timeHorizon}    # Time horizon in days
+confidence_level = ${confidenceLevel}  # VaR confidence level
+n_simulations = ${numSimulations}  # Number of Monte Carlo simulations
+
+# Asset parameters
+weights = np.array([${assetWeights}])  # Portfolio weights
+expected_returns = np.array([${assetReturns}])  # Annual expected returns
+volatilities = np.array([${assetVols}])  # Annual volatilities
+
+# Correlation matrix
+correlation_matrix = np.array([
+        ${corrMatrixStr}
+    ])
+
+# Convert annual parameters to daily
+daily_returns = expected_returns / 252
+daily_volatilities = volatilities / np.sqrt(252)
+
+# Calculate covariance matrix
+covariance_matrix = np.zeros((n_assets, n_assets))
+for i in range(n_assets):
+    for j in range(n_assets):
+        covariance_matrix[i, j] = correlation_matrix[i, j] * daily_volatilities[i] * daily_volatilities[j]
+
+# Generate correlated random returns
+np.random.seed(42)
+L = np.linalg.cholesky(covariance_matrix)
+uncorrelated_returns = np.random.normal(0, 1, (n_simulations, n_assets))
+correlated_returns = uncorrelated_returns @ L.T
+
+# Calculate portfolio returns
+portfolio_returns = np.zeros(n_simulations)
+for i in range(n_simulations):
+    asset_returns = daily_returns * time_horizon + correlated_returns[i] * np.sqrt(time_horizon)
+    portfolio_returns[i] = np.sum(weights * asset_returns)
+
+# Calculate portfolio values
+portfolio_values = initial_value * (1 + portfolio_returns)
+portfolio_changes = portfolio_values - initial_value
+
+# Calculate VaR
+var_percentile = 100 * (1 - confidence_level)
+var = -np.percentile(portfolio_changes, var_percentile)
+cvar = -np.mean(portfolio_changes[portfolio_changes <= -var])
+
+# Calculate other statistics
+mean_change = np.mean(portfolio_changes)
+median_change = np.median(portfolio_changes)
+min_change = np.min(portfolio_changes)
+max_change = np.max(portfolio_changes)
+std_change = np.std(portfolio_changes)
+
+# Print results
+print(f"Value at Risk (VaR) Analysis:")
+print(f"Initial portfolio value: ${initial_value:,.2f}")
+print(f"Time horizon: {time_horizon} days")
+print(f"Confidence level: {confidence_level:.1%}")
+print(f"Number of simulations: {n_simulations:,}")
+print(f"\\nResults:")
+print(f"VaR ({confidence_level:.1%}): ${var:,.2f}")
+print(f"CVaR/Expected Shortfall: ${cvar:,.2f}")
+print(f"\\nPortfolio Change Statistics:")
+print(f"Mean: ${mean_change:,.2f}")
+print(f"Median: ${median_change:,.2f}")
+print(f"Min: ${min_change:,.2f}")
+print(f"Max: ${max_change:,.2f}")
+print(f"Std Dev: ${std_change:,.2f}")
+
+# Prepare data for visualization
+result = {
+    "type": "var",
+    "portfolio_changes": portfolio_changes.tolist(),
+    "var": float(var),
+    "cvar": float(cvar),
+    "confidence_level": confidence_level,
+    "statistics": {
+        "mean": float(mean_change),
+        "median": float(median_change),
+        "min": float(min_change),
+        "max": float(max_change),
+        "std": float(std_change)
+    }
+}
+
+# Convert to JSON for passing back to JavaScript
+import json
+print("\\n\\nDATA_START")
+print(json.dumps(result))
+print("DATA_END")
+`;
+  };
+
+  const runSimulation = async () => {
+    if (!isPyodideAvailable) {
+      return;
+    }
+    
     setIsSimulating(true);
     
-    setTimeout(() => {
-      const simulationResults = generateMonteCarloPaths(params);
-      setResults(simulationResults);
+    try {
+      let simulationCode = '';
+      
+      switch (activeTab) {
+        case 'gbm':
+          simulationCode = generateGBMCode();
+          break;
+        case 'jump':
+          simulationCode = generateJumpDiffusionCode();
+          break;
+        case 'var':
+          simulationCode = generateVaRCode();
+          break;
+        default:
+          simulationCode = generateGBMCode();
+      }
+      
+      setCode(simulationCode);
+      await execute();
+      
+      // Extract JSON data from result
+      if (result.result) {
+        const dataStartIndex = result.result.indexOf('DATA_START') + 10;
+        const dataEndIndex = result.result.indexOf('DATA_END');
+        
+        if (dataStartIndex > 10 && dataEndIndex > dataStartIndex) {
+          const jsonData = result.result.substring(dataStartIndex, dataEndIndex).trim();
+          const simulationData = JSON.parse(jsonData);
+          setSimulation(simulationData);
+        }
+      }
+    } catch (error) {
+      console.error('Simulation error:', error);
+    } finally {
       setIsSimulating(false);
-    }, 1000);
+    }
   };
-  
-  const formatNumber = (num: number) => {
-    return num.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+
+  const handleGBMParamChange = (param: string, value: number) => {
+    setGbmParams(prev => ({ ...prev, [param]: value }));
+  };
+
+  const handleJumpParamChange = (param: string, value: number) => {
+    setJumpParams(prev => ({ ...prev, [param]: value }));
+  };
+
+  const handleVaRParamChange = (param: string, value: number) => {
+    setVarParams(prev => ({ ...prev, [param]: value }));
+  };
+
+  const handleAssetParamChange = (index: number, param: string, value: number) => {
+    setVarParams(prev => {
+      const newAssetParams = [...prev.assetParams];
+      newAssetParams[index] = { ...newAssetParams[index], [param]: value };
+      return { ...prev, assetParams: newAssetParams };
     });
   };
-  
+
   const prepareChartData = () => {
-    if (!results || !results.simplifiedData || !results.simplifiedData[0]) return [];
+    if (!simulation) return { labels: [], datasets: [] };
     
-    const samplePath = results.simplifiedData[0].data;
-    return samplePath.map((point: any) => ({
-      x: point.x,
-      y: point.y
-    }));
-  };
-  
-  const prepareVaRChartData = () => {
-    if (!results) return [];
+    const { time_points, mean_path, median_path, upper_ci, lower_ci } = simulation;
     
-    return [
-      { x: 0, y: params.initialPrice },
-      { x: params.duration, y: results.stats.mean },
-      { x: params.duration, y: results.stats.var95 }
+    const datasets = [
+      {
+        label: 'Mean Path',
+        data: mean_path.map((value: number, index: number) => ({ x: time_points[index], y: value })),
+        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'rgba(59, 130, 246, 0.5)',
+        tension: 0.3,
+      },
+      {
+        label: 'Median Path',
+        data: median_path.map((value: number, index: number) => ({ x: time_points[index], y: value })),
+        borderColor: 'rgb(16, 185, 129)',
+        backgroundColor: 'rgba(16, 185, 129, 0.5)',
+        tension: 0.3,
+        borderDash: [5, 5],
+      }
     ];
+    
+    // Add confidence intervals if available
+    if (upper_ci && lower_ci && gbmParams.showConfidenceIntervals) {
+      datasets.push({
+        label: `${gbmParams.confidenceLevel * 100}% Confidence Interval`,
+        data: upper_ci.map((value: number, index: number) => ({ x: time_points[index], y: value })),
+        borderColor: 'rgba(156, 163, 175, 0.5)',
+        backgroundColor: 'rgba(156, 163, 175, 0.1)',
+        tension: 0.3,
+        borderDash: [3, 3],
+        fill: '+1',
+      });
+      
+      datasets.push({
+        label: 'Lower CI',
+        data: lower_ci.map((value: number, index: number) => ({ x: time_points[index], y: value })),
+        borderColor: 'rgba(156, 163, 175, 0.5)',
+        backgroundColor: 'rgba(156, 163, 175, 0.1)',
+        tension: 0.3,
+        borderDash: [3, 3],
+        fill: false,
+      });
+    }
+    
+    return {
+      datasets
+    };
   };
-  
+
+  const prepareVaRChartData = () => {
+    if (!simulation || simulation.type !== 'var') return { labels: [], datasets: [] };
+    
+    const { portfolio_changes, var: varValue, confidence_level } = simulation;
+    
+    // Create histogram data
+    const min = Math.min(...portfolio_changes);
+    const max = Math.max(...portfolio_changes);
+    const binWidth = (max - min) / 30;
+    const bins: { [key: number]: number } = {};
+    
+    portfolio_changes.forEach((change: number) => {
+      const binIndex = Math.floor(change / binWidth) * binWidth;
+      bins[binIndex] = (bins[binIndex] || 0) + 1;
+    });
+    
+    const sortedBins = Object.entries(bins).sort(([a], [b]) => parseFloat(a) - parseFloat(b));
+    
+    // Find the VaR bin
+    const varBin = sortedBins.findIndex(([bin]) => parseFloat(bin) >= -varValue);
+    
+    // Create datasets
+    const labels = sortedBins.map(([bin]) => parseFloat(bin).toFixed(0));
+    const data = sortedBins.map(([_, count]) => count);
+    
+    // Create colors array with VaR highlighted
+    const backgroundColor = data.map((_, index) => {
+      if (index < varBin) {
+        return 'rgba(239, 68, 68, 0.7)'; // Red for losses beyond VaR
+      }
+      return 'rgba(59, 130, 246, 0.7)'; // Blue for other values
+    });
+    
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Portfolio Change Distribution',
+          data,
+          backgroundColor
+        }
+      ]
+    };
+  };
+
+  const downloadSimulationData = () => {
+    if (!simulation) return;
+    
+    const dataStr = JSON.stringify(simulation, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `monte-carlo-${simulation.type}-simulation.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
+
   return (
-    <div className="container mx-auto py-6 px-4 md:px-6 lg:px-8 max-w-7xl">
+    <div className="container mx-auto px-4 py-8">
       <Helmet>
-        <title>Simulateur Monte Carlo | The Pricing Library</title>
-        <meta name="description" content="Simulateur Monte Carlo pour les trajectoires de prix et métriques de risque. Analysez les simulations, VaR et d'autres indicateurs financiers." />
-        <meta name="keywords" content="Monte Carlo, simulation financière, VaR, trajectoires de prix, finance quantitative, analyse risque" />
-        <link rel="canonical" href="https://thepricinglab.com/tools/monte-carlo" />
+        <title>Monte Carlo Simulator | The Pricing Lab</title>
       </Helmet>
       
-      <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-finance-accent mb-2">Simulateur Monte Carlo</h1>
-        <p className="text-finance-lightgray">Simulation de trajectoires de prix et métriques de risque</p>
-      </div>
+      <h1 className="text-3xl font-bold mb-6">Monte Carlo Simulator</h1>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="bg-finance-charcoal border-finance-steel/30">
-          <CardHeader>
-            <CardTitle className="flex items-center text-finance-accent">
-              <Play className="mr-2 h-5 w-5" />
-              Paramètres de simulation
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="initialPrice">
-                  Prix initial: {formatNumber(params.initialPrice)}
-                </Label>
-                <Slider
-                  id="initialPrice"
-                  value={[params.initialPrice]}
-                  min={10}
-                  max={1000}
-                  step={10}
-                  onValueChange={(value) => updateParam('initialPrice', value[0])}
-                  className="mt-2"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="drift">
-                  Drift (rendement attendu): {(params.drift * 100).toFixed(1)}% par an
-                </Label>
-                <Slider
-                  id="drift"
-                  value={[params.drift]}
-                  min={-0.2}
-                  max={0.3}
-                  step={0.01}
-                  onValueChange={(value) => updateParam('drift', value[0])}
-                  className="mt-2"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="volatility">
-                  Volatilité: {(params.volatility * 100).toFixed(1)}% par an
-                </Label>
-                <Slider
-                  id="volatility"
-                  value={[params.volatility]}
-                  min={0.05}
-                  max={1}
-                  step={0.05}
-                  onValueChange={(value) => updateParam('volatility', value[0])}
-                  className="mt-2"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="duration">
-                  Durée: {params.duration} {params.duration === 1 ? 'an' : 'ans'}
-                </Label>
-                <Slider
-                  id="duration"
-                  value={[params.duration]}
-                  min={0.25}
-                  max={5}
-                  step={0.25}
-                  onValueChange={(value) => updateParam('duration', value[0])}
-                  className="mt-2"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="timeSteps">
-                  Pas de temps: {params.timeSteps}
-                </Label>
-                <Slider
-                  id="timeSteps"
-                  value={[params.timeSteps]}
-                  min={52}
-                  max={504}
-                  step={52}
-                  onValueChange={(value) => updateParam('timeSteps', value[0])}
-                  className="mt-2"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="simulationCount">
-                  Nombre de simulations: {params.simulationCount}
-                </Label>
-                <Slider
-                  id="simulationCount"
-                  value={[params.simulationCount]}
-                  min={10}
-                  max={1000}
-                  step={10}
-                  onValueChange={(value) => updateParam('simulationCount', value[0])}
-                  className="mt-2"
-                />
-              </div>
-              
-              <Button 
-                variant="finance" 
-                className="w-full mt-4"
-                onClick={runSimulation}
-                disabled={isSimulating}
-                aria-label="Lancer la simulation Monte Carlo"
-              >
-                {isSimulating ? (
-                  <div className="flex items-center">
-                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                    Simulation en cours...
-                  </div>
-                ) : (
-                  <div className="flex items-center">
-                    <Play className="mr-2 h-4 w-4" />
-                    Lancer la simulation
-                  </div>
-                )}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+      <PythonActivator autoLoad={true} discreet={true} />
+      
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="gbm">Geometric Brownian Motion</TabsTrigger>
+          <TabsTrigger value="jump">Jump Diffusion</TabsTrigger>
+          <TabsTrigger value="var">Value at Risk (VaR)</TabsTrigger>
+        </TabsList>
         
-        {results ? (
-          <>
-            <Card className="bg-finance-charcoal border-finance-steel/30 col-span-1 lg:col-span-2">
-              <CardHeader>
-                <CardTitle className="text-finance-accent">Résultats</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                  <div className="bg-finance-dark p-4 rounded-md">
-                    <div className="text-sm text-finance-lightgray">Prix moyen final</div>
-                    <div className="text-2xl font-bold text-finance-accent">{formatNumber(results.stats.mean)}</div>
+        <TabsContent value="gbm" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Geometric Brownian Motion</CardTitle>
+              <CardDescription>
+                Simulate asset price paths using the standard GBM model, commonly used for stock price modeling.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="initialPrice">Initial Price ($)</Label>
+                    <Input
+                      id="initialPrice"
+                      type="number"
+                      value={gbmParams.initialPrice}
+                      onChange={(e) => handleGBMParamChange('initialPrice', parseFloat(e.target.value))}
+                      min={1}
+                      max={10000}
+                    />
                   </div>
-                  <div className="bg-finance-dark p-4 rounded-md">
-                    <div className="text-sm text-finance-lightgray">VaR 95%</div>
-                    <div className="text-2xl font-bold text-finance-accent">{formatNumber(results.stats.var95)}</div>
+                  
+                  <div>
+                    <Label htmlFor="drift">Expected Return (μ)</Label>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        id="drift"
+                        type="number"
+                        value={gbmParams.drift}
+                        onChange={(e) => handleGBMParamChange('drift', parseFloat(e.target.value))}
+                        min={-0.5}
+                        max={0.5}
+                        step={0.01}
+                      />
+                      <span className="text-sm text-gray-500">{(gbmParams.drift * 100).toFixed(1)}%</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="volatility">Volatility (σ)</Label>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        id="volatility"
+                        type="number"
+                        value={gbmParams.volatility}
+                        onChange={(e) => handleGBMParamChange('volatility', parseFloat(e.target.value))}
+                        min={0.01}
+                        max={1}
+                        step={0.01}
+                      />
+                      <span className="text-sm text-gray-500">{(gbmParams.volatility * 100).toFixed(1)}%</span>
+                    </div>
                   </div>
                 </div>
                 
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Métrique</TableHead>
-                      <TableHead>Valeur</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>Prix initial</TableCell>
-                      <TableCell>{formatNumber(params.initialPrice)}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Prix médian final</TableCell>
-                      <TableCell>{formatNumber(results.stats.median)}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Prix minimum final</TableCell>
-                      <TableCell>{formatNumber(results.stats.min)}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Prix maximum final</TableCell>
-                      <TableCell>{formatNumber(results.stats.max)}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>VaR 99%</TableCell>
-                      <TableCell>{formatNumber(results.stats.var99)}</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-finance-charcoal border-finance-steel/30 col-span-1 lg:col-span-3 h-80">
-              <CardHeader className="p-4 pb-0">
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-finance-accent flex items-center">
-                    <LineChart className="mr-2 h-5 w-5" />
-                    Simulations Monte Carlo
-                  </CardTitle>
-                  <div className="flex space-x-2">
-                    <Select value={selectedMode} onValueChange={setSelectedMode}>
-                      <SelectTrigger className="h-8 text-xs w-40 bg-finance-dark">
-                        <SelectValue placeholder="Mode d'affichage" />
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="timeHorizon">Time Horizon (years)</Label>
+                    <Input
+                      id="timeHorizon"
+                      type="number"
+                      value={gbmParams.timeHorizon}
+                      onChange={(e) => handleGBMParamChange('timeHorizon', parseFloat(e.target.value))}
+                      min={0.1}
+                      max={10}
+                      step={0.1}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="timeSteps">Time Steps</Label>
+                    <Select
+                      value={gbmParams.timeSteps.toString()}
+                      onValueChange={(value) => handleGBMParamChange('timeSteps', parseInt(value))}
+                    >
+                      <SelectTrigger id="timeSteps">
+                        <SelectValue placeholder="Select time steps" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="price-simulation">Évolution du prix</SelectItem>
-                        <SelectItem value="var-analysis">Analyse VaR</SelectItem>
+                        <SelectItem value="52">Weekly (52)</SelectItem>
+                        <SelectItem value="252">Daily (252)</SelectItem>
+                        <SelectItem value="1000">Intraday (1000)</SelectItem>
                       </SelectContent>
                     </Select>
-                    <Button variant="outline" size="sm" className="h-8">
-                      <Download className="h-4 w-4" />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="numPaths">Number of Paths</Label>
+                    <Select
+                      value={gbmParams.numPaths.toString()}
+                      onValueChange={(value) => handleGBMParamChange('numPaths', parseInt(value))}
+                    >
+                      <SelectTrigger id="numPaths">
+                        <SelectValue placeholder="Select number of paths" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="10">10 paths</SelectItem>
+                        <SelectItem value="50">50 paths</SelectItem>
+                        <SelectItem value="100">100 paths</SelectItem>
+                        <SelectItem value="500">500 paths</SelectItem>
+                        <SelectItem value="1000">1000 paths</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2 pt-2">
+                    <Switch
+                      id="showCI"
+                      checked={gbmParams.showConfidenceIntervals}
+                      onCheckedChange={(checked) => handleGBMParamChange('showConfidenceIntervals', checked ? true : false)}
+                    />
+                    <Label htmlFor="showCI">Show Confidence Intervals</Label>
+                  </div>
+                  
+                  {gbmParams.showConfidenceIntervals && (
+                    <div>
+                      <Label htmlFor="confidenceLevel">Confidence Level</Label>
+                      <div className="flex items-center space-x-2">
+                        <Slider
+                          id="confidenceLevel"
+                          min={0.8}
+                          max={0.99}
+                          step={0.01}
+                          value={[gbmParams.confidenceLevel]}
+                          onValueChange={([value]) => handleGBMParamChange('confidenceLevel', value)}
+                        />
+                        <span className="text-sm text-gray-500">{(gbmParams.confidenceLevel * 100).toFixed(0)}%</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="mt-6 flex justify-center">
+                <Button
+                  onClick={runSimulation}
+                  disabled={isSimulating || !isPyodideAvailable}
+                  className="w-full md:w-auto"
+                >
+                  {isSimulating ? (
+                    <>
+                      <Loader className="mr-2 h-4 w-4 animate-spin" />
+                      Running Simulation...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="mr-2 h-4 w-4" />
+                      Run Simulation
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {simulation && simulation.type === 'gbm' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Simulation Results</CardTitle>
+                <CardDescription>
+                  Geometric Brownian Motion simulation with {gbmParams.numPaths} paths over {gbmParams.timeHorizon} years.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="h-64 w-full" ref={chartRef}>
+                    <LineChart data={prepareChartData()} className="h-64 w-full" />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <h3 className="text-lg font-medium mb-2">Final Price Statistics</h3>
+                      <div className="space-y-1">
+                        <div className="flex justify-between">
+                          <span>Mean:</span>
+                          <span className="font-medium">${simulation.statistics.mean.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Median:</span>
+                          <span className="font-medium">${simulation.statistics.median.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Min:</span>
+                          <span className="font-medium">${simulation.statistics.min.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Max:</span>
+                          <span className="font-medium">${simulation.statistics.max.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Std Dev:</span>
+                          <span className="font-medium">${simulation.statistics.std.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-lg font-medium mb-2">Percentiles</h3>
+                      <div className="space-y-1">
+                        {simulation.percentiles.map((percentile: number, index: number) => (
+                          <div key={percentile} className="flex justify-between">
+                            <span>{percentile}th percentile:</span>
+                            <span className="font-medium">${simulation.percentile_values[index].toFixed(2)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={downloadSimulationData}>
+                      <Download className="mr-2 h-4 w-4" />
+                      Download Data
+                    </Button>
+                    <Button variant="outline" onClick={runSimulation}>
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Re-run Simulation
                     </Button>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent className="p-0 px-4 h-64">
-                {selectedMode === "price-simulation" ? (
-                  <div className="w-full h-full">
-                    <LineChart 
-                      data={prepareChartData()}
-                      color="#8884d8"
-                      xLabel="Temps (années)"
-                      yLabel="Prix"
-                      animate={false}
-                      className="w-full"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full h-full">
-                    <LineChart 
-                      data={prepareVaRChartData()}
-                      color="#ea384c"
-                      xLabel="Temps (années)"
-                      yLabel="Prix"
-                      animate={false}
-                      className="w-full"
-                    />
-                  </div>
-                )}
               </CardContent>
             </Card>
-          </>
-        ) : (
-          <Card className="bg-finance-charcoal border-finance-steel/30 col-span-1 lg:col-span-2 flex items-center justify-center p-6">
-            <div className="text-center">
-              <PieChart className="h-16 w-16 text-finance-steel/50 mx-auto mb-4" />
-              <h3 className="text-xl font-medium mb-2">Aucun résultat</h3>
-              <p className="text-finance-lightgray mb-4">
-                Définissez les paramètres et lancez la simulation pour voir les résultats.
-              </p>
-            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="jump" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Jump Diffusion Model</CardTitle>
+              <CardDescription>
+                Simulate asset price paths with jumps, suitable for modeling markets with sudden price changes.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="jump-initialPrice">Initial Price ($)</Label>
+                    <Input
+                      id="jump-initialPrice"
+                      type="number"
+                      value={jumpParams.initialPrice}
+                      onChange={(e) => handleJumpParamChange('initialPrice', parseFloat(e.target.value))}
+                      min={1}
+                      max={10000}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="jump-drift">Expected Return (μ)</Label>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        id="jump-drift"
+                        type="number"
+                        value={jumpParams.drift}
+                        onChange={(e) => handleJumpParamChange('drift', parseFloat(e.target.value))}
+                        min={-0.5}
+                        max={0.5}
+                        step={0.01}
+                      />
+                      <span className="text-sm text-gray-500">{(jumpParams.drift * 100).toFixed(1)}%</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="jump-volatility">Volatility (σ)</Label>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        id="jump-volatility"
+                        type="number"
+                        value={jumpParams.volatility}
+                        onChange={(e) => handleJumpParamChange('volatility', parseFloat(e.target.value))}
+                        min={0.01}
+                        max={1}
+                        step={0.01}
+                      />
+                      <span className="text-sm text-gray-500">{(jumpParams.volatility * 100).toFixed(1)}%</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="jumpIntensity">Jump Intensity (λ)</Label>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        id="jumpIntensity"
+                        type="number"
+                        value={jumpParams.jumpIntensity}
+                        onChange={(e) => handleJumpParamChange('jumpIntensity', parseFloat(e.target.value))}
+                        min={0}
+                        max={20}
+                        step={1}
+                      />
+                      <span className="text-sm text-gray-500">jumps/year</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="jumpMean">Jump Mean (μⱼ)</Label>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        id="jumpMean"
+                        type="number"
+                        value={jumpParams.jumpMean}
+                        onChange={(e) => handleJumpParamChange('jumpMean', parseFloat(e.target.value))}
+                        min={-0.5}
+                        max={0.5}
+                        step={0.01}
+                      />
+                      <span className="text-sm text-gray-500">{(jumpParams.jumpMean * 100).toFixed(1)}%</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="jumpStdDev">Jump Std Dev (σⱼ)</Label>
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        id="jumpStdDev"
+                        type="number"
+                        value={jumpParams.jumpStdDev}
+                        onChange={(e) => handleJumpParamChange('jumpStdDev', parseFloat(e.target.value))}
+                        min={0.01}
+                        max={0.5}
+                        step={0.01}
+                      />
+                      <span className="text-sm text-gray-500">{(jumpParams.jumpStdDev * 100).toFixed(1)}%</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="jump-timeHorizon">Time Horizon (years)</Label>
+                    <Input
+                      id="jump-timeHorizon"
+                      type="number"
+                      value={jumpParams.timeHorizon}
+                      onChange={(e) => handleJumpParamChange('timeHorizon', parseFloat(e.target.value))}
+                      min={0.1}
+                      max={10}
+                      step={0.1}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="jump-numPaths">Number of Paths</Label>
+                    <Select
+                      value={jumpParams.numPaths.toString()}
+                      onValueChange={(value) => handleJumpParamChange('numPaths', parseInt(value))}
+                    >
+                      <SelectTrigger id="jump-numPaths">
+                        <SelectValue placeholder="Select number of paths" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="10">10 paths</SelectItem>
+                        <SelectItem value="50">50 paths</SelectItem>
+                        <SelectItem value="100">100 paths</SelectItem>
+                        <SelectItem value="500">500 paths</SelectItem>
+                        <SelectItem value="1000">1000 paths</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 flex justify-center">
+                <Button
+                  onClick={runSimulation}
+                  disabled={isSimulating || !isPyodideAvailable}
+                  className="w-full md:w-auto"
+                >
+                  {isSimulating ? (
+                    <>
+                      <Loader className="mr-2 h-4 w-4 animate-spin" />
+                      Running Simulation...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="mr-2 h-4 w-4" />
+                      Run Simulation
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
           </Card>
-        )}
-      </div>
-      
-      {/* Section SEO avec contenu descriptif pour les robots */}
-      <div className="mt-12 prose prose-invert max-w-none">
-        <h2 className="text-xl font-bold mb-4">Comprendre la simulation Monte Carlo en finance</h2>
-        <p>
-          La méthode de Monte Carlo est une technique puissante utilisée en finance quantitative pour modéliser 
-          la probabilité de différents résultats dans des processus qui ne peuvent pas être facilement prédits 
-          en raison de l'intervention de variables aléatoires. Cette technique est particulièrement utile pour 
-          évaluer les instruments financiers complexes et les stratégies d'investissement.
-        </p>
+          
+          {simulation && simulation.type === 'jump' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Simulation Results</CardTitle>
+                <CardDescription>
+                  Jump Diffusion simulation with {jumpParams.numPaths} paths over {jumpParams.timeHorizon} years.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="h-64 w-full" ref={chartRef}>
+                    <LineChart data={prepareChartData()} className="h-64 w-full" />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <h3 className="text-lg font-medium mb-2">Final Price Statistics</h3>
+                      <div className="space-y-1">
+                        <div className="flex justify-between">
+                          <span>Mean:</span>
+                          <span className="font-medium">${simulation.statistics.mean.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Median:</span>
+                          <span className="font-medium">${simulation.statistics.median.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Min:</span>
+                          <span className="font-medium">${simulation.statistics.min.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Max:</span>
+                          <span className="font-medium">${simulation.statistics.max.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Std Dev:</span>
+                          <span className="font-medium">${simulation.statistics.std.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="text-lg font-medium mb-2">Percentiles</h3>
+                      <div className="space-y-1">
+                        {simulation.percentiles.map((percentile: number, index: number) => (
+                          <div key={percentile} className="flex justify-between">
+                            <span>{percentile}th percentile:</span>
+                            <span className="font-medium">${simulation.percentile_values[index].toFixed(2)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={downloadSimulationData}>
+                      <Download className="mr-2 h-4 w-4" />
+                      Download Data
+                    </Button>
+                    <Button variant="outline" onClick={runSimulation}>
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Re-run Simulation
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
         
-        <h3 className="text-lg font-bold mt-6 mb-2">Applications en gestion des risques</h3>
-        <p>
-          En finance, la simulation Monte Carlo permet de calculer la Value at Risk (VaR), 
-          d'évaluer le risque de portefeuille, de prédire les rendements futurs et d'analyser divers 
-          scénarios de marché. Notre simulateur vous permet d'ajuster les paramètres clés comme la volatilité, 
-          le drift et le nombre de simulations pour obtenir des résultats précis adaptés à vos besoins d'analyse.
-        </p>
-        
-        <h3 className="text-lg font-bold mt-6 mb-2">Paramètres du simulateur</h3>
-        <ul className="list-disc pl-5 mt-2 space-y-1">
-          <li><strong>Prix initial</strong> : Valeur de départ de l'actif financier</li>
-          <li><strong>Drift (rendement attendu)</strong> : Tendance directionnelle moyenne du prix</li>
-          <li><strong>Volatilité</strong> : Amplitude des variations de prix</li>
-          <li><strong>Durée</strong> : Horizon temporel de la simulation en années</li>
-          <li><strong>Pas de temps</strong> : Granularité de la simulation (plus élevé = plus précis)</li>
-          <li><strong>Nombre de simulations</strong> : Quantité de chemins aléatoires générés</li>
-        </ul>
-      </div>
+        <TabsContent value="var" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Value at Risk (VaR) Analysis</CardTitle>
+              <CardDescription>
+                Estimate the potential loss of a portfolio over a defined period for a given confidence level.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="initialValue">Initial Portfolio Value ($)</Label>
+                    <Input
+                      id="initialValue"
+                      type="number"
+                      value={varParams.initialValue}
+                      onChange={(e) => handleVaRParamChange('initialValue', parseFloat(e.target.value))}
+                      min={1000}
+                      max={10000000}
+                      step={1000}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="timeHorizon">Time Horizon (days)</Label>
+                    <Select
+                      value={varParams.timeHorizon.toString()}
+                      onValueChange={(value) => handleVaRParamChange('timeHorizon', parseInt(value))}
+                    >
+                      <SelectTrigger id="timeHorizon">
+                        <SelectValue placeholder="Select time horizon" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1 day</SelectItem>
+                        <SelectItem value="5">5 days</SelectItem>
+                        <SelectItem value="10">10 days</SelectItem>
+                        <SelectItem value="20">20 days</SelectItem>
+                        <SelectItem value="60">60 days</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="confidenceLevel">Confidence Level</Label>
+                    <div className="flex items-center space-x-2">
+                      <Slider
+                        id="confidenceLevel"
+                        min={0.9}
+                        max={0.99}
+                        step={0.01}
+                        value={[varParams.confidenceLevel]}
+                        onValueChange={([value]) => handleVaRParamChange('confidenceLevel', value)}
+                      />
+                      <span className="text-sm text-gray-500">{(varParams.confidenceLevel * 100).toFixed(0)}%</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="numSimulations">Number of Simulations</Label>
+                    <Select
+                      value={varParams.numSimulations.toString()}
+                      onValueChange={(value) => handleVaRParamChange('numSimulations', parseInt(value))}
+                    >
+                      <SelectTrigger id="numSimulations">
+                        <SelectValue placeholder="Select number of simulations" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1000">1,000 simulations</SelectItem>
+                        <SelectItem value="5000">5,000 simulations</SelectItem>
+                        <SelectItem value="10000">10,000 simulations</SelectItem>
+                        <SelectItem value="50000">50,000 simulations</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Asset Parameters</h3>
+                  
+                  {varParams.assetParams.map((asset, index) => (
+                    <div key={index} className="space-y-2 p-3 border border-gray-200 rounded-md">
+                      <h4 className="font-medium">Asset {index + 1}</h4>
+                      
+                      <div>
+                        <Label htmlFor={`asset-${index}-weight`}>Weight</Label>
+                        <div className="flex items-center space-x-2">
+                          <Input
+                            id={`asset-${index}-weight`}
+                            type="number"
+                            value={asset.weight}
+                            onChange={(e) => handleAssetParamChange(index, 'weight', parseFloat(e.target.value))}
+                            min={0}
+                            max={1}
+                            step={0.05}
+                          />
+                          <span className="text-sm text-gray-500">{(asset.weight * 100).toFixed(0)}%</span>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor={`asset-${index}-return`}>Expected Return</Label>
+                        <div className="flex items-center space-x-2">
+                          <Input
+                            id={`asset-${index}-return`}
+                            type="number"
+                            value={asset.expectedReturn}
+                            onChange={(e) => handleAssetParamChange(index, 'expectedReturn', parseFloat(e.target.value))}
+                            min={-0.2}
+                            max={0.5}
+                            step={0.01}
+                          />
+                          <span className="text-sm text-gray-500">{(asset.expectedReturn * 100).toFixed(1)}%</span>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor={`asset-${index}-volatility`}>Volatility</Label>
+                        <div className="flex items-center space-x-2">
+                          <Input
+                            id={`asset-${index}-volatility`}
+                            type="number"
+                            value={asset.volatility}
+                            onChange={(e) => handleAssetParamChange(index, 'volatility', parseFloat(e.target.value))}
+                            min={0.01}
+                            max={1}
+                            step={0.01}
+                          />
+                          <span className="text-sm text-gray-500">{(asset.volatility * 100).toFixed(1)}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="mt-6 flex justify-center">
+                <Button
+                  onClick={runSimulation}
+                  disabled={isSimulating || !isPyodideAvailable}
+                  className="w-full md:w-auto"
+                >
+                  {isSimulating ? (
+                    <>
+                      <Loader className="mr-2 h-4 w-4 animate-spin" />
+                      Running Simulation...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="mr-2 h-4 w-4" />
+                      Run Simulation
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {simulation && simulation.type === 'var' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>VaR Analysis Results</CardTitle>
+                <CardDescription>
+                  Value at Risk analysis with {varParams.numSimulations.toLocaleString()} simulations over {varParams.timeHorizon} days.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                        <h3 className="text-xl font-bold mb-2">VaR ({(varParams.confidenceLevel * 100).toFixed(0)}%)</h3>
+                        <p className="text-3xl font-bold text-red-500">${simulation.var.toLocaleString(undefined, {maximumFractionDigits: 2})}</p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          With {varParams.confidenceLevel * 100}% confidence, the portfolio will not lose more than this amount over {varParams.timeHorizon} days.
+                        </p>
+                      </div>
+                      
+                      <div className="mt-4 p-4 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                        <h3 className="text-xl font-bold mb-2">Expected Shortfall (CVaR)</h3>
+                        <p className="text-2xl font-bold text-red-600">${simulation.cvar.toLocaleString(undefined, {maximumFractionDigits: 2})}</p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          The expected loss given that the loss exceeds the VaR threshold.
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="h-64 w-full" ref={chartRef}>
+                      <BarChart data={prepareVaRChartData()} className="h-64 w-full" />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">Portfolio Change Statistics</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                      <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                        <div className="text-sm text-gray-500">Mean</div>
+                        <div className={`text-lg font-medium ${simulation.statistics.mean >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                          ${simulation.statistics.mean.toLocaleString(undefined, {maximumFractionDigits: 2})}
+                        </div>
+                      </div>
+                      
+                      <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                        <div className="text-sm text-gray-500">Median</div>
+                        <div className={`text-lg font-medium ${simulation.statistics.median >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                          ${simulation.statistics.median.toLocaleString(undefined, {maximumFractionDigits: 2})}
+                        </div>
+                      </div>
+                      
+                      <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                        <div className="text-sm text-gray-500">Min</div>
+                        <div className="text-lg font-medium text-red-500">
+                          ${simulation.statistics.min.toLocaleString(undefined, {maximumFractionDigits: 2})}
+                        </div>
+                      </div>
+                      
+                      <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                        <div className="text-sm text-gray-500">Max</div>
+                        <div className="text-lg font-medium text-green-500">
+                          ${simulation.statistics.max.toLocaleString(undefined, {maximumFractionDigits: 2})}
+                        </div>
+                      </div>
+                      
+                      <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                        <div className="text-sm text-gray-500">Std Dev</div>
+                        <div className="text-lg font-medium">
+                          ${simulation.statistics.std.toLocaleString(undefined, {maximumFractionDigits: 2})}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={downloadSimulationData}>
+                      <Download className="mr-2 h-4 w-4" />
+                      Download Data
+                    </Button>
+                    <Button variant="outline" onClick={runSimulation}>
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Re-run Simulation
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
