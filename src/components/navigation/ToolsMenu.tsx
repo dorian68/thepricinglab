@@ -15,7 +15,7 @@ const ToolsMenu = () => {
           description="Outils d'analyse de vol" 
         />
         <NavMenuItem 
-          to="/tools/black-scholes" 
+          to="/tools/BlackScholesCalculator" 
           icon={Activity} 
           title="Simulateur Black-Scholes" 
           description="Pricing d'options" 

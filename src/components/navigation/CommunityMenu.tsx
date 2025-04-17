@@ -15,9 +15,9 @@ const CommunityMenu = () => {
           description="Échangez avec la communauté" 
         />
         <NavMenuItem 
-          to="/community/challenges" 
+          to="/projects" 
           icon={Award} 
-          title="Défis Hebdomadaires" 
+          title="Projets et Challenges" 
           description="Nouveaux problèmes chaque semaine" 
         />
         <NavMenuItem 
