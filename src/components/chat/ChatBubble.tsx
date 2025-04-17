@@ -1,5 +1,6 @@
+
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Minus, Maximize, Send } from 'lucide-react';
+import { MessageCircle, X, Minimize, Maximize, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import ChatWidget from './ChatWidget';
 import { useTranslation } from 'react-i18next';
@@ -173,7 +174,7 @@ const ChatBubble: React.FC = () => {
         <div
           ref={chatContainerRef}
           className={`fixed right-0 top-0 ${isMinimized ? 'w-auto h-auto' : 'w-1/4'} h-screen 
-          bg-white dark:bg-finance-charcoal border-l border-gray-200 dark:border-finance-steel/30 
+          bg-finance-dark border-l border-finance-steel/30 
           shadow-lg overflow-hidden transition-all duration-300 z-[1000]`}
           style={{
             boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
@@ -182,11 +183,11 @@ const ChatBubble: React.FC = () => {
         >
           {!isMinimized && (
             <>
-              <div className="p-3 bg-finance-accent dark:bg-finance-accent/80 text-white flex justify-between items-center">
+              <div className="p-3 bg-finance-accent/80 text-white flex justify-between items-center">
                 <h3 className="font-medium">{t('chat.title', 'Chat')}</h3>
                 <div className="flex items-center gap-2">
                   <Button variant="ghost" size="icon" className="h-6 w-6 text-white" onClick={minimizeChat}>
-                    <Minus className="h-4 w-4" />
+                    <Minimize className="h-4 w-4" />
                   </Button>
                   <Button variant="ghost" size="icon" className="h-6 w-6 text-white" onClick={closeChat}>
                     <X className="h-4 w-4" />
@@ -194,14 +195,14 @@ const ChatBubble: React.FC = () => {
                 </div>
               </div>
               <div className="flex flex-col h-[calc(100%-3rem)]">
-                <div className="flex-grow p-3 overflow-y-auto bg-gray-50 dark:bg-finance-dark/50">
+                <div className="flex-grow p-3 overflow-y-auto">
                   <ChatWidget />
                 </div>
-                <div className="p-3 border-t border-gray-200 dark:border-finance-steel/10 flex gap-2">
+                <div className="p-3 border-t border-finance-steel/10 flex gap-2">
                   <input 
                     type="text" 
                     placeholder={t('chat.placeholder', 'Type your message...')}
-                    className="flex-grow p-2 rounded border border-gray-300 dark:border-finance-steel/30 dark:bg-finance-charcoal focus:outline-none focus:ring-1 focus:ring-finance-accent"
+                    className="flex-grow p-2 rounded border border-finance-steel/30 dark:bg-finance-charcoal focus:outline-none focus:ring-1 focus:ring-finance-accent"
                   />
                   <Button size="icon" className="h-10 w-10 rounded-full bg-finance-accent hover:bg-finance-accent/80">
                     <Send className="h-4 w-4" />

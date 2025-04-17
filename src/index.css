@@ -84,7 +84,7 @@
     color: #ea384c;
   }
 
-  /* Fix for survival mode responses - ensure only selected items appear selected */
+  /* Improved survival mode radio options - ensure proper selection */
   .survival-option {
     @apply relative border border-finance-steel/30 p-4 rounded-md transition-all duration-200;
   }
@@ -93,15 +93,23 @@
     @apply bg-finance-accent/10 border-finance-accent;
   }
   
+  .survival-option:not(.selected) {
+    @apply bg-transparent border-finance-steel/30;
+  }
+  
   .survival-option input[type="radio"] {
-    @apply absolute opacity-0;
+    @apply absolute opacity-0 cursor-pointer;
   }
   
   .survival-option input[type="radio"]:checked + label {
     @apply text-finance-accent;
   }
   
-  .survival-option:not(.selected):hover {
+  .survival-option input[type="radio"]:not(:checked) + label {
+    @apply text-finance-offwhite;
+  }
+  
+  .survival-option:hover:not(.selected) {
     @apply bg-finance-steel/10 border-finance-steel/50;
   }
 

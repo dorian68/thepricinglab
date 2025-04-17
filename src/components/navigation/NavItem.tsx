@@ -1,6 +1,6 @@
 
-import React, { ElementType } from "react";
-import { Link } from "react-router-dom";
+import React, { ElementType, useRef, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   NavigationMenuItem,
   NavigationMenuLink,
@@ -21,17 +21,42 @@ interface NavItemProps {
 
 const NavItem = ({ to, icon: Icon, label, highlighted = false, children }: NavItemProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const navigate = useNavigate();
+  const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   
   // Handle click on navigation links to close dropdown
-  const handleLinkClick = () => {
+  const handleLinkClick = (linkTo?: string) => {
     setIsOpen(false);
+    if (linkTo) {
+      navigate(linkTo);
+    }
   };
+  
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node) && 
+          triggerRef.current && !triggerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   // If there are children, render a dropdown menu
   if (children) {
     return (
-      <NavigationMenuItem className="relative" onMouseLeave={() => setIsOpen(false)}>
+      <NavigationMenuItem className="relative">
         <NavigationMenuTrigger
+          ref={triggerRef}
           onMouseEnter={() => setIsOpen(true)}
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
@@ -44,9 +69,19 @@ const NavItem = ({ to, icon: Icon, label, highlighted = false, children }: NavIt
         </NavigationMenuTrigger>
         {isOpen && (
           <NavigationMenuContent 
+            ref={menuRef}
             className="absolute"
             onMouseLeave={() => setIsOpen(false)}
-            onClick={handleLinkClick}
+            onClick={(e) => {
+              // Find closest link element
+              const linkElement = (e.target as HTMLElement).closest('a');
+              if (linkElement && linkElement.getAttribute('href')) {
+                handleLinkClick(linkElement.getAttribute('href') || undefined);
+              }
+            }}
+            style={{
+              left: triggerRef.current ? triggerRef.current.offsetLeft : 0
+            }}
           >
             {children}
           </NavigationMenuContent>
