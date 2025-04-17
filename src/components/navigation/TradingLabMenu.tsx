@@ -15,7 +15,7 @@ const TradingLabMenu = () => {
       </p>
       <ul className="space-y-3">
         <NavMenuItem 
-          to="/trading/exercises" 
+          to="/exercises" 
           icon={LineChart} 
           title={safeTranslate(t, 'tradingLab.exercises', 'Exercices')} 
           description={safeTranslate(t, 'tradingLab.exercisesDesc', 'Practice with interactive exercises')} 

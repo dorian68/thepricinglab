@@ -147,12 +147,12 @@
   },
   "home": {
     "hero": {
-      "title1": "Maîtrisez la Finance Quantitative",
-      "title2": "Comme un Pro du Trading",
+      "title1": "Prépare toi à entrer dans la",
+      "title2": "salle des marchés.",
       "description": "Apprenez à évaluer des produits dérivés complexes, comprendre les surfaces de volatilité et implémenter des modèles de pointe avec notre plateforme pratique.",
       "startCourse": "Commencer à Apprendre",
       "signUp": "S'inscrire",
-      "tagline": "DES FONDAMENTAUX AUX MODÈLES AVANCÉS",
+      "tagline": "MAITRISE. TECHNIQUE. MARCHES.",
       "terminal": "TERMINAL DE TRADING ACTIVÉ"
     },
     "approach": {
