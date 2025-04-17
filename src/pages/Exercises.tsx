@@ -1,7 +1,5 @@
-
 import { useState } from "react";
 import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 import { Badge } from "@/components/ui/badge";
 import { 
   Activity, 
@@ -667,8 +665,6 @@ const Exercises = () => {
           </div>
         </main>
       )}
-      
-      <Footer />
     </div>
   );
 };

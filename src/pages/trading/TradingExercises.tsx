@@ -23,6 +23,7 @@ const TradingExercises = () => {
           <p className="text-finance-offwhite">Coming soon...</p>
         </div>
       </div>
+      {/* Pas de Footer ici, il est déjà inclus dans l'AppShell */}
     </>
   );
 };
