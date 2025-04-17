@@ -1296,6 +1296,83 @@ print("DATA_END")
           )}
         </TabsContent>
       </Tabs>
+      
+      {simulation && (
+        <div className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Simulation Results</CardTitle>
+              <CardDescription>
+                {activeTab === 'gbm' && `Geometric Brownian Motion simulation with ${gbmParams.numPaths} paths over ${gbmParams.timeHorizon} years.`}
+                {activeTab === 'jump' && `Jump Diffusion simulation with ${jumpParams.numPaths} paths over ${jumpParams.timeHorizon} years.`}
+                {activeTab === 'var' && `Value at Risk analysis with ${varParams.numSimulations} simulations over ${varParams.timeHorizon} days.`}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="h-64 w-full" ref={chartRef}>
+                  {activeTab === 'var' ? (
+                    <BarChart data={prepareVaRChartData()} className="h-64 w-full" />
+                  ) : (
+                    <LineChart data={prepareChartData()} className="h-64 w-full" />
+                  )}
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">Final Price Statistics</h3>
+                    <div className="space-y-1">
+                      <div className="flex justify-between">
+                        <span>Mean:</span>
+                        <span className="font-medium">${simulation.statistics.mean.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Median:</span>
+                        <span className="font-medium">${simulation.statistics.median.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Min:</span>
+                        <span className="font-medium">${simulation.statistics.min.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Max:</span>
+                        <span className="font-medium">${simulation.statistics.max.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Std Dev:</span>
+                        <span className="font-medium">${simulation.statistics.std.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">Percentiles</h3>
+                    <div className="space-y-1">
+                      {simulation.percentiles.map((percentile: number, index: number) => (
+                        <div key={percentile} className="flex justify-between">
+                          <span>{percentile}th percentile:</span>
+                          <span className="font-medium">${simulation.percentile_values[index].toFixed(2)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline" onClick={downloadSimulationData}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Data
+                  </Button>
+                  <Button variant="outline" onClick={runSimulation}>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Re-run Simulation
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
