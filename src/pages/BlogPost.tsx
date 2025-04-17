@@ -43,6 +43,7 @@ import { blogPosts } from "@/data/blog-posts";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import { transformCodeBlocks } from "@/utils/codeBlockTransformer";
+import PythonActivator from "@/utils/pythonActivator";
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -111,6 +112,7 @@ const BlogPost = () => {
 
   useEffect(() => {
     if (contentRef.current && post) {
+      console.log("BlogPost: Activation de la transformation des blocs Python");
       const timeoutId = setTimeout(() => {
         transformCodeBlocks(contentRef.current!);
       }, 100);
@@ -135,6 +137,8 @@ const BlogPost = () => {
       </Helmet>
       
       <Navbar />
+      
+      <PythonActivator />
       
       {!post ? (
         <div className="container mx-auto px-4 py-12 text-center">
@@ -284,6 +288,7 @@ const BlogPost = () => {
               prose-td:border prose-td:border-border/50 prose-td:p-2
               prose-img:rounded-lg prose-img:shadow-lg"
             dangerouslySetInnerHTML={{ __html: post.content }} 
+            data-type="python-content"
           />
           
           <div className="bg-card p-8 rounded-xl border border-border/50 shadow-lg mb-12">

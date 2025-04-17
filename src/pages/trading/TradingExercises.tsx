@@ -1,14 +1,25 @@
-
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { safeTranslate } from '../../utils/translationUtils';
 import PythonExercise from '@/components/python/PythonExercise';
+import PythonActivator from '@/utils/pythonActivator';
+import { transformCodeBlocks } from '@/utils/codeBlockTransformer';
 
 const TradingExercises = () => {
   const { t } = useTranslation();
+  const contentRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (contentRef.current) {
+      const timeoutId = setTimeout(() => {
+        transformCodeBlocks(contentRef.current!);
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [contentRef.current]);
 
-  // Exemple d'exercice Python pour les options
   const blackScholesProblem = `
     <p>Implémentez le modèle de Black-Scholes pour calculer le prix d'une option européenne.</p>
     <p>Utilisez les formules suivantes:</p>
@@ -150,7 +161,9 @@ plt.show()
           {safeTranslate(t, 'tradingLab.exercisesDesc', 'Practice with interactive exercises to improve your trading skills')}
         </p>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <PythonActivator />
+        
+        <div ref={contentRef} className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="bg-finance-charcoal p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-bold text-finance-accent mb-4">Black-Scholes</h2>
             <p className="text-finance-offwhite mb-4">
@@ -170,6 +183,47 @@ plt.show()
             <p className="text-finance-offwhite mb-4">
               D'autres exercices interactifs seront bientôt disponibles...
             </p>
+            
+            <pre>
+              <code className="language-python">
+{`import numpy as np
+import matplotlib.pyplot as plt
+
+# Monte Carlo simulation for option pricing
+S0 = 100    # Initial stock price
+K = 100     # Strike price
+T = 1       # Time to maturity (years)
+r = 0.05    # Risk-free rate
+sigma = 0.2 # Volatility
+n_sims = 10000
+
+# Generate random price paths
+np.random.seed(42)
+z = np.random.standard_normal(n_sims)
+S_T = S0 * np.exp((r - 0.5 * sigma**2) * T + sigma * np.sqrt(T) * z)
+
+# Calculate payoffs
+call_payoffs = np.maximum(S_T - K, 0)
+put_payoffs = np.maximum(K - S_T, 0)
+
+# Calculate option prices
+call_price = np.exp(-r * T) * np.mean(call_payoffs)
+put_price = np.exp(-r * T) * np.mean(put_payoffs)
+
+print(f"Monte Carlo Call Price: {call_price:.4f}")
+print(f"Monte Carlo Put Price: {put_price:.4f}")
+
+# Visualize results
+plt.figure(figsize=(10, 6))
+plt.hist(S_T, bins=50, alpha=0.7)
+plt.axvline(K, color='red', linestyle='--', label='Strike Price')
+plt.title('Distribution of Stock Prices at Maturity')
+plt.xlabel('Stock Price')
+plt.ylabel('Frequency')
+plt.legend()
+plt.show()`}
+              </code>
+            </pre>
           </div>
         </div>
         
