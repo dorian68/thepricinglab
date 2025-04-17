@@ -15,6 +15,7 @@ const AppShell: React.FC = () => {
       <div className="flex-1">
         <Outlet />
       </div>
+      {/* Only one Footer here, any additional footers in child components should be removed */}
       <Footer />
     </div>
   );

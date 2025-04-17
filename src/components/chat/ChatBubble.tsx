@@ -38,6 +38,25 @@ const ChatBubble: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Apply split-screen effect to main content when chat is open
+  useEffect(() => {
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+      if (isOpen && !isMinimized) {
+        rootElement.style.width = '75%';
+        rootElement.style.transition = 'width 0.3s ease-in-out';
+      } else {
+        rootElement.style.width = '100%';
+      }
+    }
+    
+    return () => {
+      if (rootElement) {
+        rootElement.style.width = '100%';
+      }
+    };
+  }, [isOpen, isMinimized]);
+
   const toggleChat = () => {
     if (isMinimized) {
       setIsMinimized(false);
@@ -54,6 +73,11 @@ const ChatBubble: React.FC = () => {
   const maximizeChat = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsMinimized(false);
+  };
+
+  const closeChat = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsOpen(false);
   };
 
   const startDrag = (e: React.MouseEvent) => {
@@ -143,65 +167,28 @@ const ChatBubble: React.FC = () => {
     });
   };
 
-  // Calculate chat position based on bubble position to ensure it stays in viewport
-  const getChatPosition = () => {
-    const chatWidth = 320;
-    const chatHeight = 400;
-    const bubbleSize = 70;
-    
-    // Default position above the bubble
-    let chatY = position.y - chatHeight + bubbleSize;
-    
-    // If too close to the top, position below the bubble
-    if (chatY < 0) {
-      chatY = position.y;
-    }
-    
-    // Ensure chat is within right edge
-    let chatX = position.x - chatWidth + bubbleSize;
-    
-    // If would go offscreen left, position at left edge
-    if (chatX < 0) {
-      chatX = 0;
-    }
-    
-    // If bubble close to right edge, align right edge of chat with right edge of screen
-    if (position.x > window.innerWidth - bubbleSize) {
-      chatX = window.innerWidth - chatWidth;
-    }
-    
-    return {
-      x: chatX,
-      y: chatY
-    };
-  };
-
   return (
     <>
       {isOpen && (
         <div
           ref={chatContainerRef}
-          onMouseDown={startDrag}
-          onTouchStart={startDragTouch}
-          className={`fixed bg-white dark:bg-finance-charcoal rounded-lg shadow-lg overflow-hidden transition-all 
-            ${isMinimized ? 'w-auto h-auto p-0' : 'w-80 h-96'}`}
+          className={`fixed right-0 top-0 ${isMinimized ? 'w-auto h-auto' : 'w-1/4'} h-screen 
+          bg-white dark:bg-finance-charcoal border-l border-gray-200 dark:border-finance-steel/30 
+          shadow-lg overflow-hidden transition-all duration-300 z-[1000]`}
           style={{
-            left: `${getChatPosition().x}px`,
-            top: `${getChatPosition().y}px`,
-            zIndex: 1000,
             boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
-            transition: isDragging ? 'none' : 'all 0.2s ease-in-out'
+            transition: isDragging ? 'none' : 'all 0.3s ease-in-out'
           }}
         >
           {!isMinimized && (
             <>
-              <div className="p-3 bg-finance-accent dark:bg-finance-accent/80 text-white flex justify-between items-center cursor-grab">
-                <h3 className="font-medium">{t('chat.title')}</h3>
+              <div className="p-3 bg-finance-accent dark:bg-finance-accent/80 text-white flex justify-between items-center">
+                <h3 className="font-medium">{t('chat.title', 'Chat')}</h3>
                 <div className="flex items-center gap-2">
                   <Button variant="ghost" size="icon" className="h-6 w-6 text-white" onClick={minimizeChat}>
                     <Minus className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-6 w-6 text-white" onClick={() => setIsOpen(false)}>
+                  <Button variant="ghost" size="icon" className="h-6 w-6 text-white" onClick={closeChat}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -213,7 +200,7 @@ const ChatBubble: React.FC = () => {
                 <div className="p-3 border-t border-gray-200 dark:border-finance-steel/10 flex gap-2">
                   <input 
                     type="text" 
-                    placeholder={t('chat.placeholder')}
+                    placeholder={t('chat.placeholder', 'Type your message...')}
                     className="flex-grow p-2 rounded border border-gray-300 dark:border-finance-steel/30 dark:bg-finance-charcoal focus:outline-none focus:ring-1 focus:ring-finance-accent"
                   />
                   <Button size="icon" className="h-10 w-10 rounded-full bg-finance-accent hover:bg-finance-accent/80">

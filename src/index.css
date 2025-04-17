@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -81,6 +82,27 @@
   .terminal-text {
     font-family: 'Roboto Mono', monospace;
     color: #ea384c;
+  }
+
+  /* Fix for survival mode responses - ensure only selected items appear selected */
+  .survival-option {
+    @apply relative border border-finance-steel/30 p-4 rounded-md transition-all duration-200;
+  }
+  
+  .survival-option.selected {
+    @apply bg-finance-accent/10 border-finance-accent;
+  }
+  
+  .survival-option input[type="radio"] {
+    @apply absolute opacity-0;
+  }
+  
+  .survival-option input[type="radio"]:checked + label {
+    @apply text-finance-accent;
+  }
+  
+  .survival-option:not(.selected):hover {
+    @apply bg-finance-steel/10 border-finance-steel/50;
   }
 
   /* Code block styling */

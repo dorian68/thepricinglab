@@ -1,51 +1,72 @@
 
-import React from "react";
+import React, { ElementType } from "react";
 import { Link } from "react-router-dom";
-import { LucideIcon } from "lucide-react";
 import {
   NavigationMenuItem,
   NavigationMenuLink,
-  navigationMenuTriggerStyle,
   NavigationMenuTrigger,
   NavigationMenuContent,
+  navigationMenuTriggerStyle,
   navigationMenuTriggerHighlightedStyle,
 } from "@/components/ui/navigation-menu";
+import { cn } from "@/lib/utils";
 
 interface NavItemProps {
   to?: string;
-  icon?: LucideIcon;
+  icon: ElementType;
   label: string;
-  children?: React.ReactNode;
   highlighted?: boolean;
+  children?: React.ReactNode;
 }
 
-const NavItem = ({ to, icon: Icon, label, children, highlighted = false }: NavItemProps) => {
+const NavItem = ({ to, icon: Icon, label, highlighted = false, children }: NavItemProps) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  
+  // Handle click on navigation links to close dropdown
+  const handleLinkClick = () => {
+    setIsOpen(false);
+  };
+
   // If there are children, render a dropdown menu
   if (children) {
     return (
-      <NavigationMenuItem>
-        <NavigationMenuTrigger 
-          className={highlighted ? "text-finance-accent bg-finance-accent/10 hover:bg-finance-accent/20" : ""}
+      <NavigationMenuItem className="relative" onMouseLeave={() => setIsOpen(false)}>
+        <NavigationMenuTrigger
+          onMouseEnter={() => setIsOpen(true)}
+          onClick={() => setIsOpen(!isOpen)}
+          className={cn(
+            highlighted ? navigationMenuTriggerHighlightedStyle() : navigationMenuTriggerStyle(),
+            "flex items-center gap-1"
+          )}
         >
-          {Icon && <Icon className="w-4 h-4 mr-2" />}
-          {label}
+          <Icon className="h-4 w-4" />
+          <span>{label}</span>
         </NavigationMenuTrigger>
-        <NavigationMenuContent>
-          {children}
-        </NavigationMenuContent>
+        {isOpen && (
+          <NavigationMenuContent 
+            className="absolute"
+            onMouseLeave={() => setIsOpen(false)}
+            onClick={handleLinkClick}
+          >
+            {children}
+          </NavigationMenuContent>
+        )}
       </NavigationMenuItem>
     );
   }
 
-  // Otherwise, render a simple link
+  // If there are no children, render a simple link
   return (
     <NavigationMenuItem>
-      <Link 
-        to={to || "/"} 
-        className={navigationMenuTriggerStyle() + (highlighted ? " text-finance-accent bg-finance-accent/10 hover:bg-finance-accent/20" : "")}
+      <Link
+        to={to || "#"}
+        className={cn(
+          highlighted ? navigationMenuTriggerHighlightedStyle() : navigationMenuTriggerStyle(),
+          "flex items-center gap-1"
+        )}
       >
-        {Icon && <Icon className="w-4 h-4 mr-2" />}
-        {label}
+        <Icon className="h-4 w-4" />
+        <span>{label}</span>
       </Link>
     </NavigationMenuItem>
   );
