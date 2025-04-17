@@ -40,7 +40,7 @@ interface LineChartProps {
   color?: string;
   showAxes?: boolean;
   animate?: boolean;
-  className?: string; // Add this line to allow optional className
+  className?: string;
 }
 
 export const LineChart: React.FC<LineChartProps> = ({ 
@@ -50,7 +50,7 @@ export const LineChart: React.FC<LineChartProps> = ({
   color = "#8884d8",
   showAxes = true,
   animate = true,
-  className = "", // Add default empty string
+  className = "",
 }) => {
   const chartData = data.map(item => ({
     name: item.x,
@@ -58,7 +58,7 @@ export const LineChart: React.FC<LineChartProps> = ({
   }));
 
   return (
-    <Chart className={className}> {/* Pass className to Chart component */}
+    <Chart className={className}>
       <RechartsLineChart
         data={chartData}
         margin={{ top: 5, right: 20, bottom: 20, left: 20 }}

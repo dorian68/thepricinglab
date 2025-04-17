@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -231,7 +230,7 @@ const MonteCarloSimulator: React.FC = () => {
               
               <div className="space-y-2">
                 <Label htmlFor="duration">
-                  Durée: {params.duration} {params.duration === 1 ? 'an' : 'ans'}
+                  Dur��e: {params.duration} {params.duration === 1 ? 'an' : 'ans'}
                 </Label>
                 <Slider
                   id="duration"
@@ -379,6 +378,7 @@ const MonteCarloSimulator: React.FC = () => {
                       xLabel="Temps (années)"
                       yLabel="Prix"
                       animate={false}
+                      className="w-full"
                     />
                   </div>
                 ) : (
@@ -389,6 +389,7 @@ const MonteCarloSimulator: React.FC = () => {
                       xLabel="Temps (années)"
                       yLabel="Prix"
                       animate={false}
+                      className="w-full"
                     />
                   </div>
                 )}
