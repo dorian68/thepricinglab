@@ -1,5 +1,10 @@
 
 import { useState } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Calculator } from "lucide-react";
 
 const BlackScholesCalculator = () => {
   const [spot, setSpot] = useState<number>(100);
@@ -47,112 +52,140 @@ const BlackScholesCalculator = () => {
   };
 
   return (
-    <div className="finance-card p-6">
-      <h3 className="text-xl font-medium mb-6">Calculatrice Black-Scholes</h3>
+    <div className="container mx-auto py-6 px-4 md:px-6 lg:px-8 max-w-7xl">
+      <div className="mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-finance-accent mb-2">Calculatrice Black-Scholes</h1>
+        <p className="text-finance-lightgray">Pricing d'options européennes et calcul des Greeks</p>
+      </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Prix spot</label>
-              <input
-                type="number"
-                value={spot}
-                onChange={(e) => setSpot(parseFloat(e.target.value))}
-                className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
-              />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="bg-finance-charcoal border-finance-steel/30">
+          <CardHeader>
+            <CardTitle className="flex items-center text-finance-accent">
+              <Calculator className="mr-2 h-5 w-5" />
+              Paramètres d'entrée
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="spot">Prix spot</Label>
+                <Input
+                  id="spot"
+                  type="number"
+                  value={spot}
+                  onChange={(e) => setSpot(parseFloat(e.target.value))}
+                  className="bg-finance-dark border-finance-steel/30 text-finance-offwhite"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="strike">Prix d'exercice</Label>
+                <Input
+                  id="strike"
+                  type="number"
+                  value={strike}
+                  onChange={(e) => setStrike(parseFloat(e.target.value))}
+                  className="bg-finance-dark border-finance-steel/30 text-finance-offwhite"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="interestRate">Taux d'intérêt (décimal)</Label>
+                <Input
+                  id="interestRate"
+                  type="number"
+                  step="0.01"
+                  value={interestRate}
+                  onChange={(e) => setInterestRate(parseFloat(e.target.value))}
+                  className="bg-finance-dark border-finance-steel/30 text-finance-offwhite"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="volatility">Volatilité (décimal)</Label>
+                <Input
+                  id="volatility"
+                  type="number"
+                  step="0.01"
+                  value={volatility}
+                  onChange={(e) => setVolatility(parseFloat(e.target.value) || 0)}
+                  className="bg-finance-dark border-finance-steel/30 text-finance-offwhite"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="timeToMaturity">Temps jusqu'à maturité (années)</Label>
+                <Input
+                  id="timeToMaturity"
+                  type="number"
+                  step="0.01"
+                  value={timeToMaturity}
+                  onChange={(e) => setTimeToMaturity(parseFloat(e.target.value) || 0)}
+                  className="bg-finance-dark border-finance-steel/30 text-finance-offwhite"
+                />
+              </div>
+              
+              <Button
+                onClick={calculate}
+                variant="finance"
+                className="w-full mt-4"
+              >
+                <Calculator className="mr-2 h-4 w-4" />
+                Calculer
+              </Button>
             </div>
-            
-            <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Prix d'exercice</label>
-              <input
-                type="number"
-                value={strike}
-                onChange={(e) => setStrike(parseFloat(e.target.value))}
-                className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Taux d'intérêt (décimal)</label>
-              <input
-                type="number"
-                step="0.01"
-                value={interestRate}
-                onChange={(e) => setInterestRate(parseFloat(e.target.value))}
-                className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Volatilité (décimal)</label>
-              <input
-                type="number"
-                step="0.01"
-                value={volatility}
-                onChange={(e) => setVolatility(parseFloat(e.target.value) || 0)}
-                className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Temps jusqu'à maturité (années)</label>
-              <input
-                type="number"
-                step="0.01"
-                value={timeToMaturity}
-                onChange={(e) => setTimeToMaturity(parseFloat(e.target.value) || 0)}
-                className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
-              />
-            </div>
-            
-            <button
-              onClick={calculate}
-              className="finance-button w-full"
-            >
-              Calculer
-            </button>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
         
-        <div>
-          <h4 className="text-finance-offwhite font-medium mb-4">Résultats</h4>
+        <div className="space-y-6">
+          <Card className="bg-finance-charcoal border-finance-steel/30">
+            <CardHeader>
+              <CardTitle className="text-finance-accent">Résultats</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-finance-dark p-4 rounded-md">
+                  <p className="text-finance-lightgray text-sm mb-1">Prix Call</p>
+                  <p className="text-2xl font-medium text-finance-offwhite">{callPrice}</p>
+                </div>
+                
+                <div className="bg-finance-dark p-4 rounded-md">
+                  <p className="text-finance-lightgray text-sm mb-1">Prix Put</p>
+                  <p className="text-2xl font-medium text-finance-offwhite">{putPrice}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
           
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="finance-card p-4">
-              <p className="text-finance-lightgray text-sm mb-1">Prix Call</p>
-              <p className="text-2xl font-medium text-finance-offwhite">{callPrice}</p>
-            </div>
-            
-            <div className="finance-card p-4">
-              <p className="text-finance-lightgray text-sm mb-1">Prix Put</p>
-              <p className="text-2xl font-medium text-finance-offwhite">{putPrice}</p>
-            </div>
-          </div>
-          
-          <h4 className="text-finance-offwhite font-medium mb-4">Greeks</h4>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="finance-card p-3">
-              <p className="text-finance-lightgray text-sm mb-1">Delta</p>
-              <p className="text-lg font-medium text-finance-offwhite">{delta}</p>
-            </div>
-            
-            <div className="finance-card p-3">
-              <p className="text-finance-lightgray text-sm mb-1">Gamma</p>
-              <p className="text-lg font-medium text-finance-offwhite">{gamma}</p>
-            </div>
-            
-            <div className="finance-card p-3">
-              <p className="text-finance-lightgray text-sm mb-1">Vega</p>
-              <p className="text-lg font-medium text-finance-offwhite">{vega}</p>
-            </div>
-            
-            <div className="finance-card p-3">
-              <p className="text-finance-lightgray text-sm mb-1">Theta</p>
-              <p className="text-lg font-medium text-finance-offwhite">{theta}</p>
-            </div>
-          </div>
+          <Card className="bg-finance-charcoal border-finance-steel/30">
+            <CardHeader>
+              <CardTitle className="text-finance-accent">Greeks</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-finance-dark p-4 rounded-md">
+                  <p className="text-finance-lightgray text-sm mb-1">Delta</p>
+                  <p className="text-xl font-medium text-finance-offwhite">{delta}</p>
+                </div>
+                
+                <div className="bg-finance-dark p-4 rounded-md">
+                  <p className="text-finance-lightgray text-sm mb-1">Gamma</p>
+                  <p className="text-xl font-medium text-finance-offwhite">{gamma}</p>
+                </div>
+                
+                <div className="bg-finance-dark p-4 rounded-md">
+                  <p className="text-finance-lightgray text-sm mb-1">Vega</p>
+                  <p className="text-xl font-medium text-finance-offwhite">{vega}</p>
+                </div>
+                
+                <div className="bg-finance-dark p-4 rounded-md">
+                  <p className="text-finance-lightgray text-sm mb-1">Theta</p>
+                  <p className="text-xl font-medium text-finance-offwhite">{theta}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
