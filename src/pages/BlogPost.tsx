@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet-async";
@@ -43,12 +42,14 @@ import {
 import { blogPosts } from "@/data/blog-posts";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
+import { transformCodeBlocks } from "@/utils/codeBlockTransformer";
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const post = React.useMemo(() => 
     blogPosts.find(post => post.slug === slug), 
@@ -68,7 +69,6 @@ const BlogPost = () => {
       .slice(0, 3);
   }, [post]);
 
-  // Share functions
   const shareOnTwitter = () => {
     if (!post) return;
     const text = encodeURIComponent(`${post.title} | The Pricing Lab Blog`);
@@ -108,6 +108,16 @@ const BlogPost = () => {
       });
     });
   };
+
+  useEffect(() => {
+    if (contentRef.current && post) {
+      const timeoutId = setTimeout(() => {
+        transformCodeBlocks(contentRef.current!);
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [post, contentRef.current]);
 
   return (
     <>
@@ -251,26 +261,28 @@ const BlogPost = () => {
             />
           </div>
           
-          <div className="prose prose-lg dark:prose-invert max-w-none mb-12 
-            prose-headings:font-mono prose-headings:font-bold
-            prose-h1:text-3xl prose-h1:mt-12 prose-h1:mb-6
-            prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
-            prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4
-            prose-p:text-base prose-p:leading-relaxed prose-p:mb-6
-            prose-pre:bg-card prose-pre:border prose-pre:border-border/50
-            prose-pre:rounded-lg prose-pre:p-4 prose-pre:shadow-md
-            prose-pre:font-mono prose-pre:text-sm
-            prose-code:font-mono prose-code:text-primary
-            prose-strong:font-semibold prose-strong:text-primary
-            prose-blockquote:border-l-4 prose-blockquote:border-primary
-            prose-blockquote:pl-4 prose-blockquote:italic
-            prose-ul:list-disc prose-ul:pl-6
-            prose-ol:list-decimal prose-ol:pl-6
-            prose-li:mb-2
-            prose-table:border-collapse prose-table:w-full
-            prose-th:border prose-th:border-border/50 prose-th:p-2 prose-th:bg-muted
-            prose-td:border prose-td:border-border/50 prose-td:p-2
-            prose-img:rounded-lg prose-img:shadow-lg"
+          <div 
+            ref={contentRef}
+            className="prose prose-lg dark:prose-invert max-w-none mb-12 
+              prose-headings:font-mono prose-headings:font-bold
+              prose-h1:text-3xl prose-h1:mt-12 prose-h1:mb-6
+              prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
+              prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4
+              prose-p:text-base prose-p:leading-relaxed prose-p:mb-6
+              prose-pre:bg-card prose-pre:border prose-pre:border-border/50
+              prose-pre:rounded-lg prose-pre:p-4 prose-pre:shadow-md
+              prose-pre:font-mono prose-pre:text-sm
+              prose-code:font-mono prose-code:text-primary
+              prose-strong:font-semibold prose-strong:text-primary
+              prose-blockquote:border-l-4 prose-blockquote:border-primary
+              prose-blockquote:pl-4 prose-blockquote:italic
+              prose-ul:list-disc prose-ul:pl-6
+              prose-ol:list-decimal prose-ol:pl-6
+              prose-li:mb-2
+              prose-table:border-collapse prose-table:w-full
+              prose-th:border prose-th:border-border/50 prose-th:p-2 prose-th:bg-muted
+              prose-td:border prose-td:border-border/50 prose-td:p-2
+              prose-img:rounded-lg prose-img:shadow-lg"
             dangerouslySetInnerHTML={{ __html: post.content }} 
           />
           
