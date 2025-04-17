@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { safeTranslate } from '../../utils/translationUtils';
 import PythonExercise from '@/components/python/PythonExercise';
 import { transformCodeBlocks } from '@/utils/codeBlockTransformer';
+import PythonActivator from '@/utils/pythonActivator';
 
 const TradingExercises = () => {
   const { t } = useTranslation();
@@ -153,6 +154,10 @@ plt.show()
       <Helmet>
         <title>{safeTranslate(t, 'tradingLab.exercises', 'Exercices')} | The Trading Lab</title>
       </Helmet>
+      
+      {/* Charger Python automatiquement pour les pages d'exercices */}
+      <PythonActivator autoLoad={true} discreet={true} />
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-3xl font-bold text-finance-accent mb-6">
           {safeTranslate(t, 'tradingLab.exercises', 'Exercices')}

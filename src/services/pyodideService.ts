@@ -3,6 +3,7 @@ import { PyodideInterface } from '@/types/pyodide';
 
 let pyodideInstance: PyodideInterface | null = null;
 let pyodideLoading: Promise<PyodideInterface> | null = null;
+let pyodideLoaded = false;
 
 export const loadPyodide = async (): Promise<PyodideInterface> => {
   if (pyodideInstance) {
@@ -17,24 +18,27 @@ export const loadPyodide = async (): Promise<PyodideInterface> => {
     try {
       console.log("Chargement de Pyodide depuis CDN...");
       
-      // Load script manually instead of importing directly
-      const script = document.createElement('script');
-      script.src = "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js";
-      script.type = "text/javascript";
-      document.head.appendChild(script);
-      
-      // Wait for script to load
-      const waitForPyodide = () => {
-        return new Promise<void>((res) => {
-          if ((window as any).loadPyodide) {
-            res();
-          } else {
-            setTimeout(() => res(waitForPyodide()), 100);
-          }
+      // Vérifier si loadPyodide est déjà disponible
+      if (!(window as any).loadPyodide) {
+        // Load script manually instead of importing directly
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js";
+        script.type = "text/javascript";
+        
+        // Attendre que le script soit chargé
+        await new Promise((scriptResolve, scriptReject) => {
+          script.onload = scriptResolve;
+          script.onerror = scriptReject;
+          document.head.appendChild(script);
         });
-      };
+        
+        console.log("Script Pyodide chargé avec succès");
+      }
       
-      await waitForPyodide();
+      // Vérifier à nouveau si loadPyodide est disponible
+      if (!(window as any).loadPyodide) {
+        throw new Error("Impossible de charger Pyodide - loadPyodide non disponible");
+      }
       
       console.log("Initialisation de Pyodide...");
       const loadPyodideFunction = (window as any).loadPyodide;
@@ -44,6 +48,8 @@ export const loadPyodide = async (): Promise<PyodideInterface> => {
       });
       
       console.log("Pyodide chargé avec succès");
+      (window as any).pyodideLoaded = true;
+      pyodideLoaded = true;
       
       // Initialize matplotlib if available
       try {
@@ -74,6 +80,10 @@ export const loadPyodide = async (): Promise<PyodideInterface> => {
   });
 
   return pyodideLoading;
+};
+
+export const isPyodideLoaded = (): boolean => {
+  return pyodideLoaded || (window as any).pyodideLoaded === true;
 };
 
 export const executePythonCode = async (code: string): Promise<{ result: string; error: string | null; plots: string[] }> => {

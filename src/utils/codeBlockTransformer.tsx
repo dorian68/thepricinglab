@@ -2,13 +2,19 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import PythonCodeBlock from '@/components/python/PythonCodeBlock';
-import PyodideLoader from '@/components/python/PyodideLoader';
+import PythonActivator from '@/utils/pythonActivator';
+import { isPyodideLoaded } from '@/services/pyodideService';
 
 const detectLanguage = (className: string | null): string | null => {
   if (!className) return null;
   
   const match = className.match(/language-(\w+)/);
   return match ? match[1] : null;
+};
+
+// Nettoyer les balises [caption] des titres
+const cleanCaption = (text: string): string => {
+  return text.replace(/\[caption\]\s*/g, '');
 };
 
 export const transformCodeBlocks = (containerElement: HTMLElement) => {
@@ -35,7 +41,14 @@ export const transformCodeBlocks = (containerElement: HTMLElement) => {
       pythonBlocksFound = true;
       const code = codeElement.textContent || '';
       
-      // Créer un wrapper pour contenir le bloc de code et le loader
+      // Trouver un titre potentiel dans un élément précédent (h3, h4, etc.)
+      let title = "Python";
+      const prevElement = preElement.previousElementSibling;
+      if (prevElement && ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(prevElement.tagName)) {
+        title = cleanCaption(prevElement.textContent || 'Python');
+      }
+      
+      // Créer un wrapper pour contenir le bloc de code et les contrôles
       const wrapper = document.createElement('div');
       wrapper.className = 'python-block-wrapper relative';
       
@@ -43,24 +56,15 @@ export const transformCodeBlocks = (containerElement: HTMLElement) => {
       const container = document.createElement('div');
       container.className = 'python-code-container';
       
-      // Créer un conteneur pour le loader Python (petit bouton discret)
-      const loaderContainer = document.createElement('div');
-      loaderContainer.className = 'python-loader-container absolute top-2 right-2 z-10';
-      
       // Ajouter les conteneurs au wrapper
       wrapper.appendChild(container);
-      wrapper.appendChild(loaderContainer);
       
       // Remplacer le bloc pre par notre wrapper
       preElement.parentNode?.replaceChild(wrapper, preElement);
       
-      // Rendre le composant principal dans son conteneur
+      // Rendre le composant PythonCodeBlock avec activation Python intégrée
       const codeRoot = createRoot(container);
-      codeRoot.render(<PythonCodeBlock code={code} title="Python" />);
-      
-      // Rendre le loader discret dans son conteneur
-      const loaderRoot = createRoot(loaderContainer);
-      loaderRoot.render(<PyodideLoader discreet={true} />);
+      codeRoot.render(<PythonCodeBlock code={code} title={title} />);
       
       console.log(`Bloc Python #${index} transformé avec succès`);
     }

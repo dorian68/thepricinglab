@@ -1,10 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Play, RotateCcw, X, Loader, Check, Code, Copy, ChevronDown, ChevronUp, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { usePythonExecution } from '@/hooks/usePythonExecution';
 import { useToast } from '@/hooks/use-toast';
+import { isPyodideLoaded } from '@/services/pyodideService';
+import PyodideLoader from '@/components/python/PyodideLoader';
 
 interface PythonExerciseProps {
   problem: string;
@@ -27,10 +29,34 @@ const PythonExercise: React.FC<PythonExerciseProps> = ({
   const [isOutputCollapsed, setIsOutputCollapsed] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
   const [currentHintIndex, setCurrentHintIndex] = useState(-1);
+  const [isPyodideAvailable, setIsPyodideAvailable] = useState(false);
   const { code, setCode, result, execute, reset } = usePythonExecution(initialCode);
   const { toast } = useToast();
   
+  useEffect(() => {
+    // Vérifier si Pyodide est déjà chargé
+    setIsPyodideAvailable(isPyodideLoaded());
+    
+    // Observer pour détecter si Pyodide est chargé après le montage
+    const intervalId = setInterval(() => {
+      if (isPyodideLoaded()) {
+        setIsPyodideAvailable(true);
+        clearInterval(intervalId);
+      }
+    }, 1000);
+    
+    return () => clearInterval(intervalId);
+  }, []);
+  
   const handleRunClick = () => {
+    if (!isPyodideAvailable) {
+      toast({
+        title: "Python non activé",
+        description: "L'environnement Python est en cours de chargement...",
+      });
+      return;
+    }
+    
     if (!isEditorOpen) {
       setIsEditorOpen(true);
     } else {
@@ -69,13 +95,30 @@ const PythonExercise: React.FC<PythonExerciseProps> = ({
     }
   };
   
+  // Nettoyer les balises [caption] du titre
+  const cleanedTitle = title ? title.replace(/\[caption\]\s*/g, '') : "Exercice Python";
+  
   return (
     <div className={`my-6 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 ${className}`}>
+      {/* Activation Python automatique pour les exercices */}
+      {!isPyodideAvailable && (
+        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 flex items-center justify-between">
+          <p className="text-sm text-blue-700 dark:text-blue-300">
+            Chargement de l'environnement Python nécessaire pour cet exercice...
+          </p>
+          <PyodideLoader 
+            discreet={false} 
+            autoLoad={true}
+            onLoad={() => setIsPyodideAvailable(true)} 
+          />
+        </div>
+      )}
+      
       {/* En-tête de l'exercice */}
       <div className="bg-slate-100 dark:bg-slate-800 p-4 border-b border-slate-200 dark:border-slate-700">
-        <h3 className="text-lg font-semibold mb-2">{title || "Exercice Python"}</h3>
+        <h3 className="text-lg font-semibold mb-2">{cleanedTitle}</h3>
         <div className="prose prose-sm dark:prose-invert max-w-none">
-          <div dangerouslySetInnerHTML={{ __html: problem }} />
+          <div dangerouslySetInnerHTML={{ __html: problem.replace(/\[caption\]\s*/g, '') }} />
         </div>
       </div>
       
@@ -128,6 +171,7 @@ const PythonExercise: React.FC<PythonExerciseProps> = ({
               variant="default" 
               className="flex items-center space-x-1"
               onClick={handleRunClick}
+              disabled={!isPyodideAvailable}
             >
               <Play className="h-3.5 w-3.5" />
               <span>Exécuter</span>
@@ -199,7 +243,7 @@ const PythonExercise: React.FC<PythonExerciseProps> = ({
               size="sm"
               className="flex items-center space-x-1"
               onClick={execute}
-              disabled={result.isLoading}
+              disabled={result.isLoading || !isPyodideAvailable}
             >
               {result.isLoading ? (
                 <>

@@ -1,6 +1,6 @@
 
-import { useState, useCallback } from 'react';
-import { executePythonCode } from '@/services/pyodideService';
+import { useState, useCallback, useEffect } from 'react';
+import { executePythonCode, isPyodideLoaded } from '@/services/pyodideService';
 import { CodeExecutionResult } from '@/types/pyodide';
 import { useToast } from '@/hooks/use-toast';
 
@@ -12,13 +12,38 @@ export const usePythonExecution = (initialCode: string = '') => {
     plots: [],
     isLoading: false
   });
+  const [isPyodideAvailable, setIsPyodideAvailable] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Vérifier si Pyodide est déjà chargé
+    setIsPyodideAvailable(isPyodideLoaded());
+    
+    // Observer pour détecter si Pyodide est chargé après le montage
+    const intervalId = setInterval(() => {
+      if (isPyodideLoaded()) {
+        setIsPyodideAvailable(true);
+        clearInterval(intervalId);
+      }
+    }, 1000);
+    
+    return () => clearInterval(intervalId);
+  }, []);
 
   const execute = useCallback(async () => {
     if (!code.trim()) {
       toast({
         title: "Code vide",
         description: "Veuillez entrer du code Python à exécuter",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!isPyodideAvailable) {
+      toast({
+        title: "Python non activé",
+        description: "Veuillez d'abord activer l'environnement Python",
         variant: "destructive"
       });
       return;
@@ -58,7 +83,7 @@ export const usePythonExecution = (initialCode: string = '') => {
         variant: "destructive"
       });
     }
-  }, [code, toast]);
+  }, [code, toast, isPyodideAvailable]);
 
   const reset = useCallback(() => {
     setCode(initialCode);
@@ -75,6 +100,7 @@ export const usePythonExecution = (initialCode: string = '') => {
     setCode,
     result,
     execute,
-    reset
+    reset,
+    isPyodideAvailable
   };
 };

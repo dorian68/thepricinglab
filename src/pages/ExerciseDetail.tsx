@@ -33,8 +33,8 @@ const ExerciseDetail = () => {
       
       <h1 className="text-3xl font-bold mb-6">{safeExerciseId}</h1>
       
-      {/* Activateur Python pour cette page */}
-      <PythonActivator />
+      {/* Activateur Python automatique pour les pages d'exercices */}
+      <PythonActivator autoLoad={true} discreet={true} />
       
       <div 
         ref={contentRef}

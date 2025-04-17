@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -43,7 +44,6 @@ import { blogPosts } from "@/data/blog-posts";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import { transformCodeBlocks } from "@/utils/codeBlockTransformer";
-import PythonActivator from "@/utils/pythonActivator";
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -138,7 +138,7 @@ const BlogPost = () => {
       
       <Navbar />
       
-      <PythonActivator />
+      {/* PythonActivator retiré d'ici - il sera intégré directement à chaque bloc de code */}
       
       {!post ? (
         <div className="container mx-auto px-4 py-12 text-center">
@@ -287,7 +287,7 @@ const BlogPost = () => {
               prose-th:border prose-th:border-border/50 prose-th:p-2 prose-th:bg-muted
               prose-td:border prose-td:border-border/50 prose-td:p-2
               prose-img:rounded-lg prose-img:shadow-lg"
-            dangerouslySetInnerHTML={{ __html: post.content }} 
+            dangerouslySetInnerHTML={{ __html: post.content.replace(/\[caption\]\s*/g, '') }} 
             data-type="python-content"
           />
           
