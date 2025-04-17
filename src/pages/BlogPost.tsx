@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -66,6 +67,47 @@ const BlogPost = () => {
       .sort((a, b) => b.matchingTags - a.matchingTags)
       .slice(0, 3);
   }, [post]);
+
+  // Share functions
+  const shareOnTwitter = () => {
+    if (!post) return;
+    const text = encodeURIComponent(`${post.title} | The Pricing Lab Blog`);
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+    toast({
+      title: t("blog.shared"),
+      description: t("blog.sharedOnTwitter"),
+    });
+  };
+
+  const shareOnLinkedIn = () => {
+    if (!post) return;
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+    toast({
+      title: t("blog.shared"),
+      description: t("blog.sharedOnLinkedIn"),
+    });
+  };
+
+  const shareOnFacebook = () => {
+    if (!post) return;
+    const url = encodeURIComponent(window.location.href);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+    toast({
+      title: t("blog.shared"),
+      description: t("blog.sharedOnFacebook"),
+    });
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      toast({
+        title: t("blog.linkCopied"),
+        description: t("blog.linkCopiedToClipboard"),
+      });
+    });
+  };
 
   return (
     <>
