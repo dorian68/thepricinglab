@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -371,21 +372,25 @@ const MonteCarloSimulator: React.FC = () => {
               </CardHeader>
               <CardContent className="p-0 px-4 h-64">
                 {selectedMode === "price-simulation" ? (
-                  <LineChart 
-                    data={prepareChartData()}
-                    color="#8884d8"
-                    xLabel="Temps (années)"
-                    yLabel="Prix"
-                    animate={false}
-                  />
+                  <div className="w-full h-full">
+                    <LineChart 
+                      data={prepareChartData()}
+                      color="#8884d8"
+                      xLabel="Temps (années)"
+                      yLabel="Prix"
+                      animate={false}
+                    />
+                  </div>
                 ) : (
-                  <LineChart 
-                    data={prepareVaRChartData()}
-                    color="#ea384c"
-                    xLabel="Temps (années)"
-                    yLabel="Prix"
-                    animate={false}
-                  />
+                  <div className="w-full h-full">
+                    <LineChart 
+                      data={prepareVaRChartData()}
+                      color="#ea384c"
+                      xLabel="Temps (années)"
+                      yLabel="Prix"
+                      animate={false}
+                    />
+                  </div>
                 )}
               </CardContent>
             </Card>
