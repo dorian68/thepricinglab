@@ -2,6 +2,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import PythonCodeBlock from '@/components/python/PythonCodeBlock';
+import PyodideLoader from '@/components/python/PyodideLoader';
 
 const detectLanguage = (className: string | null): string | null => {
   if (!className) return null;
@@ -20,6 +21,8 @@ export const transformCodeBlocks = (containerElement: HTMLElement) => {
   const preElements = containerElement.querySelectorAll('pre');
   console.log(`Nombre de blocs pre trouvés: ${preElements.length}`);
   
+  let pythonBlocksFound = false;
+  
   preElements.forEach((preElement, index) => {
     const codeElement = preElement.querySelector('code');
     if (!codeElement) return;
@@ -29,22 +32,41 @@ export const transformCodeBlocks = (containerElement: HTMLElement) => {
     
     // Ne transformer que les blocs de code Python
     if (language === 'python' || language === 'py') {
+      pythonBlocksFound = true;
       const code = codeElement.textContent || '';
       
-      // Créer un conteneur pour le composant React
+      // Créer un wrapper pour contenir le bloc de code et le loader
+      const wrapper = document.createElement('div');
+      wrapper.className = 'python-block-wrapper relative';
+      
+      // Créer un conteneur pour le composant React principal
       const container = document.createElement('div');
       container.className = 'python-code-container';
       
-      // Remplacer le bloc pre par notre conteneur
-      preElement.parentNode?.replaceChild(container, preElement);
+      // Créer un conteneur pour le loader Python (petit bouton discret)
+      const loaderContainer = document.createElement('div');
+      loaderContainer.className = 'python-loader-container absolute top-2 right-2 z-10';
       
-      // Rendre notre composant React dans le conteneur
-      const root = createRoot(container);
-      root.render(<PythonCodeBlock code={code} title="Python" />);
+      // Ajouter les conteneurs au wrapper
+      wrapper.appendChild(container);
+      wrapper.appendChild(loaderContainer);
+      
+      // Remplacer le bloc pre par notre wrapper
+      preElement.parentNode?.replaceChild(wrapper, preElement);
+      
+      // Rendre le composant principal dans son conteneur
+      const codeRoot = createRoot(container);
+      codeRoot.render(<PythonCodeBlock code={code} title="Python" />);
+      
+      // Rendre le loader discret dans son conteneur
+      const loaderRoot = createRoot(loaderContainer);
+      loaderRoot.render(<PyodideLoader discreet={true} />);
       
       console.log(`Bloc Python #${index} transformé avec succès`);
     }
   });
+  
+  return pythonBlocksFound;
 };
 
 // Fonction d'auto-scan pour les pages où la référence directe au conteneur n'est pas disponible
@@ -68,9 +90,16 @@ export const autoScanAndTransform = () => {
     
     console.log(`Conteneurs potentiels trouvés: ${potentialContainers.length}`);
     
+    let anyPythonBlocksFound = false;
+    
     potentialContainers.forEach((container, idx) => {
       console.log(`Transformation du conteneur #${idx}`);
-      transformCodeBlocks(container);
+      const pythonBlocksFound = transformCodeBlocks(container);
+      if (pythonBlocksFound) {
+        anyPythonBlocksFound = true;
+      }
     });
+    
+    console.log(`Python blocks found: ${anyPythonBlocksFound}`);
   }, 1000); // Délai pour s'assurer que le DOM est chargé
 };

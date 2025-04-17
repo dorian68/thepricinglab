@@ -15,12 +15,21 @@ export const loadPyodide = async (): Promise<PyodideInterface> => {
 
   pyodideLoading = new Promise(async (resolve, reject) => {
     try {
-      // @ts-ignore
-      const pyodide = await import("https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js");
-      // @ts-ignore
-      pyodideInstance = await pyodide.loadPyodide({
+      console.log("Chargement de Pyodide depuis CDN...");
+      // Correction: Charger dynamiquement depuis le CDN et accéder correctement à loadPyodide
+      const pyodideModule = await import("https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js");
+      const loadPyodideFunction = pyodideModule.default?.loadPyodide;
+      
+      if (!loadPyodideFunction) {
+        throw new Error("Fonction loadPyodide non trouvée dans le module importé");
+      }
+      
+      console.log("Initialisation de Pyodide...");
+      pyodideInstance = await loadPyodideFunction({
         indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/",
       });
+      
+      console.log("Pyodide chargé avec succès");
       
       // Initialize matplotlib if available
       try {
@@ -37,6 +46,7 @@ export const loadPyodide = async (): Promise<PyodideInterface> => {
               buf.close()
               return img_str
         `);
+        console.log("Matplotlib initialisé");
       } catch (e) {
         console.warn("Matplotlib could not be initialized:", e);
       }
