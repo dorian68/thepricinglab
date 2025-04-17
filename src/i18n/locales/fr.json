@@ -1,7 +1,11 @@
 {
   "app": {
-    "title": "The Pricing Lab",
-    "subtitle": "Plateforme de Trading en Finance Quantitative"
+    "title": "The Pricing Library",
+    "subtitle": "Plateforme de Trading en Finance Quantitative",
+    "meta": {
+      "description": "Plateforme d'apprentissage avancé pour la finance quantitative, le pricing d'options et les outils de simulation financière.",
+      "keywords": "finance quantitative, options financières, Black-Scholes, Monte Carlo, simulateur financier, volatilité"
+    }
   },
   "navbar": {
     "home": "Accueil",
@@ -554,5 +558,29 @@
     "difficult": "Plus difficile",
     "duration": "Durée Estimée",
     "hours": "heures"
+  },
+  "seo": {
+    "tools": {
+      "monteCarlo": {
+        "title": "Simulateur Monte Carlo | The Pricing Library",
+        "description": "Simulateur Monte Carlo pour générer des trajectoires de prix et analyser les métriques de risque. Un outil essentiel pour la finance quantitative.",
+        "keywords": "Monte Carlo, simulation financière, trajectoires de prix, métriques de risque, VaR"
+      },
+      "blackScholes": {
+        "title": "Calculateur Black-Scholes | The Pricing Library",
+        "description": "Calculateur Black-Scholes pour le pricing d'options vanille, calcul des grecques et analyses de sensibilité.",
+        "keywords": "Black-Scholes, pricing d'options, grecques, volatilité implicite, finance quantitative"
+      },
+      "volatility": {
+        "title": "Calculateur de Volatilité | The Pricing Library",
+        "description": "Outil d'analyse de volatilité, surface de volatilité et calcul de volatilité implicite pour options financières.",
+        "keywords": "volatilité implicite, surface de volatilité, skew, smile, options"
+      },
+      "modelCalibration": {
+        "title": "Calibration de Modèles | The Pricing Library",
+        "description": "Outils de calibration de modèles financiers pour ajuster les paramètres aux données de marché observées.",
+        "keywords": "calibration de modèles, ajustement de paramètres, fitting, modèles stochastiques"
+      }
+    }
   }
 }

@@ -1,7 +1,11 @@
 {
   "app": {
-    "title": "The Pricing Lab",
-    "subtitle": "Quantitative Finance Trading Platform"
+    "title": "The Pricing Library",
+    "subtitle": "Quantitative Finance Trading Platform",
+    "meta": {
+      "description": "Advanced learning platform for quantitative finance, option pricing and financial simulation tools.",
+      "keywords": "quantitative finance, financial options, Black-Scholes, Monte Carlo, financial simulator, volatility"
+    }
   },
   "navbar": {
     "home": "Home",
@@ -575,5 +579,29 @@
     "difficult": "Most Difficult",
     "duration": "Estimated Duration",
     "hours": "hours"
+  },
+  "seo": {
+    "tools": {
+      "monteCarlo": {
+        "title": "Monte Carlo Simulator | The Pricing Library",
+        "description": "Monte Carlo simulator to generate price paths and analyze risk metrics. An essential tool for quantitative finance.",
+        "keywords": "Monte Carlo, financial simulation, price paths, risk metrics, VaR"
+      },
+      "blackScholes": {
+        "title": "Black-Scholes Calculator | The Pricing Library",
+        "description": "Black-Scholes calculator for vanilla option pricing, greeks calculation and sensitivity analysis.",
+        "keywords": "Black-Scholes, option pricing, greeks, implied volatility, quantitative finance"
+      },
+      "volatility": {
+        "title": "Volatility Calculator | The Pricing Library",
+        "description": "Volatility analysis tool, volatility surface and implied volatility calculation for financial options.",
+        "keywords": "implied volatility, volatility surface, skew, smile, options"
+      },
+      "modelCalibration": {
+        "title": "Model Calibration | The Pricing Library",
+        "description": "Financial model calibration tools to adjust parameters to observed market data.",
+        "keywords": "model calibration, parameter fitting, stochastic models"
+      }
+    }
   }
 }

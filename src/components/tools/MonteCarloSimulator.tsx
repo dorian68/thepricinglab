@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -9,6 +10,8 @@ import { LineChart } from '@/components/ui/chart';
 import { Play, RefreshCw, Download, PieChart } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { setSeed, seededRandom, resetSeed } from '@/utils/seedrandom';
+import { useTranslation } from 'react-i18next';
+import { Helmet } from 'react-helmet-async';
 
 interface SimulationParams {
   initialPrice: number;
@@ -112,6 +115,7 @@ const generateMonteCarloPaths = (params: SimulationParams) => {
 };
 
 const MonteCarloSimulator: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const [params, setParams] = useState<SimulationParams>({
     initialPrice: 100,
     drift: 0.05,
@@ -168,6 +172,13 @@ const MonteCarloSimulator: React.FC = () => {
   
   return (
     <div className="container mx-auto py-6 px-4 md:px-6 lg:px-8 max-w-7xl">
+      <Helmet>
+        <title>Simulateur Monte Carlo | The Pricing Library</title>
+        <meta name="description" content="Simulateur Monte Carlo pour les trajectoires de prix et métriques de risque. Analysez les simulations, VaR et d'autres indicateurs financiers." />
+        <meta name="keywords" content="Monte Carlo, simulation financière, VaR, trajectoires de prix, finance quantitative, analyse risque" />
+        <link rel="canonical" href="https://thepricinglab.com/tools/monte-carlo" />
+      </Helmet>
+      
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-finance-accent mb-2">Simulateur Monte Carlo</h1>
         <p className="text-finance-lightgray">Simulation de trajectoires de prix et métriques de risque</p>
@@ -278,6 +289,7 @@ const MonteCarloSimulator: React.FC = () => {
                 className="w-full mt-4"
                 onClick={runSimulation}
                 disabled={isSimulating}
+                aria-label="Lancer la simulation Monte Carlo"
               >
                 {isSimulating ? (
                   <div className="flex items-center">
@@ -407,6 +419,35 @@ const MonteCarloSimulator: React.FC = () => {
             </div>
           </Card>
         )}
+      </div>
+      
+      {/* Section SEO avec contenu descriptif pour les robots */}
+      <div className="mt-12 prose prose-invert max-w-none">
+        <h2 className="text-xl font-bold mb-4">Comprendre la simulation Monte Carlo en finance</h2>
+        <p>
+          La méthode de Monte Carlo est une technique puissante utilisée en finance quantitative pour modéliser 
+          la probabilité de différents résultats dans des processus qui ne peuvent pas être facilement prédits 
+          en raison de l'intervention de variables aléatoires. Cette technique est particulièrement utile pour 
+          évaluer les instruments financiers complexes et les stratégies d'investissement.
+        </p>
+        
+        <h3 className="text-lg font-bold mt-6 mb-2">Applications en gestion des risques</h3>
+        <p>
+          En finance, la simulation Monte Carlo permet de calculer la Value at Risk (VaR), 
+          d'évaluer le risque de portefeuille, de prédire les rendements futurs et d'analyser divers 
+          scénarios de marché. Notre simulateur vous permet d'ajuster les paramètres clés comme la volatilité, 
+          le drift et le nombre de simulations pour obtenir des résultats précis adaptés à vos besoins d'analyse.
+        </p>
+        
+        <h3 className="text-lg font-bold mt-6 mb-2">Paramètres du simulateur</h3>
+        <ul className="list-disc pl-5 mt-2 space-y-1">
+          <li><strong>Prix initial</strong> : Valeur de départ de l'actif financier</li>
+          <li><strong>Drift (rendement attendu)</strong> : Tendance directionnelle moyenne du prix</li>
+          <li><strong>Volatilité</strong> : Amplitude des variations de prix</li>
+          <li><strong>Durée</strong> : Horizon temporel de la simulation en années</li>
+          <li><strong>Pas de temps</strong> : Granularité de la simulation (plus élevé = plus précis)</li>
+          <li><strong>Nombre de simulations</strong> : Quantité de chemins aléatoires générés</li>
+        </ul>
       </div>
     </div>
   );

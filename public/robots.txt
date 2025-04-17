@@ -1,17 +1,32 @@
 
+# Allow all web crawlers access to all content
+User-agent: *
+Allow: /
+
+# Specify the location of the sitemap file
+Sitemap: https://thepricinglab.com/sitemap.xml
+
+# Add more targeted directives for major search engines
 User-agent: Googlebot
 Allow: /
 
 User-agent: Bingbot
 Allow: /
 
+User-agent: Yandexbot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+# Allow social media crawlers for proper link previews
 User-agent: Twitterbot
 Allow: /
 
 User-agent: facebookexternalhit
 Allow: /
 
+# Disallow crawling of admin sections
 User-agent: *
-Allow: /
-
-Sitemap: https://thepricinglab.com/sitemap.xml
+Disallow: /admin-login
+Disallow: /admin-dashboard
