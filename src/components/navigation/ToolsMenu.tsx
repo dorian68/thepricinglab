@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Calculator, Activity, Waves, Sigma } from "lucide-react";
+import { Calculator, Activity, Waves, Sigma, LineChart, Gauge } from "lucide-react";
 import { NavMenuItem } from "./NavMenuSection";
 
 const ToolsMenu = () => {
@@ -10,27 +10,27 @@ const ToolsMenu = () => {
       <ul className="space-y-3">
         <NavMenuItem 
           to="/tools/volatility-calculator" 
-          icon={Calculator} 
-          title="Calculatrices de Volatilité" 
-          description="Outils d'analyse de vol" 
+          icon={Gauge} 
+          title="Calculatrice de Volatilité" 
+          description="Calcul de volatilité historique" 
         />
         <NavMenuItem 
-          to="/tools/BlackScholesCalculator" 
-          icon={Activity} 
-          title="Simulateur Black-Scholes" 
+          to="/tools/black-scholes" 
+          icon={Calculator} 
+          title="Black-Scholes Calculator" 
           description="Pricing d'options" 
         />
         <NavMenuItem 
           to="/tools/monte-carlo" 
           icon={Waves} 
-          title="Générateur Monte Carlo" 
-          description="Simulation de scénarios" 
+          title="Simulateur Monte Carlo" 
+          description="Simulation de trajectoires" 
         />
         <NavMenuItem 
           to="/tools/model-calibration" 
           icon={Sigma} 
           title="Calibration de Modèles" 
-          description="Analyse de surfaces de vol" 
+          description="Calibration et optimisation" 
         />
       </ul>
     </div>

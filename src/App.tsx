@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -44,14 +43,17 @@ import BugReport from './pages/BugReport';
 import NotFound from './pages/NotFound';
 import AppShell from './components/AppShell';
 
-// New Trading Lab pages
+import VolatilityCalculator from './components/tools/VolatilityCalculator';
+import BlackScholesCalculator from './components/tools/BlackScholesCalculator';
+import MonteCarloSimulator from './components/tools/MonteCarloSimulator';
+import ModelCalibration from './components/tools/ModelCalibration';
+
 import TradingExercises from './pages/trading/TradingExercises';
 import Backtest from './pages/trading/Backtest';
 import Scenarios from './pages/trading/Scenarios';
 import Strategies from './pages/trading/Strategies';
 import Performance from './pages/trading/Performance';
 
-// Admin Pages
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminRouteGuard from './components/admin/AdminRouteGuard';
@@ -86,6 +88,10 @@ const App = () => {
                 <Route path="/exercises/:id" element={<ExerciseDetail />} />
                 <Route path="/quizzes" element={<Quizzes />} />
                 <Route path="/tools" element={<Tools />} />
+                <Route path="/tools/volatility-calculator" element={<VolatilityCalculator />} />
+                <Route path="/tools/black-scholes" element={<BlackScholesCalculator />} />
+                <Route path="/tools/monte-carlo" element={<MonteCarloSimulator />} />
+                <Route path="/tools/model-calibration" element={<ModelCalibration />} />
                 <Route path="/community" element={<Community />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
@@ -105,14 +111,12 @@ const App = () => {
                 <Route path="/survival-mode/legendary" element={<LegendaryWave />} />
                 <Route path="/bug-report" element={<BugReport />} />
                 
-                {/* Trading Lab Routes */}
                 <Route path="/trading/exercises" element={<TradingExercises />} />
                 <Route path="/trading/backtest" element={<Backtest />} />
                 <Route path="/trading/scenarios" element={<Scenarios />} />
                 <Route path="/trading/strategies" element={<Strategies />} />
                 <Route path="/trading/performance" element={<Performance />} />
                 
-                {/* Admin Routes */}
                 <Route path="/admin-login" element={<AdminLogin />} />
                 <Route path="/admin-dashboard" element={
                   <AdminRouteGuard>
@@ -123,7 +127,6 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
               </Route>
             </Routes>
-            {/* Place ChatBubble outside of the routing context but still inside BrowserRouter */}
             <ChatBubble />
           </BrowserRouter>
         </QueryClientProvider>
