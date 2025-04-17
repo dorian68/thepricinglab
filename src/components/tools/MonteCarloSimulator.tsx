@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
@@ -746,75 +747,6 @@ print("DATA_END")
               </div>
             </CardContent>
           </Card>
-          
-          {simulation && simulation.type === 'gbm' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Simulation Results</CardTitle>
-                <CardDescription>
-                  Geometric Brownian Motion simulation with {gbmParams.numPaths} paths over {gbmParams.timeHorizon} years.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="h-64 w-full" ref={chartRef}>
-                    <LineChart data={prepareChartData()} className="h-64 w-full" />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <h3 className="text-lg font-medium mb-2">Final Price Statistics</h3>
-                      <div className="space-y-1">
-                        <div className="flex justify-between">
-                          <span>Mean:</span>
-                          <span className="font-medium">${simulation.statistics.mean.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Median:</span>
-                          <span className="font-medium">${simulation.statistics.median.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Min:</span>
-                          <span className="font-medium">${simulation.statistics.min.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Max:</span>
-                          <span className="font-medium">${simulation.statistics.max.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Std Dev:</span>
-                          <span className="font-medium">${simulation.statistics.std.toFixed(2)}</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-lg font-medium mb-2">Percentiles</h3>
-                      <div className="space-y-1">
-                        {simulation.percentiles.map((percentile: number, index: number) => (
-                          <div key={percentile} className="flex justify-between">
-                            <span>{percentile}th percentile:</span>
-                            <span className="font-medium">${simulation.percentile_values[index].toFixed(2)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-end space-x-2">
-                    <Button variant="outline" onClick={downloadSimulationData}>
-                      <Download className="mr-2 h-4 w-4" />
-                      Download Data
-                    </Button>
-                    <Button variant="outline" onClick={runSimulation}>
-                      <RefreshCw className="mr-2 h-4 w-4" />
-                      Re-run Simulation
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </TabsContent>
         
         <TabsContent value="jump" className="space-y-4">
@@ -891,7 +823,7 @@ print("DATA_END")
                 
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="jumpMean">Jump Mean (μⱼ)</Label>
+                    <Label htmlFor="jumpMean">Jump Mean (μᴊ)</Label>
                     <div className="flex items-center space-x-2">
                       <Input
                         id="jumpMean"
@@ -907,7 +839,7 @@ print("DATA_END")
                   </div>
                   
                   <div>
-                    <Label htmlFor="jumpStdDev">Jump Std Dev (σⱼ)</Label>
+                    <Label htmlFor="jumpStdDev">Jump Std Dev (σᴊ)</Label>
                     <div className="flex items-center space-x-2">
                       <Input
                         id="jumpStdDev"
@@ -977,83 +909,14 @@ print("DATA_END")
               </div>
             </CardContent>
           </Card>
-          
-          {simulation && simulation.type === 'jump' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Simulation Results</CardTitle>
-                <CardDescription>
-                  Jump Diffusion simulation with {jumpParams.numPaths} paths over {jumpParams.timeHorizon} years.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="h-64 w-full" ref={chartRef}>
-                    <LineChart data={prepareChartData()} className="h-64 w-full" />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <h3 className="text-lg font-medium mb-2">Final Price Statistics</h3>
-                      <div className="space-y-1">
-                        <div className="flex justify-between">
-                          <span>Mean:</span>
-                          <span className="font-medium">${simulation.statistics.mean.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Median:</span>
-                          <span className="font-medium">${simulation.statistics.median.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Min:</span>
-                          <span className="font-medium">${simulation.statistics.min.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Max:</span>
-                          <span className="font-medium">${simulation.statistics.max.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Std Dev:</span>
-                          <span className="font-medium">${simulation.statistics.std.toFixed(2)}</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-lg font-medium mb-2">Percentiles</h3>
-                      <div className="space-y-1">
-                        {simulation.percentiles.map((percentile: number, index: number) => (
-                          <div key={percentile} className="flex justify-between">
-                            <span>{percentile}th percentile:</span>
-                            <span className="font-medium">${simulation.percentile_values[index].toFixed(2)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-end space-x-2">
-                    <Button variant="outline" onClick={downloadSimulationData}>
-                      <Download className="mr-2 h-4 w-4" />
-                      Download Data
-                    </Button>
-                    <Button variant="outline" onClick={runSimulation}>
-                      <RefreshCw className="mr-2 h-4 w-4" />
-                      Re-run Simulation
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </TabsContent>
         
         <TabsContent value="var" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Value at Risk (VaR) Analysis</CardTitle>
+              <CardTitle>Value at Risk (VaR)</CardTitle>
               <CardDescription>
-                Estimate the potential loss of a portfolio over a defined period for a given confidence level.
+                Calculate portfolio risk metrics using Monte Carlo simulation.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -1067,35 +930,29 @@ print("DATA_END")
                       value={varParams.initialValue}
                       onChange={(e) => handleVaRParamChange('initialValue', parseFloat(e.target.value))}
                       min={1000}
-                      max={10000000}
+                      max={100000000}
                       step={1000}
                     />
                   </div>
                   
                   <div>
-                    <Label htmlFor="timeHorizon">Time Horizon (days)</Label>
-                    <Select
-                      value={varParams.timeHorizon.toString()}
-                      onValueChange={(value) => handleVaRParamChange('timeHorizon', parseInt(value))}
-                    >
-                      <SelectTrigger id="timeHorizon">
-                        <SelectValue placeholder="Select time horizon" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">1 day</SelectItem>
-                        <SelectItem value="5">5 days</SelectItem>
-                        <SelectItem value="10">10 days</SelectItem>
-                        <SelectItem value="20">20 days</SelectItem>
-                        <SelectItem value="60">60 days</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="timeHorizon-var">Time Horizon (days)</Label>
+                    <Input
+                      id="timeHorizon-var"
+                      type="number"
+                      value={varParams.timeHorizon}
+                      onChange={(e) => handleVaRParamChange('timeHorizon', parseFloat(e.target.value))}
+                      min={1}
+                      max={252}
+                      step={1}
+                    />
                   </div>
                   
                   <div>
-                    <Label htmlFor="confidenceLevel">Confidence Level</Label>
+                    <Label htmlFor="confidenceLevel-var">Confidence Level</Label>
                     <div className="flex items-center space-x-2">
                       <Slider
-                        id="confidenceLevel"
+                        id="confidenceLevel-var"
                         min={0.9}
                         max={0.99}
                         step={0.01}
@@ -1113,7 +970,7 @@ print("DATA_END")
                       onValueChange={(value) => handleVaRParamChange('numSimulations', parseInt(value))}
                     >
                       <SelectTrigger id="numSimulations">
-                        <SelectValue placeholder="Select number of simulations" />
+                        <SelectValue placeholder="Select simulation count" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="1000">1,000 simulations</SelectItem>
@@ -1125,58 +982,60 @@ print("DATA_END")
                   </div>
                 </div>
                 
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Asset Parameters</h3>
+                <div>
+                  <h3 className="text-lg font-medium mb-3">Asset Parameters</h3>
                   
                   {varParams.assetParams.map((asset, index) => (
-                    <div key={index} className="space-y-2 p-3 border border-gray-200 rounded-md">
-                      <h4 className="font-medium">Asset {index + 1}</h4>
+                    <div key={index} className="mb-4 p-3 border rounded-md border-gray-200 dark:border-gray-700">
+                      <h4 className="text-sm font-medium mb-2">Asset {index + 1}</h4>
                       
-                      <div>
-                        <Label htmlFor={`asset-${index}-weight`}>Weight</Label>
-                        <div className="flex items-center space-x-2">
-                          <Input
-                            id={`asset-${index}-weight`}
-                            type="number"
-                            value={asset.weight}
-                            onChange={(e) => handleAssetParamChange(index, 'weight', parseFloat(e.target.value))}
-                            min={0}
-                            max={1}
-                            step={0.05}
-                          />
-                          <span className="text-sm text-gray-500">{(asset.weight * 100).toFixed(0)}%</span>
+                      <div className="space-y-3">
+                        <div>
+                          <Label htmlFor={`weight-${index}`}>Weight</Label>
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              id={`weight-${index}`}
+                              type="number"
+                              value={asset.weight}
+                              onChange={(e) => handleAssetParamChange(index, 'weight', parseFloat(e.target.value))}
+                              min={0}
+                              max={1}
+                              step={0.01}
+                            />
+                            <span className="text-sm text-gray-500">{(asset.weight * 100).toFixed(0)}%</span>
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor={`asset-${index}-return`}>Expected Return</Label>
-                        <div className="flex items-center space-x-2">
-                          <Input
-                            id={`asset-${index}-return`}
-                            type="number"
-                            value={asset.expectedReturn}
-                            onChange={(e) => handleAssetParamChange(index, 'expectedReturn', parseFloat(e.target.value))}
-                            min={-0.2}
-                            max={0.5}
-                            step={0.01}
-                          />
-                          <span className="text-sm text-gray-500">{(asset.expectedReturn * 100).toFixed(1)}%</span>
+                        
+                        <div>
+                          <Label htmlFor={`return-${index}`}>Expected Return</Label>
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              id={`return-${index}`}
+                              type="number"
+                              value={asset.expectedReturn}
+                              onChange={(e) => handleAssetParamChange(index, 'expectedReturn', parseFloat(e.target.value))}
+                              min={-0.5}
+                              max={0.5}
+                              step={0.01}
+                            />
+                            <span className="text-sm text-gray-500">{(asset.expectedReturn * 100).toFixed(1)}%</span>
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor={`asset-${index}-volatility`}>Volatility</Label>
-                        <div className="flex items-center space-x-2">
-                          <Input
-                            id={`asset-${index}-volatility`}
-                            type="number"
-                            value={asset.volatility}
-                            onChange={(e) => handleAssetParamChange(index, 'volatility', parseFloat(e.target.value))}
-                            min={0.01}
-                            max={1}
-                            step={0.01}
-                          />
-                          <span className="text-sm text-gray-500">{(asset.volatility * 100).toFixed(1)}%</span>
+                        
+                        <div>
+                          <Label htmlFor={`volatility-${index}`}>Volatility</Label>
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              id={`volatility-${index}`}
+                              type="number"
+                              value={asset.volatility}
+                              onChange={(e) => handleAssetParamChange(index, 'volatility', parseFloat(e.target.value))}
+                              min={0.01}
+                              max={1}
+                              step={0.01}
+                            />
+                            <span className="text-sm text-gray-500">{(asset.volatility * 100).toFixed(1)}%</span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1193,107 +1052,18 @@ print("DATA_END")
                   {isSimulating ? (
                     <>
                       <Loader className="mr-2 h-4 w-4 animate-spin" />
-                      Running Simulation...
+                      Running VaR Analysis...
                     </>
                   ) : (
                     <>
                       <Play className="mr-2 h-4 w-4" />
-                      Run Simulation
+                      Run VaR Analysis
                     </>
                   )}
                 </Button>
               </div>
             </CardContent>
           </Card>
-          
-          {simulation && simulation.type === 'var' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>VaR Analysis Results</CardTitle>
-                <CardDescription>
-                  Value at Risk analysis with {varParams.numSimulations.toLocaleString()} simulations over {varParams.timeHorizon} days.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <div className="p-4 bg-slate-100 dark:bg-slate-800 rounded-lg">
-                        <h3 className="text-xl font-bold mb-2">VaR ({(varParams.confidenceLevel * 100).toFixed(0)}%)</h3>
-                        <p className="text-3xl font-bold text-red-500">${simulation.var.toLocaleString(undefined, {maximumFractionDigits: 2})}</p>
-                        <p className="text-sm text-gray-500 mt-1">
-                          With {varParams.confidenceLevel * 100}% confidence, the portfolio will not lose more than this amount over {varParams.timeHorizon} days.
-                        </p>
-                      </div>
-                      
-                      <div className="mt-4 p-4 bg-slate-100 dark:bg-slate-800 rounded-lg">
-                        <h3 className="text-xl font-bold mb-2">Expected Shortfall (CVaR)</h3>
-                        <p className="text-2xl font-bold text-red-600">${simulation.cvar.toLocaleString(undefined, {maximumFractionDigits: 2})}</p>
-                        <p className="text-sm text-gray-500 mt-1">
-                          The expected loss given that the loss exceeds the VaR threshold.
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="h-64 w-full" ref={chartRef}>
-                      <BarChart data={prepareVaRChartData()} className="h-64 w-full" />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-lg font-medium mb-2">Portfolio Change Statistics</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                      <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                        <div className="text-sm text-gray-500">Mean</div>
-                        <div className={`text-lg font-medium ${simulation.statistics.mean >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                          ${simulation.statistics.mean.toLocaleString(undefined, {maximumFractionDigits: 2})}
-                        </div>
-                      </div>
-                      
-                      <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                        <div className="text-sm text-gray-500">Median</div>
-                        <div className={`text-lg font-medium ${simulation.statistics.median >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                          ${simulation.statistics.median.toLocaleString(undefined, {maximumFractionDigits: 2})}
-                        </div>
-                      </div>
-                      
-                      <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                        <div className="text-sm text-gray-500">Min</div>
-                        <div className="text-lg font-medium text-red-500">
-                          ${simulation.statistics.min.toLocaleString(undefined, {maximumFractionDigits: 2})}
-                        </div>
-                      </div>
-                      
-                      <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                        <div className="text-sm text-gray-500">Max</div>
-                        <div className="text-lg font-medium text-green-500">
-                          ${simulation.statistics.max.toLocaleString(undefined, {maximumFractionDigits: 2})}
-                        </div>
-                      </div>
-                      
-                      <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                        <div className="text-sm text-gray-500">Std Dev</div>
-                        <div className="text-lg font-medium">
-                          ${simulation.statistics.std.toLocaleString(undefined, {maximumFractionDigits: 2})}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-end space-x-2">
-                    <Button variant="outline" onClick={downloadSimulationData}>
-                      <Download className="mr-2 h-4 w-4" />
-                      Download Data
-                    </Button>
-                    <Button variant="outline" onClick={runSimulation}>
-                      <RefreshCw className="mr-2 h-4 w-4" />
-                      Re-run Simulation
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </TabsContent>
       </Tabs>
       
@@ -1348,7 +1118,7 @@ print("DATA_END")
                   <div>
                     <h3 className="text-lg font-medium mb-2">Percentiles</h3>
                     <div className="space-y-1">
-                      {simulation.percentiles.map((percentile: number, index: number) => (
+                      {simulation.percentiles && simulation.percentiles.map((percentile: number, index: number) => (
                         <div key={percentile} className="flex justify-between">
                           <span>{percentile}th percentile:</span>
                           <span className="font-medium">${simulation.percentile_values[index].toFixed(2)}</span>
