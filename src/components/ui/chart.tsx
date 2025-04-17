@@ -3,7 +3,7 @@ import React from 'react';
 import { AreaChart, BarChart as RechartsBarChart, LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Area, Bar, ResponsiveContainer } from 'recharts';
 
 export const Chart: React.FC<{
-  children: React.ReactNode;
+  children: React.ReactElement;
   className?: string;
 }> = ({ children, className = "" }) => {
   return (
@@ -20,9 +20,9 @@ export const ChartLine: React.FC<{
   stroke?: string;
   strokeWidth?: number;
   dot?: boolean;
-  activeDot?: boolean | React.ReactNode;
+  activeDot?: boolean | { r: number } | React.ReactElement;
 }> = ({ dataKey, stroke = "#8884d8", strokeWidth = 2, dot = false, activeDot = true }) => {
-  return <Line type="monotone" dataKey={dataKey} stroke={stroke} strokeWidth={strokeWidth} dot={dot} activeDot={activeDot} />;
+  return <Line type="monotone" dataKey={dataKey} stroke={stroke} strokeWidth={strokeWidth} dot={dot} activeDot={activeDot ? { r: 4 } : false} />;
 };
 
 export const ChartBar: React.FC<{

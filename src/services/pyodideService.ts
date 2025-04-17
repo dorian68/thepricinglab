@@ -16,15 +16,29 @@ export const loadPyodide = async (): Promise<PyodideInterface> => {
   pyodideLoading = new Promise(async (resolve, reject) => {
     try {
       console.log("Chargement de Pyodide depuis CDN...");
-      // Correction: Charger dynamiquement depuis le CDN et accéder correctement à loadPyodide
-      const pyodideModule = await import("https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js");
-      const loadPyodideFunction = pyodideModule.default?.loadPyodide;
       
-      if (!loadPyodideFunction) {
-        throw new Error("Fonction loadPyodide non trouvée dans le module importé");
-      }
+      // Load script manually instead of importing directly
+      const script = document.createElement('script');
+      script.src = "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js";
+      script.type = "text/javascript";
+      document.head.appendChild(script);
+      
+      // Wait for script to load
+      const waitForPyodide = () => {
+        return new Promise<void>((res) => {
+          if ((window as any).loadPyodide) {
+            res();
+          } else {
+            setTimeout(() => res(waitForPyodide()), 100);
+          }
+        });
+      };
+      
+      await waitForPyodide();
       
       console.log("Initialisation de Pyodide...");
+      const loadPyodideFunction = (window as any).loadPyodide;
+      
       pyodideInstance = await loadPyodideFunction({
         indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/",
       });

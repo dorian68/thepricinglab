@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Chart, ChartLine, LineChart, BarChart, Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/chart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { defaultStrategies } from '@/utils/options/strategyDefaults';
-import { TrendingUp, BarChart3, PieChart, Calendar, Clock, FileDown, BarChart2, ArrowUpRight, ArrowDownRight, Trophy, Star, Filter, CheckCircle, XCircle } from 'lucide-react';
+import { TrendingUp, BarChart3, PieChart, Calendar, Clock, FileDown, BarChart2, ArrowUpRight, ArrowDownRight, Trophy, Star, Filter, CheckCircle, XCircle, FlaskConical } from 'lucide-react';
 
 // Performance metrics sample data
 const strategiesPerformance = [
