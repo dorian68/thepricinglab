@@ -11,6 +11,10 @@ const ExerciseDetail = () => {
   const { t } = useTranslation();
   const contentRef = useRef<HTMLDivElement>(null);
   
+  // Créer un titre sécurisé pour Helmet
+  const safeExerciseId = exerciseId || 'Exercise';
+  const pageTitle = `${safeExerciseId} | Exercises | The Pricing Lab`;
+  
   useEffect(() => {
     if (contentRef.current) {
       const timeoutId = setTimeout(() => {
@@ -24,10 +28,10 @@ const ExerciseDetail = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <Helmet>
-        <title>{exerciseId} | Exercises | The Pricing Lab</title>
+        <title>{pageTitle}</title>
       </Helmet>
       
-      <h1 className="text-3xl font-bold mb-6">{exerciseId}</h1>
+      <h1 className="text-3xl font-bold mb-6">{safeExerciseId}</h1>
       
       {/* Activateur Python pour cette page */}
       <PythonActivator />
