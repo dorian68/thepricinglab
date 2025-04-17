@@ -7,10 +7,17 @@ import { useIsMobile } from '@/hooks/use-mobile';
 interface PythonActivatorProps {
   discreet?: boolean;
   scanOnLoad?: boolean;
+  inline?: boolean;
+  className?: string;
 }
 
 // Ce composant peut être inclus dans n'importe quelle page pour activer l'exécution Python
-const PythonActivator: React.FC<PythonActivatorProps> = ({ discreet = true, scanOnLoad = true }) => {
+const PythonActivator: React.FC<PythonActivatorProps> = ({ 
+  discreet = true, 
+  scanOnLoad = true,
+  inline = false,
+  className = ""
+}) => {
   const isMobile = useIsMobile();
   
   useEffect(() => {
@@ -33,7 +40,7 @@ const PythonActivator: React.FC<PythonActivatorProps> = ({ discreet = true, scan
   }, [scanOnLoad]);
   
   return (
-    <div className={`python-executor-container ${discreet ? 'inline-block' : ''}`}>
+    <div className={`python-executor-container ${inline ? 'inline-block' : ''} ${className}`}>
       <PyodideLoader 
         discreet={discreet}
         onLoad={() => {

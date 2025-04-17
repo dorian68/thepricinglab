@@ -1,9 +1,9 @@
+
 import React, { useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { safeTranslate } from '../../utils/translationUtils';
 import PythonExercise from '@/components/python/PythonExercise';
-import PythonActivator from '@/utils/pythonActivator';
 import { transformCodeBlocks } from '@/utils/codeBlockTransformer';
 
 const TradingExercises = () => {
@@ -160,8 +160,6 @@ plt.show()
         <p className="text-finance-offwhite mb-8">
           {safeTranslate(t, 'tradingLab.exercisesDesc', 'Practice with interactive exercises to improve your trading skills')}
         </p>
-        
-        <PythonActivator />
         
         <div ref={contentRef} className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="bg-finance-charcoal p-6 rounded-lg shadow-md">

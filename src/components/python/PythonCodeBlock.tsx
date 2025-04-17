@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { usePythonExecution } from '@/hooks/usePythonExecution';
 import { useToast } from '@/hooks/use-toast';
+import PythonActivator from '@/utils/pythonActivator';
+import { executePythonCode } from '@/services/pyodideService';
 
 interface PythonCodeBlockProps {
   code: string;
@@ -15,11 +17,20 @@ interface PythonCodeBlockProps {
 const PythonCodeBlock: React.FC<PythonCodeBlockProps> = ({ code: initialCode, className = '', title }) => {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isOutputCollapsed, setIsOutputCollapsed] = useState(false);
+  const [isPyodideLoaded, setIsPyodideLoaded] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
   const { code, setCode, result, execute, reset } = usePythonExecution(initialCode);
   const { toast } = useToast();
   
   const handleRunClick = () => {
+    if (!isPyodideLoaded) {
+      toast({
+        title: "Activation de Python",
+        description: "Chargement de l'environnement Python avant exécution du code...",
+      });
+      return;
+    }
+    
     if (!isEditorOpen) {
       setIsEditorOpen(true);
     } else {
@@ -35,6 +46,14 @@ const PythonCodeBlock: React.FC<PythonCodeBlockProps> = ({ code: initialCode, cl
     });
   };
   
+  const handlePyodideLoaded = () => {
+    setIsPyodideLoaded(true);
+    toast({
+      title: "Python activé",
+      description: "L'environnement Python est prêt pour l'exécution de code",
+    });
+  };
+  
   useEffect(() => {
     if (isEditorOpen && editorRef.current) {
       const scrollToEditor = () => {
@@ -45,6 +64,31 @@ const PythonCodeBlock: React.FC<PythonCodeBlockProps> = ({ code: initialCode, cl
       return () => clearTimeout(timeoutId);
     }
   }, [isEditorOpen]);
+  
+  const checkPyodideAvailable = () => {
+    try {
+      // Vérifie si la fonction est disponible dans le service
+      return typeof executePythonCode === 'function' && window['pyodideLoaded'] === true;
+    } catch (e) {
+      return false;
+    }
+  };
+  
+  useEffect(() => {
+    // Vérifie si Pyodide est déjà chargé au montage du composant
+    setIsPyodideLoaded(checkPyodideAvailable());
+    
+    // Observer pour détecter si Pyodide est chargé après le montage
+    const intervalId = setInterval(() => {
+      const isLoaded = checkPyodideAvailable();
+      if (isLoaded) {
+        setIsPyodideLoaded(true);
+        clearInterval(intervalId);
+      }
+    }, 1000);
+    
+    return () => clearInterval(intervalId);
+  }, []);
   
   return (
     <div 
@@ -75,7 +119,8 @@ const PythonCodeBlock: React.FC<PythonCodeBlockProps> = ({ code: initialCode, cl
             <code>{initialCode}</code>
           </pre>
           
-          <div className="flex justify-end mt-1 pr-1">
+          <div className="flex justify-end mt-1 pr-1 gap-2 items-center">
+            <PythonActivator inline={true} discreet={true} className="mr-1" />
             <Button
               size="sm" 
               variant="outline" 
