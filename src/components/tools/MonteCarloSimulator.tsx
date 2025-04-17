@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -11,7 +10,6 @@ import { Play, RefreshCw, Download, PieChart } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { setSeed, seededRandom, resetSeed } from '@/utils/seedrandom';
 
-// Définir les types pour les paramètres
 interface SimulationParams {
   initialPrice: number;
   drift: number;
@@ -21,7 +19,6 @@ interface SimulationParams {
   simulationCount: number;
 }
 
-// Fonction pour générer les trajectoires Monte Carlo
 const generateMonteCarloPaths = (params: SimulationParams) => {
   const { initialPrice, drift, volatility, timeSteps, duration, simulationCount } = params;
   const dt = duration / timeSteps;
@@ -29,18 +26,15 @@ const generateMonteCarloPaths = (params: SimulationParams) => {
   const paths = [];
   const finalPrices = [];
   
-  // Seed pour reproduire les mêmes résultats
   setSeed(42);
   resetSeed();
   
-  // Pour chaque simulation
   for (let sim = 0; sim < simulationCount; sim++) {
     const path = [initialPrice];
     let currentPrice = initialPrice;
     
-    // Pour chaque pas de temps
     for (let t = 1; t <= timeSteps; t++) {
-      const randomShock = (seededRandom() - 0.5) * 2; // Normaliser entre -1 et 1
+      const randomShock = (seededRandom() - 0.5) * 2;
       const dS = drift * currentPrice * dt + volatility * currentPrice * randomShock * sqrtDt;
       currentPrice += dS;
       path.push(currentPrice);
@@ -50,7 +44,6 @@ const generateMonteCarloPaths = (params: SimulationParams) => {
     finalPrices.push(currentPrice);
   }
   
-  // Calculer les statistiques
   finalPrices.sort((a, b) => a - b);
   const mean = finalPrices.reduce((sum, price) => sum + price, 0) / simulationCount;
   const median = finalPrices[Math.floor(simulationCount / 2)];
@@ -59,7 +52,6 @@ const generateMonteCarloPaths = (params: SimulationParams) => {
   const var95 = finalPrices[Math.floor(simulationCount * 0.05)];
   const var99 = finalPrices[Math.floor(simulationCount * 0.01)];
   
-  // Transformer les chemins pour le graphique
   const formattedPaths = paths.map((path, simIndex) => {
     return path.map((price, timeIndex) => ({
       simulation: simIndex,
@@ -68,15 +60,13 @@ const generateMonteCarloPaths = (params: SimulationParams) => {
     }));
   });
   
-  // Obtenir un échantillon de chemins pour l'affichage (pour éviter de surcharger le graphique)
   const samplePaths = [];
-  const step = Math.max(1, Math.floor(simulationCount / 20)); // Max 20 chemins affichés
+  const step = Math.max(1, Math.floor(simulationCount / 20));
   
   for (let i = 0; i < simulationCount; i += step) {
     samplePaths.push(formattedPaths[i]);
   }
   
-  // Organiser les données pour le graphique
   const chartData = [];
   for (let t = 0; t <= timeSteps; t++) {
     samplePaths.forEach((path, index) => {
@@ -88,7 +78,6 @@ const generateMonteCarloPaths = (params: SimulationParams) => {
     });
   }
   
-  // Créer des données pour le graphique ligne par ligne
   const chartLines = [];
   for (let i = 0; i < samplePaths.length; i++) {
     const line = samplePaths[i].map(point => ({
@@ -101,7 +90,6 @@ const generateMonteCarloPaths = (params: SimulationParams) => {
     });
   }
   
-  // Créer des données simplifiées pour afficher dans un composant LineChart
   const simplifiedData = samplePaths.map((path, index) => {
     return {
       id: `sim-${index}`,
@@ -124,31 +112,26 @@ const generateMonteCarloPaths = (params: SimulationParams) => {
 };
 
 const MonteCarloSimulator: React.FC = () => {
-  // États pour les paramètres
   const [params, setParams] = useState<SimulationParams>({
     initialPrice: 100,
-    drift: 0.05, // 5% par an
-    volatility: 0.2, // 20% par an
+    drift: 0.05,
+    volatility: 0.2,
     timeSteps: 252,
-    duration: 1, // 1 an
+    duration: 1,
     simulationCount: 100
   });
   
-  // États pour l'interface
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
   const [results, setResults] = useState<any>(null);
   const [selectedMode, setSelectedMode] = useState<string>("price-simulation");
   
-  // Mise à jour des paramètres
   const updateParam = (key: keyof SimulationParams, value: number) => {
     setParams(prev => ({ ...prev, [key]: value }));
   };
   
-  // Lancer la simulation
   const runSimulation = () => {
     setIsSimulating(true);
     
-    // Simuler un délai de calcul
     setTimeout(() => {
       const simulationResults = generateMonteCarloPaths(params);
       setResults(simulationResults);
@@ -156,7 +139,6 @@ const MonteCarloSimulator: React.FC = () => {
     }, 1000);
   };
   
-  // Formatter un nombre pour l'affichage
   const formatNumber = (num: number) => {
     return num.toLocaleString(undefined, {
       minimumFractionDigits: 2,
@@ -164,11 +146,9 @@ const MonteCarloSimulator: React.FC = () => {
     });
   };
   
-  // Préparer les données simplifiées pour LineChart
   const prepareChartData = () => {
     if (!results || !results.simplifiedData || !results.simplifiedData[0]) return [];
     
-    // Prendre le premier chemin comme exemple pour le graphique simple
     const samplePath = results.simplifiedData[0].data;
     return samplePath.map((point: any) => ({
       x: point.x,
@@ -176,11 +156,9 @@ const MonteCarloSimulator: React.FC = () => {
     }));
   };
   
-  // Créer des données pour le graphique VaR, simplifié pour s'adapter au composant LineChart
   const prepareVaRChartData = () => {
     if (!results) return [];
     
-    // Exemple simplifié pour VaR
     return [
       { x: 0, y: params.initialPrice },
       { x: params.duration, y: results.stats.mean },
@@ -393,7 +371,6 @@ const MonteCarloSimulator: React.FC = () => {
               </CardHeader>
               <CardContent className="p-0 px-4 h-64">
                 {selectedMode === "price-simulation" ? (
-                  // Afficher quelques trajectoires à titre d'exemple
                   <LineChart 
                     data={prepareChartData()}
                     color="#8884d8"
@@ -402,7 +379,6 @@ const MonteCarloSimulator: React.FC = () => {
                     animate={false}
                   />
                 ) : (
-                  // Afficher l'analyse VaR
                   <LineChart 
                     data={prepareVaRChartData()}
                     color="#ea384c"
