@@ -230,7 +230,7 @@ const MonteCarloSimulator: React.FC = () => {
               
               <div className="space-y-2">
                 <Label htmlFor="duration">
-                  Dur����e: {params.duration} {params.duration === 1 ? 'an' : 'ans'}
+                  Durée: {params.duration} {params.duration === 1 ? 'an' : 'ans'}
                 </Label>
                 <Slider
                   id="duration"
