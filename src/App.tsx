@@ -11,6 +11,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import i18n from './i18n';
 import Home from './pages/Home';
 import Login from './pages/auth/Login';
+import SignUp from './pages/SignUp';
 import Courses from './pages/Courses';
 import BlackScholes from './pages/courses/BlackScholes';
 import ExoticOptions from './pages/courses/ExoticOptions';
@@ -44,7 +45,6 @@ import LegendaryWave from './pages/survival/LegendaryWave';
 import BugReport from './pages/BugReport';
 import NotFound from './pages/NotFound';
 import AppShell from './components/AppShell';
-import SignUp from './pages/SignUp';
 
 import VolatilityCalculator from './components/tools/VolatilityCalculator';
 import BlackScholesCalculator from './components/tools/BlackScholesCalculator';
@@ -134,7 +134,6 @@ const App = () => {
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
-              <ChatBubble />
             </BrowserRouter>
           </AuthProvider>
         </QueryClientProvider>

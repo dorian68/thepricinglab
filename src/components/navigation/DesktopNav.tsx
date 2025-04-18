@@ -3,7 +3,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { 
-  Home, BookOpen, Dumbbell, Users, CreditCard, Wrench, FileText, Bug, BarChart3
+  BookOpen, CreditCard, FileText, BarChart3
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,9 +17,11 @@ import TradingLabMenu from "./TradingLabMenu";
 import CoursesMenu from "./CoursesMenu";
 import CommunityMenu from "./CommunityMenu";
 import ToolsMenu from "./ToolsMenu";
+import { useAuth } from "@/contexts/AuthContext";
 
 const DesktopNav = () => {
   const { t } = useTranslation();
+  const { user, signOut } = useAuth();
 
   return (
     <div className="hidden md:flex items-center justify-between w-full">
@@ -51,7 +53,7 @@ const DesktopNav = () => {
               
               {/* Community */}
               <NavItem 
-                icon={Users} 
+                icon={CommunityMenu} 
                 label={t('navbar.community')}
               >
                 <CommunityMenu />
@@ -66,7 +68,7 @@ const DesktopNav = () => {
               
               {/* Tools */}
               <NavItem 
-                icon={Wrench} 
+                icon={ToolsMenu} 
                 label={t('navbar.tools')}
               >
                 <ToolsMenu />
@@ -87,16 +89,31 @@ const DesktopNav = () => {
       <div className="flex items-center space-x-4">
         <LanguageSwitcher />
         <div className="ml-4 flex items-center md:ml-6">
-          <Button variant="financeOutline" size="sm" className="mr-2" asChild>
-            <Link to="/login">
-              {t('navbar.login')}
-            </Link>
-          </Button>
-          <Button variant="finance" size="sm" asChild>
-            <Link to="/signup">
-              {t('navbar.signup')}
-            </Link>
-          </Button>
+          {user ? (
+            <>
+              <Button variant="financeOutline" size="sm" className="mr-2" asChild>
+                <Link to="/dashboard">
+                  {t('navbar.dashboard')}
+                </Link>
+              </Button>
+              <Button variant="finance" size="sm" onClick={signOut}>
+                {t('navbar.logout', 'Déconnexion')}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="financeOutline" size="sm" className="mr-2" asChild>
+                <Link to="/login">
+                  {t('navbar.login')}
+                </Link>
+              </Button>
+              <Button variant="finance" size="sm" asChild>
+                <Link to="/signup">
+                  {t('navbar.signup')}
+                </Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -1,11 +1,9 @@
+
 {
   "app": {
-    "title": "The Pricing Library",
-    "subtitle": "Quantitative Finance Trading Platform",
-    "meta": {
-      "description": "Advanced learning platform for quantitative finance, option pricing and financial simulation tools.",
-      "keywords": "quantitative finance, financial options, Black-Scholes, Monte Carlo, financial simulator, volatility"
-    }
+    "name": "The Pricing Laboratory",
+    "subtitle": "The reference for option theory and quantitative pricing",
+    "description": "Learn and master the models and calculations of derivative financial products"
   },
   "navbar": {
     "home": "Home",
@@ -13,595 +11,121 @@
     "exercises": "Exercises",
     "tools": "Tools",
     "community": "Community",
-    "survival": "Survival Mode",
-    "notebooks": "Notebooks",
-    "dashboard": "Dashboard",
-    "projects": "Projects",
-    "mentoring": "Mentoring",
+    "blog": "Blog",
+    "pricing": "Pricing",
     "login": "Login",
     "signup": "Sign Up",
-    "profile": "Profile",
-    "settings": "Settings",
-    "logout": "Logout",
-    "theme": "Theme",
-    "language": "Language",
-    "blog": "Blog",
-    "bugs": "Report Bug",
-    "trainingLab": "Training Lab",
-    "pricing": "Pricing",
-    "tradingLab": "Trading Lab"
+    "dashboard": "Dashboard",
+    "tradingLab": "Trading Lab",
+    "practice": "Practice",
+    "mentoring": "Mentoring",
+    "myAccount": "My Account"
   },
-  "language": {
-    "en": "English",
-    "fr": "French"
+  "auth": {
+    "login": {
+      "title": "Login",
+      "subtitle": "Welcome back!",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign In",
+      "loading": "Signing in...",
+      "forgotPassword": "Forgot password?",
+      "signupPrompt": "Don't have an account yet?",
+      "signupLink": "Sign up"
+    },
+    "signup": {
+      "title": "Create an Account",
+      "subtitle": "Start your journey into quantitative finance",
+      "firstname": "First Name",
+      "lastname": "Last Name",
+      "email": "Email",
+      "password": "Password",
+      "terms": "I agree to the",
+      "termsLink": "terms of service",
+      "submit": "Create my account",
+      "loading": "Creating account...",
+      "loginPrompt": "Already registered?",
+      "loginLink": "Sign in"
+    }
   },
-  "languageSwitcher": {
-    "switchLanguage": "Switch language",
-    "tooltip": "Change the site language",
-    "en": "English",
-    "fr": "Français"
-  },
-  "bugReport": {
-    "title": "Report a Bug",
-    "description": "Help us improve The Trading Lab by reporting issues you encounter.",
-    "category": "Bug Category",
-    "selectCategory": "Select a category",
-    "categoryUI": "User Interface",
-    "categoryFunctionality": "Functionality",
-    "categoryPerformance": "Performance",
-    "categoryCourseContent": "Course Content",
-    "categoryOther": "Other",
-    "bugTitle": "Bug Title",
-    "titlePlaceholder": "Briefly describe the issue",
-    "detailedDescription": "Detailed Description",
-    "descriptionPlaceholder": "Describe the bug in detail, steps to reproduce it, and expected behavior",
-    "urlLabel": "URL where the bug occurs",
-    "screenshot": "Screenshot (optional)",
-    "dropImage": "Drag and drop an image or",
-    "browseFiles": "Browse Files",
-    "submitReport": "Submit Report"
+  "home": {
+    "title": "Option Theory | Black-Scholes | Monte Carlo",
+    "hero": {
+      "title": "Master Complex Financial Models",
+      "subtitle": "The learning platform to become an expert in options, pricing, and financial algorithms",
+      "cta": "Start for free",
+      "ctaLogin": "Sign in"
+    },
+    "features": {
+      "title": "The expertise of major trading floors",
+      "subtitle": "Tools and methods used by professional traders",
+      "courses": {
+        "title": "Interactive Courses",
+        "description": "From Black-Scholes to exotic options, learn the fundamentals and progress at your own pace with clear explanations."
+      },
+      "tools": {
+        "title": "Calculation Tools",
+        "description": "Precise calculators to value options, calibrate models and visualize yield curves."
+      },
+      "monte": {
+        "title": "Monte Carlo Simulation",
+        "description": "Explore the power of stochastic simulations to value complex products and visualize distributions."
+      },
+      "exercises": {
+        "title": "Exercises and Quizzes",
+        "description": "Validate your knowledge with practical exercises and test yourself with varied series of questions."
+      }
+    }
   },
   "footer": {
+    "copyright": "All rights reserved.",
     "products": "Products",
     "company": "Company",
     "legal": "Legal",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "cookies": "Cookies"
+  },
+  "404": {
+    "title": "Page not found",
+    "subtitle": "Sorry, the page you're looking for doesn't exist.",
+    "back": "Back to home"
+  },
+  "about": "About",
+  "contact": "Contact",
+  "loading": "Loading...",
+  "error": "An error occurred",
+  "try_again": "Try again",
+  "back": "Back",
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome,",
+    "progress": "Your progress",
+    "recent": "Recent activity",
+    "recommended": "Recommended for you"
+  },
+  "languageSwitcher": {
+    "switchLanguage": "Switch Language",
+    "tooltip": "Change the site language",
+    "fr": "French",
+    "en": "English"
+  },
+  "login": {
+    "title": "Login",
+    "subtitle": "Welcome back",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "loginButton": "Sign in",
+    "noAccount": "Don't have an account yet?",
+    "signupLink": "Sign up now",
+    "termsPrefix": "By logging in, you agree to our",
     "terms": "Terms of Use",
-    "privacy": "Privacy Policy",
-    "cookies": "Cookies",
-    "copyright": "All rights reserved"
+    "andOur": "and our",
+    "privacy": "Privacy Policy"
   },
-  "trainingLab": {
-    "title": "Training Lab",
-    "subtitle": "Interactive exercises and challenges to test your knowledge",
-    "exercises": "Interactive Exercises",
-    "survival": "Survival Mode",
-    "quizzes": "Progressive Quizzes",
-    "practice": "Guided Practice",
-    "leaderboard": "Leaderboard",
-    "performance": "Your Performance",
-    "progress": "Track Progress"
-  },
-  "tradingLab": {
-    "title": "Trading Lab",
-    "subtitle": "Test, validate and monitor your trading strategies",
-    "exercises": "Exercises",
-    "exercisesDesc": "Practice with interactive exercises",
-    "backtest": "Backtest",
-    "backtestDesc": "Evaluate strategies on historical data",
-    "scenarios": "Scenarios",
-    "scenariosDesc": "Test market scenarios and assumptions",
-    "strategies": "Strategies",
-    "strategiesDesc": "Build and test trading strategies for different market conditions",
-    "performance": "Performance",
-    "performanceDesc": "Track and analyze your results",
-    "optionStrategies": "Option Strategy Pricing"
-  },
-  "strategies": {
-    "vanilla": "Vanilla",
-    "advanced": "Advanced",
-    "selectStrategy": "Select a Strategy",
-    "parameters": "Parameters",
-    "payoffDiagram": "Payoff Diagram",
-    "greeksAndPricing": "Pricing and Greeks",
-    "marketParameters": "Market Parameters",
-    "optionLegs": "Option Legs",
-    "spotPrice": "Spot Price",
-    "volatility": "Volatility",
-    "timeToMaturity": "Maturity (years)",
-    "interestRate": "Interest Rate",
-    "dividendYield": "Dividend Yield",
-    "strikePrice": "Strike Price",
-    "quantity": "Quantity",
-    "optionType": "Option Type",
-    "position": "Position",
-    "call": "Call",
-    "put": "Put",
-    "long": "Long (Buy)",
-    "short": "Short (Sell)",
-    "leg": "Leg",
-    "payoffLine": "Payoff Curve",
-    "currentPrice": "Current Price",
-    "breakEvenPoints": "Break-Even Points",
-    "maxProfit": "Max Profit",
-    "maxLoss": "Max Loss",
-    "none": "None",
-    "unlimited": "Unlimited",
-    "pricingSummary": "Pricing Summary",
-    "pricingPositive": "Net credit: you receive this premium",
-    "pricingNegative": "Net debit: you pay this premium",
-    "greeks": "Greeks",
-    "deltaDesc": "Price sensitivity",
-    "gammaDesc": "Delta change rate",
-    "vegaDesc": "Volatility sensitivity",
-    "thetaDesc": "Time decay",
-    "rhoDesc": "Interest rate sensitivity",
-    "legDetails": "Leg Details",
-    "type": "Type",
-    "strike": "Strike",
-    "price": "Price",
-    "total": "Total",
-    "payoff": "Profit/Loss"
-  },
-  "chat": {
-    "title": "Trading Lab Assistant",
-    "placeholder": "Type your message...",
-    "send": "Send",
-    "welcomeMessage": "Hello! How can I help you with your financial options learning today?",
-    "tipMessage": "You can ask me about option pricing, volatility models, or trading strategies."
-  },
-  "home": {
-    "hero": {
-      "title1": "Get ready to enter the",
-      "title2": "The tading room",
-      "description": "Learn to price complex financial derivatives, understand volatility surfaces, and implement cutting-edge models with our hands-on platform.",
-      "startCourse": "Start Learning",
-      "signUp": "Sign Up",
-      "tagline": "MASTERY. TECHNIQUE. MARKETS.",
-      "terminal": "TRADING TERMINAL ACTIVATED"
-    },
-    "approach": {
-      "title": "Our Innovative",
-      "description": "Our platform combines theoretical knowledge with practical applications to help you master complex financial models and valuation techniques."
-    },
-    "mission": {
-      "highlight": "Approach"
-    },
-    "features": {
-      "pragmatic": {
-        "title": "Practical Learning",
-        "description": "Hands-on exercises and real-world problems to bridge the gap between theory and practice."
-      },
-      "tech": {
-        "title": "Technical Excellence",
-        "description": "Focus on computational methods and implementing models using industry-standard techniques."
-      },
-      "job": {
-        "title": "Career Relevant",
-        "description": "Skills directly applicable to quantitative finance roles in investment banks and trading firms."
-      },
-      "certified": {
-        "title": "Industry Relevance",
-        "description": "Curriculum designed in partnership with quantitative analysts from top investment banks."
-      }
-    },
-    "curriculum": {
-      "title": "Comprehensive",
-      "description": "Our platform offers a wide range of modules covering all aspects of financial modeling and trading strategies.",
-      "allModules": "All Modules"
-    },
-    "modules": {
-      "highlight": "Curriculum",
-      "blackScholes": {
-        "title": "Black-Scholes Model",
-        "level": "Fundamental",
-        "description": "Master the cornerstone option pricing model that revolutionized financial markets."
-      },
-      "volatility": {
-        "title": "Volatility Surface",
-        "level": "Intermediate",
-        "description": "Understand volatility smiles, skews, and term structures across option markets."
-      },
-      "exotic": {
-        "title": "Exotic Options",
-        "level": "Advanced",
-        "description": "Price and hedge complex derivatives like barriers, Asians, and lookbacks."
-      },
-      "greeks": {
-        "title": "Option Greeks",
-        "level": "Intermediate",
-        "description": "Master delta, gamma, vega, theta, and their role in risk management."
-      },
-      "monteCarlo": {
-        "title": "Monte Carlo Methods",
-        "level": "Advanced",
-        "description": "Implement simulation techniques for pricing path-dependent options."
-      },
-      "stressTesting": {
-        "title": "Stress Testing",
-        "level": "Advanced",
-        "description": "Analyze option portfolios under extreme market scenarios."
-      },
-      "courses": {
-        "description": "From vanilla options to exotic derivatives, learn the theory and practice through interactive tutorials.",
-        "cta": "Browse Courses"
-      },
-      "fundamentals": {
-        "description": "Master the building blocks of quantitative finance with our beginner-friendly modules.",
-        "cta": "Start with Fundamentals"
-      },
-      "survival": {
-        "title": "Survival Mode",
-        "subtitle": "Test your skills under pressure",
-        "description": "Face increasingly difficult pricing challenges against the clock. How far can you go?",
-        "cta": "Challenge Yourself"
-      },
-      "exercises": {
-        "description": "Practice makes perfect. Solve real-world financial problems with guided exercises.",
-        "cta": "Try Exercises"
-      },
-      "community": {
-        "description": "Connect with fellow quants, share insights, and collaborate on challenging problems.",
-        "cta": "Join Community"
-      },
-      "tools": {
-        "subtitle": "Work with professional-grade tools",
-        "description": "Use our suite of calculators and visualizers to understand complex financial concepts.",
-        "cta": "Explore Tools"
-      },
-      "leaderboard": {
-        "description": "Track your progress, compete with peers, and earn certifications for your achievements.",
-        "cta": "View Leaderboard"
-      }
-    },
-    "testimonials": {
-      "title": "What Our Users Say",
-      "description": "Hear from professionals and students who have transformed their quantitative finance skills with our platform.",
-      "joinCta": "Join Our Community",
-      "alexandre": {
-        "quote": "The practical approach to option pricing models helped me ace my interviews for a quant role at a major investment bank.",
-        "author": "Alexandre D.",
-        "position": "Derivatives Trader, Paris"
-      },
-      "sarah": {
-        "quote": "Finally a platform that explains volatility surfaces in a way that made sense to me. The interactive tools are game-changing.",
-        "author": "Sarah M.",
-        "position": "Risk Manager, London"
-      },
-      "thomas": {
-        "quote": "As someone transitioning from academia to finance, this platform bridged the gap between mathematical theory and actual implementation.",
-        "author": "Thomas K.",
-        "position": "PhD Student, ETH Zurich"
-      }
-    },
-    "cta": {
-      "title": "Ready to Become a",
-      "highlight": "Quant Master?",
-      "description": "Join thousands of professionals and students who are leveling up their quantitative finance skills.",
-      "subscribe": "Choose a Plan",
-      "explore": "Explore Courses",
-      "freeCourse": "Try Free Course",
-      "tooltip": "Access our BSM model course for free"
-    }
-  },
-  "courses": {
-    "fundamentals": "Fundamentals",
-    "intermediate": "Intermediate",
-    "advanced": "Advanced",
-    "complex": "Complex Products",
-    "bonus": "Bonus Material",
-    "subscription": "Subscription Plans"
-  },
-  "pricing": {
-    "title": "Choose the right plan for you",
-    "subtitle": "Access professional trading tools and learning resources for quantitative finance.",
-    "monthly": "Monthly",
-    "annual": "Annual",
-    "annualSavings": "Save 20% with annual billing",
-    "recommended": "RECOMMENDED",
-    "comparison": {
-      "title": "Feature Comparison",
-      "feature": "Feature",
-      "category1": "Learning Content",
-      "category2": "Exercises & Practice",
-      "category3": "Tools & Simulation",
-      "category4": "Professional Features",
-      "fundamentals": "Fundamental Courses",
-      "intermediate": "Intermediate Courses",
-      "advanced": "Advanced Courses",
-      "basicExercises": "Basic Exercises",
-      "intermediateExercises": "Intermediate Exercises",
-      "advancedExercises": "Advanced Exercises",
-      "survivalMode": "Survival Mode",
-      "basicTools": "Basic Tools",
-      "advancedTools": "Advanced Tools",
-      "notebooks": "Interactive Notebooks",
-      "certificates": "Certificates",
-      "linkedinIntegration": "LinkedIn Integration",
-      "performanceReports": "Performance Reports",
-      "projectChallenges": "Project Challenges",
-      "gptAssistant": "AI Assistant"
-    },
-    "faq": {
-      "title": "Frequently Asked Questions",
-      "question1": "How can I change my plan?",
-      "answer1": "You can change your plan at any time from your dashboard. The change will take effect on your next billing period.",
-      "question2": "Do you offer refunds?",
-      "answer2": "Yes, we offer a 30-day money-back guarantee if you're not satisfied with your subscription.",
-      "question3": "Can I cancel anytime?",
-      "answer3": "Absolutely. There are no long-term commitments, and you can cancel your subscription at any time.",
-      "question4": "Are updates included?",
-      "answer4": "Yes, all content and feature updates are automatically available for your subscription tier."
-    },
-    "cta": {
-      "title": "Ready to upgrade your finance skills?",
-      "highlight": "now",
-      "description": "Join thousands of professionals and students who are leveling up their quantitative finance skills.",
-      "start": "Get started now",
-      "try": "Try for free"
-    },
-    "freemium": {
-      "title": "Free",
-      "price": "$0",
-      "description": "For beginners looking to explore the basics of quantitative finance.",
-      "badge": "FREE",
-      "cta": "Sign up for free",
-      "feature1": "Access to fundamental courses",
-      "feature2": "Basic Black-Scholes calculator",
-      "feature3": "Limited exercises",
-      "feature4": "Community support"
-    },
-    "student": {
-      "title": "Student",
-      "description": "Perfect for students and academics who want to deepen their knowledge.",
-      "badge": "POPULAR",
-      "cta": "Choose Student plan",
-      "feature1": "All fundamental and intermediate courses",
-      "feature2": "Advanced calculators and tools",
-      "feature3": "Unlimited exercises",
-      "feature4": "Full Survival Mode access",
-      "feature5": "Basic certification"
-    },
-    "pro": {
-      "title": "Professional",
-      "description": "For professionals and traders who need premium tools.",
-      "badge": "COMPLETE",
-      "cta": "Choose Pro plan",
-      "feature1": "Access to all courses and content",
-      "feature2": "Complete suite of trading tools",
-      "feature3": "Exotic and advanced models",
-      "feature4": "Unlimited backtesting and scenarios",
-      "feature5": "Professional certification",
-      "feature6": "Customizable interactive notebooks",
-      "feature7": "AI trading assistant",
-      "feature8": "Priority support"
-    },
-    "hero": {
-      "title": "Simple pricing for all",
-      "highlight": "expertise levels",
-      "description": "Whether you're a student, educator, or professional, we have a plan that fits your needs."
-    },
-    "guarantee": "30-day money-back guarantee"
-  },
-  "projects": {
-    "title": "Projects and Challenges",
-    "subtitle": "Apply your knowledge with concrete quantitative finance projects",
-    "monthlyChallenge": "Monthly Challenge",
-    "active": "ACTIVE",
-    "upcoming": "UPCOMING",
-    "endsIn": "Ends in 14 days",
-    "optionPricingTitle": "Local Volatility Option Pricing Tool Development",
-    "optionPricingDesc": "Create an option pricing tool integrating local volatility models to better capture smile and skew effects.",
-    "description": "Project Description",
-    "requirements": "Requirements",
-    "implementPython": "Implement in Python",
-    "handleSmile": "Handle volatility smile",
-    "includeDocumentation": "Include documentation",
-    "optimizePerformance": "Optimize performance",
-    "rewards": "Rewards",
-    "firstPrize": "1st place: $300 + mentoring",
-    "secondPrize": "2nd place: $150",
-    "thirdPrize": "3rd place: $50",
-    "allParticipants": "All: achievement badge",
-    "viewDetails": "View details",
-    "notAvailable": "Coming soon",
-    "resources": "Resources & Documentation",
-    "participants": "participants",
-    "monteCarloTitle": "Monte Carlo Simulation for Exotic Options",
-    "monteCarloDesc": "Implement a Monte Carlo pricing solution for various path-dependent exotic options.",
-    "portfolioOptTitle": "Option Portfolio Optimization",
-    "portfolioOptDesc": "Create an optimization algorithm to build option portfolios meeting various risk constraints.",
-    "volSurfaceTitle": "Volatility Surface Calibration",
-    "volSurfaceDesc": "Develop a tool to calibrate and visualize volatility surfaces from market data.",
-    "algoTradingTitle": "Algorithmic Trading Strategy",
-    "algoTradingDesc": "Design and backtest an algorithmic trading strategy for options based on volatility anomalies.",
-    "starts": "Starts on",
-    "weeks": "weeks",
-    "advanced": "Advanced",
-    "intermediate": "Intermediate",
-    "expert": "Expert",
-    "leaderboard": "Participant Leaderboard",
-    "previousChallenge": "Previous Challenge: Interest Rate Curve Modeling",
-    "completed": "Completed on",
-    "participant": "Participant",
-    "score": "Score",
-    "reward": "Reward",
-    "viewAll": "View full leaderboard",
-    "joinCommunity": "Join our quant community",
-    "communityDescription": "Participate in challenging projects, share your knowledge, and progress with other quantitative finance enthusiasts.",
-    "subscribe": "Subscribe now",
-    "discover": "Discover courses"
-  },
-  "quizzes": {
-    "title": "Progressive Quizzes",
-    "subtitle": "Evaluate your knowledge of financial options",
-    "categories": "Quizzes by Category",
-    "fundamentalsTitle": "Option Fundamentals",
-    "fundamentalsDesc": "Master the basic concepts of financial options: structure, pricing, and fundamental mechanisms.",
-    "pricingTitle": "Pricing & Models",
-    "pricingDesc": "Test your knowledge on Black-Scholes, binomial trees, and numerical methods.",
-    "greeksTitle": "The Greeks",
-    "greeksDesc": "Evaluate your understanding of sensitivity measures and hedging strategies.",
-    "volatilityTitle": "Volatility",
-    "volatilityDesc": "Test your knowledge of implied volatility, historical volatility, and volatility surfaces.",
-    "exoticTitle": "Exotic Options",
-    "exoticDesc": "Evaluate your mastery of path-dependent options, barrier options, and multi-asset options.",
-    "strategiesTitle": "Advanced Strategies",
-    "strategiesDesc": "Put your knowledge of complex strategies and arbitrage to the test.",
-    "survivalTitle": "Survival Mode - The Ultimate Test",
-    "survivalDesc": "Ready to put your knowledge to the test? Survival mode combines questions from all categories with a time limit for a complete challenge.",
-    "accessSurvival": "Access Survival Mode",
-    "quizAvailable": "quizzes available",
-    "explore": "Explore"
-  },
-  "blog": {
-    "title": "Blog",
-    "subtitle": "Insights and educational content about quantitative finance",
-    "search": "Search articles...",
-    "clearFilters": "Clear filters",
-    "featuredPost": "Featured Post",
-    "allPosts": "All Posts",
-    "searchResults": "Search Results",
-    "noResults": "No posts found",
-    "tryDifferent": "Try different search terms or filters",
-    "viewAllPosts": "View all posts",
-    "readMore": "Read more",
-    "browseTags": "Browse by Tags",
-    "description": "Learn from our experts about financial derivatives, volatility modeling, and trading strategies",
-    "newsletter": {
-      "title": "Subscribe to our Newsletter",
-      "description": "Get the latest insights and updates delivered to your inbox",
-      "placeholder": "Your email address",
-      "subscribe": "Subscribe"
-    }
-  },
-  "coursesPage": {
-    "title": "Courses",
-    "subtitle": "Structured learning paths from fundamentals to advanced quantitative finance",
-    "description": "Comprehensive courses on financial derivatives, volatility modeling, and quantitative trading strategies",
-    "startCourse": "Start Course",
-    "unlock": "Unlock Course",
-    "beginner": "Beginner",
-    "intermediate": "Intermediate",
-    "advanced": "Advanced",
-    "expert": "Expert",
-    "fundamentals": {
-      "tab": "Fundamentals",
-      "title": "Fundamental Courses",
-      "blackScholes": {
-        "title": "Black-Scholes Model",
-        "description": "Master the cornerstone option pricing model that revolutionized financial markets."
-      },
-      "yieldCurves": {
-        "title": "Yield Curves",
-        "description": "Understand interest rate term structures and their applications in derivatives pricing."
-      },
-      "greeks": {
-        "title": "Option Greeks",
-        "description": "Master delta, gamma, vega, theta, and their role in risk management."
-      }
-    },
-    "advanced": {
-      "tab": "Advanced",
-      "title": "Advanced Courses",
-      "description": "Dive deeper into complex financial models and advanced trading concepts",
-      "impliedVol": {
-        "title": "Implied Volatility",
-        "description": "Explore the volatility smile, term structure, and surface calibration techniques."
-      },
-      "volProducts": {
-        "title": "Volatility Products",
-        "description": "Learn about VIX, variance swaps, and volatility derivatives trading."
-      },
-      "hedging": {
-        "title": "Dynamic Hedging",
-        "description": "Master advanced hedging techniques for complex option portfolios."
-      }
-    },
-    "complex": {
-      "tab": "Complex",
-      "title": "Complex Products",
-      "exotic": {
-        "title": "Exotic Options",
-        "description": "Price and hedge barrier, Asian, lookback, and other exotic derivatives."
-      },
-      "monteCarlo": {
-        "title": "Monte Carlo Methods",
-        "description": "Implement simulation techniques for pricing path-dependent options."
-      },
-      "stochastic": {
-        "title": "Stochastic Calculus",
-        "description": "Master the mathematical foundations of modern quantitative finance."
-      }
-    },
-    "learning": {
-      "title": "Enhance Your Learning",
-      "subtitle": "Combine courses with interactive exercises and mentoring to accelerate your progress",
-      "mentoring": "Get Mentoring",
-      "practice": "Practice Exercises"
-    },
-    "difficulty": "Required Level",
-    "unlockCourse": "Unlock This Course",
-    "advancedCoursesInfo": "Advanced courses are exclusively available with a premium subscription.",
-    "subscribeToAccess": "Subscribe to access",
-    "alreadySubscribed": "Already subscribed?",
-    "unlockContent": "Unlock this content",
-    "skillsGained": "Skills You'll Gain",
-    "volSkillsDescription": "Mastery of volatility surfaces, complex product pricing, volatility-based trading strategies",
-    "backToExercises": "Back to exercises",
-    "unlockNow": "Unlock now",
-    "duration": "Estimated Duration"
-  },
-  "exercisesPage": {
-    "title": "Practice Exercises",
-    "subtitle": "Apply your knowledge with hands-on financial modeling exercises",
-    "description": "Solve real-world quantitative finance problems with our interactive exercises",
-    "categories": "Exercise Categories",
-    "difficulty": "Difficulty",
-    "beginner": "Beginner",
-    "intermediate": "Intermediate",
-    "advanced": "Advanced",
-    "expert": "Expert",
-    "all": "All Exercises",
-    "pricing": "Option Pricing",
-    "pricingDesc": "Apply Black-Scholes, Monte Carlo, and other pricing methods",
-    "volatility": "Volatility Modeling",
-    "volatilityDesc": "Practice with volatility surfaces, skew, and term structures",
-    "greeks": "Greeks & Hedging",
-    "greeksDesc": "Calculate risk measures and implement hedging strategies",
-    "strategies": "Trading Strategies",
-    "strategiesDesc": "Design and implement complex option trading strategies",
-    "completionRate": "Completion rate",
-    "popularity": "Popularity",
-    "filter": "Filter",
-    "sort": "Sort by",
-    "newest": "Newest",
-    "popular": "Most Popular",
-    "difficult": "Most Difficult",
-    "duration": "Estimated Duration",
-    "hours": "hours"
-  },
-  "seo": {
-    "tools": {
-      "monteCarlo": {
-        "title": "Monte Carlo Simulator | The Pricing Library",
-        "description": "Monte Carlo simulator to generate price paths and analyze risk metrics. An essential tool for quantitative finance.",
-        "keywords": "Monte Carlo, financial simulation, price paths, risk metrics, VaR"
-      },
-      "blackScholes": {
-        "title": "Black-Scholes Calculator | The Pricing Library",
-        "description": "Black-Scholes calculator for vanilla option pricing, greeks calculation and sensitivity analysis.",
-        "keywords": "Black-Scholes, option pricing, greeks, implied volatility, quantitative finance"
-      },
-      "volatility": {
-        "title": "Volatility Calculator | The Pricing Library",
-        "description": "Volatility analysis tool, volatility surface and implied volatility calculation for financial options.",
-        "keywords": "implied volatility, volatility surface, skew, smile, options"
-      },
-      "modelCalibration": {
-        "title": "Model Calibration | The Pricing Library",
-        "description": "Financial model calibration tools to adjust parameters to observed market data.",
-        "keywords": "model calibration, parameter fitting, stochastic models"
-      }
-    }
+  "navigation": {
+    "closeMenu": "Close navigation menu",
+    "openMenu": "Open navigation menu"
   }
 }
