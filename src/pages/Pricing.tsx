@@ -209,7 +209,7 @@ const PricingPage = () => {
       <Navbar />
       
       <section className="py-20 px-6">
-        <div className="max-w-7xl mx-auto text-center">
+        <div className="max-w-[1400px] mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
             {t('pricing.hero.title')} <span className="text-finance-accent">{t('pricing.hero.highlight')}</span>
           </h1>
@@ -217,18 +217,18 @@ const PricingPage = () => {
             {t('pricing.hero.description')}
           </p>
           
-          <Tabs defaultValue="monthly" className="max-w-7xl mx-auto">
+          <Tabs defaultValue="monthly" className="max-w-[1400px] mx-auto">
             <TabsList className="grid grid-cols-2 w-64 mx-auto mb-8">
               <TabsTrigger value="monthly">{t('pricing.monthly')}</TabsTrigger>
               <TabsTrigger value="annual">{t('pricing.annual')}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="monthly">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 lg:gap-12">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                 {pricingTiers.map((tier) => (
                   <div 
                     key={tier.id} 
-                    className={`bg-[#141821] p-8 rounded-lg border min-w-[280px] ${
+                    className={`bg-[#141821] p-8 rounded-lg border min-w-[340px] ${
                       tier.recommended ? 'border-finance-accent' : 'border-[#2A2F3C]'
                     } relative flex flex-col h-full`}
                   >
@@ -265,7 +265,7 @@ const PricingPage = () => {
                       {tier.features.map((feature, index) => (
                         <li key={index} className="flex items-start">
                           <CheckCircle2 className="h-5 w-5 text-green-400 mr-3 flex-shrink-0 mt-0.5" />
-                          <span className="text-sm text-finance-offwhite">{feature}</span>
+                          <span className="text-sm text-finance-offwhite whitespace-nowrap overflow-hidden text-ellipsis">{feature}</span>
                         </li>
                       ))}
                     </ul>
@@ -286,7 +286,7 @@ const PricingPage = () => {
             </TabsContent>
             
             <TabsContent value="annual">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 lg:gap-12">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                 {pricingTiers.map((tier) => {
                   const annualPrice = tier.id === "freemium" 
                     ? tier.price 
@@ -295,7 +295,7 @@ const PricingPage = () => {
                   return (
                     <div 
                       key={tier.id} 
-                      className={`bg-[#141821] p-8 rounded-lg border min-w-[280px] ${
+                      className={`bg-[#141821] p-8 rounded-lg border min-w-[340px] ${
                         tier.recommended ? 'border-finance-accent' : 'border-[#2A2F3C]'
                       } relative flex flex-col h-full`}
                     >
@@ -343,7 +343,7 @@ const PricingPage = () => {
                         {tier.features.map((feature, index) => (
                           <li key={index} className="flex items-start">
                             <CheckCircle2 className="h-5 w-5 text-green-400 mr-3 flex-shrink-0 mt-0.5" />
-                            <span className="text-sm text-finance-offwhite">{feature}</span>
+                            <span className="text-sm text-finance-offwhite whitespace-nowrap overflow-hidden text-ellipsis">{feature}</span>
                           </li>
                         ))}
                       </ul>
