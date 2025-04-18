@@ -100,7 +100,7 @@ const PythonExercise: React.FC<PythonExerciseProps> = ({
           <PyodideLoader 
             discreet={false} 
             autoLoad={true}
-            onLoad={() => setIsPyodideAvailable(true)} 
+            onLoad={() => {}} 
           />
         </div>
       )}
