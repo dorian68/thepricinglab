@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { transformCodeBlocks } from '@/utils/codeBlockTransformer';
 import PythonActivator from '@/utils/pythonActivator';
 import { isPyodideLoaded } from '@/services/pyodideService';
-import { safeTranslate } from '@/utils/translationUtils';
+import { safeTranslate, cleanCaptions } from '@/utils/translationUtils';
 
 const ExerciseDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,7 +15,7 @@ const ExerciseDetail = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   
   // Créer un titre sécurisé pour Helmet
-  const safeExerciseId = id || 'Exercise';
+  const safeExerciseId = cleanCaptions(id || 'Exercise');
   const pageTitle = `${safeExerciseId} | Exercises | The Pricing Lab`;
   
   useEffect(() => {
@@ -340,7 +340,7 @@ plt.show()`}
         <title>{pageTitle}</title>
       </Helmet>
       
-      <h1 className="text-3xl font-bold mb-6">{safeExerciseId}</h1>
+      <h1 className="text-3xl font-bold mb-6">{cleanCaptions(safeExerciseId)}</h1>
       
       {/* Activateur Python automatique pour les pages d'exercices */}
       <PythonActivator 

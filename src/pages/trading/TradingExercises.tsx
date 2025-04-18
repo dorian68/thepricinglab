@@ -2,7 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { safeTranslate } from '../../utils/translationUtils';
+import { safeTranslate, cleanCaptions } from '../../utils/translationUtils';
 import PythonExercise from '@/components/python/PythonExercise';
 import { transformCodeBlocks } from '@/utils/codeBlockTransformer';
 import PythonActivator from '@/utils/pythonActivator';
@@ -173,8 +173,8 @@ plt.show()
               Implémentez le modèle de Black-Scholes pour calculer le prix d'une option européenne.
             </p>
             <PythonExercise
-              title="Modèle de Black-Scholes"
-              problem={blackScholesProblem}
+              title={cleanCaptions("Modèle de Black-Scholes")}
+              problem={cleanCaptions(blackScholesProblem)}
               initialCode={blackScholesInitialCode}
               solution={blackScholesSolution}
               hints={blackScholesHints}

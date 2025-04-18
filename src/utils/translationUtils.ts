@@ -14,12 +14,29 @@ export const safeTranslate = (
   key: string,
   fallback: string
 ): string => {
-  const translated = typeof t === 'function' ? t(key, fallback) : fallback;
+  // Handle different ways the t function can be called from react-i18next
+  let translated: string | null | undefined;
+  
+  try {
+    if (typeof t === 'function') {
+      translated = t(key, { defaultValue: fallback });
+      
+      // If that didn't work, try the simpler form
+      if (translated === key) {
+        translated = t(key, fallback);
+      }
+    } else {
+      translated = fallback;
+    }
+  } catch (error) {
+    console.warn(`Translation error for key "${key}":`, error);
+    translated = fallback;
+  }
   
   // Remove any [caption] prefixes that might appear in translations
   return typeof translated === 'string' 
-    ? translated.replace(/\[caption\]\s*/g, '') 
-    : fallback;
+    ? cleanCaptions(translated) 
+    : cleanCaptions(fallback);
 };
 
 /**
