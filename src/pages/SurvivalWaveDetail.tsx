@@ -159,6 +159,7 @@ const SurvivalWaveDetail = () => {
     setGameOver(false);
     setTimeLeft(wave?.time || 30);
     setMistakes([]);
+    setSelectedOption(null);
     
     // Générer de nouvelles questions
     if (wave) {
@@ -197,6 +198,8 @@ const SurvivalWaveDetail = () => {
   };
 
   const handleAnswer = (optionIndex: number) => {
+    if (answered) return; // Empêcher le clic multiple sur les options
+    
     setSelectedOption(optionIndex);
     setAnswered(true);
     
@@ -408,15 +411,13 @@ const SurvivalWaveDetail = () => {
                     <div className="mb-6">
                       <h3 className="text-lg font-medium mb-4">{getCurrentQuestion()?.question}</h3>
                       
-                      <RadioGroup 
-                        value={selectedOption?.toString()} 
-                        className="space-y-3"
-                        disabled={answered}
-                      >
+                      {/* Fixed: Stabilized the options layout with fixed heights and absolute positioning for icons */}
+                      <div className="space-y-3">
                         {getCurrentQuestion()?.options.map((option, index) => (
                           <div 
                             key={index}
-                            className={`flex items-center space-x-2 p-3 rounded-md border cursor-pointer 
+                            className={`flex items-center space-x-2 p-3 rounded-md border relative h-[56px] 
+                              ${!answered ? 'cursor-pointer' : 'cursor-default'} 
                               ${answered && index === getCurrentQuestion()?.correctAnswer 
                                 ? 'bg-green-900/20 border-green-500/30' 
                                 : answered && index === selectedOption 
@@ -425,26 +426,20 @@ const SurvivalWaveDetail = () => {
                               }`}
                             onClick={() => !answered && handleAnswer(index)}
                           >
-                            <RadioGroupItem 
-                              value={index.toString()} 
-                              id={`option-${index}`}
-                              className="text-finance-accent"
-                            />
-                            <label 
-                              htmlFor={`option-${index}`}
-                              className="flex-1 cursor-pointer"
-                            >
-                              {option}
-                            </label>
-                            {answered && index === getCurrentQuestion()?.correctAnswer && (
-                              <Check className="h-5 w-5 text-green-500" />
-                            )}
-                            {answered && index === selectedOption && index !== getCurrentQuestion()?.correctAnswer && (
-                              <X className="h-5 w-5 text-red-500" />
-                            )}
+                            <div className="flex items-center w-full">
+                              <span className={`h-4 w-4 rounded-full border ${answered && index === selectedOption ? 'bg-finance-accent border-finance-accent' : 'border-finance-steel'}`}></span>
+                              <span className="ml-2 flex-1">{option}</span>
+                              
+                              {answered && index === getCurrentQuestion()?.correctAnswer && (
+                                <Check className="h-5 w-5 text-green-500 absolute right-3" />
+                              )}
+                              {answered && index === selectedOption && index !== getCurrentQuestion()?.correctAnswer && (
+                                <X className="h-5 w-5 text-red-500 absolute right-3" />
+                              )}
+                            </div>
                           </div>
                         ))}
-                      </RadioGroup>
+                      </div>
                     </div>
                     
                     {answered && (

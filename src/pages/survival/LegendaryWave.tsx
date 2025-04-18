@@ -58,6 +58,7 @@ const LegendaryWave = () => {
     setScore(0);
     setGameOver(false);
     setTimeLeft(waveInfo.time);
+    setUserAnswer("");
   };
 
   const handleTimeout = () => {
@@ -71,6 +72,7 @@ const LegendaryWave = () => {
         setCurrentChallenge((prev) => prev + 1);
         setTimeLeft(waveInfo.time);
         setAnswered(false);
+        setUserAnswer("");
       }
     }, 2000);
   };
@@ -90,6 +92,7 @@ const LegendaryWave = () => {
         setCurrentChallenge((prev) => prev + 1);
         setTimeLeft(waveInfo.time);
         setAnswered(false);
+        setUserAnswer("");
       }
     }, 2000);
   };
