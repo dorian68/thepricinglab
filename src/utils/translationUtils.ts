@@ -1,16 +1,25 @@
 
+import { TFunction } from 'react-i18next';
+
+/**
+ * Type for a simplified translation function
+ */
+type SimpleTranslationFn = (key: string, defaultValue?: string) => string;
+
 /**
  * Utility for safely handling translations and avoiding [caption] placeholders
  */
 export const safeTranslate = (
-  t: (key: string, defaultValue?: string) => string,
+  t: TFunction | SimpleTranslationFn,
   key: string,
   fallback: string
 ): string => {
-  const translated = t(key, fallback);
+  const translated = typeof t === 'function' ? t(key, fallback) : fallback;
   
   // Remove any [caption] prefixes that might appear in translations
-  return translated.replace(/\[caption\]\s*/g, '');
+  return typeof translated === 'string' 
+    ? translated.replace(/\[caption\]\s*/g, '') 
+    : fallback;
 };
 
 /**

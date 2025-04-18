@@ -1,21 +1,15 @@
-
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import PythonCodeBlock from '@/components/python/PythonCodeBlock';
 import PythonActivator from '@/utils/pythonActivator';
 import { isPyodideLoaded } from '@/services/pyodideService';
-import { safeTranslate } from '@/utils/translationUtils';
+import { safeTranslate, cleanCaptions } from '@/utils/translationUtils';
 
 const detectLanguage = (className: string | null): string | null => {
   if (!className) return null;
   
   const match = className.match(/language-(\w+)/);
   return match ? match[1] : null;
-};
-
-// Nettoyer les balises [caption] des titres
-const cleanCaption = (text: string): string => {
-  return text.replace(/\[caption\]\s*/g, '');
 };
 
 export const transformCodeBlocks = (containerElement: HTMLElement) => {
@@ -55,7 +49,7 @@ export const transformCodeBlocks = (containerElement: HTMLElement) => {
       let title = "Python";
       const prevElement = preElement.previousElementSibling;
       if (prevElement && ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(prevElement.tagName)) {
-        title = cleanCaption(prevElement.textContent || 'Python');
+        title = cleanCaptions(prevElement.textContent || 'Python');
       }
       
       // Créer un wrapper pour contenir le bloc de code et les contrôles
