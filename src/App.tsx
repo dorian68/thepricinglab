@@ -46,6 +46,12 @@ import NotFound from './pages/NotFound';
 import AppShell from './components/AppShell';
 import SignUp from './pages/SignUp';
 
+// Pages de la communauté
+import Forum from './pages/community/Forum';
+import Chat from './pages/community/Chat';
+import WeeklyChallenge from './pages/community/WeeklyChallenge';
+import PairProgramming from './pages/community/PairProgramming';
+
 import VolatilityCalculator from './components/tools/VolatilityCalculator';
 import BlackScholesCalculator from './components/tools/BlackScholesCalculator';
 import MonteCarloSimulator from './components/tools/MonteCarloSimulator';
@@ -100,6 +106,10 @@ const App = () => {
                   <Route path="/tools/monte-carlo" element={<MonteCarloSimulator />} />
                   <Route path="/tools/model-calibration" element={<ModelCalibration />} />
                   <Route path="/community" element={<Community />} />
+                  <Route path="/community/forum" element={<Forum />} />
+                  <Route path="/community/chat" element={<Chat />} />
+                  <Route path="/community/weekly-challenge" element={<WeeklyChallenge />} />
+                  <Route path="/community/pair-programming" element={<PairProgramming />} />
                   <Route path="/blog" element={<Blog />} />
                   <Route path="/blog/:slug" element={<BlogPost />} />
                   <Route path="/pricing" element={<Pricing />} />
@@ -134,7 +144,6 @@ const App = () => {
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
-              <ChatBubble />
             </BrowserRouter>
           </AuthProvider>
         </QueryClientProvider>

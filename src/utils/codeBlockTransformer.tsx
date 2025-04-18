@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import PythonCodeBlock from '@/components/python/PythonCodeBlock';
 import PythonActivator from '@/utils/pythonActivator';
 import { isPyodideLoaded } from '@/services/pyodideService';
+import { safeTranslate } from '@/utils/translationUtils';
 
 const detectLanguage = (className: string | null): string | null => {
   if (!className) return null;

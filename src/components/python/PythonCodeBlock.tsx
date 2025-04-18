@@ -7,6 +7,8 @@ import { usePythonExecution } from '@/hooks/usePythonExecution';
 import { useToast } from '@/hooks/use-toast';
 import PyodideLoader from '@/components/python/PyodideLoader';
 import { isPyodideLoaded } from '@/services/pyodideService';
+import { safeTranslate } from '@/utils/translationUtils';
+import { useTranslation } from 'react-i18next';
 
 interface PythonCodeBlockProps {
   code: string;
@@ -15,6 +17,7 @@ interface PythonCodeBlockProps {
 }
 
 const PythonCodeBlock: React.FC<PythonCodeBlockProps> = ({ code: initialCode, className = '', title }) => {
+  const { t } = useTranslation();
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isOutputCollapsed, setIsOutputCollapsed] = useState(false);
   const [isPyodideAvailable, setIsPyodideAvailable] = useState(false);
@@ -40,8 +43,8 @@ const PythonCodeBlock: React.FC<PythonCodeBlockProps> = ({ code: initialCode, cl
   const handleRunClick = () => {
     if (!isPyodideAvailable) {
       toast({
-        title: "Python non activé",
-        description: "Veuillez d'abord activer l'environnement Python",
+        title: safeTranslate(t, 'python.notActivated', "Python non activé"),
+        description: safeTranslate(t, 'python.activateFirst', "Veuillez d'abord activer l'environnement Python"),
       });
       return;
     }
@@ -56,16 +59,16 @@ const PythonCodeBlock: React.FC<PythonCodeBlockProps> = ({ code: initialCode, cl
   const handleCopyClick = () => {
     navigator.clipboard.writeText(code);
     toast({
-      title: "Copié !",
-      description: "Le code a été copié dans le presse-papiers",
+      title: safeTranslate(t, 'python.copied', "Copié !"),
+      description: safeTranslate(t, 'python.codeCop       ied', "Le code a été copié dans le presse-papiers"),
     });
   };
   
   const handlePyodideLoaded = () => {
     setIsPyodideAvailable(true);
     toast({
-      title: "Python activé",
-      description: "L'environnement Python est prêt pour l'exécution de code",
+      title: safeTranslate(t, 'python.activated', "Python activé"),
+      description: safeTranslate(t, 'python.ready', "L'environnement Python est prêt pour l'exécution de code"),
     });
   };
   
@@ -114,6 +117,7 @@ const PythonCodeBlock: React.FC<PythonCodeBlockProps> = ({ code: initialCode, cl
               <PyodideLoader 
                 discreet={true} 
                 onLoad={handlePyodideLoaded} 
+                autoLoad={true}
               />
             )}
             <Button
@@ -124,7 +128,7 @@ const PythonCodeBlock: React.FC<PythonCodeBlockProps> = ({ code: initialCode, cl
               disabled={!isPyodideAvailable}
             >
               <Play className="h-3.5 w-3.5" />
-              <span>Exécuter</span>
+              <span>{safeTranslate(t, 'python.execute', "Exécuter")}</span>
             </Button>
           </div>
         </div>
@@ -136,7 +140,7 @@ const PythonCodeBlock: React.FC<PythonCodeBlockProps> = ({ code: initialCode, cl
           <div className="flex items-center justify-between p-2 border-b border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800">
             <div className="flex items-center space-x-2">
               <Code className="h-4 w-4 text-slate-500" />
-              <span className="text-sm font-medium">{title || "Code Python"}</span>
+              <span className="text-sm font-medium">{title || safeTranslate(t, 'python.codeBlock', "Code Python")}</span>
             </div>
             <div className="flex items-center space-x-1">
               <Button
@@ -144,7 +148,7 @@ const PythonCodeBlock: React.FC<PythonCodeBlockProps> = ({ code: initialCode, cl
                 size="sm"
                 className="h-7 w-7 p-0 text-slate-500"
                 onClick={() => reset()}
-                title="Réinitialiser"
+                title={safeTranslate(t, 'python.reset', "Réinitialiser")}
               >
                 <RotateCcw className="h-4 w-4" />
               </Button>
@@ -153,7 +157,7 @@ const PythonCodeBlock: React.FC<PythonCodeBlockProps> = ({ code: initialCode, cl
                 size="sm"
                 className="h-7 w-7 p-0 text-slate-500"
                 onClick={() => setIsEditorOpen(false)}
-                title="Fermer"
+                title={safeTranslate(t, 'python.close', "Fermer")}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -166,7 +170,7 @@ const PythonCodeBlock: React.FC<PythonCodeBlockProps> = ({ code: initialCode, cl
               value={code}
               onChange={(e) => setCode(e.target.value)}
               className="font-mono text-sm min-h-[150px] resize-y bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600"
-              placeholder="Entrez votre code Python ici..."
+              placeholder={safeTranslate(t, 'python.enterCode', "Entrez votre code Python ici...")}
             />
           </div>
           
@@ -180,12 +184,12 @@ const PythonCodeBlock: React.FC<PythonCodeBlockProps> = ({ code: initialCode, cl
               {result.isLoading ? (
                 <>
                   <Loader className="h-3.5 w-3.5 animate-spin" />
-                  <span>Exécution...</span>
+                  <span>{safeTranslate(t, 'python.executing', "Exécution...")}</span>
                 </>
               ) : (
                 <>
                   <Play className="h-3.5 w-3.5" />
-                  <span>Exécuter</span>
+                  <span>{safeTranslate(t, 'python.execute', "Exécuter")}</span>
                 </>
               )}
             </Button>
@@ -202,12 +206,12 @@ const PythonCodeBlock: React.FC<PythonCodeBlockProps> = ({ code: initialCode, cl
                   {result.error ? (
                     <span className="text-red-500 flex items-center">
                       <X className="h-4 w-4 mr-1" />
-                      Erreur
+                      {safeTranslate(t, 'python.error', "Erreur")}
                     </span>
                   ) : (
                     <span className="text-green-500 flex items-center">
                       <Check className="h-4 w-4 mr-1" />
-                      Résultat
+                      {safeTranslate(t, 'python.result', "Résultat")}
                     </span>
                   )}
                 </span>
@@ -238,7 +242,7 @@ const PythonCodeBlock: React.FC<PythonCodeBlockProps> = ({ code: initialCode, cl
                   
                   {result.plots.length > 0 && (
                     <div className="mt-3 space-y-3">
-                      <h4 className="text-sm font-medium">Visualisations:</h4>
+                      <h4 className="text-sm font-medium">{safeTranslate(t, 'python.visualizations', "Visualisations:")}</h4>
                       {result.plots.map((plot, index) => (
                         <div key={index} className="flex justify-center">
                           <img 

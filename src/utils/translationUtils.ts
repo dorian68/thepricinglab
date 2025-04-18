@@ -1,63 +1,47 @@
 
-import { TFunction } from 'i18next';
-
 /**
- * A safe translation function that provides fallbacks for missing translations
- * @param t The translation function from useTranslation()
- * @param key The translation key to look up
- * @param defaultValue Optional default value if translation is missing
- * @param lng Current language
- * @returns The translated string or a fallback value
+ * Utility for safely handling translations and avoiding [caption] placeholders
  */
 export const safeTranslate = (
-  t: TFunction, 
-  key: string, 
-  defaultValue?: string, 
-  lng?: string
+  t: (key: string, defaultValue?: string) => string,
+  key: string,
+  fallback: string
 ): string => {
-  // Use the translation function with a default value
-  const result = t(key, { defaultValue: defaultValue || extractLabel(key) });
+  const translated = t(key, fallback);
   
-  // If the result exactly matches the key or contains square brackets, consider it missing
-  if (result === key || (typeof result === 'string' && result.includes('[') && result.includes(']'))) {
-    console.warn(`Missing translation: ${key}${lng ? ` in ${lng}` : ''}`);
-    // Return the default value or a humanized version of the key
-    return defaultValue || extractLabel(key);
+  // Remove any [caption] prefixes that might appear in translations
+  return translated.replace(/\[caption\]\s*/g, '');
+};
+
+/**
+ * Process a block of text to remove [caption] markers
+ */
+export const cleanCaptions = (text: string): string => {
+  if (!text) return '';
+  return text.replace(/\[caption\]\s*/g, '');
+};
+
+/**
+ * Process translations in an object recursively
+ */
+export const cleanTranslationObject = (obj: any): any => {
+  if (!obj) return obj;
+  
+  if (typeof obj === 'string') {
+    return cleanCaptions(obj);
   }
   
-  return result;
-};
-
-/**
- * Extracts a human-readable label from a translation key
- * @param key The translation key
- * @returns A readable label
- */
-export const extractLabel = (key: string): string => {
-  // Get the last part of the key (e.g., "title" from "home.hero.title")
-  const lastPart = key.split('.').pop();
+  if (Array.isArray(obj)) {
+    return obj.map(cleanTranslationObject);
+  }
   
-  if (!lastPart) return key;
+  if (typeof obj === 'object') {
+    const result = {};
+    for (const key in obj) {
+      result[key] = cleanTranslationObject(obj[key]);
+    }
+    return result;
+  }
   
-  // Convert camelCase to Title Case with spaces
-  return lastPart
-    .replace(/([A-Z])/g, ' $1') // Add space before capital letters
-    .replace(/^./, (str) => str.toUpperCase()) // Capitalize first letter
-    .trim(); // Remove any extra spaces
-};
-
-/**
- * Checks if a translation exists for a given key
- * @param t The translation function from useTranslation()
- * @param key The translation key to check
- * @returns Boolean indicating if translation exists
- */
-export const hasTranslation = (t: TFunction, key: string): boolean => {
-  // First cast to unknown, then to string to handle the typing correctly
-  const result = t(key, { returnObjects: true }) as unknown;
-  
-  // Check if the result is a valid string and not a fallback
-  return typeof result === 'string' && 
-         result !== key && 
-         !(String(result).includes('[') && String(result).includes(']'));
+  return obj;
 };

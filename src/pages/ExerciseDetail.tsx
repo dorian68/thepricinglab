@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { transformCodeBlocks } from '@/utils/codeBlockTransformer';
 import PythonActivator from '@/utils/pythonActivator';
 import { isPyodideLoaded } from '@/services/pyodideService';
+import { safeTranslate } from '@/utils/translationUtils';
 
 const ExerciseDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -182,11 +183,152 @@ plt.show()`}
             </p>
           </>
         );
+      case 'bsm-pricing':
+        return (
+          <>
+            <h2>Black-Scholes-Merton Model Implementation</h2>
+            <p>
+              This exercise guides you through implementing the Black-Scholes-Merton model for European option pricing.
+            </p>
+            <pre>
+              <code className="language-python">
+{`import numpy as np
+from scipy.stats import norm
+import matplotlib.pyplot as plt
+
+# Function to calculate d1 and d2
+def calculate_d1_d2(S, K, T, r, sigma):
+    """
+    Calculate d1 and d2 parameters for Black-Scholes formula
+    
+    Parameters:
+    S: Current stock price
+    K: Strike price
+    T: Time to maturity (in years)
+    r: Risk-free interest rate
+    sigma: Volatility of the underlying asset
+    
+    Returns:
+    d1, d2: Parameters used in Black-Scholes formula
+    """
+    d1 = (np.log(S/K) + (r + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
+    d2 = d1 - sigma * np.sqrt(T)
+    return d1, d2
+
+# Black-Scholes formula for call option price
+def bs_call_price(S, K, T, r, sigma):
+    """
+    Calculate the price of a European call option using Black-Scholes formula
+    
+    Parameters:
+    S: Current stock price
+    K: Strike price
+    T: Time to maturity (in years)
+    r: Risk-free interest rate
+    sigma: Volatility of the underlying asset
+    
+    Returns:
+    call_price: Theoretical price of the European call option
+    """
+    d1, d2 = calculate_d1_d2(S, K, T, r, sigma)
+    call_price = S * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
+    return call_price
+
+# Black-Scholes formula for put option price
+def bs_put_price(S, K, T, r, sigma):
+    """
+    Calculate the price of a European put option using Black-Scholes formula
+    
+    Parameters:
+    S: Current stock price
+    K: Strike price
+    T: Time to maturity (in years)
+    r: Risk-free interest rate
+    sigma: Volatility of the underlying asset
+    
+    Returns:
+    put_price: Theoretical price of the European put option
+    """
+    d1, d2 = calculate_d1_d2(S, K, T, r, sigma)
+    put_price = K * np.exp(-r * T) * norm.cdf(-d2) - S * norm.cdf(-d1)
+    return put_price
+
+# Example usage
+S = 100    # Current stock price
+K = 100    # Strike price
+T = 1.0    # Time to maturity (1 year)
+r = 0.05   # Risk-free rate (5%)
+sigma = 0.2  # Volatility (20%)
+
+# Calculate option prices
+call_price = bs_call_price(S, K, T, r, sigma)
+put_price = bs_put_price(S, K, T, r, sigma)
+
+print(f"European Call Option Price: {call_price:.4f}")
+print(f"European Put Option Price: {put_price:.4f}")
+
+# Verify put-call parity: C - P = S - K*exp(-rT)
+parity_check = call_price - put_price
+theoretical_parity = S - K * np.exp(-r * T)
+print(f"Put-Call Parity Check: {parity_check:.4f} = {theoretical_parity:.4f}")
+
+# Visualization: Option prices as a function of stock price
+stock_prices = np.linspace(60, 140, 100)
+call_prices = [bs_call_price(s, K, T, r, sigma) for s in stock_prices]
+put_prices = [bs_put_price(s, K, T, r, sigma) for s in stock_prices]
+
+plt.figure(figsize=(12, 6))
+plt.plot(stock_prices, call_prices, 'b', label='Call Option')
+plt.plot(stock_prices, put_prices, 'r', label='Put Option')
+plt.axvline(x=K, color='green', linestyle='--', label='Strike Price')
+plt.grid(True, alpha=0.3)
+plt.xlabel('Stock Price')
+plt.ylabel('Option Price')
+plt.title('Black-Scholes Option Prices')
+plt.legend()
+plt.show()
+
+# Visualization: Option prices as a function of time to maturity
+times = np.linspace(0.1, 2, 100)
+call_times = [bs_call_price(S, K, t, r, sigma) for t in times]
+put_times = [bs_put_price(S, K, t, r, sigma) for t in times]
+
+plt.figure(figsize=(12, 6))
+plt.plot(times, call_times, 'b', label='Call Option')
+plt.plot(times, put_times, 'r', label='Put Option')
+plt.grid(True, alpha=0.3)
+plt.xlabel('Time to Maturity (years)')
+plt.ylabel('Option Price')
+plt.title('Option Prices vs Time to Maturity')
+plt.legend()
+plt.show()
+
+# Visualization: Option prices as a function of volatility
+vols = np.linspace(0.1, 0.6, 100)
+call_vols = [bs_call_price(S, K, T, r, v) for v in vols]
+put_vols = [bs_put_price(S, K, T, r, v) for v in vols]
+
+plt.figure(figsize=(12, 6))
+plt.plot(vols, call_vols, 'b', label='Call Option')
+plt.plot(vols, put_vols, 'r', label='Put Option')
+plt.grid(True, alpha=0.3)
+plt.xlabel('Volatility')
+plt.ylabel('Option Price')
+plt.title('Option Prices vs Volatility')
+plt.legend()
+plt.show()`}
+              </code>
+            </pre>
+            <p>
+              Explore how different parameters affect option prices in the Black-Scholes model.
+            </p>
+          </>
+        );
       default:
         return (
           <div className="text-center py-10">
-            <h2 className="text-2xl font-bold mb-4">Exercise Not Found</h2>
-            <p>The exercise you're looking for is either not available or still in development.</p>
+            <h2 className="text-2xl font-bold mb-4">{safeTranslate(t, 'exercises.notFound', 'Exercise Not Found')}</h2>
+            <p>{safeTranslate(t, 'exercises.notFoundDescription', 'The exercise you\'re looking for is either not available or still in development.')}</p>
           </div>
         );
     }
@@ -221,7 +363,7 @@ plt.show()`}
           onClick={refreshContent}
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
         >
-          Recharger les blocs de code
+          {safeTranslate(t, 'exercises.reloadCodeBlocks', 'Recharger les blocs de code')}
         </button>
       </div>
     </div>
