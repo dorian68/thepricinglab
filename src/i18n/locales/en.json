@@ -603,5 +603,42 @@
         "keywords": "model calibration, parameter fitting, stochastic models"
       }
     }
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "subtitle": "Welcome back!",
+      "email": "Email",
+      "emailPlaceholder": "Your email address",
+      "password": "Password",
+      "passwordPlaceholder": "Your password",
+      "submit": "Sign in",
+      "loading": "Signing in...",
+      "forgotPassword": "Forgot password?",
+      "signupPrompt": "Don't have an account?",
+      "signupLink": "Sign up",
+      "error": "Login failed. Please check your credentials.",
+      "success": "Successfully logged in"
+    },
+    "signup": {
+      "title": "Create an account",
+      "subtitle": "Join the community",
+      "firstname": "First name",
+      "firstnamePlaceholder": "Your first name",
+      "lastname": "Last name",
+      "lastnamePlaceholder": "Your last name",
+      "email": "Email",
+      "emailPlaceholder": "Your email address",
+      "password": "Password",
+      "passwordPlaceholder": "Choose a secure password",
+      "terms": "I agree to the",
+      "termsLink": "terms of service",
+      "submit": "Create account",
+      "loading": "Creating account...",
+      "loginPrompt": "Already have an account?",
+      "loginLink": "Sign in",
+      "error": "Error creating account.",
+      "success": "Account created successfully!"
+    }
   }
 }

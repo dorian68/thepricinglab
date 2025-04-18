@@ -582,5 +582,42 @@
         "keywords": "calibration de modèles, ajustement de paramètres, fitting, modèles stochastiques"
       }
     }
+  },
+  "auth": {
+    "login": {
+      "title": "Connexion",
+      "subtitle": "Content de vous revoir !",
+      "email": "Email",
+      "emailPlaceholder": "Votre adresse email",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Votre mot de passe",
+      "submit": "Se connecter",
+      "loading": "Connexion...",
+      "forgotPassword": "Mot de passe oublié ?",
+      "signupPrompt": "Pas encore de compte ?",
+      "signupLink": "S'inscrire",
+      "error": "Erreur de connexion. Veuillez vérifier vos identifiants.",
+      "success": "Connexion réussie"
+    },
+    "signup": {
+      "title": "Créer un compte",
+      "subtitle": "Rejoignez la communauté",
+      "firstname": "Prénom",
+      "firstnamePlaceholder": "Votre prénom",
+      "lastname": "Nom",
+      "lastnamePlaceholder": "Votre nom",
+      "email": "Email",
+      "emailPlaceholder": "Votre adresse email",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Choisissez un mot de passe sécurisé",
+      "terms": "J'accepte les",
+      "termsLink": "conditions d'utilisation",
+      "submit": "Créer mon compte",
+      "loading": "Création en cours...",
+      "loginPrompt": "Déjà inscrit ?",
+      "loginLink": "Connectez-vous",
+      "error": "Erreur lors de la création du compte.",
+      "success": "Compte créé avec succès !"
+    }
   }
 }
