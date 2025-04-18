@@ -42,6 +42,68 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          date_inscription: string
+          email: string
+          id: string
+          nom: string | null
+          plan: Database["public"]["Enums"]["user_plan"]
+          prenom: string | null
+        }
+        Insert: {
+          date_inscription?: string
+          email: string
+          id: string
+          nom?: string | null
+          plan?: Database["public"]["Enums"]["user_plan"]
+          prenom?: string | null
+        }
+        Update: {
+          date_inscription?: string
+          email?: string
+          id?: string
+          nom?: string | null
+          plan?: Database["public"]["Enums"]["user_plan"]
+          prenom?: string | null
+        }
+        Relationships: []
+      }
+      user_activity: {
+        Row: {
+          activity_type: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          module_path: string | null
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          module_path?: string | null
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          module_path?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_activity_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -50,7 +112,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_plan: "freemium" | "basic" | "pro" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -165,6 +227,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_plan: ["freemium", "basic", "pro", "admin"],
+    },
   },
 } as const

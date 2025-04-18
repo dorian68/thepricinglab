@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -43,6 +42,7 @@ import LegendaryWave from './pages/survival/LegendaryWave';
 import BugReport from './pages/BugReport';
 import NotFound from './pages/NotFound';
 import AppShell from './components/AppShell';
+import SignUp from './pages/SignUp';
 
 import VolatilityCalculator from './components/tools/VolatilityCalculator';
 import BlackScholesCalculator from './components/tools/BlackScholesCalculator';
@@ -66,72 +66,75 @@ const App = () => {
     <I18nextProvider i18n={i18n}>
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
-          <Helmet>
-            <title>The Pricing Library - Plateforme d'apprentissage avancé pour les options financières</title>
-            <meta name="description" content="Apprenez à maitriser les options financières avec des cours interactifs, des simulateurs et des outils d'analyse avancés. Black-Scholes, Monte Carlo, Volatilité et plus." />
-            <meta name="keywords" content="pricing financier, options, black-scholes, monte carlo, volatilité, finance quantitative, simulateurs financiers" />
-            <link rel="canonical" href="https://thepricinglab.com" />
-          </Helmet>
-          <Toaster position="top-right" />
-          <BrowserRouter>
-            <Routes>
-              <Route element={<AppShell />}>
-                <Route index element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/courses" element={<Courses />} />
-                <Route path="/courses/black-scholes" element={<BlackScholes />} />
-                <Route path="/courses/exotic-options" element={<ExoticOptions />} />
-                <Route path="/courses/greeks" element={<Greeks />} />
-                <Route path="/courses/implied-vol" element={<ImpliedVol />} />
-                <Route path="/courses/monte-carlo" element={<MonteCarlo />} />
-                <Route path="/courses/vol-products" element={<VolProducts />} />
-                <Route path="/courses/yield-curves" element={<YieldCurves />} />
-                <Route path="/practice" element={<Practice />} />
-                <Route path="/exercises" element={<Exercises />} />
-                <Route path="/exercises/:id" element={<ExerciseDetail />} />
-                <Route path="/quizzes" element={<Quizzes />} />
-                <Route path="/tools" element={<Tools />} />
-                <Route path="/tools/volatility-calculator" element={<VolatilityCalculator />} />
-                <Route path="/tools/black-scholes" element={<BlackScholesCalculator />} />
-                <Route path="/tools/monte-carlo" element={<MonteCarloSimulator />} />
-                <Route path="/tools/model-calibration" element={<ModelCalibration />} />
-                <Route path="/community" element={<Community />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:slug" element={<BlogPost />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="/notebooks" element={<Notebooks />} />
-                <Route path="/projects" element={<Projects />} />
-                <Route path="/mentoring" element={<Mentoring />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/leaderboard" element={<Leaderboard />} />
-                <Route path="/survival-mode" element={<SurvivalMode />} />
-                <Route path="/survival-mode/wave/:id" element={<SurvivalWaveDetail />} />
-                <Route path="/survival-mode/beginner" element={<BeginnerWave />} />
-                <Route path="/survival-mode/intermediate" element={<IntermediateWave />} />
-                <Route path="/survival-mode/advanced" element={<AdvancedWave />} />
-                <Route path="/survival-mode/expert" element={<ExpertWave />} />
-                <Route path="/survival-mode/master" element={<MasterWave />} />
-                <Route path="/survival-mode/legendary" element={<LegendaryWave />} />
-                <Route path="/bug-report" element={<BugReport />} />
-                
-                <Route path="/trading/exercises" element={<TradingExercises />} />
-                <Route path="/trading/backtest" element={<Backtest />} />
-                <Route path="/trading/scenarios" element={<Scenarios />} />
-                <Route path="/trading/strategies" element={<Strategies />} />
-                <Route path="/trading/performance" element={<Performance />} />
-                
-                <Route path="/admin-login" element={<AdminLogin />} />
-                <Route path="/admin-dashboard" element={
-                  <AdminRouteGuard>
-                    <AdminDashboard />
-                  </AdminRouteGuard>
-                } />
-                
-                <Route path="*" element={<NotFound />} />
-              </Route>
-            </Routes>
-            <ChatBubble />
-          </BrowserRouter>
+          <AuthProvider>
+            <Helmet>
+              <title>The Pricing Library - Plateforme d'apprentissage avancé pour les options financières</title>
+              <meta name="description" content="Apprenez à maitriser les options financières avec des cours interactifs, des simulateurs et des outils d'analyse avancés. Black-Scholes, Monte Carlo, Volatilité et plus." />
+              <meta name="keywords" content="pricing financier, options, black-scholes, monte carlo, volatilité, finance quantitative, simulateurs financiers" />
+              <link rel="canonical" href="https://thepricinglab.com" />
+            </Helmet>
+            <Toaster position="top-right" />
+            <BrowserRouter>
+              <Routes>
+                <Route element={<AppShell />}>
+                  <Route index element={<Home />} />
+                  <Route path="/signup" element={<SignUp />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/courses" element={<Courses />} />
+                  <Route path="/courses/black-scholes" element={<BlackScholes />} />
+                  <Route path="/courses/exotic-options" element={<ExoticOptions />} />
+                  <Route path="/courses/greeks" element={<Greeks />} />
+                  <Route path="/courses/implied-vol" element={<ImpliedVol />} />
+                  <Route path="/courses/monte-carlo" element={<MonteCarlo />} />
+                  <Route path="/courses/vol-products" element={<VolProducts />} />
+                  <Route path="/courses/yield-curves" element={<YieldCurves />} />
+                  <Route path="/practice" element={<Practice />} />
+                  <Route path="/exercises" element={<Exercises />} />
+                  <Route path="/exercises/:id" element={<ExerciseDetail />} />
+                  <Route path="/quizzes" element={<Quizzes />} />
+                  <Route path="/tools" element={<Tools />} />
+                  <Route path="/tools/volatility-calculator" element={<VolatilityCalculator />} />
+                  <Route path="/tools/black-scholes" element={<BlackScholesCalculator />} />
+                  <Route path="/tools/monte-carlo" element={<MonteCarloSimulator />} />
+                  <Route path="/tools/model-calibration" element={<ModelCalibration />} />
+                  <Route path="/community" element={<Community />} />
+                  <Route path="/blog" element={<Blog />} />
+                  <Route path="/blog/:slug" element={<BlogPost />} />
+                  <Route path="/pricing" element={<Pricing />} />
+                  <Route path="/notebooks" element={<Notebooks />} />
+                  <Route path="/projects" element={<Projects />} />
+                  <Route path="/mentoring" element={<Mentoring />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/leaderboard" element={<Leaderboard />} />
+                  <Route path="/survival-mode" element={<SurvivalMode />} />
+                  <Route path="/survival-mode/wave/:id" element={<SurvivalWaveDetail />} />
+                  <Route path="/survival-mode/beginner" element={<BeginnerWave />} />
+                  <Route path="/survival-mode/intermediate" element={<IntermediateWave />} />
+                  <Route path="/survival-mode/advanced" element={<AdvancedWave />} />
+                  <Route path="/survival-mode/expert" element={<ExpertWave />} />
+                  <Route path="/survival-mode/master" element={<MasterWave />} />
+                  <Route path="/survival-mode/legendary" element={<LegendaryWave />} />
+                  <Route path="/bug-report" element={<BugReport />} />
+                  
+                  <Route path="/trading/exercises" element={<TradingExercises />} />
+                  <Route path="/trading/backtest" element={<Backtest />} />
+                  <Route path="/trading/scenarios" element={<Scenarios />} />
+                  <Route path="/trading/strategies" element={<Strategies />} />
+                  <Route path="/trading/performance" element={<Performance />} />
+                  
+                  <Route path="/admin-login" element={<AdminLogin />} />
+                  <Route path="/admin-dashboard" element={
+                    <AdminRouteGuard>
+                      <AdminDashboard />
+                    </AdminRouteGuard>
+                  } />
+                  
+                  <Route path="*" element={<NotFound />} />
+                </Route>
+              </Routes>
+              <ChatBubble />
+            </BrowserRouter>
+          </AuthProvider>
         </QueryClientProvider>
       </HelmetProvider>
     </I18nextProvider>
