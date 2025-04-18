@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Menu } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import DesktopNav from "./navigation/DesktopNav";
 import MobileNav from "./navigation/MobileNav";
 import { Link } from "react-router-dom";
@@ -8,11 +9,19 @@ import { useTranslation } from "react-i18next";
 
 const ModernNavbar = () => {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
+
+  // Fermer le menu si on passe de mobile à desktop
+  useEffect(() => {
+    if (!isMobile && isOpen) {
+      setIsOpen(false);
+    }
+  }, [isMobile, isOpen]);
 
   // Bloquer le scroll du body quand le menu mobile est ouvert
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && isMobile) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'auto';
@@ -21,10 +30,13 @@ const ModernNavbar = () => {
     return () => {
       document.body.style.overflow = 'auto';
     };
-  }, [isOpen]);
+  }, [isOpen, isMobile]);
 
   return (
-    <nav className="sticky top-0 z-50 bg-finance-dark/95 backdrop-blur-sm border-b border-finance-steel/20" aria-label="Navigation principale">
+    <nav 
+      className="sticky top-0 z-50 bg-finance-dark/95 backdrop-blur-sm border-b border-finance-steel/20" 
+      aria-label="Navigation principale"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link 

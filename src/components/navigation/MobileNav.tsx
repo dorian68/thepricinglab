@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { 
@@ -17,20 +18,46 @@ interface MobileNavProps {
 const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
   const { t } = useTranslation();
 
+  // Bloquer le scroll quand le menu est ouvert
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
     <div className="md:hidden fixed inset-0 z-50 overflow-hidden">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="absolute inset-y-0 right-0 w-full max-w-sm bg-finance-charcoal overflow-y-auto h-full">
+      {/* Overlay semi-transparent */}
+      <div 
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" 
+        onClick={onClose} 
+      />
+      
+      {/* Panel de navigation */}
+      <div 
+        className="absolute inset-y-0 right-0 w-full max-w-sm bg-finance-dark border-l border-finance-steel/20 overflow-y-auto"
+        style={{ 
+          maxHeight: '100vh',
+          overflowY: 'auto',
+          boxShadow: '-4px 0 12px rgba(0, 0, 0, 0.1)'
+        }}
+      >
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-          <div className="flex justify-between items-center mb-4 px-3">
+          <div className="flex justify-between items-center mb-4 px-3 pt-2">
             <h2 className="text-finance-accent font-bold">Menu</h2>
             <button
               onClick={onClose}
               className="inline-flex items-center justify-center p-2 rounded-md text-finance-offwhite hover:text-finance-accent focus:outline-none"
+              aria-label={safeTranslate(t, 'navbar.closeMenu', 'Close menu')}
             >
-              <span className="sr-only">{safeTranslate(t, 'navbar.closeMenu', 'Close menu')}</span>
               <X className="block h-6 w-6" aria-hidden="true" />
             </button>
           </div>
