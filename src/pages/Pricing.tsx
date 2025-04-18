@@ -1,4 +1,3 @@
-
 import React from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -79,7 +78,6 @@ const PricingPage = () => {
     }
   ];
 
-  // Detailed feature comparison
   const featureComparison = [
     {
       category: t('pricing.comparison.category1'),
@@ -193,7 +191,6 @@ const PricingPage = () => {
     }
   ];
 
-  // Helper function to render feature availability
   const renderFeatureAvailability = (available: boolean | string) => {
     if (available === true) {
       return <Check className="h-5 w-5 text-green-500" />;
@@ -211,9 +208,8 @@ const PricingPage = () => {
     <div className="flex flex-col min-h-screen bg-[#1A1F2C] text-white">
       <Navbar />
       
-      {/* Hero Section */}
       <section className="py-20 px-6">
-        <div className="max-w-6xl mx-auto text-center">
+        <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
             {t('pricing.hero.title')} <span className="text-finance-accent">{t('pricing.hero.highlight')}</span>
           </h1>
@@ -221,18 +217,18 @@ const PricingPage = () => {
             {t('pricing.hero.description')}
           </p>
           
-          <Tabs defaultValue="monthly" className="max-w-3xl mx-auto">
+          <Tabs defaultValue="monthly" className="max-w-7xl mx-auto">
             <TabsList className="grid grid-cols-2 w-64 mx-auto mb-8">
               <TabsTrigger value="monthly">{t('pricing.monthly')}</TabsTrigger>
               <TabsTrigger value="annual">{t('pricing.annual')}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="monthly">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 lg:gap-12">
                 {pricingTiers.map((tier) => (
                   <div 
                     key={tier.id} 
-                    className={`bg-[#141821] p-6 rounded-lg border ${
+                    className={`bg-[#141821] p-8 rounded-lg border min-w-[280px] ${
                       tier.recommended ? 'border-finance-accent' : 'border-[#2A2F3C]'
                     } relative flex flex-col h-full`}
                   >
@@ -243,32 +239,32 @@ const PricingPage = () => {
                     )}
                     
                     {tier.badge && (
-                      <Badge variant="outline" className="absolute top-3 right-3 bg-[#1A1F2C]/50">
+                      <Badge variant="outline" className="absolute top-4 right-4 bg-[#1A1F2C]/50">
                         {tier.badge}
                       </Badge>
                     )}
                     
-                    <div className="flex items-center mb-4">
+                    <div className="flex items-center mb-6">
                       <div className="p-2 rounded-full bg-[#1A1F2C] mr-3">
                         {tier.icon}
                       </div>
                       <h3 className="text-xl font-medium text-finance-offwhite">{tier.name}</h3>
                     </div>
                     
-                    <div className="mb-4">
-                      <div className="text-2xl font-bold text-finance-accent">
+                    <div className="mb-6">
+                      <div className="text-3xl font-bold text-finance-accent">
                         {tier.price} 
                         {tier.id !== "freemium" && (
                           <span className="text-sm text-[#8E9196] font-normal ml-1">{t('pricing.monthly')}</span>
                         )}
                       </div>
-                      <p className="text-[#8E9196] text-sm mt-1">{tier.description}</p>
+                      <p className="text-[#8E9196] text-sm mt-2">{tier.description}</p>
                     </div>
                     
-                    <ul className="space-y-3 mb-6 flex-grow">
+                    <ul className="space-y-4 mb-8 flex-grow">
                       {tier.features.map((feature, index) => (
                         <li key={index} className="flex items-start">
-                          <CheckCircle2 className="h-5 w-5 text-green-400 mr-2 flex-shrink-0 mt-0.5" />
+                          <CheckCircle2 className="h-5 w-5 text-green-400 mr-3 flex-shrink-0 mt-0.5" />
                           <span className="text-sm text-finance-offwhite">{feature}</span>
                         </li>
                       ))}
@@ -277,6 +273,7 @@ const PricingPage = () => {
                     <Button 
                       variant={tier.id === "freemium" ? "financeOutline" : "finance"} 
                       className="w-full mt-auto" 
+                      size="lg"
                       asChild
                     >
                       <Link to={tier.href}>
@@ -289,9 +286,8 @@ const PricingPage = () => {
             </TabsContent>
             
             <TabsContent value="annual">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 lg:gap-12">
                 {pricingTiers.map((tier) => {
-                  // Calculate annual price with 20% discount
                   const annualPrice = tier.id === "freemium" 
                     ? tier.price 
                     : `${Math.round(parseInt(tier.price) * 12 * 0.8)}€`;
@@ -299,7 +295,7 @@ const PricingPage = () => {
                   return (
                     <div 
                       key={tier.id} 
-                      className={`bg-[#141821] p-6 rounded-lg border ${
+                      className={`bg-[#141821] p-8 rounded-lg border min-w-[280px] ${
                         tier.recommended ? 'border-finance-accent' : 'border-[#2A2F3C]'
                       } relative flex flex-col h-full`}
                     >
@@ -316,37 +312,37 @@ const PricingPage = () => {
                       )}
                       
                       {tier.badge && (
-                        <Badge variant="outline" className="absolute top-3 right-3 bg-[#1A1F2C]/50">
+                        <Badge variant="outline" className="absolute top-4 right-4 bg-[#1A1F2C]/50">
                           {tier.badge}
                         </Badge>
                       )}
                       
-                      <div className="flex items-center mb-4">
+                      <div className="flex items-center mb-6">
                         <div className="p-2 rounded-full bg-[#1A1F2C] mr-3">
                           {tier.icon}
                         </div>
                         <h3 className="text-xl font-medium text-finance-offwhite">{tier.name}</h3>
                       </div>
                       
-                      <div className="mb-4">
-                        <div className="text-2xl font-bold text-finance-accent">
+                      <div className="mb-6">
+                        <div className="text-3xl font-bold text-finance-accent">
                           {annualPrice} 
                           {tier.id !== "freemium" && (
                             <span className="text-sm text-[#8E9196] font-normal ml-1">{t('pricing.annual')}</span>
                           )}
                         </div>
                         {tier.id !== "freemium" && (
-                          <div className="text-sm text-green-400 mt-1">
+                          <div className="text-sm text-green-400 mt-2">
                             {t('pricing.annualSavings')}
                           </div>
                         )}
-                        <p className="text-[#8E9196] text-sm mt-1">{tier.description}</p>
+                        <p className="text-[#8E9196] text-sm mt-2">{tier.description}</p>
                       </div>
                       
-                      <ul className="space-y-3 mb-6 flex-grow">
+                      <ul className="space-y-4 mb-8 flex-grow">
                         {tier.features.map((feature, index) => (
                           <li key={index} className="flex items-start">
-                            <CheckCircle2 className="h-5 w-5 text-green-400 mr-2 flex-shrink-0 mt-0.5" />
+                            <CheckCircle2 className="h-5 w-5 text-green-400 mr-3 flex-shrink-0 mt-0.5" />
                             <span className="text-sm text-finance-offwhite">{feature}</span>
                           </li>
                         ))}
@@ -354,7 +350,8 @@ const PricingPage = () => {
                       
                       <Button 
                         variant={tier.id === "freemium" ? "financeOutline" : "finance"} 
-                        className="w-full mt-auto" 
+                        className="w-full mt-auto"
+                        size="lg" 
                         asChild
                       >
                         <Link to={`${tier.href}&billing=annual`}>
@@ -370,7 +367,6 @@ const PricingPage = () => {
         </div>
       </section>
       
-      {/* Feature Comparison */}
       <section className="py-16 px-6 bg-[#141821]">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-12 text-center">
@@ -430,7 +426,6 @@ const PricingPage = () => {
         </div>
       </section>
       
-      {/* FAQ Section */}
       <section className="py-16 px-6">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl font-bold mb-8 text-center">{t('pricing.faq.title')}</h2>
@@ -459,7 +454,6 @@ const PricingPage = () => {
         </div>
       </section>
       
-      {/* CTA Section */}
       <section className="py-16 px-6 bg-[#141821]">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6">
