@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -5,10 +6,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import { Toaster } from 'sonner';
 import ChatBubble from './components/chat/ChatBubble';
+import { AuthProvider } from './contexts/AuthContext';
 
 import i18n from './i18n';
 import Home from './pages/Home';
-import Login from './pages/Login';
+import Login from './pages/auth/Login';
 import Courses from './pages/Courses';
 import BlackScholes from './pages/courses/BlackScholes';
 import ExoticOptions from './pages/courses/ExoticOptions';
