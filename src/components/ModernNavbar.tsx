@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Menu } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import DesktopNav from "./navigation/DesktopNav";
@@ -12,14 +12,14 @@ const ModernNavbar = () => {
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Fermer le menu si on passe de mobile à desktop
+  // Close menu if we switch from mobile to desktop
   useEffect(() => {
     if (!isMobile && isOpen) {
       setIsOpen(false);
     }
   }, [isMobile, isOpen]);
 
-  // Bloquer le scroll du body quand le menu mobile est ouvert
+  // Block body scroll when mobile menu is open
   useEffect(() => {
     if (isOpen && isMobile) {
       document.body.style.overflow = 'hidden';

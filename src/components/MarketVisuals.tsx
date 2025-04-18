@@ -1,12 +1,13 @@
 
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 type Point = { x: number; y: number; };
 
 const MarketVisuals = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  // Make sure we're using React.useRef properly
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
   
-  useEffect(() => {
+  React.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
