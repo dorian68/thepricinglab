@@ -33,6 +33,102 @@
     "logout": "Déconnexion",
     "survivalMode": "Mode Survie"
   },
+  "home": {
+    "hero": {
+      "title1": "Maîtrisez la Finance Quantitative",
+      "title2": "Comme un Pro du Trading",
+      "description": "Apprenez à évaluer des produits dérivés complexes, comprendre les surfaces de volatilité et implémenter des modèles de pointe avec notre plateforme pratique.",
+      "startCourse": "Commencer à apprendre",
+      "signUp": "S'inscrire",
+      "tagline": "DES FONDAMENTAUX AUX MODÈLES AVANCÉS",
+      "terminal": "TERMINAL DE TRADING ACTIVÉ"
+    },
+    "approach": {
+      "title": "Notre Approche Innovante",
+      "description": "Notre plateforme combine connaissances théoriques et applications pratiques pour vous aider à maîtriser des modèles financiers complexes et des techniques d'évaluation."
+    },
+    "features": {
+      "pragmatic": {
+        "title": "Apprentissage Pratique",
+        "description": "Exercices pratiques et problèmes réels pour combler le fossé entre théorie et pratique."
+      },
+      "tech": {
+        "title": "Excellence Technique",
+        "description": "Focus sur les méthodes computationnelles et l'implémentation de modèles avec des techniques standards de l'industrie."
+      },
+      "job": {
+        "title": "Pertinence Professionnelle",
+        "description": "Compétences directement applicables aux rôles en finance quantitative dans les banques d'investissement et sociétés de trading."
+      },
+      "certified": {
+        "title": "Pertinence Industrielle",
+        "description": "Programme conçu en partenariat avec des analystes quantitatifs des plus grandes banques d'investissement."
+      }
+    },
+    "curriculum": {
+      "title": "Programme Complet",
+      "description": "Notre plateforme offre une large gamme de modules couvrant tous les aspects de la modélisation financière et des stratégies de trading.",
+      "allModules": "Tous les Modules"
+    },
+    "modules": {
+      "blackScholes": {
+        "title": "Modèle Black-Scholes",
+        "level": "Fondamental",
+        "description": "Maîtrisez le modèle d'évaluation d'options qui a révolutionné les marchés financiers."
+      },
+      "volatility": {
+        "title": "Surface de Volatilité",
+        "level": "Intermédiaire",
+        "description": "Comprenez les smiles, skews, et structures temporelles de volatilité sur les marchés d'options."
+      },
+      "exotic": {
+        "title": "Options Exotiques",
+        "level": "Avancé",
+        "description": "Évaluez et couvrez des produits dérivés complexes comme les barrières, asiatiques et lookbacks."
+      },
+      "greeks": {
+        "title": "Greeks des Options",
+        "level": "Intermédiaire",
+        "description": "Maîtrisez delta, gamma, vega, theta et leur rôle dans la gestion du risque."
+      },
+      "monteCarlo": {
+        "title": "Méthodes Monte Carlo",
+        "level": "Avancé",
+        "description": "Implémentez des techniques de simulation pour évaluer des options path-dependent."
+      },
+      "stressTesting": {
+        "title": "Tests de Résistance",
+        "level": "Avancé",
+        "description": "Analysez des portefeuilles d'options dans des scénarios de marché extrêmes."
+      }
+    },
+    "testimonials": {
+      "title": "Ce que Disent Nos Utilisateurs",
+      "description": "Écoutez les professionnels et étudiants qui ont transformé leurs compétences en finance quantitative avec notre plateforme.",
+      "alexandre": {
+        "quote": "L'approche pratique des modèles d'évaluation d'options m'a aidé à réussir mes entretiens pour un poste de quant dans une grande banque d'investissement.",
+        "author": "Alexandre D.",
+        "position": "Trader de Produits Dérivés, Paris"
+      },
+      "sarah": {
+        "quote": "Enfin une plateforme qui explique les surfaces de volatilité d'une manière qui a du sens pour moi. Les outils interactifs changent la donne.",
+        "author": "Sarah M.",
+        "position": "Risk Manager, Londres"
+      },
+      "thomas": {
+        "quote": "En tant que personne passant de l'académie à la finance, cette plateforme a comblé le fossé entre théorie mathématique et implémentation réelle.",
+        "author": "Thomas K.",
+        "position": "Doctorant, ETH Zurich"
+      },
+      "joinCta": "Rejoignez Notre Communauté"
+    },
+    "cta": {
+      "title": "Prêt à Devenir un Maître Quant ?",
+      "description": "Rejoignez des milliers de professionnels et d'étudiants qui améliorent leurs compétences en finance quantitative.",
+      "subscribe": "Choisir un Forfait",
+      "explore": "Explorer les Cours"
+    }
+  },
   "exercises": {
     "title": "Exercices",
     "subtitle": "Améliorez vos compétences grâce à nos exercices interactifs",
@@ -137,5 +233,27 @@
     "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères",
     "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
     "invalidInput": "Entrée invalide"
+  },
+  "quizzes": {
+    "title": "Quiz",
+    "subtitle": "Testez vos connaissances et renforcez votre apprentissage avec nos quiz interactifs",
+    "categories": "Catégories de Quiz",
+    "explore": "Explorer",
+    "quizAvailable": "quiz disponibles",
+    "fundamentalsTitle": "Fondamentaux des Options",
+    "fundamentalsDesc": "Testez vos connaissances sur les concepts de base des options, la terminologie et les mécanismes de marché",
+    "pricingTitle": "Modèles de Pricing d'Options",
+    "pricingDesc": "Défiez-vous avec des questions sur Black-Scholes, les arbres binomiaux et d'autres modèles de pricing",
+    "greeksTitle": "Greeks des Options",
+    "greeksDesc": "Évaluez votre compréhension de Delta, Gamma, Theta, Vega et d'autres sensibilités d'options",
+    "volatilityTitle": "Analyse de Volatilité",
+    "volatilityDesc": "Testez vos connaissances sur la volatilité implicite, les smiles de volatilité et la prévision de volatilité",
+    "exoticTitle": "Options Exotiques",
+    "exoticDesc": "Défiez-vous avec des questions sur les options barrières, les options asiatiques et d'autres dérivés exotiques",
+    "strategiesTitle": "Stratégies de Trading",
+    "strategiesDesc": "Testez vos connaissances sur les spreads, straddles, collars et d'autres stratégies de trading d'options",
+    "survivalTitle": "Mode Survie",
+    "survivalDesc": "Mettez vos connaissances à l'épreuve dans notre mode challenge chronométré avec difficulté croissante",
+    "accessSurvival": "Accéder au Mode Survie"
   }
 }

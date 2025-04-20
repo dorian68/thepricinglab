@@ -4,7 +4,7 @@ import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import enTranslation from './locales/en.json';
 import frTranslation from './locales/fr.json';
-import { cleanTranslationObject } from '../utils/translationUtils';
+import { cleanTranslationObject, cleanCaptions } from '../utils/translationUtils';
 
 // Process translation files to remove any [caption] markers
 const cleanedEnTranslation = cleanTranslationObject(enTranslation);
@@ -44,7 +44,7 @@ i18n
     parseMissingKeyHandler: (key) => {
       // If a key is missing, return a more user-friendly fallback without [caption]
       const fallback = key.split('.').pop() || key;
-      return fallback.replace(/\[caption\]\s*/g, '');
+      return cleanCaptions(fallback.replace(/([A-Z])/g, ' $1').toLowerCase());
     }
   });
 

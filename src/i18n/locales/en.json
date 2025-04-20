@@ -33,6 +33,102 @@
     "logout": "Logout",
     "survivalMode": "Survival Mode"
   },
+  "home": {
+    "hero": {
+      "title1": "Master Quantitative Finance",
+      "title2": "Like a Trading Pro",
+      "description": "Learn to price complex financial derivatives, understand volatility surfaces, and implement cutting-edge models with our hands-on platform.",
+      "startCourse": "Start Learning",
+      "signUp": "Sign Up",
+      "tagline": "FROM FUNDAMENTALS TO ADVANCED MODELS",
+      "terminal": "TRADING TERMINAL ACTIVATED"
+    },
+    "approach": {
+      "title": "Our Innovative Approach",
+      "description": "Our platform combines theoretical knowledge with practical applications to help you master complex financial models and valuation techniques."
+    },
+    "features": {
+      "pragmatic": {
+        "title": "Practical Learning",
+        "description": "Hands-on exercises and real-world problems to bridge the gap between theory and practice."
+      },
+      "tech": {
+        "title": "Technical Excellence",
+        "description": "Focus on computational methods and implementing models using industry-standard techniques."
+      },
+      "job": {
+        "title": "Career Relevant",
+        "description": "Skills directly applicable to quantitative finance roles in investment banks and trading firms."
+      },
+      "certified": {
+        "title": "Industry Relevance",
+        "description": "Curriculum designed in partnership with quantitative analysts from top investment banks."
+      }
+    },
+    "curriculum": {
+      "title": "Comprehensive Curriculum",
+      "description": "Our platform offers a wide range of modules covering all aspects of financial modeling and trading strategies.",
+      "allModules": "All Modules"
+    },
+    "modules": {
+      "blackScholes": {
+        "title": "Black-Scholes Model",
+        "level": "Fundamental",
+        "description": "Master the cornerstone option pricing model that revolutionized financial markets."
+      },
+      "volatility": {
+        "title": "Volatility Surface",
+        "level": "Intermediate",
+        "description": "Understand volatility smiles, skews, and term structures across option markets."
+      },
+      "exotic": {
+        "title": "Exotic Options",
+        "level": "Advanced",
+        "description": "Price and hedge complex derivatives like barriers, Asians, and lookbacks."
+      },
+      "greeks": {
+        "title": "Option Greeks",
+        "level": "Intermediate",
+        "description": "Master delta, gamma, vega, theta, and their role in risk management."
+      },
+      "monteCarlo": {
+        "title": "Monte Carlo Methods",
+        "level": "Advanced",
+        "description": "Implement simulation techniques for pricing path-dependent options."
+      },
+      "stressTesting": {
+        "title": "Stress Testing",
+        "level": "Advanced",
+        "description": "Analyze option portfolios under extreme market scenarios."
+      }
+    },
+    "testimonials": {
+      "title": "What Our Users Say",
+      "description": "Hear from professionals and students who have transformed their quantitative finance skills with our platform.",
+      "alexandre": {
+        "quote": "The practical approach to option pricing models helped me ace my interviews for a quant role at a major investment bank.",
+        "author": "Alexandre D.",
+        "position": "Derivatives Trader, Paris"
+      },
+      "sarah": {
+        "quote": "Finally a platform that explains volatility surfaces in a way that made sense to me. The interactive tools are game-changing.",
+        "author": "Sarah M.",
+        "position": "Risk Manager, London"
+      },
+      "thomas": {
+        "quote": "As someone transitioning from academia to finance, this platform bridged the gap between mathematical theory and actual implementation.",
+        "author": "Thomas K.",
+        "position": "PhD Student, ETH Zurich"
+      },
+      "joinCta": "Join Our Community"
+    },
+    "cta": {
+      "title": "Ready to Become a Quant Master?",
+      "description": "Join thousands of professionals and students who are leveling up their quantitative finance skills.",
+      "subscribe": "Choose a Plan",
+      "explore": "Explore Courses"
+    }
+  },
   "exercises": {
     "title": "Exercises",
     "subtitle": "Improve your skills with our interactive exercises",
@@ -137,5 +233,27 @@
     "passwordTooShort": "Password must be at least 8 characters",
     "passwordsDoNotMatch": "Passwords do not match",
     "invalidInput": "Invalid input"
+  },
+  "quizzes": {
+    "title": "Quizzes",
+    "subtitle": "Test your knowledge and reinforce learning with our interactive quizzes",
+    "categories": "Quiz Categories",
+    "explore": "Explore",
+    "quizAvailable": "quizzes available",
+    "fundamentalsTitle": "Options Fundamentals",
+    "fundamentalsDesc": "Test your knowledge of basic option concepts, terminology, and market mechanics",
+    "pricingTitle": "Option Pricing Models",
+    "pricingDesc": "Challenge yourself with questions on Black-Scholes, binomial trees, and other pricing models",
+    "greeksTitle": "Option Greeks",
+    "greeksDesc": "Measure your understanding of Delta, Gamma, Theta, Vega, and other option sensitivities",
+    "volatilityTitle": "Volatility Analysis",
+    "volatilityDesc": "Test your knowledge of implied volatility, volatility smiles, and volatility forecasting",
+    "exoticTitle": "Exotic Options",
+    "exoticDesc": "Challenge yourself with questions on barrier options, Asian options, and other exotic derivatives",
+    "strategiesTitle": "Trading Strategies",
+    "strategiesDesc": "Test your knowledge of spreads, straddles, collars, and other option trading strategies",
+    "survivalTitle": "Survival Mode",
+    "survivalDesc": "Put your knowledge to the test in our timed challenge mode with increasing difficulty",
+    "accessSurvival": "Access Survival Mode"
   }
 }

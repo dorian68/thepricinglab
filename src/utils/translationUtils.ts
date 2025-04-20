@@ -30,7 +30,7 @@ export const safeTranslate = (
         console.warn(`Simple translation format failed for "${key}", trying alternative format:`, e);
         try {
           // We need to cast this as any since the type definitions are strict but implementations may vary
-          translated = t(key, { defaultValue: fallback });
+          translated = t(key, { defaultValue: fallback }) as string;
         } catch (err) {
           console.warn(`All translation attempts failed for "${key}":`, err);
           translated = fallback;
