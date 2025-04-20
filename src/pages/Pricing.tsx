@@ -1,3 +1,4 @@
+
 import React from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -81,22 +82,22 @@ const PricingPage = () => {
 
   const featureComparison = [
     {
-      category: st('pricing.comparison.category1', 'Category 1'),
+      category: st('pricing.comparison.category1', 'Content Access'),
       features: [
         {
-          name: st('pricing.comparison.fundamentals', 'Fundamentals'),
+          name: st('pricing.comparison.fundamentals', 'Fundamentals Content'),
           freemium: true,
           student: true,
           pro: true
         },
         {
-          name: st('pricing.comparison.intermediate', 'Intermediate'),
+          name: st('pricing.comparison.intermediate', 'Intermediate Content'),
           freemium: false,
           student: true,
           pro: true
         },
         {
-          name: st('pricing.comparison.advanced', 'Advanced'),
+          name: st('pricing.comparison.advanced', 'Advanced Content'),
           freemium: false,
           student: false,
           pro: true
@@ -104,7 +105,7 @@ const PricingPage = () => {
       ]
     },
     {
-      category: st('pricing.comparison.category2', 'Category 2'),
+      category: st('pricing.comparison.category2', 'Learning Tools'),
       features: [
         {
           name: st('pricing.comparison.basicExercises', 'Basic Exercises'),
@@ -133,22 +134,22 @@ const PricingPage = () => {
       ]
     },
     {
-      category: st('pricing.comparison.category3', 'Category 3'),
+      category: st('pricing.comparison.category3', 'Trading Tools'),
       features: [
         {
-          name: st('pricing.comparison.basicTools', 'Basic Tools'),
+          name: st('pricing.comparison.basicTools', 'Basic Trading Tools'),
           freemium: true,
           student: true,
           pro: true
         },
         {
-          name: st('pricing.comparison.advancedTools', 'Advanced Tools'),
+          name: st('pricing.comparison.advancedTools', 'Advanced Trading Tools'),
           freemium: false,
           student: true,
           pro: true
         },
         {
-          name: st('pricing.comparison.notebooks', 'Notebooks'),
+          name: st('pricing.comparison.notebooks', 'Interactive Notebooks'),
           freemium: false,
           student: true,
           pro: true
@@ -156,10 +157,10 @@ const PricingPage = () => {
       ]
     },
     {
-      category: st('pricing.comparison.category4', 'Category 4'),
+      category: st('pricing.comparison.category4', 'Professional Features'),
       features: [
         {
-          name: st('pricing.comparison.certificates', 'Certificates'),
+          name: st('pricing.comparison.certificates', 'Course Certificates'),
           freemium: false,
           student: 'basic',
           pro: true
@@ -183,7 +184,7 @@ const PricingPage = () => {
           pro: true
         },
         {
-          name: st('pricing.comparison.gptAssistant', 'GPT Assistant'),
+          name: st('pricing.comparison.gptAssistant', 'AI Assistant'),
           freemium: false,
           student: false,
           pro: true
@@ -235,7 +236,7 @@ const PricingPage = () => {
                   >
                     {tier.recommended && (
                       <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-finance-accent text-xs font-bold uppercase py-1 px-3 rounded-full">
-                        {st('pricing.recommended')}
+                        {st('pricing.recommended', 'Most Popular')}
                       </div>
                     )}
                     
@@ -256,7 +257,7 @@ const PricingPage = () => {
                       <div className="text-3xl font-bold text-finance-accent">
                         {tier.price} 
                         {tier.id !== "freemium" && (
-                          <span className="text-sm text-[#8E9196] font-normal ml-1">{st('pricing.monthly')}</span>
+                          <span className="text-sm text-[#8E9196] font-normal ml-1">{st('pricing.monthly', 'Monthly')}</span>
                         )}
                       </div>
                       <p className="text-[#8E9196] text-sm mt-2">{tier.description}</p>
@@ -302,7 +303,7 @@ const PricingPage = () => {
                     >
                       {tier.recommended && (
                         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-finance-accent text-xs font-bold uppercase py-1 px-3 rounded-full">
-                          {st('pricing.recommended')}
+                          {st('pricing.recommended', 'Most Popular')}
                         </div>
                       )}
                       
@@ -329,12 +330,12 @@ const PricingPage = () => {
                         <div className="text-3xl font-bold text-finance-accent">
                           {annualPrice} 
                           {tier.id !== "freemium" && (
-                            <span className="text-sm text-[#8E9196] font-normal ml-1">{st('pricing.annual')}</span>
+                            <span className="text-sm text-[#8E9196] font-normal ml-1">{st('pricing.annual', 'Annual')}</span>
                           )}
                         </div>
                         {tier.id !== "freemium" && (
                           <div className="text-sm text-green-400 mt-2">
-                            {st('pricing.annualSavings')}
+                            {st('pricing.annualSavings', 'Save 20% with annual billing')}
                           </div>
                         )}
                         <p className="text-[#8E9196] text-sm mt-2">{tier.description}</p>
@@ -433,23 +434,23 @@ const PricingPage = () => {
           
           <div className="space-y-6">
             <div className="finance-card p-6">
-              <h3 className="text-xl font-medium mb-3">{st('pricing.faq.question1', 'Question 1')}</h3>
-              <p className="text-[#8E9196]">{st('pricing.faq.answer1', 'Answer 1')}</p>
+              <h3 className="text-xl font-medium mb-3">{st('pricing.faq.question1', 'What happens after I subscribe?')}</h3>
+              <p className="text-[#8E9196]">{st('pricing.faq.answer1', 'After subscribing, you'll get immediate access to all the content included in your plan. You can start learning right away.')}</p>
             </div>
             
             <div className="finance-card p-6">
-              <h3 className="text-xl font-medium mb-3">{st('pricing.faq.question2', 'Question 2')}</h3>
-              <p className="text-[#8E9196]">{st('pricing.faq.answer2', 'Answer 2')}</p>
+              <h3 className="text-xl font-medium mb-3">{st('pricing.faq.question2', 'Can I switch plans later?')}</h3>
+              <p className="text-[#8E9196]">{st('pricing.faq.answer2', 'Yes, you can upgrade or downgrade your plan at any time. If you upgrade, you'll be charged the prorated difference. If you downgrade, you'll receive credit towards your next billing cycle.')}</p>
             </div>
             
             <div className="finance-card p-6">
-              <h3 className="text-xl font-medium mb-3">{st('pricing.faq.question3', 'Question 3')}</h3>
-              <p className="text-[#8E9196]">{st('pricing.faq.answer3', 'Answer 3')}</p>
+              <h3 className="text-xl font-medium mb-3">{st('pricing.faq.question3', 'Is there a free trial?')}</h3>
+              <p className="text-[#8E9196]">{st('pricing.faq.answer3', 'Yes, our Free plan gives you access to core content so you can experience our platform before subscribing.')}</p>
             </div>
             
             <div className="finance-card p-6">
-              <h3 className="text-xl font-medium mb-3">{st('pricing.faq.question4', 'Question 4')}</h3>
-              <p className="text-[#8E9196]">{st('pricing.faq.answer4', 'Answer 4')}</p>
+              <h3 className="text-xl font-medium mb-3">{st('pricing.faq.question4', 'How do refunds work?')}</h3>
+              <p className="text-[#8E9196]">{st('pricing.faq.answer4', 'If you're not satisfied with your subscription, contact us within 14 days of purchase for a full refund.')}</p>
             </div>
           </div>
         </div>
@@ -458,21 +459,21 @@ const PricingPage = () => {
       <section className="py-16 px-6 bg-[#141821]">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6">
-            {st('pricing.cta.title', 'Get Started')} <span className="text-finance-accent">{st('pricing.cta.highlight', 'Now')}</span>
+            {st('pricing.cta.title', 'Start Your Learning Journey')} <span className="text-finance-accent">{st('pricing.cta.highlight', 'Today')}</span>
           </h2>
           <p className="text-[#8E9196] text-lg mb-8">
-            {st('pricing.cta.description', 'Start your learning journey today')}
+            {st('pricing.cta.description', 'Join thousands of professionals mastering quantitative finance.')}
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button variant="finance" size="lg" asChild>
               <Link to="/signup">
-                {st('pricing.cta.start', 'Start Free')}
+                {st('pricing.cta.start', 'Get Started')}
               </Link>
             </Button>
             <Button variant="financeOutline" size="lg" asChild>
               <Link to="/courses/fundamentals/black-scholes">
-                {st('pricing.cta.try', 'Try Now')}
+                {st('pricing.cta.try', 'Try Free Demo')}
               </Link>
             </Button>
           </div>
