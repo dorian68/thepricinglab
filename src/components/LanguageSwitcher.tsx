@@ -25,7 +25,7 @@ const LanguageSwitcher = () => {
   };
 
   // Use our safe translation utility
-  const st = (key: string, defaultValue?: string) => safeTranslate(t, key, defaultValue, i18n.language);
+  const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
 
   return (
     <div className="relative">

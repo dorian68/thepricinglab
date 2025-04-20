@@ -1,5 +1,5 @@
 
-import { TFunction } from 'react-i18next';
+import { TFunction as ReactI18NextTFunction } from 'i18next';
 
 /**
  * Type for a simplified translation function
@@ -15,7 +15,7 @@ type SimpleTranslationFn = (key: string, defaultValue?: string) => string;
  * @returns Cleaned translated text without [caption] prefixes
  */
 export const safeTranslate = (
-  t: TFunction | SimpleTranslationFn,
+  t: ReactI18NextTFunction | SimpleTranslationFn,
   key: string,
   fallback: string
 ): string => {

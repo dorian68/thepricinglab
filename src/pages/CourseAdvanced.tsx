@@ -29,8 +29,8 @@ const CourseAdvanced = () => {
   const modules = [
     {
       id: 1,
-      title: safeTranslate(t, 'coursesPage.advanced.impliedVol.title'),
-      description: safeTranslate(t, 'coursesPage.advanced.impliedVol.description'),
+      title: safeTranslate(t, 'coursesPage.advanced.impliedVol.title', "Implied Volatility Analysis"),
+      description: safeTranslate(t, 'coursesPage.advanced.impliedVol.description', "Understanding and analyzing implied volatility across strike prices and maturities"),
       lessons: [
         { 
           title: "Introduction à la volatilité implicite", 
@@ -66,8 +66,8 @@ const CourseAdvanced = () => {
     },
     {
       id: 2,
-      title: safeTranslate(t, 'coursesPage.advanced.volProducts.title'),
-      description: safeTranslate(t, 'coursesPage.advanced.volProducts.description'),
+      title: safeTranslate(t, 'coursesPage.advanced.volProducts.title', "Volatility Products"),
+      description: safeTranslate(t, 'coursesPage.advanced.volProducts.description', "Trade and invest in volatility through specialized financial products"),
       lessons: [
         { 
           title: "Introduction aux produits de volatilité", 
@@ -128,23 +128,23 @@ const CourseAdvanced = () => {
           {/* Breadcrumb */}
           <div className="flex items-center text-sm text-finance-lightgray mb-8">
             <Link to="/" className="hover:text-finance-accent">
-              {safeTranslate(t, 'navbar.home')}
+              {safeTranslate(t, 'navbar.home', "Home")}
             </Link>
             <ChevronRight className="h-4 w-4 mx-2" />
             <Link to="/courses" className="hover:text-finance-accent">
-              {safeTranslate(t, 'navbar.courses')}
+              {safeTranslate(t, 'navbar.courses', "Courses")}
             </Link>
             <ChevronRight className="h-4 w-4 mx-2" />
-            <span className="text-finance-offwhite">{safeTranslate(t, 'courses.advanced')}</span>
+            <span className="text-finance-offwhite">{safeTranslate(t, 'courses.advanced', "Advanced Courses")}</span>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Sidebar */}
             <div className="lg:col-span-1">
               <div className="finance-card p-6 mb-6">
-                <h2 className="text-xl font-medium mb-4">{safeTranslate(t, 'courses.advanced')}</h2>
+                <h2 className="text-xl font-medium mb-4">{safeTranslate(t, 'courses.advanced', "Advanced Courses")}</h2>
                 <p className="text-finance-lightgray text-sm mb-6">
-                  {safeTranslate(t, 'coursesPage.advanced.description')}
+                  {safeTranslate(t, 'coursesPage.advanced.description', "Go beyond the basics with our advanced courses on volatility, hedging, and complex derivatives.")}
                 </p>
                 
                 <div className="space-y-3">
@@ -172,31 +172,31 @@ const CourseAdvanced = () => {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center">
                       <GraduationCap className="h-5 w-5 text-finance-accent mr-2" />
-                      <span className="text-finance-offwhite font-medium">{safeTranslate(t, 'coursesPage.difficulty')}</span>
+                      <span className="text-finance-offwhite font-medium">{safeTranslate(t, 'coursesPage.difficulty', "Difficulty")}</span>
                     </div>
-                    <Badge variant="achievement">{safeTranslate(t, 'coursesPage.intermediate')}</Badge>
+                    <Badge variant="achievement">{safeTranslate(t, 'coursesPage.intermediate', "Intermediate")}</Badge>
                   </div>
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <Clock className="h-5 w-5 text-finance-accent mr-2" />
-                      <span className="text-finance-offwhite font-medium">{safeTranslate(t, 'exercisesPage.duration')}</span>
+                      <span className="text-finance-offwhite font-medium">{safeTranslate(t, 'exercisesPage.duration', "Duration")}</span>
                     </div>
-                    <span className="text-finance-lightgray">8-10 {safeTranslate(t, 'exercisesPage.hours')}</span>
+                    <span className="text-finance-lightgray">8-10 {safeTranslate(t, 'exercisesPage.hours', "hours")}</span>
                   </div>
                 </div>
               </div>
               
               <div className="finance-card p-6">
-                <h3 className="text-lg font-medium mb-4">{safeTranslate(t, 'coursesPage.unlockCourse')}</h3>
+                <h3 className="text-lg font-medium mb-4">{safeTranslate(t, 'coursesPage.unlockCourse', "Unlock This Course")}</h3>
                 <p className="text-finance-lightgray text-sm mb-6">
-                  {safeTranslate(t, 'coursesPage.advancedCoursesInfo')}
+                  {safeTranslate(t, 'coursesPage.advancedCoursesInfo', "Advanced courses are available with our Student and Pro plans. Subscribe to gain access.")}
                 </p>
                 <Link to="/signup" className="finance-button w-full flex items-center justify-center">
-                  {safeTranslate(t, 'coursesPage.subscribeToAccess')} <ArrowRight className="ml-2 h-4 w-4" />
+                  {safeTranslate(t, 'coursesPage.subscribeToAccess', "Subscribe to Access")} <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
                 <p className="mt-4 text-xs text-finance-lightgray text-center">
-                  {safeTranslate(t, 'coursesPage.alreadySubscribed')} <Link to="/login" className="text-finance-accent hover:underline">{safeTranslate(t, 'navbar.login')}</Link>
+                  {safeTranslate(t, 'coursesPage.alreadySubscribed', "Already subscribed?")} <Link to="/login" className="text-finance-accent hover:underline">{safeTranslate(t, 'navbar.login', "Login")}</Link>
                 </p>
               </div>
             </div>
@@ -213,7 +213,7 @@ const CourseAdvanced = () => {
                       </div>
                       <h2 className="terminal-text text-2xl mb-4">{modules[activeModule].title}</h2>
                       <Link to="/signup" className="finance-button inline-flex items-center">
-                        <Play className="mr-2 h-4 w-4" /> {safeTranslate(t, 'coursesPage.unlockContent')}
+                        <Play className="mr-2 h-4 w-4" /> {safeTranslate(t, 'coursesPage.unlockContent', "Unlock Content")}
                       </Link>
                     </div>
                   </div>
@@ -266,9 +266,9 @@ const CourseAdvanced = () => {
                         <Check className="h-4 w-4 text-finance-accent" />
                       </div>
                       <div>
-                        <h3 className="text-finance-offwhite font-medium">{safeTranslate(t, 'coursesPage.skillsGained')}</h3>
+                        <h3 className="text-finance-offwhite font-medium">{safeTranslate(t, 'coursesPage.skillsGained', "Skills You'll Gain")}</h3>
                         <p className="text-finance-lightgray text-sm">
-                          {safeTranslate(t, 'coursesPage.volSkillsDescription')}
+                          {safeTranslate(t, 'coursesPage.volSkillsDescription', "Volatility surface analysis, pricing variance swaps, volatility trading strategies, and more.")}
                         </p>
                       </div>
                     </div>
@@ -277,10 +277,10 @@ const CourseAdvanced = () => {
                   <div className="flex justify-between items-center pt-6 mt-6 border-t border-finance-steel/10">
                     <Link to="/exercises" className="text-finance-lightgray hover:text-finance-offwhite flex items-center">
                       <ArrowRight className="mr-2 h-4 w-4 rotate-180" />
-                      {safeTranslate(t, 'coursesPage.backToExercises')}
+                      {safeTranslate(t, 'coursesPage.backToExercises', "Back to Exercises")}
                     </Link>
                     <Link to="/signup" className="finance-button flex items-center">
-                      {safeTranslate(t, 'coursesPage.unlockNow')} <ExternalLink className="ml-2 h-4 w-4" />
+                      {safeTranslate(t, 'coursesPage.unlockNow', "Unlock Now")} <ExternalLink className="ml-2 h-4 w-4" />
                     </Link>
                   </div>
                 </div>

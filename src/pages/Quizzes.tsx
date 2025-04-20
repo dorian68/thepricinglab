@@ -28,10 +28,10 @@ const QuizSection = ({ title, description, quizCount, icon: Icon, to }: {
             <h3 className="text-xl font-medium mb-2">{title}</h3>
             <p className="text-finance-lightgray mb-4">{description}</p>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-finance-lightgray">{quizCount} {safeTranslate(t, 'quizzes.quizAvailable')}</span>
+              <span className="text-sm text-finance-lightgray">{quizCount} {safeTranslate(t, 'quizzes.quizAvailable', "quizzes available")}</span>
               <Button asChild size="sm" variant="outline">
                 <Link to={to}>
-                  {safeTranslate(t, 'quizzes.explore')} <ChevronRight className="ml-1 h-4 w-4" />
+                  {safeTranslate(t, 'quizzes.explore', "Explore")} <ChevronRight className="ml-1 h-4 w-4" />
                 </Link>
               </Button>
             </div>
@@ -53,63 +53,63 @@ const Quizzes = () => {
         <div className="max-w-6xl mx-auto">
           <header className="mb-10">
             <h1 className="text-3xl md:text-4xl font-bold mb-4 terminal-text">
-              {safeTranslate(t, 'quizzes.title')}
+              {safeTranslate(t, 'quizzes.title', "Quizzes")}
             </h1>
             <p className="text-finance-lightgray text-lg max-w-3xl">
-              {safeTranslate(t, 'quizzes.subtitle')}
+              {safeTranslate(t, 'quizzes.subtitle', "Test your knowledge and reinforce learning with our interactive quizzes")}
             </p>
           </header>
           
           <div className="mb-12">
             <h2 className="text-2xl font-bold mb-6 flex items-center">
               <Brain className="mr-3 h-6 w-6 text-finance-accent" />
-              {safeTranslate(t, 'quizzes.categories')}
+              {safeTranslate(t, 'quizzes.categories', "Quiz Categories")}
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <QuizSection 
-                title={safeTranslate(t, 'quizzes.fundamentalsTitle')}
-                description={safeTranslate(t, 'quizzes.fundamentalsDesc')}
+                title={safeTranslate(t, 'quizzes.fundamentalsTitle', "Options Fundamentals")}
+                description={safeTranslate(t, 'quizzes.fundamentalsDesc', "Test your knowledge of basic option concepts, terminology, and market mechanics")}
                 quizCount={5}
                 icon={BookOpen}
                 to="/quizzes/fundamentals"
               />
               
               <QuizSection 
-                title={safeTranslate(t, 'quizzes.pricingTitle')}
-                description={safeTranslate(t, 'quizzes.pricingDesc')}
+                title={safeTranslate(t, 'quizzes.pricingTitle', "Option Pricing Models")}
+                description={safeTranslate(t, 'quizzes.pricingDesc', "Challenge yourself with questions on Black-Scholes, binomial trees, and other pricing models")}
                 quizCount={4}
                 icon={BookOpen}
                 to="/quizzes/pricing"
               />
               
               <QuizSection 
-                title={safeTranslate(t, 'quizzes.greeksTitle')}
-                description={safeTranslate(t, 'quizzes.greeksDesc')}
+                title={safeTranslate(t, 'quizzes.greeksTitle', "Option Greeks")}
+                description={safeTranslate(t, 'quizzes.greeksDesc', "Measure your understanding of Delta, Gamma, Theta, Vega, and other option sensitivities")}
                 quizCount={3}
                 icon={BookOpen}
                 to="/quizzes/greeks"
               />
               
               <QuizSection 
-                title={safeTranslate(t, 'quizzes.volatilityTitle')}
-                description={safeTranslate(t, 'quizzes.volatilityDesc')}
+                title={safeTranslate(t, 'quizzes.volatilityTitle', "Volatility Analysis")}
+                description={safeTranslate(t, 'quizzes.volatilityDesc', "Test your knowledge of implied volatility, volatility smiles, and volatility forecasting")}
                 quizCount={4}
                 icon={BookOpen}
                 to="/quizzes/volatility"
               />
               
               <QuizSection 
-                title={safeTranslate(t, 'quizzes.exoticTitle')}
-                description={safeTranslate(t, 'quizzes.exoticDesc')}
+                title={safeTranslate(t, 'quizzes.exoticTitle', "Exotic Options")}
+                description={safeTranslate(t, 'quizzes.exoticDesc', "Challenge yourself with questions on barrier options, Asian options, and other exotic derivatives")}
                 quizCount={3}
                 icon={BookOpen}
                 to="/quizzes/exotic"
               />
               
               <QuizSection 
-                title={safeTranslate(t, 'quizzes.strategiesTitle')}
-                description={safeTranslate(t, 'quizzes.strategiesDesc')}
+                title={safeTranslate(t, 'quizzes.strategiesTitle', "Trading Strategies")}
+                description={safeTranslate(t, 'quizzes.strategiesDesc', "Test your knowledge of spreads, straddles, collars, and other option trading strategies")}
                 quizCount={3}
                 icon={BookOpen}
                 to="/quizzes/strategies"
@@ -123,13 +123,13 @@ const Quizzes = () => {
                 <Brain className="h-6 w-6 text-finance-accent" />
               </div>
               <div>
-                <h3 className="text-xl font-medium mb-2">{safeTranslate(t, 'quizzes.survivalTitle')}</h3>
+                <h3 className="text-xl font-medium mb-2">{safeTranslate(t, 'quizzes.survivalTitle', "Survival Mode")}</h3>
                 <p className="text-finance-lightgray mb-4">
-                  {safeTranslate(t, 'quizzes.survivalDesc')}
+                  {safeTranslate(t, 'quizzes.survivalDesc', "Put your knowledge to the test in our timed challenge mode with increasing difficulty")}
                 </p>
                 <Button asChild>
                   <Link to="/survival-mode">
-                    {safeTranslate(t, 'quizzes.accessSurvival')} <ChevronRight className="ml-1 h-4 w-4" />
+                    {safeTranslate(t, 'quizzes.accessSurvival', "Access Survival Mode")} <ChevronRight className="ml-1 h-4 w-4" />
                   </Link>
                 </Button>
               </div>
