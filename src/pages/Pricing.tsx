@@ -1,4 +1,3 @@
-
 import React from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -16,87 +15,88 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { safeTranslate } from "../utils/translationUtils";
 
 const PricingPage = () => {
   const { t } = useTranslation();
+  const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
   
   const pricingTiers = [
     {
       id: "freemium",
-      name: t('pricing.freemium.title'),
-      price: t('pricing.freemium.price'),
-      description: t('pricing.freemium.description'),
+      name: st('pricing.freemium.title', 'Free'),
+      price: st('pricing.freemium.price', '0€'),
+      description: st('pricing.freemium.description', 'Basic access to get you started'),
       icon: <Star className="h-5 w-5 text-yellow-400" />,
       features: [
-        t('pricing.freemium.feature1'),
-        t('pricing.freemium.feature2'),
-        t('pricing.freemium.feature3'),
-        t('pricing.freemium.feature4')
+        st('pricing.freemium.features.access', 'Access to core lectures'),
+        st('pricing.freemium.features.fundamentals', 'Basic option pricing models'),
+        st('pricing.freemium.features.exercises', '5 practice exercises'),
+        st('pricing.freemium.features.community', 'Community forum access')
       ],
-      cta: t('pricing.freemium.cta'),
+      cta: st('pricing.freemium.cta', 'Start Free'),
       href: "/signup?plan=freemium",
       recommended: false,
-      badge: t('pricing.freemium.badge')
+      badge: st('pricing.freemium.badge', 'Free')
     },
     {
       id: "student",
-      name: t('pricing.student.title'),
+      name: st('pricing.student.title', 'Student'),
       price: "19€",
-      description: t('pricing.student.description'),
+      description: st('pricing.student.description', 'Perfect for learning and practice'),
       icon: <GraduationCap className="h-5 w-5 text-blue-400" />,
       features: [
-        t('pricing.student.feature1'),
-        t('pricing.student.feature2'),
-        t('pricing.student.feature3'),
-        t('pricing.student.feature4'),
-        t('pricing.student.feature5')
+        st('pricing.student.features.access', 'Everything in Free plan'),
+        st('pricing.student.features.advanced', 'Advanced options pricing models'),
+        st('pricing.student.features.exercises', 'Unlimited practice exercises'),
+        st('pricing.student.features.quizzes', 'Access to all quizzes'),
+        st('pricing.student.features.notebooks', 'Interactive notebooks')
       ],
-      cta: t('pricing.student.cta'),
+      cta: st('pricing.student.cta', 'Choose Student Plan'),
       href: "/signup?plan=student",
       recommended: true,
-      badge: t('pricing.student.badge')
+      badge: st('pricing.student.badge', 'Student')
     },
     {
       id: "pro",
-      name: t('pricing.pro.title'),
+      name: st('pricing.pro.title', 'Professional'),
       price: "49€",
-      description: t('pricing.pro.description'),
+      description: st('pricing.pro.description', 'For serious quants and traders'),
       icon: <Rocket className="h-5 w-5 text-finance-accent" />,
       features: [
-        t('pricing.pro.feature1'),
-        t('pricing.pro.feature2'),
-        t('pricing.pro.feature3'),
-        t('pricing.pro.feature4'),
-        t('pricing.pro.feature5'),
-        t('pricing.pro.feature6'),
-        t('pricing.pro.feature7'),
-        t('pricing.pro.feature8')
+        st('pricing.pro.features.access', 'Everything in Student plan'),
+        st('pricing.pro.features.exclusive', 'Exclusive content for professionals'),
+        st('pricing.pro.features.advanced', 'Advanced volatility modeling'),
+        st('pricing.pro.features.exotic', 'Exotic derivatives pricing'),
+        st('pricing.pro.features.workshops', 'Monthly live workshops'),
+        st('pricing.pro.features.certification', 'Course completion certificates'),
+        st('pricing.pro.features.community', '1-on-1 expert sessions')
       ],
-      cta: t('pricing.pro.cta'),
+      cta: st('pricing.pro.cta', 'Choose Pro Plan'),
       href: "/signup?plan=pro",
       recommended: false,
-      badge: t('pricing.pro.badge')
+      badge: st('pricing.pro.badge', 'Pro')
     }
   ];
 
   const featureComparison = [
     {
-      category: t('pricing.comparison.category1'),
+      category: st('pricing.comparison.category1', 'Category 1'),
       features: [
         {
-          name: t('pricing.comparison.fundamentals'),
+          name: st('pricing.comparison.fundamentals', 'Fundamentals'),
           freemium: true,
           student: true,
           pro: true
         },
         {
-          name: t('pricing.comparison.intermediate'),
+          name: st('pricing.comparison.intermediate', 'Intermediate'),
           freemium: false,
           student: true,
           pro: true
         },
         {
-          name: t('pricing.comparison.advanced'),
+          name: st('pricing.comparison.advanced', 'Advanced'),
           freemium: false,
           student: false,
           pro: true
@@ -104,28 +104,28 @@ const PricingPage = () => {
       ]
     },
     {
-      category: t('pricing.comparison.category2'),
+      category: st('pricing.comparison.category2', 'Category 2'),
       features: [
         {
-          name: t('pricing.comparison.basicExercises'),
+          name: st('pricing.comparison.basicExercises', 'Basic Exercises'),
           freemium: true,
           student: true,
           pro: true
         },
         {
-          name: t('pricing.comparison.intermediateExercises'),
+          name: st('pricing.comparison.intermediateExercises', 'Intermediate Exercises'),
           freemium: false,
           student: true,
           pro: true
         },
         {
-          name: t('pricing.comparison.advancedExercises'),
+          name: st('pricing.comparison.advancedExercises', 'Advanced Exercises'),
           freemium: false,
           student: false,
           pro: true
         },
         {
-          name: t('pricing.comparison.survivalMode'),
+          name: st('pricing.comparison.survivalMode', 'Survival Mode'),
           freemium: 'limited',
           student: true,
           pro: true
@@ -133,22 +133,22 @@ const PricingPage = () => {
       ]
     },
     {
-      category: t('pricing.comparison.category3'),
+      category: st('pricing.comparison.category3', 'Category 3'),
       features: [
         {
-          name: t('pricing.comparison.basicTools'),
+          name: st('pricing.comparison.basicTools', 'Basic Tools'),
           freemium: true,
           student: true,
           pro: true
         },
         {
-          name: t('pricing.comparison.advancedTools'),
+          name: st('pricing.comparison.advancedTools', 'Advanced Tools'),
           freemium: false,
           student: true,
           pro: true
         },
         {
-          name: t('pricing.comparison.notebooks'),
+          name: st('pricing.comparison.notebooks', 'Notebooks'),
           freemium: false,
           student: true,
           pro: true
@@ -156,34 +156,34 @@ const PricingPage = () => {
       ]
     },
     {
-      category: t('pricing.comparison.category4'),
+      category: st('pricing.comparison.category4', 'Category 4'),
       features: [
         {
-          name: t('pricing.comparison.certificates'),
+          name: st('pricing.comparison.certificates', 'Certificates'),
           freemium: false,
           student: 'basic',
           pro: true
         },
         {
-          name: t('pricing.comparison.linkedinIntegration'),
+          name: st('pricing.comparison.linkedinIntegration', 'LinkedIn Integration'),
           freemium: false,
           student: false,
           pro: true
         },
         {
-          name: t('pricing.comparison.performanceReports'),
+          name: st('pricing.comparison.performanceReports', 'Performance Reports'),
           freemium: false,
           student: true,
           pro: true
         },
         {
-          name: t('pricing.comparison.projectChallenges'),
+          name: st('pricing.comparison.projectChallenges', 'Project Challenges'),
           freemium: false,
           student: false,
           pro: true
         },
         {
-          name: t('pricing.comparison.gptAssistant'),
+          name: st('pricing.comparison.gptAssistant', 'GPT Assistant'),
           freemium: false,
           student: false,
           pro: true
@@ -212,16 +212,16 @@ const PricingPage = () => {
       <section className="py-20 px-6">
         <div className="max-w-[1400px] mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            {t('pricing.hero.title')} <span className="text-finance-accent">{t('pricing.hero.highlight')}</span>
+            {st('pricing.hero.title', 'Plans & Pricing')} <span className="text-finance-accent">{st('pricing.hero.highlight', 'for Everyone')}</span>
           </h1>
           <p className="text-[#8E9196] text-lg max-w-3xl mx-auto mb-12">
-            {t('pricing.hero.description')}
+            {st('pricing.hero.description', 'Choose the plan that fits your learning journey. All plans include access to our core platform features.')}
           </p>
           
           <Tabs defaultValue="monthly" className="max-w-[1400px] mx-auto">
             <TabsList className="grid grid-cols-2 w-64 mx-auto mb-8">
-              <TabsTrigger value="monthly">{t('pricing.monthly')}</TabsTrigger>
-              <TabsTrigger value="annual">{t('pricing.annual')}</TabsTrigger>
+              <TabsTrigger value="monthly">{st('pricing.monthly', 'Monthly')}</TabsTrigger>
+              <TabsTrigger value="annual">{st('pricing.annual', 'Annual')}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="monthly">
@@ -235,7 +235,7 @@ const PricingPage = () => {
                   >
                     {tier.recommended && (
                       <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-finance-accent text-xs font-bold uppercase py-1 px-3 rounded-full">
-                        {t('pricing.recommended')}
+                        {st('pricing.recommended')}
                       </div>
                     )}
                     
@@ -256,7 +256,7 @@ const PricingPage = () => {
                       <div className="text-3xl font-bold text-finance-accent">
                         {tier.price} 
                         {tier.id !== "freemium" && (
-                          <span className="text-sm text-[#8E9196] font-normal ml-1">{t('pricing.monthly')}</span>
+                          <span className="text-sm text-[#8E9196] font-normal ml-1">{st('pricing.monthly')}</span>
                         )}
                       </div>
                       <p className="text-[#8E9196] text-sm mt-2">{tier.description}</p>
@@ -302,7 +302,7 @@ const PricingPage = () => {
                     >
                       {tier.recommended && (
                         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-finance-accent text-xs font-bold uppercase py-1 px-3 rounded-full">
-                          {t('pricing.recommended')}
+                          {st('pricing.recommended')}
                         </div>
                       )}
                       
@@ -329,12 +329,12 @@ const PricingPage = () => {
                         <div className="text-3xl font-bold text-finance-accent">
                           {annualPrice} 
                           {tier.id !== "freemium" && (
-                            <span className="text-sm text-[#8E9196] font-normal ml-1">{t('pricing.annual')}</span>
+                            <span className="text-sm text-[#8E9196] font-normal ml-1">{st('pricing.annual')}</span>
                           )}
                         </div>
                         {tier.id !== "freemium" && (
                           <div className="text-sm text-green-400 mt-2">
-                            {t('pricing.annualSavings')}
+                            {st('pricing.annualSavings')}
                           </div>
                         )}
                         <p className="text-[#8E9196] text-sm mt-2">{tier.description}</p>
@@ -371,33 +371,33 @@ const PricingPage = () => {
       <section className="py-16 px-6 bg-[#141821]">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold mb-12 text-center">
-            {t('pricing.comparison.title')}
+            {st('pricing.comparison.title', 'Feature Comparison')}
           </h2>
           
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="border-b border-[#2A2F3C]">
-                  <TableHead className="text-left py-4 px-4 w-1/3 text-finance-offwhite">{t('pricing.comparison.feature')}</TableHead>
+                  <TableHead className="text-left py-4 px-4 w-1/3 text-finance-offwhite">{st('pricing.comparison.feature', 'Feature')}</TableHead>
                   <TableHead className="text-center py-4 px-4 w-1/5 text-finance-offwhite">
                     <div className="flex flex-col items-center">
                       <Star className="h-5 w-5 text-yellow-400 mb-2" />
-                      {t('pricing.freemium.title')}
-                      <span className="text-[#8E9196] text-sm">{t('pricing.freemium.price')}</span>
+                      {st('pricing.freemium.title', 'Free')}
+                      <span className="text-[#8E9196] text-sm">{st('pricing.freemium.price', '0€')}</span>
                     </div>
                   </TableHead>
                   <TableHead className="text-center py-4 px-4 w-1/5 text-finance-offwhite">
                     <div className="flex flex-col items-center">
                       <GraduationCap className="h-5 w-5 text-blue-400 mb-2" />
-                      {t('pricing.student.title')}
-                      <span className="text-finance-accent text-sm">19€ / {t('pricing.monthly')}</span>
+                      {st('pricing.student.title', 'Student')}
+                      <span className="text-finance-accent text-sm">19€ / {st('pricing.monthly', 'Monthly')}</span>
                     </div>
                   </TableHead>
                   <TableHead className="text-center py-4 px-4 w-1/5 text-finance-offwhite">
                     <div className="flex flex-col items-center">
                       <Rocket className="h-5 w-5 text-finance-accent mb-2" />
-                      {t('pricing.pro.title')}
-                      <span className="text-finance-accent text-sm">49€ / {t('pricing.monthly')}</span>
+                      {st('pricing.pro.title', 'Professional')}
+                      <span className="text-finance-accent text-sm">49€ / {st('pricing.monthly', 'Monthly')}</span>
                     </div>
                   </TableHead>
                 </TableRow>
@@ -429,27 +429,27 @@ const PricingPage = () => {
       
       <section className="py-16 px-6">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold mb-8 text-center">{t('pricing.faq.title')}</h2>
+          <h2 className="text-3xl font-bold mb-8 text-center">{st('pricing.faq.title', 'Frequently Asked Questions')}</h2>
           
           <div className="space-y-6">
             <div className="finance-card p-6">
-              <h3 className="text-xl font-medium mb-3">{t('pricing.faq.question1')}</h3>
-              <p className="text-[#8E9196]">{t('pricing.faq.answer1')}</p>
+              <h3 className="text-xl font-medium mb-3">{st('pricing.faq.question1', 'Question 1')}</h3>
+              <p className="text-[#8E9196]">{st('pricing.faq.answer1', 'Answer 1')}</p>
             </div>
             
             <div className="finance-card p-6">
-              <h3 className="text-xl font-medium mb-3">{t('pricing.faq.question2')}</h3>
-              <p className="text-[#8E9196]">{t('pricing.faq.answer2')}</p>
+              <h3 className="text-xl font-medium mb-3">{st('pricing.faq.question2', 'Question 2')}</h3>
+              <p className="text-[#8E9196]">{st('pricing.faq.answer2', 'Answer 2')}</p>
             </div>
             
             <div className="finance-card p-6">
-              <h3 className="text-xl font-medium mb-3">{t('pricing.faq.question3')}</h3>
-              <p className="text-[#8E9196]">{t('pricing.faq.answer3')}</p>
+              <h3 className="text-xl font-medium mb-3">{st('pricing.faq.question3', 'Question 3')}</h3>
+              <p className="text-[#8E9196]">{st('pricing.faq.answer3', 'Answer 3')}</p>
             </div>
             
             <div className="finance-card p-6">
-              <h3 className="text-xl font-medium mb-3">{t('pricing.faq.question4')}</h3>
-              <p className="text-[#8E9196]">{t('pricing.faq.answer4')}</p>
+              <h3 className="text-xl font-medium mb-3">{st('pricing.faq.question4', 'Question 4')}</h3>
+              <p className="text-[#8E9196]">{st('pricing.faq.answer4', 'Answer 4')}</p>
             </div>
           </div>
         </div>
@@ -458,21 +458,21 @@ const PricingPage = () => {
       <section className="py-16 px-6 bg-[#141821]">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-6">
-            {t('pricing.cta.title')} <span className="text-finance-accent">{t('pricing.cta.highlight')}</span>
+            {st('pricing.cta.title', 'Get Started')} <span className="text-finance-accent">{st('pricing.cta.highlight', 'Now')}</span>
           </h2>
           <p className="text-[#8E9196] text-lg mb-8">
-            {t('pricing.cta.description')}
+            {st('pricing.cta.description', 'Start your learning journey today')}
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button variant="finance" size="lg" asChild>
               <Link to="/signup">
-                {t('pricing.cta.start')}
+                {st('pricing.cta.start', 'Start Free')}
               </Link>
             </Button>
             <Button variant="financeOutline" size="lg" asChild>
               <Link to="/courses/fundamentals/black-scholes">
-                {t('pricing.cta.try')}
+                {st('pricing.cta.try', 'Try Now')}
               </Link>
             </Button>
           </div>

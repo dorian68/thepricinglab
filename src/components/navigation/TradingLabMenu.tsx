@@ -18,7 +18,7 @@ const TradingLabMenu = () => {
         <NavMenuItem 
           to="/exercises" 
           icon={LineChart} 
-          title={st('tradingLab.exercises', 'Exercices')} 
+          title={st('tradingLab.exercises', 'Exercises')} 
           description={st('tradingLab.exercisesDesc', 'Practice with interactive exercises')} 
         />
         <NavMenuItem 
@@ -30,19 +30,19 @@ const TradingLabMenu = () => {
         <NavMenuItem 
           to="/trading/scenarios" 
           icon={Share2} 
-          title={st('tradingLab.scenarios', 'Scénarios')} 
+          title={st('tradingLab.scenarios', 'Scenarios')} 
           description={st('tradingLab.scenariosDesc', 'Test market scenarios and assumptions')} 
         />
         <NavMenuItem 
           to="/trading/strategies" 
           icon={GitBranch} 
-          title={st('tradingLab.strategies', 'Stratégies')} 
+          title={st('tradingLab.strategies', 'Strategies')} 
           description={st('tradingLab.strategiesDesc', 'Build and test trading strategies')} 
         />
         <NavMenuItem 
           to="/trading/performance" 
           icon={BarChart} 
-          title={st('tradingLab.performance', 'Performances')} 
+          title={st('tradingLab.performance', 'Performance')} 
           description={st('tradingLab.performanceDesc', 'Track and analyze your results')} 
         />
       </ul>

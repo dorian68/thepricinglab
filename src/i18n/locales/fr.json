@@ -1,4 +1,3 @@
-
 {
   "common": {
     "exercises": "Exercices",
@@ -178,10 +177,17 @@
     "subtitle": "Expérimentez avec des outils interactifs de pricing et de trading",
     "exercises": "Exercices",
     "exercisesDesc": "Pratiquez avec des exercices interactifs pour améliorer vos compétences en trading",
+    "backtest": "Backtest",
+    "backtestDesc": "Évaluez vos stratégies sur des données historiques",
+    "scenarios": "Scénarios",
+    "scenariosDesc": "Testez des scénarios de marché et des hypothèses",
+    "strategies": "Stratégies",
+    "strategiesDesc": "Construisez et testez des stratégies de trading",
+    "performance": "Performances",
+    "performanceDesc": "Suivez et analysez vos résultats",
     "calculator": "Calculateur",
     "simulators": "Simulateurs",
-    "models": "Modèles",
-    "strategies": "Stratégies"
+    "models": "Modèles"
   },
   "survivalMode": {
     "title": "Mode Survie",
@@ -300,53 +306,71 @@
     "subtitle": "Choisissez le forfait qui correspond le mieux à vos objectifs d'apprentissage",
     "monthly": "Mensuel",
     "yearly": "Annuel (Économisez 20%)",
+    "annual": "Annuel",
+    "annualSavings": "Économisez 20% avec la facturation annuelle",
     "currentPlan": "Forfait actuel",
     "choosePlan": "Choisir ce forfait",
     "upgradeNow": "Mettre à niveau maintenant",
     "continueFreemium": "Continuer avec le forfait gratuit",
     "mostPopular": "Le plus populaire",
+    "recommended": "Le plus populaire",
+    "guarantee": "Garantie satisfait ou remboursé de 14 jours, sans questions",
+    "comparison": {
+      "title": "Comparer les fonctionnalités",
+      "feature": "Fonctionnalité",
+      "category1": "Accès au contenu",
+      "category2": "Outils d'apprentissage",
+      "category3": "Outils de trading",
+      "category4": "Fonctionnalités professionnelles",
+      "fundamentals": "Contenu fondamental",
+      "intermediate": "Contenu intermédiaire",
+      "advanced": "Contenu avancé",
+      "basicExercises": "Exercices de base",
+      "intermediateExercises": "Exercices intermédiaires",
+      "advancedExercises": "Exercices avancés",
+      "survivalMode": "Mode Survie",
+      "basicTools": "Outils de trading basiques",
+      "advancedTools": "Outils de trading avancés",
+      "notebooks": "Notebooks interactifs",
+      "certificates": "Certificats de cours",
+      "linkedinIntegration": "Intégration LinkedIn",
+      "performanceReports": "Rapports de performance",
+      "projectChallenges": "Défis de projets",
+      "gptAssistant": "Assistant IA"
+    },
     "freemium": {
       "title": "Gratuit",
       "badge": "Gratuit",
       "description": "Accès de base pour commencer",
-      "price": {
-        "monthly": "0€",
-        "yearly": "0€"
-      },
+      "price": "0€",
+      "cta": "Commencer gratuitement",
       "features": {
         "access": "Accès aux cours fondamentaux",
         "fundamentals": "Modèles de pricing d'options de base",
         "exercises": "5 exercices pratiques",
-        "community": "Accès au forum communautaire",
-        "updates": "Mises à jour régulières de contenu"
+        "community": "Accès au forum communautaire"
       }
     },
     "student": {
       "title": "Étudiant",
       "badge": "Étudiant",
       "description": "Parfait pour apprendre et pratiquer",
-      "price": {
-        "monthly": "19€",
-        "yearly": "182€"
-      },
+      "price": "19€",
+      "cta": "Choisir le forfait Étudiant",
       "features": {
         "access": "Tout ce qui est inclus dans le forfait Gratuit",
         "advanced": "Modèles de pricing d'options avancés",
         "exercises": "Exercices pratiques illimités",
         "quizzes": "Accès à tous les quiz",
-        "notebooks": "Notebooks interactifs",
-        "projects": "Projets du monde réel",
-        "community": "Support prioritaire sur le forum"
+        "notebooks": "Notebooks interactifs"
       }
     },
     "pro": {
       "title": "Professionnel",
       "badge": "Pro",
       "description": "Pour les quants et traders sérieux",
-      "price": {
-        "monthly": "49€",
-        "yearly": "470€"
-      },
+      "price": "49€",
+      "cta": "Choisir le forfait Pro",
       "features": {
         "access": "Tout ce qui est inclus dans le forfait Étudiant",
         "exclusive": "Contenu exclusif pour les professionnels",
@@ -357,33 +381,28 @@
         "community": "Sessions 1-à-1 avec des experts"
       }
     },
+    "hero": {
+      "title": "Forfaits et tarifs",
+      "highlight": "pour tous",
+      "description": "Choisissez le forfait qui correspond à votre parcours d'apprentissage. Tous les forfaits incluent l'accès aux fonctionnalités de base de notre plateforme."
+    },
+    "cta": {
+      "title": "Commencez votre voyage d'apprentissage",
+      "highlight": "aujourd'hui",
+      "description": "Rejoignez des milliers de professionnels qui maîtrisent la finance quantitative.",
+      "start": "Commencer",
+      "try": "Essayer la démo gratuite"
+    },
     "faq": {
       "title": "Questions fréquemment posées",
-      "q1": "Que se passe-t-il après mon abonnement ?",
-      "a1": "Après vous être abonné, vous aurez un accès immédiat à tout le contenu inclus dans votre forfait. Vous pouvez commencer à apprendre immédiatement.",
-      "q2": "Puis-je changer de forfait plus tard ?",
-      "a2": "Oui, vous pouvez passer à un forfait supérieur ou inférieur à tout moment. Si vous passez à un forfait supérieur, la différence au prorata vous sera facturée. Si vous passez à un forfait inférieur, vous recevrez un crédit pour votre prochain cycle de facturation.",
-      "q3": "Y a-t-il un essai gratuit ?",
-      "a3": "Oui, notre forfait Gratuit vous donne accès au contenu de base pour que vous puissiez découvrir notre plateforme avant de vous abonner.",
-      "q4": "Comment fonctionnent les remboursements ?",
-      "a4": "Si vous n'êtes pas satisfait de votre abonnement, contactez-nous dans les 14 jours suivant l'achat pour un remboursement complet.",
-      "q5": "Est-ce que je reçois des mises à jour du contenu ?",
-      "a5": "Oui, tous les forfaits incluent l'accès aux mises à jour et au nouveau contenu de leur niveau au fur et à mesure qu'il devient disponible.",
-      "q6": "Sur combien d'appareils puis-je utiliser mon compte ?",
-      "a6": "Vous pouvez accéder à votre compte sur un nombre illimité d'appareils, mais nous n'autorisons qu'une seule session active à la fois."
-    },
-    "enterprise": {
-      "title": "Solutions Entreprise",
-      "description": "Besoin d'un forfait personnalisé pour votre équipe ou entreprise ?",
-      "cta": "Contactez-nous",
-      "features": {
-        "dedicated": "Gestionnaire de compte dédié",
-        "custom": "Parcours d'apprentissage personnalisés",
-        "private": "Ateliers privés",
-        "analytics": "Analytique d'apprentissage",
-        "api": "Accès API",
-        "sso": "Intégration SSO"
-      }
+      "question1": "Que se passe-t-il après mon abonnement ?",
+      "answer1": "Après vous être abonné, vous aurez un accès immédiat à tout le contenu inclus dans votre forfait. Vous pouvez commencer à apprendre immédiatement.",
+      "question2": "Puis-je changer de forfait plus tard ?",
+      "answer2": "Oui, vous pouvez passer à un forfait supérieur ou inférieur à tout moment. Si vous passez à un forfait supérieur, la différence au prorata vous sera facturée. Si vous passez à un forfait inférieur, vous recevrez un crédit pour votre prochain cycle de facturation.",
+      "question3": "Y a-t-il un essai gratuit ?",
+      "answer3": "Oui, notre forfait Gratuit vous donne accès au contenu de base pour que vous puissiez découvrir notre plateforme avant de vous abonner.",
+      "question4": "Comment fonctionnent les remboursements ?",
+      "answer4": "Si vous n'êtes pas satisfait de votre abonnement, contactez-nous dans les 14 jours suivant l'achat pour un remboursement complet."
     }
   },
   "courses": {
