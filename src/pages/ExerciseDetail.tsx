@@ -16,7 +16,7 @@ const ExerciseDetail = () => {
   
   // Créer un titre sécurisé pour Helmet
   const safeExerciseId = cleanCaptions(id || 'Exercise');
-  const pageTitle = `${safeExerciseId} | Exercises | The Pricing Lab`;
+  const pageTitle = `${safeExerciseId} | ${safeTranslate(t, 'common.exercises', 'Exercises')} | The Pricing Lab`;
   
   useEffect(() => {
     setIsLoaded(true);
@@ -363,7 +363,7 @@ plt.show()`}
           onClick={refreshContent}
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
         >
-          {safeTranslate(t, 'exercises.reloadCodeBlocks', 'Recharger les blocs de code')}
+          {safeTranslate(t, 'exercises.reloadCodeBlocks', 'Reload Code Blocks')}
         </button>
       </div>
     </div>
