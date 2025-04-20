@@ -58,7 +58,7 @@ const ModulePreview = ({ title, level, description }: { title: string, level: st
 );
 
 const Home = () => {
-  const { t, i18n, ready } = useTranslation();
+  const { t } = useTranslation();
   
   // Utiliser la fonction safeTranslate pour éviter les problèmes d'affichage [caption]
   const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
