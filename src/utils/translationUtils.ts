@@ -1,6 +1,6 @@
 
-import { TFunctionResult } from 'i18next';
-import { TFunction } from 'react-i18next';
+import i18next, { TFunctionReturn } from 'i18next';
+import { UseTranslationResponse } from 'react-i18next';
 
 /**
  * Type for a simplified translation function
@@ -16,12 +16,12 @@ type SimpleTranslationFn = (key: string, defaultValue?: string) => string;
  * @returns Cleaned translated text without [caption] prefixes
  */
 export const safeTranslate = (
-  t: TFunction | SimpleTranslationFn,
+  t: any,
   key: string,
   fallback: string
 ): string => {
   // Handle different ways the t function can be called from react-i18next
-  let translated: string | TFunctionResult | null | undefined;
+  let translated: string | TFunctionReturn | null | undefined;
   
   try {
     if (typeof t === 'function') {
@@ -33,7 +33,7 @@ export const safeTranslate = (
         console.warn(`Simple translation format failed for "${key}", trying alternative format:`, e);
         try {
           // We need to cast this as any since the type definitions are strict but implementations may vary
-          translated = (t as any)(key, { defaultValue: fallback });
+          translated = t(key, { defaultValue: fallback });
         } catch (err) {
           console.warn(`All translation attempts failed for "${key}":`, err);
           translated = fallback;
