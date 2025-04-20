@@ -53,7 +53,7 @@ export const safeTranslate = (
  */
 export const cleanCaptions = (text: string): string => {
   if (!text) return '';
-  return text.replace(/\[caption\]\s*/g, '');
+  return text.replace(/\[caption\]\s*/g, '').replace(/title/g, '');
 };
 
 /**

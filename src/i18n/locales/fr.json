@@ -261,5 +261,237 @@
     "survivalTitle": "Mode Survie",
     "survivalDesc": "Mettez vos connaissances à l'épreuve dans notre mode challenge chronométré avec difficulté croissante",
     "accessSurvival": "Accéder au Mode Survie"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Analyses, tutoriels et articles sur la finance quantitative et le trading d'options",
+    "description": "Articles sur la Finance Quantitative et le Pricing d'Options",
+    "search": "Rechercher des articles...",
+    "clearFilters": "Effacer les filtres",
+    "featuredPost": "Article à la une",
+    "readMore": "Lire la suite",
+    "searchResults": "Résultats de recherche",
+    "allPosts": "Tous les articles",
+    "noResults": "Aucun article trouvé",
+    "tryDifferent": "Essayez un autre terme de recherche ou tag",
+    "viewAllPosts": "Voir tous les articles",
+    "browseTags": "Parcourir par tags",
+    "postNotFound": "Article non trouvé",
+    "postNotFoundDesc": "L'article que vous recherchez a peut-être été supprimé ou est temporairement indisponible",
+    "backToBlog": "Retour au Blog",
+    "shared": "Contenu partagé",
+    "sharedOnTwitter": "Partagé avec succès sur Twitter",
+    "sharedOnLinkedIn": "Partagé avec succès sur LinkedIn",
+    "sharedOnFacebook": "Partagé avec succès sur Facebook",
+    "linkCopied": "Lien copié",
+    "linkCopiedToClipboard": "Le lien a été copié dans le presse-papiers",
+    "shareOnTwitter": "Partager sur Twitter",
+    "shareOnLinkedIn": "Partager sur LinkedIn",
+    "shareOnFacebook": "Partager sur Facebook",
+    "newsletter": {
+      "title": "Abonnez-vous à notre newsletter",
+      "description": "Recevez les derniers articles et ressources directement dans votre boîte de réception",
+      "placeholder": "Entrez votre email",
+      "subscribe": "S'abonner"
+    }
+  },
+  "pricing": {
+    "title": "Forfaits",
+    "subtitle": "Choisissez le forfait qui correspond le mieux à vos objectifs d'apprentissage",
+    "monthly": "Mensuel",
+    "yearly": "Annuel (Économisez 20%)",
+    "currentPlan": "Forfait actuel",
+    "choosePlan": "Choisir ce forfait",
+    "upgradeNow": "Mettre à niveau maintenant",
+    "continueFreemium": "Continuer avec le forfait gratuit",
+    "mostPopular": "Le plus populaire",
+    "freemium": {
+      "title": "Gratuit",
+      "badge": "Gratuit",
+      "description": "Accès de base pour commencer",
+      "price": {
+        "monthly": "0€",
+        "yearly": "0€"
+      },
+      "features": {
+        "access": "Accès aux cours fondamentaux",
+        "fundamentals": "Modèles de pricing d'options de base",
+        "exercises": "5 exercices pratiques",
+        "community": "Accès au forum communautaire",
+        "updates": "Mises à jour régulières de contenu"
+      }
+    },
+    "student": {
+      "title": "Étudiant",
+      "badge": "Étudiant",
+      "description": "Parfait pour apprendre et pratiquer",
+      "price": {
+        "monthly": "19€",
+        "yearly": "182€"
+      },
+      "features": {
+        "access": "Tout ce qui est inclus dans le forfait Gratuit",
+        "advanced": "Modèles de pricing d'options avancés",
+        "exercises": "Exercices pratiques illimités",
+        "quizzes": "Accès à tous les quiz",
+        "notebooks": "Notebooks interactifs",
+        "projects": "Projets du monde réel",
+        "community": "Support prioritaire sur le forum"
+      }
+    },
+    "pro": {
+      "title": "Professionnel",
+      "badge": "Pro",
+      "description": "Pour les quants et traders sérieux",
+      "price": {
+        "monthly": "49€",
+        "yearly": "470€"
+      },
+      "features": {
+        "access": "Tout ce qui est inclus dans le forfait Étudiant",
+        "exclusive": "Contenu exclusif pour les professionnels",
+        "advanced": "Modélisation avancée de la volatilité",
+        "exotic": "Pricing de produits dérivés exotiques",
+        "workshops": "Ateliers en direct mensuels",
+        "certification": "Certificats de fin de cours",
+        "community": "Sessions 1-à-1 avec des experts"
+      }
+    },
+    "faq": {
+      "title": "Questions fréquemment posées",
+      "q1": "Que se passe-t-il après mon abonnement ?",
+      "a1": "Après vous être abonné, vous aurez un accès immédiat à tout le contenu inclus dans votre forfait. Vous pouvez commencer à apprendre immédiatement.",
+      "q2": "Puis-je changer de forfait plus tard ?",
+      "a2": "Oui, vous pouvez passer à un forfait supérieur ou inférieur à tout moment. Si vous passez à un forfait supérieur, la différence au prorata vous sera facturée. Si vous passez à un forfait inférieur, vous recevrez un crédit pour votre prochain cycle de facturation.",
+      "q3": "Y a-t-il un essai gratuit ?",
+      "a3": "Oui, notre forfait Gratuit vous donne accès au contenu de base pour que vous puissiez découvrir notre plateforme avant de vous abonner.",
+      "q4": "Comment fonctionnent les remboursements ?",
+      "a4": "Si vous n'êtes pas satisfait de votre abonnement, contactez-nous dans les 14 jours suivant l'achat pour un remboursement complet.",
+      "q5": "Est-ce que je reçois des mises à jour du contenu ?",
+      "a5": "Oui, tous les forfaits incluent l'accès aux mises à jour et au nouveau contenu de leur niveau au fur et à mesure qu'il devient disponible.",
+      "q6": "Sur combien d'appareils puis-je utiliser mon compte ?",
+      "a6": "Vous pouvez accéder à votre compte sur un nombre illimité d'appareils, mais nous n'autorisons qu'une seule session active à la fois."
+    },
+    "enterprise": {
+      "title": "Solutions Entreprise",
+      "description": "Besoin d'un forfait personnalisé pour votre équipe ou entreprise ?",
+      "cta": "Contactez-nous",
+      "features": {
+        "dedicated": "Gestionnaire de compte dédié",
+        "custom": "Parcours d'apprentissage personnalisés",
+        "private": "Ateliers privés",
+        "analytics": "Analytique d'apprentissage",
+        "api": "Accès API",
+        "sso": "Intégration SSO"
+      }
+    }
+  },
+  "courses": {
+    "fundamentals": "Fondamentaux",
+    "advanced": "Avancé",
+    "complex": "Complexe",
+    "beginner": "Débutant",
+    "intermediate": "Intermédiaire",
+    "expert": "Expert"
+  },
+  "coursesPage": {
+    "title": "Cours",
+    "subtitle": "Des concepts fondamentaux aux techniques avancées en finance quantitative",
+    "description": "Cours interactifs sur la finance quantitative, le pricing d'options et les stratégies de trading",
+    "fundamentals": {
+      "tab": "Fondamentaux",
+      "title": "Concepts Fondamentaux",
+      "blackScholes": {
+        "title": "Modèle Black-Scholes",
+        "description": "Maîtrisez le modèle de pricing d'options fondamental"
+      },
+      "yieldCurves": {
+        "title": "Courbes de Rendement",
+        "description": "Comprenez les taux d'intérêt et les courbes de rendement"
+      },
+      "greeks": {
+        "title": "Greeks des Options",
+        "description": "Maîtrisez Delta, Gamma, Theta, Vega et Rho"
+      }
+    },
+    "advanced": {
+      "tab": "Avancé",
+      "title": "Techniques Avancées",
+      "description": "Allez au-delà des bases avec nos cours avancés sur la volatilité, la couverture et les produits dérivés complexes.",
+      "impliedVol": {
+        "title": "Analyse de la Volatilité Implicite",
+        "description": "Comprendre et analyser la volatilité implicite à travers les prix d'exercice et les maturités"
+      },
+      "volProducts": {
+        "title": "Produits de Volatilité",
+        "description": "Tradez et investissez dans la volatilité grâce à des produits financiers spécialisés"
+      },
+      "hedging": {
+        "title": "Stratégies de Couverture Avancées",
+        "description": "Implémentez des techniques de couverture sophistiquées pour des portefeuilles complexes"
+      }
+    },
+    "complex": {
+      "tab": "Complexe",
+      "title": "Méthodes Complexes",
+      "exotic": {
+        "title": "Options Exotiques",
+        "description": "Évaluez et analysez les produits dérivés path-dependent et multi-actifs"
+      },
+      "monteCarlo": {
+        "title": "Méthodes Monte Carlo",
+        "description": "Maîtrisez les techniques de pricing et de gestion des risques basées sur la simulation"
+      },
+      "stochastic": {
+        "title": "Calcul Stochastique",
+        "description": "Appliquez des techniques mathématiques avancées à la modélisation financière"
+      }
+    },
+    "beginner": "Débutant",
+    "intermediate": "Intermédiaire",
+    "advanced": "Avancé",
+    "expert": "Expert",
+    "startCourse": "Commencer le cours",
+    "unlock": "Débloquer",
+    "unlockNow": "Débloquer maintenant",
+    "unlockContent": "Débloquer le contenu",
+    "learning": {
+      "title": "Continuez Votre Apprentissage",
+      "subtitle": "Explorez d'autres façons d'améliorer vos compétences en finance quantitative",
+      "mentoring": "Mentorat 1-à-1",
+      "practice": "Exercices Pratiques"
+    },
+    "difficulty": "Difficulté",
+    "skillsGained": "Compétences Acquises",
+    "volSkillsDescription": "Analyse de surface de volatilité, pricing de swaps de variance, stratégies de trading sur volatilité, et plus encore.",
+    "subscribeToAccess": "S'abonner pour accéder",
+    "alreadySubscribed": "Déjà abonné?",
+    "backToExercises": "Retour aux Exercices",
+    "unlockCourse": "Débloquer ce Cours",
+    "advancedCoursesInfo": "Les cours avancés sont disponibles avec nos forfaits Étudiant et Pro. Abonnez-vous pour y accéder."
+  },
+  "community": {
+    "title": "Communauté",
+    "subtitle": "Connectez-vous avec d'autres quants et traders",
+    "forum": {
+      "title": "Forum de discussion",
+      "description": "Échangez des idées et posez des questions"
+    },
+    "chat": {
+      "title": "Chat en direct",
+      "description": "Obtenez de l'aide en temps réel de la communauté"
+    },
+    "events": {
+      "title": "Événements",
+      "description": "Webinaires, ateliers et meetups"
+    },
+    "mentoring": {
+      "title": "Mentorat",
+      "description": "Accompagnement individuel par des experts du secteur"
+    }
+  },
+  "exercisesPage": {
+    "duration": "Durée",
+    "hours": "heures"
   }
 }

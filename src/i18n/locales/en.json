@@ -261,5 +261,237 @@
     "survivalTitle": "Survival Mode",
     "survivalDesc": "Put your knowledge to the test in our timed challenge mode with increasing difficulty",
     "accessSurvival": "Access Survival Mode"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Insights, tutorials, and analysis on quantitative finance and options trading",
+    "description": "Articles on Quantitative Finance and Options Pricing",
+    "search": "Search articles...",
+    "clearFilters": "Clear Filters",
+    "featuredPost": "Featured Post",
+    "readMore": "Read More",
+    "searchResults": "Search Results",
+    "allPosts": "All Posts",
+    "noResults": "No Posts Found",
+    "tryDifferent": "Try a different search term or tag",
+    "viewAllPosts": "View All Posts",
+    "browseTags": "Browse by Tags",
+    "postNotFound": "Blog Post Not Found",
+    "postNotFoundDesc": "The blog post you are looking for might have been removed or is temporarily unavailable",
+    "backToBlog": "Back to Blog",
+    "shared": "Content Shared",
+    "sharedOnTwitter": "Successfully shared on Twitter",
+    "sharedOnLinkedIn": "Successfully shared on LinkedIn",
+    "sharedOnFacebook": "Successfully shared on Facebook",
+    "linkCopied": "Link Copied",
+    "linkCopiedToClipboard": "Link has been copied to clipboard",
+    "shareOnTwitter": "Share on Twitter",
+    "shareOnLinkedIn": "Share on LinkedIn",
+    "shareOnFacebook": "Share on Facebook",
+    "newsletter": {
+      "title": "Subscribe to Our Newsletter",
+      "description": "Get the latest articles and resources delivered straight to your inbox",
+      "placeholder": "Enter your email",
+      "subscribe": "Subscribe"
+    }
+  },
+  "pricing": {
+    "title": "Pricing Plans",
+    "subtitle": "Choose the plan that best fits your learning goals",
+    "monthly": "Monthly",
+    "yearly": "Yearly (Save 20%)",
+    "currentPlan": "Current Plan",
+    "choosePlan": "Choose Plan",
+    "upgradeNow": "Upgrade Now",
+    "continueFreemium": "Continue with Free Plan",
+    "mostPopular": "Most Popular",
+    "freemium": {
+      "title": "Free",
+      "badge": "Free",
+      "description": "Basic access to get you started",
+      "price": {
+        "monthly": "$0",
+        "yearly": "$0"
+      },
+      "features": {
+        "access": "Access to core lectures",
+        "fundamentals": "Basic option pricing models",
+        "exercises": "5 practice exercises",
+        "community": "Community forum access",
+        "updates": "Regular content updates"
+      }
+    },
+    "student": {
+      "title": "Student",
+      "badge": "Student",
+      "description": "Perfect for learning and practice",
+      "price": {
+        "monthly": "$19",
+        "yearly": "$182"
+      },
+      "features": {
+        "access": "Everything in Free plan",
+        "advanced": "Advanced options pricing models",
+        "exercises": "Unlimited practice exercises",
+        "quizzes": "Access to all quizzes",
+        "notebooks": "Interactive notebooks",
+        "projects": "Real-world projects",
+        "community": "Priority forum support"
+      }
+    },
+    "pro": {
+      "title": "Professional",
+      "badge": "Pro",
+      "description": "For serious quants and traders",
+      "price": {
+        "monthly": "$49",
+        "yearly": "$470"
+      },
+      "features": {
+        "access": "Everything in Student plan",
+        "exclusive": "Exclusive content for professionals",
+        "advanced": "Advanced volatility modeling",
+        "exotic": "Exotic derivatives pricing",
+        "workshops": "Monthly live workshops",
+        "certification": "Course completion certificates",
+        "community": "1-on-1 expert sessions"
+      }
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "q1": "What happens after I subscribe?",
+      "a1": "After subscribing, you'll get immediate access to all the content included in your plan. You can start learning right away.",
+      "q2": "Can I switch plans later?",
+      "a2": "Yes, you can upgrade or downgrade your plan at any time. If you upgrade, you'll be charged the prorated difference. If you downgrade, you'll receive credit towards your next billing cycle.",
+      "q3": "Is there a free trial?",
+      "a3": "Yes, our Free plan gives you access to core content so you can experience our platform before subscribing.",
+      "q4": "How do refunds work?",
+      "a4": "If you're not satisfied with your subscription, contact us within 14 days of purchase for a full refund.",
+      "q5": "Do I get updates to the content?",
+      "a5": "Yes, all plans include access to updates and new content within their tier as it becomes available.",
+      "q6": "How many devices can I use?",
+      "a6": "You can access your account on unlimited devices, but we allow only one active session at a time."
+    },
+    "enterprise": {
+      "title": "Enterprise Solutions",
+      "description": "Need a customized plan for your team or company?",
+      "cta": "Contact Us",
+      "features": {
+        "dedicated": "Dedicated account manager",
+        "custom": "Custom learning paths",
+        "private": "Private workshops",
+        "analytics": "Learning analytics",
+        "api": "API access",
+        "sso": "SSO integration"
+      }
+    }
+  },
+  "courses": {
+    "fundamentals": "Fundamentals",
+    "advanced": "Advanced",
+    "complex": "Complex",
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "expert": "Expert"
+  },
+  "coursesPage": {
+    "title": "Courses",
+    "subtitle": "From fundamental concepts to advanced techniques in quantitative finance",
+    "description": "Interactive courses on quantitative finance, options pricing, and trading strategies",
+    "fundamentals": {
+      "tab": "Fundamentals",
+      "title": "Fundamental Concepts",
+      "blackScholes": {
+        "title": "Black-Scholes Model",
+        "description": "Master the foundational option pricing model"
+      },
+      "yieldCurves": {
+        "title": "Yield Curves",
+        "description": "Understand interest rates and yield curves"
+      },
+      "greeks": {
+        "title": "Option Greeks",
+        "description": "Master Delta, Gamma, Theta, Vega, and Rho"
+      }
+    },
+    "advanced": {
+      "tab": "Advanced",
+      "title": "Advanced Techniques",
+      "description": "Go beyond the basics with our advanced courses on volatility, hedging, and complex derivatives.",
+      "impliedVol": {
+        "title": "Implied Volatility Analysis",
+        "description": "Understanding and analyzing implied volatility across strike prices and maturities"
+      },
+      "volProducts": {
+        "title": "Volatility Products",
+        "description": "Trade and invest in volatility through specialized financial products"
+      },
+      "hedging": {
+        "title": "Advanced Hedging Strategies",
+        "description": "Implement sophisticated hedging techniques for complex portfolios"
+      }
+    },
+    "complex": {
+      "tab": "Complex",
+      "title": "Complex Methods",
+      "exotic": {
+        "title": "Exotic Options",
+        "description": "Price and analyze path-dependent and multi-asset derivatives"
+      },
+      "monteCarlo": {
+        "title": "Monte Carlo Methods",
+        "description": "Master simulation-based pricing and risk management techniques"
+      },
+      "stochastic": {
+        "title": "Stochastic Calculus",
+        "description": "Apply advanced mathematical techniques to financial modeling"
+      }
+    },
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced",
+    "expert": "Expert",
+    "startCourse": "Start Course",
+    "unlock": "Unlock",
+    "unlockNow": "Unlock Now",
+    "unlockContent": "Unlock Content",
+    "learning": {
+      "title": "Continue Your Learning",
+      "subtitle": "Explore other ways to improve your quantitative finance skills",
+      "mentoring": "1-on-1 Mentoring",
+      "practice": "Practice Exercises"
+    },
+    "difficulty": "Difficulty",
+    "skillsGained": "Skills You'll Gain",
+    "volSkillsDescription": "Volatility surface analysis, pricing variance swaps, volatility trading strategies, and more.",
+    "subscribeToAccess": "Subscribe to Access",
+    "alreadySubscribed": "Already subscribed?",
+    "backToExercises": "Back to Exercises",
+    "unlockCourse": "Unlock This Course",
+    "advancedCoursesInfo": "Advanced courses are available with our Student and Pro plans. Subscribe to gain access."
+  },
+  "community": {
+    "title": "Community",
+    "subtitle": "Connect with fellow quants and traders",
+    "forum": {
+      "title": "Discussion Forum",
+      "description": "Exchange ideas and ask questions"
+    },
+    "chat": {
+      "title": "Live Chat",
+      "description": "Get real-time help from the community"
+    },
+    "events": {
+      "title": "Events",
+      "description": "Webinars, workshops, and meetups"
+    },
+    "mentoring": {
+      "title": "Mentoring",
+      "description": "One-on-one guidance from industry experts"
+    }
+  },
+  "exercisesPage": {
+    "duration": "Duration",
+    "hours": "hours"
   }
 }
