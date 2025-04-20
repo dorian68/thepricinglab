@@ -1,7 +1,4 @@
 
-import i18next, { TFunctionReturn } from 'i18next';
-import { UseTranslationResponse } from 'react-i18next';
-
 /**
  * Type for a simplified translation function
  */
@@ -21,7 +18,7 @@ export const safeTranslate = (
   fallback: string
 ): string => {
   // Handle different ways the t function can be called from react-i18next
-  let translated: string | TFunctionReturn | null | undefined;
+  let translated: string | null | undefined;
   
   try {
     if (typeof t === 'function') {
