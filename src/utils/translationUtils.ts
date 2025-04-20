@@ -1,5 +1,6 @@
 
-import { TFunction as ReactI18NextTFunction } from 'i18next';
+import { TFunctionResult } from 'i18next';
+import { TFunction } from 'react-i18next';
 
 /**
  * Type for a simplified translation function
@@ -15,25 +16,27 @@ type SimpleTranslationFn = (key: string, defaultValue?: string) => string;
  * @returns Cleaned translated text without [caption] prefixes
  */
 export const safeTranslate = (
-  t: ReactI18NextTFunction | SimpleTranslationFn,
+  t: TFunction | SimpleTranslationFn,
   key: string,
   fallback: string
 ): string => {
   // Handle different ways the t function can be called from react-i18next
-  let translated: string | null | undefined;
+  let translated: string | TFunctionResult | null | undefined;
   
   try {
     if (typeof t === 'function') {
-      // First attempt: Use the object format which is the preferred way in newer versions
-      translated = t(key, { defaultValue: fallback });
-      
-      // If that didn't work (returned the key itself), try the simpler form
-      if (translated === key) {
+      // First attempt: Try the simple form which works in most cases
+      try {
+        translated = t(key, fallback);
+      } catch (e) {
+        // If that didn't work, try the object format as a fallback approach
+        console.warn(`Simple translation format failed for "${key}", trying alternative format:`, e);
         try {
-          translated = t(key, fallback);
-        } catch (e) {
-          // Some implementations might not support this format
-          console.warn(`Alternative translation format failed for "${key}":`, e);
+          // We need to cast this as any since the type definitions are strict but implementations may vary
+          translated = (t as any)(key, { defaultValue: fallback });
+        } catch (err) {
+          console.warn(`All translation attempts failed for "${key}":`, err);
+          translated = fallback;
         }
       }
     } else {
@@ -45,7 +48,7 @@ export const safeTranslate = (
   }
   
   // Always clean the result, whether it's the translation or the fallback
-  return cleanCaptions(translated || fallback);
+  return cleanCaptions(translated?.toString() || fallback);
 };
 
 /**
