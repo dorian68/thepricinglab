@@ -40,6 +40,7 @@ interface LineChartProps {
   color?: string;
   showAxes?: boolean;
   animate?: boolean;
+  className?: string;
 }
 
 export const LineChart: React.FC<LineChartProps> = ({ 
@@ -48,7 +49,8 @@ export const LineChart: React.FC<LineChartProps> = ({
   yLabel, 
   color = "#8884d8",
   showAxes = true,
-  animate = true
+  animate = true,
+  className = "",
 }) => {
   const chartData = data.map(item => ({
     name: item.x,
@@ -56,7 +58,7 @@ export const LineChart: React.FC<LineChartProps> = ({
   }));
 
   return (
-    <Chart>
+    <Chart className={className}>
       <RechartsLineChart
         data={chartData}
         margin={{ top: 5, right: 20, bottom: 20, left: 20 }}

@@ -64,13 +64,38 @@ interface StrategyCardProps {
   strategy: Strategy;
   isSelected: boolean;
   onClick: () => void;
-  t: TFunction; // Updated type here
+  t: TFunction;
 }
 
 const StrategyCard: React.FC<StrategyCardProps> = ({ strategy, isSelected, onClick, t }) => {
-  // Try to find translations for strategy name and description
-  const strategyName = safeTranslate(t, `strategies.${strategy.id}.name`, strategy.name);
-  const strategyDescription = safeTranslate(t, `strategies.${strategy.id}.description`, strategy.description);
+  // Traduction des noms et descriptions des stratégies
+  // Assurer qu'on n'affiche jamais les valeurs brutes "name" ou "description"
+  const strategyId = strategy.id || '';
+  
+  // Déterminer un nom lisible pour la stratégie
+  let displayName = strategy.name;
+  if (!displayName || displayName === "name") {
+    displayName = `Strategy ${strategyId}`;
+  }
+  
+  // Déterminer une description lisible pour la stratégie
+  let displayDescription = strategy.description;
+  if (!displayDescription || displayDescription === "description") {
+    displayDescription = `Configuration for ${displayName}`;
+  }
+  
+  // Utiliser les traductions si disponibles, sinon utiliser les noms formatés
+  const strategyName = safeTranslate(
+    t, 
+    `strategies.${strategyId}.name`, 
+    displayName
+  );
+  
+  const strategyDescription = safeTranslate(
+    t, 
+    `strategies.${strategyId}.description`, 
+    displayDescription
+  );
 
   return (
     <Card 

@@ -1,18 +1,39 @@
 
 import React, { useState, useEffect } from 'react';
 import { Loader, Play } from 'lucide-react';
-import { loadPyodide } from '@/services/pyodideService';
+import { loadPyodide, isPyodideLoaded } from '@/services/pyodideService';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 interface PyodideLoaderProps {
   onLoad?: () => void;
   discreet?: boolean;
+  autoLoad?: boolean;
 }
 
-const PyodideLoader: React.FC<PyodideLoaderProps> = ({ onLoad, discreet = true }) => {
+const PyodideLoader: React.FC<PyodideLoaderProps> = ({ 
+  onLoad, 
+  discreet = true, 
+  autoLoad = false 
+}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Vérifier si Pyodide est déjà chargé
+    if (isPyodideLoaded()) {
+      setIsLoaded(true);
+      onLoad?.();
+      return;
+    }
+
+    // Charger automatiquement Pyodide si autoLoad est true
+    if (autoLoad) {
+      handleLoad();
+    }
+  }, [autoLoad, onLoad]);
 
   const handleLoad = async () => {
     if (isLoading || isLoaded) return;
@@ -21,20 +42,39 @@ const PyodideLoader: React.FC<PyodideLoaderProps> = ({ onLoad, discreet = true }
     setError(null);
     
     try {
+      toast({
+        title: "Activation de Python",
+        description: "Chargement de l'environnement Python en cours...",
+      });
+      
       await loadPyodide();
       setIsLoaded(true);
+      
+      toast({
+        title: "Python activé",
+        description: "L'environnement Python est prêt à l'utilisation",
+      });
+      
       onLoad?.();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load Pyodide');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load Pyodide';
+      setError(errorMessage);
+      
+      toast({
+        title: "Erreur d'activation",
+        description: "Impossible de charger Python: " + errorMessage,
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Ne rien afficher si déjà chargé et en mode discret
+  if (isLoaded && discreet) return null;
+  
   // Version discrète - pour placement à côté des blocs de code
   if (discreet) {
-    if (isLoaded) return null;
-    
     return (
       <div className="inline-flex items-center">
         {!isLoading ? (

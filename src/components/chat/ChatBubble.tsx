@@ -2,16 +2,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Minimize, Maximize, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Drawer, DrawerContent, DrawerTrigger, DrawerClose } from '@/components/ui/drawer';
+import { Dialog, DialogContent, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import ChatWidget from './ChatWidget';
 import { useTranslation } from 'react-i18next';
 
 const ChatBubble: React.FC = () => {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [position, setPosition] = useState({ 
-    x: window.innerWidth - 80, 
-    y: window.innerHeight - 100 
+    x: typeof window !== 'undefined' ? window.innerWidth - 80 : 0, 
+    y: typeof window !== 'undefined' ? window.innerHeight - 100 : 0 
   });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -19,30 +23,25 @@ const ChatBubble: React.FC = () => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Set initial position anchored to bottom right
-    setPosition({
-      x: window.innerWidth - 80,
-      y: window.innerHeight - 100
-    });
-
-    const handleResize = () => {
-      // Keep bubble in viewport on resize
-      setPosition(prev => {
-        const bubbleSize = 70;
-        const newX = Math.min(window.innerWidth - bubbleSize, prev.x);
-        const newY = Math.min(window.innerHeight - bubbleSize, prev.y);
-        return { x: newX, y: newY };
+    // Positionnement initial du bouton flottant (en bas à droite)
+    const updatePosition = () => {
+      const margin = 20; // marge par rapport au bord de l'écran
+      setPosition({
+        x: window.innerWidth - 70 - margin,
+        y: window.innerHeight - 70 - margin
       });
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    
+    return () => window.removeEventListener('resize', updatePosition);
   }, []);
 
-  // Apply split-screen effect to main content when chat is open
+  // Appliquer l'effet split-screen seulement sur desktop
   useEffect(() => {
     const rootElement = document.getElementById('root');
-    if (rootElement) {
+    if (rootElement && !isMobile) {
       if (isOpen && !isMinimized) {
         rootElement.style.width = '75%';
         rootElement.style.transition = 'width 0.3s ease-in-out';
@@ -56,7 +55,20 @@ const ChatBubble: React.FC = () => {
         rootElement.style.width = '100%';
       }
     };
-  }, [isOpen, isMinimized]);
+  }, [isOpen, isMinimized, isMobile]);
+
+  // Bloquer le scroll lorsque le chat est ouvert sur mobile
+  useEffect(() => {
+    if (isMobile && isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, isMobile]);
 
   const toggleChat = () => {
     if (isMinimized) {
@@ -81,7 +93,9 @@ const ChatBubble: React.FC = () => {
     setIsOpen(false);
   };
 
+  // Fonctions pour le drag & drop sur desktop
   const startDrag = (e: React.MouseEvent) => {
+    if (isMobile) return;
     if (e.target !== bubbleRef.current && 
         (chatContainerRef.current && !chatContainerRef.current.contains(e.target as Node))) return;
     
@@ -96,7 +110,7 @@ const ChatBubble: React.FC = () => {
   };
 
   const onDrag = (e: MouseEvent) => {
-    if (!isDragging) return;
+    if (!isDragging || isMobile) return;
     
     const bubbleSize = 70;
     const chatWidth = isOpen ? 320 : bubbleSize;
@@ -116,58 +130,65 @@ const ChatBubble: React.FC = () => {
   };
 
   useEffect(() => {
-    if (isDragging) {
+    if (isDragging && !isMobile) {
       window.addEventListener('mousemove', onDrag);
       window.addEventListener('mouseup', endDrag);
-      window.addEventListener('touchmove', onDragTouch);
-      window.addEventListener('touchend', endDrag);
     } else {
       window.removeEventListener('mousemove', onDrag);
       window.removeEventListener('mouseup', endDrag);
-      window.removeEventListener('touchmove', onDragTouch);
-      window.removeEventListener('touchend', endDrag);
     }
 
     return () => {
       window.removeEventListener('mousemove', onDrag);
       window.removeEventListener('mouseup', endDrag);
-      window.removeEventListener('touchmove', onDragTouch);
-      window.removeEventListener('touchend', endDrag);
     };
   }, [isDragging]);
 
-  const onDragTouch = (e: TouchEvent) => {
-    if (!isDragging || !e.touches[0]) return;
-    
-    const touch = e.touches[0];
-    const bubbleSize = 70;
-    const chatWidth = isOpen ? 320 : bubbleSize;
-    const chatHeight = isOpen ? 400 : bubbleSize;
-    
-    const newX = Math.max(0, Math.min(window.innerWidth - chatWidth, touch.clientX - dragStart.x));
-    const newY = Math.max(0, Math.min(window.innerHeight - chatHeight, touch.clientY - dragStart.y));
-    
-    setPosition({
-      x: newX,
-      y: newY
-    });
-  };
+  // Version mobile (utilise Drawer de shadcn)
+  if (isMobile) {
+    return (
+      <>
+        <Drawer>
+          <DrawerTrigger asChild>
+            <Button 
+              variant="default" 
+              size="icon" 
+              className="fixed bottom-5 right-5 h-14 w-14 bg-finance-accent shadow-lg hover:bg-finance-accent/80 text-white rounded-full flex items-center justify-center z-50"
+            >
+              <MessageCircle className="h-6 w-6" />
+            </Button>
+          </DrawerTrigger>
+          <DrawerContent className="h-[90vh] bg-finance-dark text-finance-offwhite border-t border-finance-steel/20">
+            <div className="p-3 bg-finance-accent/80 text-white flex justify-between items-center sticky top-0">
+              <h3 className="font-medium">{t('chat.title', 'Chat')}</h3>
+              <DrawerClose asChild>
+                <Button variant="ghost" size="icon" className="h-6 w-6 text-white">
+                  <X className="h-4 w-4" />
+                </Button>
+              </DrawerClose>
+            </div>
+            <div className="flex flex-col h-[calc(100%-3rem)] p-2">
+              <div className="flex-grow overflow-y-auto p-2">
+                <ChatWidget />
+              </div>
+              <div className="p-3 border-t border-finance-steel/10 flex gap-2 bg-finance-dark sticky bottom-0">
+                <input 
+                  type="text" 
+                  placeholder={t('chat.placeholder', 'Type your message...')}
+                  className="flex-grow p-2 rounded border border-finance-steel/30 dark:bg-finance-charcoal focus:outline-none focus:ring-1 focus:ring-finance-accent"
+                />
+                <Button size="icon" className="h-10 w-10 rounded-full bg-finance-accent hover:bg-finance-accent/80">
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </DrawerContent>
+        </Drawer>
+      </>
+    );
+  }
 
-  const startDragTouch = (e: React.TouchEvent) => {
-    if (!e.touches[0]) return;
-    if (e.target !== bubbleRef.current && 
-        (chatContainerRef.current && !chatContainerRef.current.contains(e.target as Node))) return;
-    
-    if ((e.target as HTMLElement).closest('button[role="button"]')) return;
-    
-    const touch = e.touches[0];
-    setIsDragging(true);
-    setDragStart({
-      x: touch.clientX - position.x,
-      y: touch.clientY - position.y
-    });
-  };
-
+  // Version desktop (fenêtre flottante avec drag & drop)
   return (
     <>
       {isOpen && (
@@ -180,6 +201,7 @@ const ChatBubble: React.FC = () => {
             boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
             transition: isDragging ? 'none' : 'all 0.3s ease-in-out'
           }}
+          onMouseDown={startDrag}
         >
           {!isMinimized && (
             <>
@@ -235,6 +257,7 @@ const ChatBubble: React.FC = () => {
           top: `${position.y}px`,
           transition: isDragging ? 'none' : 'all 0.2s ease-in-out'
         }}
+        onMouseDown={startDrag}
       >
         <MessageCircle className="h-6 w-6" />
       </Button>

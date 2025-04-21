@@ -28,9 +28,16 @@ const Strategies = () => {
   }, []);
 
   const handleStrategyChange = (strategy: Strategy) => {
-    setSelectedStrategy(strategy);
-    setFormStrategy(strategy);
-    const newResults = calculateStrategyResults(strategy);
+    // Ensure that strategy never contains raw "name" or "description" values
+    const cleanStrategy = {
+      ...strategy,
+      name: strategy.name === "name" ? `Strategy ${strategy.id}` : strategy.name,
+      description: strategy.description === "description" ? `Configuration for strategy ${strategy.id}` : strategy.description
+    };
+    
+    setSelectedStrategy(cleanStrategy);
+    setFormStrategy(cleanStrategy);
+    const newResults = calculateStrategyResults(cleanStrategy);
     setResults(newResults);
   };
 

@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, GraduationCap, Trophy, Rocket, Star, Lock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { safeTranslate } from "../utils/translationUtils";
 
 interface PricingDialogProps {
   trigger: React.ReactNode;
@@ -20,63 +21,63 @@ interface PricingDialogProps {
 
 const PricingDialog = ({ trigger }: PricingDialogProps) => {
   const { t } = useTranslation();
+  const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
   
   const pricingTiers = [
     {
       id: "freemium",
-      name: t('pricing.freemium.title'),
-      price: t('pricing.freemium.price'),
-      description: t('pricing.freemium.description'),
+      name: st('pricing.freemium.title', 'Free'),
+      price: st('pricing.freemium.price', '0€'),
+      description: st('pricing.freemium.description', 'Basic access to get you started'),
       icon: <Star className="h-5 w-5 text-yellow-400" />,
       features: [
-        t('pricing.freemium.feature1'),
-        t('pricing.freemium.feature2'),
-        t('pricing.freemium.feature3'),
-        t('pricing.freemium.feature4')
+        st('pricing.freemium.features.access', 'Access to core lectures'),
+        st('pricing.freemium.features.fundamentals', 'Basic option pricing models'),
+        st('pricing.freemium.features.exercises', '5 practice exercises'),
+        st('pricing.freemium.features.community', 'Community forum access')
       ],
-      cta: t('pricing.freemium.cta'),
+      cta: st('pricing.freemium.cta', 'Start Free'),
       href: "/signup?plan=freemium",
       recommended: false,
-      badge: t('pricing.freemium.badge')
+      badge: st('pricing.freemium.badge', 'Free')
     },
     {
       id: "student",
-      name: t('pricing.student.title'),
+      name: st('pricing.student.title', 'Student'),
       price: "19€",
-      description: t('pricing.student.description'),
+      description: st('pricing.student.description', 'Perfect for learning and practice'),
       icon: <GraduationCap className="h-5 w-5 text-blue-400" />,
       features: [
-        t('pricing.student.feature1'),
-        t('pricing.student.feature2'),
-        t('pricing.student.feature3'),
-        t('pricing.student.feature4'),
-        t('pricing.student.feature5')
+        st('pricing.student.features.access', 'Everything in Free plan'),
+        st('pricing.student.features.advanced', 'Advanced options pricing models'),
+        st('pricing.student.features.exercises', 'Unlimited practice exercises'),
+        st('pricing.student.features.quizzes', 'Access to all quizzes'),
+        st('pricing.student.features.notebooks', 'Interactive notebooks')
       ],
-      cta: t('pricing.student.cta'),
+      cta: st('pricing.student.cta', 'Choose Student Plan'),
       href: "/signup?plan=student",
       recommended: true,
-      badge: t('pricing.student.badge')
+      badge: st('pricing.student.badge', 'Student')
     },
     {
       id: "pro",
-      name: t('pricing.pro.title'),
+      name: st('pricing.pro.title', 'Professional'),
       price: "49€",
-      description: t('pricing.pro.description'),
+      description: st('pricing.pro.description', 'For serious quants and traders'),
       icon: <Rocket className="h-5 w-5 text-finance-accent" />,
       features: [
-        t('pricing.pro.feature1'),
-        t('pricing.pro.feature2'),
-        t('pricing.pro.feature3'),
-        t('pricing.pro.feature4'),
-        t('pricing.pro.feature5'),
-        t('pricing.pro.feature6'),
-        t('pricing.pro.feature7'),
-        t('pricing.pro.feature8')
+        st('pricing.pro.features.access', 'Everything in Student plan'),
+        st('pricing.pro.features.exclusive', 'Exclusive content for professionals'),
+        st('pricing.pro.features.advanced', 'Advanced volatility modeling'),
+        st('pricing.pro.features.exotic', 'Exotic derivatives pricing'),
+        st('pricing.pro.features.workshops', 'Monthly live workshops'),
+        st('pricing.pro.features.certification', 'Course completion certificates'),
+        st('pricing.pro.features.community', '1-on-1 expert sessions')
       ],
-      cta: t('pricing.pro.cta'),
+      cta: st('pricing.pro.cta', 'Choose Pro Plan'),
       href: "/signup?plan=pro",
       recommended: false,
-      badge: t('pricing.pro.badge')
+      badge: st('pricing.pro.badge', 'Pro')
     }
   ];
 
@@ -87,9 +88,9 @@ const PricingDialog = ({ trigger }: PricingDialogProps) => {
       </DialogTrigger>
       <DialogContent className="bg-[#1A1F2C] text-white border-[#2A2F3C] max-w-4xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">{t('pricing.title')}</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">{st('pricing.title', 'Pricing Plans')}</DialogTitle>
           <DialogDescription className="text-[#8E9196]">
-            {t('pricing.subtitle')}
+            {st('pricing.subtitle', 'Choose the plan that best fits your learning goals')}
           </DialogDescription>
         </DialogHeader>
         
@@ -103,7 +104,7 @@ const PricingDialog = ({ trigger }: PricingDialogProps) => {
             >
               {tier.recommended && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-finance-accent text-xs font-bold uppercase py-1 px-3 rounded-full">
-                  {t('pricing.recommended')}
+                  {st('pricing.recommended', 'Most Popular')}
                 </div>
               )}
               
@@ -124,7 +125,7 @@ const PricingDialog = ({ trigger }: PricingDialogProps) => {
                 <div className="text-2xl font-bold text-finance-accent">
                   {tier.price} 
                   {tier.id !== "freemium" && (
-                    <span className="text-sm text-[#8E9196] font-normal ml-1">{t('pricing.monthly')}</span>
+                    <span className="text-sm text-[#8E9196] font-normal ml-1">{st('pricing.monthly', 'Monthly')}</span>
                   )}
                 </div>
                 <p className="text-[#8E9196] text-sm mt-1">{tier.description}</p>
@@ -153,7 +154,7 @@ const PricingDialog = ({ trigger }: PricingDialogProps) => {
         </div>
         
         <div className="mt-6 text-center text-[#8E9196] text-sm">
-          {t('pricing.guarantee')}
+          {st('pricing.guarantee', '14-day money-back guarantee, no questions asked')}
         </div>
       </DialogContent>
     </Dialog>

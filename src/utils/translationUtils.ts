@@ -1,63 +1,82 @@
 
-import { TFunction } from 'i18next';
+/**
+ * Type for a simplified translation function
+ */
+type SimpleTranslationFn = (key: string, defaultValue?: string) => string;
 
 /**
- * A safe translation function that provides fallbacks for missing translations
- * @param t The translation function from useTranslation()
- * @param key The translation key to look up
- * @param defaultValue Optional default value if translation is missing
- * @param lng Current language
- * @returns The translated string or a fallback value
+ * Utility for safely handling translations and avoiding [caption] placeholders
+ * 
+ * @param t - Translation function from react-i18next or similar
+ * @param key - Translation key to look up
+ * @param fallback - Fallback text if translation is not found
+ * @returns Cleaned translated text without [caption] prefixes
  */
 export const safeTranslate = (
-  t: TFunction, 
-  key: string, 
-  defaultValue?: string, 
-  lng?: string
+  t: any,
+  key: string,
+  fallback: string
 ): string => {
-  // Use the translation function with a default value
-  const result = t(key, { defaultValue: defaultValue || extractLabel(key) });
+  // Handle different ways the t function can be called from react-i18next
+  let translated: string | null | undefined;
   
-  // If the result exactly matches the key or contains square brackets, consider it missing
-  if (result === key || (typeof result === 'string' && result.includes('[') && result.includes(']'))) {
-    console.warn(`Missing translation: ${key}${lng ? ` in ${lng}` : ''}`);
-    // Return the default value or a humanized version of the key
-    return defaultValue || extractLabel(key);
+  try {
+    if (typeof t === 'function') {
+      // First attempt: Try the simple form which works in most cases
+      try {
+        translated = t(key, fallback);
+      } catch (e) {
+        // If that didn't work, try the object format as a fallback approach
+        console.warn(`Simple translation format failed for "${key}", trying alternative format:`, e);
+        try {
+          // We need to cast this as any since the type definitions are strict but implementations may vary
+          translated = t(key, { defaultValue: fallback }) as string;
+        } catch (err) {
+          console.warn(`All translation attempts failed for "${key}":`, err);
+          translated = fallback;
+        }
+      }
+    } else {
+      translated = fallback;
+    }
+  } catch (error) {
+    console.warn(`Translation error for key "${key}":`, error);
+    translated = fallback;
   }
   
-  return result;
+  // Always clean the result, whether it's the translation or the fallback
+  return cleanCaptions(translated?.toString() || fallback);
 };
 
 /**
- * Extracts a human-readable label from a translation key
- * @param key The translation key
- * @returns A readable label
+ * Process a block of text to remove [caption] markers
  */
-export const extractLabel = (key: string): string => {
-  // Get the last part of the key (e.g., "title" from "home.hero.title")
-  const lastPart = key.split('.').pop();
-  
-  if (!lastPart) return key;
-  
-  // Convert camelCase to Title Case with spaces
-  return lastPart
-    .replace(/([A-Z])/g, ' $1') // Add space before capital letters
-    .replace(/^./, (str) => str.toUpperCase()) // Capitalize first letter
-    .trim(); // Remove any extra spaces
+export const cleanCaptions = (text: string): string => {
+  if (!text) return '';
+  return text.replace(/\[caption\]\s*/g, '').replace(/title/g, '');
 };
 
 /**
- * Checks if a translation exists for a given key
- * @param t The translation function from useTranslation()
- * @param key The translation key to check
- * @returns Boolean indicating if translation exists
+ * Process translations in an object recursively
  */
-export const hasTranslation = (t: TFunction, key: string): boolean => {
-  // First cast to unknown, then to string to handle the typing correctly
-  const result = t(key, { returnObjects: true }) as unknown;
+export const cleanTranslationObject = (obj: any): any => {
+  if (!obj) return obj;
   
-  // Check if the result is a valid string and not a fallback
-  return typeof result === 'string' && 
-         result !== key && 
-         !(String(result).includes('[') && String(result).includes(']'));
+  if (typeof obj === 'string') {
+    return cleanCaptions(obj);
+  }
+  
+  if (Array.isArray(obj)) {
+    return obj.map(cleanTranslationObject);
+  }
+  
+  if (typeof obj === 'object') {
+    const result = {};
+    for (const key in obj) {
+      result[key] = cleanTranslationObject(obj[key]);
+    }
+    return result;
+  }
+  
+  return obj;
 };

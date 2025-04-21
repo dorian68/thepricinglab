@@ -2,9 +2,10 @@
 import React, { useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { safeTranslate } from '../../utils/translationUtils';
+import { safeTranslate, cleanCaptions } from '../../utils/translationUtils';
 import PythonExercise from '@/components/python/PythonExercise';
 import { transformCodeBlocks } from '@/utils/codeBlockTransformer';
+import PythonActivator from '@/utils/pythonActivator';
 
 const TradingExercises = () => {
   const { t } = useTranslation();
@@ -132,11 +133,11 @@ put_prices = [black_scholes(s, K, T, r, sigma, "put") for s in S_range]
 plt.figure(figsize=(10, 6))
 plt.plot(S_range, call_prices, 'b', label='Call')
 plt.plot(S_range, put_prices, 'r', label='Put')
-plt.axvline(x=K, color='g', linestyle='--', label='Prix d\'exercice')
+plt.axvline(x=K, color='g', linestyle='--', label='Prix d\\'exercice')
 plt.grid(True)
 plt.xlabel('Prix du sous-jacent')
-plt.ylabel('Prix de l\'option')
-plt.title('Prix d\'options selon le modèle de Black-Scholes')
+plt.ylabel('Prix de l\\'option')
+plt.title('Prix d\\'options selon le modèle de Black-Scholes')
 plt.legend()
 plt.show()
 `;
@@ -153,6 +154,10 @@ plt.show()
       <Helmet>
         <title>{safeTranslate(t, 'tradingLab.exercises', 'Exercices')} | The Trading Lab</title>
       </Helmet>
+      
+      {/* Charger Python automatiquement pour les pages d'exercices */}
+      <PythonActivator autoLoad={true} discreet={true} />
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-3xl font-bold text-finance-accent mb-6">
           {safeTranslate(t, 'tradingLab.exercises', 'Exercices')}
@@ -168,8 +173,8 @@ plt.show()
               Implémentez le modèle de Black-Scholes pour calculer le prix d'une option européenne.
             </p>
             <PythonExercise
-              title="Modèle de Black-Scholes"
-              problem={blackScholesProblem}
+              title={cleanCaptions("Modèle de Black-Scholes")}
+              problem={cleanCaptions(blackScholesProblem)}
               initialCode={blackScholesInitialCode}
               solution={blackScholesSolution}
               hints={blackScholesHints}

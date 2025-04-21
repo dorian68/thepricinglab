@@ -27,6 +27,9 @@ const Blog = () => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = React.useState("");
   const [activeTag, setActiveTag] = React.useState<string | null>(null);
+  
+  // Utiliser la fonction safeTranslate
+  const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
 
   const filteredPosts = React.useMemo(() => {
     let filtered = [...blogPosts];
@@ -61,8 +64,8 @@ const Blog = () => {
   return (
     <>
       <Helmet>
-        <title>{safeTranslate(t, "blog.title")} | The Pricing Lab</title>
-        <meta name="description" content={safeTranslate(t, "blog.description")} />
+        <title>{st('blog.title', 'Blog')} | The Pricing Lab</title>
+        <meta name="description" content={st('blog.description', 'Articles on Quantitative Finance and Options Pricing')} />
         <meta name="keywords" content="quantitative finance, options pricing, Black-Scholes, Monte Carlo, volatility surface, quant interview" />
         <link rel="canonical" href="https://thepricinglab.com/blog" />
       </Helmet>
@@ -75,12 +78,12 @@ const Blog = () => {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink>
-                <Link to="/">{safeTranslate(t, "navbar.home")}</Link>
+                <Link to="/">{st('navigation.home', 'Home')}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{safeTranslate(t, "blog.title")}</BreadcrumbPage>
+              <BreadcrumbPage>{st('blog.title', 'Blog')}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -88,10 +91,10 @@ const Blog = () => {
         {/* Hero Section */}
         <div className="mb-12 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            {safeTranslate(t, "blog.title")}
+            {st('blog.title', 'Blog')}
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            {safeTranslate(t, "blog.subtitle")}
+            {st('blog.subtitle', 'Insights, tutorials, and analysis on quantitative finance and options trading')}
           </p>
         </div>
         
@@ -101,7 +104,7 @@ const Blog = () => {
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder={safeTranslate(t, "blog.search")}
+              placeholder={st('blog.search', 'Search articles...')}
               className="pl-8"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -127,7 +130,7 @@ const Blog = () => {
                 onClick={resetFilters}
                 className="ml-2"
               >
-                {safeTranslate(t, "blog.clearFilters")}
+                {st('blog.clearFilters', 'Clear Filters')}
               </Button>
             )}
           </div>
@@ -136,7 +139,7 @@ const Blog = () => {
         {/* Featured Post */}
         {filteredPosts.length > 0 && !searchTerm && !activeTag && (
           <div className="mb-12">
-            <h2 className="text-2xl font-bold mb-6">{safeTranslate(t, "blog.featuredPost")}</h2>
+            <h2 className="text-2xl font-bold mb-6">{st('blog.featuredPost', 'Featured Post')}</h2>
             <Link to={`/blog/${filteredPosts[0].slug}`} className="block">
               <Card className="overflow-hidden transition-all hover:shadow-lg">
                 <div className="relative aspect-video overflow-hidden bg-muted">
@@ -165,7 +168,7 @@ const Blog = () => {
                     <span>{filteredPosts[0].readingTime} min read</span>
                   </div>
                   <div className="flex items-center font-medium">
-                    {safeTranslate(t, "blog.readMore")}
+                    {st('blog.readMore', 'Read More')}
                     <ArrowRight className="ml-1 h-4 w-4" />
                   </div>
                 </CardFooter>
@@ -177,19 +180,19 @@ const Blog = () => {
         {/* All Posts */}
         <div className="mb-12">
           <h2 className="text-2xl font-bold mb-6">
-            {searchTerm || activeTag ? safeTranslate(t, "blog.searchResults") : safeTranslate(t, "blog.allPosts")}
+            {searchTerm || activeTag ? st('blog.searchResults', 'Search Results') : st('blog.allPosts', 'All Posts')}
           </h2>
           
           {filteredPosts.length === 0 ? (
             <div className="text-center py-12">
-              <h3 className="text-xl font-medium mb-2">{safeTranslate(t, "blog.noResults")}</h3>
-              <p className="text-muted-foreground">{safeTranslate(t, "blog.tryDifferent")}</p>
+              <h3 className="text-xl font-medium mb-2">{st('blog.noResults', 'No Posts Found')}</h3>
+              <p className="text-muted-foreground">{st('blog.tryDifferent', 'Try a different search term or tag')}</p>
               <Button 
                 variant="outline" 
                 onClick={resetFilters}
                 className="mt-4"
               >
-                {safeTranslate(t, "blog.viewAllPosts")}
+                {st('blog.viewAllPosts', 'View All Posts')}
               </Button>
             </div>
           ) : (
@@ -235,7 +238,7 @@ const Blog = () => {
         {/* Tags Section */}
         <div className="mb-12">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">{safeTranslate(t, "blog.browseTags")}</h2>
+            <h2 className="text-2xl font-bold">{st('blog.browseTags', 'Browse by Tags')}</h2>
             <Tag className="h-5 w-5" />
           </div>
           <div className="flex flex-wrap gap-2">
@@ -255,15 +258,15 @@ const Blog = () => {
         {/* Newsletter */}
         <div className="mb-12 bg-muted p-8 rounded-lg">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl font-bold mb-4">{safeTranslate(t, "blog.newsletter.title")}</h2>
-            <p className="mb-6">{safeTranslate(t, "blog.newsletter.description")}</p>
+            <h2 className="text-2xl font-bold mb-4">{st('blog.newsletter.title', 'Subscribe to Our Newsletter')}</h2>
+            <p className="mb-6">{st('blog.newsletter.description', 'Get the latest articles and resources delivered straight to your inbox')}</p>
             <div className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
               <Input 
                 type="email" 
-                placeholder={safeTranslate(t, "blog.newsletter.placeholder")}
+                placeholder={st('blog.newsletter.placeholder', 'Enter your email')}
                 className="flex-grow"
               />
-              <Button>{safeTranslate(t, "blog.newsletter.subscribe")}</Button>
+              <Button>{st('blog.newsletter.subscribe', 'Subscribe')}</Button>
             </div>
           </div>
         </div>

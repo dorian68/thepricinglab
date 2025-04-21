@@ -2,7 +2,9 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import PythonCodeBlock from '@/components/python/PythonCodeBlock';
-import PyodideLoader from '@/components/python/PyodideLoader';
+import PythonActivator from '@/utils/pythonActivator';
+import { isPyodideLoaded } from '@/services/pyodideService';
+import { safeTranslate, cleanCaptions } from '@/utils/translationUtils';
 
 const detectLanguage = (className: string | null): string | null => {
   if (!className) return null;
@@ -24,6 +26,12 @@ export const transformCodeBlocks = (containerElement: HTMLElement) => {
   let pythonBlocksFound = false;
   
   preElements.forEach((preElement, index) => {
+    // Vérifier si ce bloc a déjà été transformé
+    if (preElement.getAttribute('data-transformed') === 'true') {
+      console.log(`Bloc #${index} déjà transformé, ignoré`);
+      return;
+    }
+    
     const codeElement = preElement.querySelector('code');
     if (!codeElement) return;
     
@@ -35,7 +43,17 @@ export const transformCodeBlocks = (containerElement: HTMLElement) => {
       pythonBlocksFound = true;
       const code = codeElement.textContent || '';
       
-      // Créer un wrapper pour contenir le bloc de code et le loader
+      // Marquer comme transformé pour éviter les doublons
+      preElement.setAttribute('data-transformed', 'true');
+      
+      // Trouver un titre potentiel dans un élément précédent (h3, h4, etc.)
+      let title = "Python";
+      const prevElement = preElement.previousElementSibling;
+      if (prevElement && ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(prevElement.tagName)) {
+        title = cleanCaptions(prevElement.textContent || 'Python');
+      }
+      
+      // Créer un wrapper pour contenir le bloc de code et les contrôles
       const wrapper = document.createElement('div');
       wrapper.className = 'python-block-wrapper relative';
       
@@ -43,24 +61,15 @@ export const transformCodeBlocks = (containerElement: HTMLElement) => {
       const container = document.createElement('div');
       container.className = 'python-code-container';
       
-      // Créer un conteneur pour le loader Python (petit bouton discret)
-      const loaderContainer = document.createElement('div');
-      loaderContainer.className = 'python-loader-container absolute top-2 right-2 z-10';
-      
       // Ajouter les conteneurs au wrapper
       wrapper.appendChild(container);
-      wrapper.appendChild(loaderContainer);
       
       // Remplacer le bloc pre par notre wrapper
       preElement.parentNode?.replaceChild(wrapper, preElement);
       
-      // Rendre le composant principal dans son conteneur
+      // Rendre le composant PythonCodeBlock avec activation Python intégrée
       const codeRoot = createRoot(container);
-      codeRoot.render(<PythonCodeBlock code={code} title="Python" />);
-      
-      // Rendre le loader discret dans son conteneur
-      const loaderRoot = createRoot(loaderContainer);
-      loaderRoot.render(<PyodideLoader discreet={true} />);
+      codeRoot.render(<PythonCodeBlock code={code} title={title} />);
       
       console.log(`Bloc Python #${index} transformé avec succès`);
     }
@@ -73,33 +82,30 @@ export const transformCodeBlocks = (containerElement: HTMLElement) => {
 export const autoScanAndTransform = () => {
   console.log('Auto-scan activé pour transformation Python');
   
-  // Attendre que le DOM soit complètement chargé
-  setTimeout(() => {
-    // Chercher les conteneurs potentiels (articles, sections de contenu, etc.)
-    const potentialContainers = [
-      document.querySelector('.prose'),
-      document.querySelector('.content'),
-      document.querySelector('article'),
-      document.querySelector('[data-content="exercise"]'),
-      document.querySelector('.exercise-content'),
-      document.querySelector('.blog-content'),
-      document.querySelector('[data-type="python-content"]'),
-      document.querySelector('main'),
-      // Ajoutez d'autres sélecteurs si nécessaire
-    ].filter(Boolean) as HTMLElement[];
-    
-    console.log(`Conteneurs potentiels trouvés: ${potentialContainers.length}`);
-    
-    let anyPythonBlocksFound = false;
-    
-    potentialContainers.forEach((container, idx) => {
-      console.log(`Transformation du conteneur #${idx}`);
-      const pythonBlocksFound = transformCodeBlocks(container);
-      if (pythonBlocksFound) {
-        anyPythonBlocksFound = true;
-      }
-    });
-    
-    console.log(`Python blocks found: ${anyPythonBlocksFound}`);
-  }, 1000); // Délai pour s'assurer que le DOM est chargé
+  // Chercher les conteneurs potentiels (articles, sections de contenu, etc.)
+  const potentialContainers = [
+    document.querySelector('.prose'),
+    document.querySelector('.content'),
+    document.querySelector('article'),
+    document.querySelector('[data-content="exercise"]'),
+    document.querySelector('.exercise-content'),
+    document.querySelector('.blog-content'),
+    document.querySelector('[data-type="python-content"]'),
+    document.querySelector('main'),
+    // Ajoutez d'autres sélecteurs si nécessaire
+  ].filter(Boolean) as HTMLElement[];
+  
+  console.log(`Conteneurs potentiels trouvés: ${potentialContainers.length}`);
+  
+  let anyPythonBlocksFound = false;
+  
+  potentialContainers.forEach((container, idx) => {
+    console.log(`Transformation du conteneur #${idx}`);
+    const pythonBlocksFound = transformCodeBlocks(container);
+    if (pythonBlocksFound) {
+      anyPythonBlocksFound = true;
+    }
+  });
+  
+  console.log(`Python blocks found: ${anyPythonBlocksFound}`);
 };

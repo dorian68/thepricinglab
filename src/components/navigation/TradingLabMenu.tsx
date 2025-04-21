@@ -7,42 +7,43 @@ import { safeTranslate } from "../../utils/translationUtils";
 
 const TradingLabMenu = () => {
   const { t } = useTranslation();
+  const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
 
   return (
     <div className="p-4 w-[380px]">
       <p className="text-sm text-finance-accent mb-4 font-medium">
-        {safeTranslate(t, 'tradingLab.subtitle', 'Test, validate and monitor your trading strategies')}
+        {st('tradingLab.subtitle', 'Test, validate and monitor your trading strategies')}
       </p>
       <ul className="space-y-3">
         <NavMenuItem 
           to="/exercises" 
           icon={LineChart} 
-          title={safeTranslate(t, 'tradingLab.exercises', 'Exercices')} 
-          description={safeTranslate(t, 'tradingLab.exercisesDesc', 'Practice with interactive exercises')} 
+          title={st('tradingLab.exercises', 'Exercises')} 
+          description={st('tradingLab.exercisesDesc', 'Practice with interactive exercises')} 
         />
         <NavMenuItem 
           to="/trading/backtest" 
           icon={Workflow} 
-          title={safeTranslate(t, 'tradingLab.backtest', 'Backtest')} 
-          description={safeTranslate(t, 'tradingLab.backtestDesc', 'Evaluate strategies on historical data')} 
+          title={st('tradingLab.backtest', 'Backtest')} 
+          description={st('tradingLab.backtestDesc', 'Evaluate strategies on historical data')} 
         />
         <NavMenuItem 
           to="/trading/scenarios" 
           icon={Share2} 
-          title={safeTranslate(t, 'tradingLab.scenarios', 'Scénarios')} 
-          description={safeTranslate(t, 'tradingLab.scenariosDesc', 'Test market scenarios and assumptions')} 
+          title={st('tradingLab.scenarios', 'Scenarios')} 
+          description={st('tradingLab.scenariosDesc', 'Test market scenarios and assumptions')} 
         />
         <NavMenuItem 
           to="/trading/strategies" 
           icon={GitBranch} 
-          title={safeTranslate(t, 'tradingLab.strategies', 'Stratégies')} 
-          description={safeTranslate(t, 'tradingLab.strategiesDesc', 'Build and test trading strategies')} 
+          title={st('tradingLab.strategies', 'Strategies')} 
+          description={st('tradingLab.strategiesDesc', 'Build and test trading strategies')} 
         />
         <NavMenuItem 
           to="/trading/performance" 
           icon={BarChart} 
-          title={safeTranslate(t, 'tradingLab.performance', 'Performances')} 
-          description={safeTranslate(t, 'tradingLab.performanceDesc', 'Track and analyze your results')} 
+          title={st('tradingLab.performance', 'Performance')} 
+          description={st('tradingLab.performanceDesc', 'Track and analyze your results')} 
         />
       </ul>
     </div>

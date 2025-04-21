@@ -1,77 +1,40 @@
 
-import { useState, useEffect } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Button } from './ui/button';
 import { Globe } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
 import { safeTranslate } from '../utils/translationUtils';
 
 const LanguageSwitcher = () => {
   const { i18n, t } = useTranslation();
-  const [isOpen, setIsOpen] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState(i18n.language?.split('-')[0] || 'en');
+  const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
 
-  useEffect(() => {
-    // Ensure we're using the base language code without regional suffixes
-    setCurrentLanguage(i18n.language?.split('-')[0] || 'en');
-  }, [i18n.language]);
-
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
-    setCurrentLanguage(lng);
-    setIsOpen(false);
-    
-    // Save to localStorage with the correct format
-    localStorage.setItem('i18nextLng', lng);
+  const changeLanguage = (language: string) => {
+    i18n.changeLanguage(language);
   };
 
-  // Use our safe translation utility
-  const st = (key: string, defaultValue?: string) => safeTranslate(t, key, defaultValue, i18n.language);
-
   return (
-    <div className="relative">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            className="flex items-center text-finance-offwhite hover:text-finance-accent"
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label={st('languageSwitcher.switchLanguage', 'Switch Language')}
-          >
-            <Globe className="w-5 h-5" />
-            <span className="ml-1 hidden sm:inline">
-              {currentLanguage === 'en' ? 'EN' : 'FR'}
-            </span>
-          </button>
-        </TooltipTrigger>
-        <TooltipContent className="bg-[#1A1F2C] border-[#2A2F3C] text-white">
-          <p>{st('languageSwitcher.tooltip', 'Change the site language')}</p>
-        </TooltipContent>
-      </Tooltip>
-      
-      {isOpen && (
-        <div className="absolute mt-2 right-0 w-32 rounded-md shadow-lg bg-finance-charcoal ring-1 ring-finance-steel/20 z-50">
-          <div className="py-1" role="menu">
-            <button
-              onClick={() => changeLanguage('fr')}
-              className={`w-full text-left px-4 py-2 text-sm ${
-                currentLanguage === 'fr' ? 'text-finance-accent' : 'text-finance-offwhite'
-              } hover:bg-finance-steel/20`}
-              role="menuitem"
-            >
-              {st('languageSwitcher.fr', 'Français')}
-            </button>
-            <button
-              onClick={() => changeLanguage('en')}
-              className={`w-full text-left px-4 py-2 text-sm ${
-                currentLanguage === 'en' ? 'text-finance-accent' : 'text-finance-offwhite'
-              } hover:bg-finance-steel/20`}
-              role="menuitem"
-            >
-              {st('languageSwitcher.en', 'English')}
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="relative" aria-label={st('languageSwitcher.switchLanguage', 'Switch Language')}>
+          <Globe className="h-5 w-5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onSelect={() => changeLanguage('en')}>
+          {st('languageSwitcher.en', 'English')}
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => changeLanguage('fr')}>
+          {st('languageSwitcher.fr', 'Français')}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

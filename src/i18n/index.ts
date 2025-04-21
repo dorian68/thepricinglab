@@ -4,6 +4,11 @@ import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import enTranslation from './locales/en.json';
 import frTranslation from './locales/fr.json';
+import { cleanTranslationObject, cleanCaptions } from '../utils/translationUtils';
+
+// Process translation files to remove any [caption] markers
+const cleanedEnTranslation = cleanTranslationObject(enTranslation);
+const cleanedFrTranslation = cleanTranslationObject(frTranslation);
 
 // Initialize i18next
 i18n
@@ -15,10 +20,10 @@ i18n
   .init({
     resources: {
       en: {
-        translation: enTranslation
+        translation: cleanedEnTranslation
       },
       fr: {
-        translation: frTranslation
+        translation: cleanedFrTranslation
       }
     },
     fallbackLng: 'en',
@@ -37,8 +42,9 @@ i18n
       console.warn(`Missing translation key: ${key} for language: ${lng}`);
     },
     parseMissingKeyHandler: (key) => {
-      // If a key is missing, return a more user-friendly fallback
-      return `[${key.split('.').pop()}]`;
+      // If a key is missing, return a more user-friendly fallback without [caption]
+      const fallback = key.split('.').pop() || key;
+      return cleanCaptions(fallback.replace(/([A-Z])/g, ' $1').toLowerCase());
     }
   });
 

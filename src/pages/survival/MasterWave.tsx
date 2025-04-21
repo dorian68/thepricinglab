@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../../components/Navbar";
-import Footer from "../../components/Footer";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useTranslation } from "react-i18next";
 import { survivalChallengeTypes } from "@/data/survival-waves";
 import { ArrowLeft, Clock, Check, X, Zap, Trophy, AlertTriangle } from "lucide-react";
+import ModernNavbar from "../../components/ModernNavbar";
+import Footer from "../../components/Footer";
 
 const MasterWave = () => {
   const { t } = useTranslation();
@@ -58,6 +58,7 @@ const MasterWave = () => {
     setScore(0);
     setGameOver(false);
     setTimeLeft(waveInfo.time);
+    setUserAnswer("");
   };
 
   const handleTimeout = () => {
@@ -71,11 +72,15 @@ const MasterWave = () => {
         setCurrentChallenge((prev) => prev + 1);
         setTimeLeft(waveInfo.time);
         setAnswered(false);
+        setUserAnswer("");
       }
     }, 2000);
   };
 
   const handleAnswer = (correct) => {
+    // Prevent multiple clicks
+    if (answered) return;
+    
     setAnswered(true);
     setAnswerCorrect(correct);
     
@@ -90,13 +95,14 @@ const MasterWave = () => {
         setCurrentChallenge((prev) => prev + 1);
         setTimeLeft(waveInfo.time);
         setAnswered(false);
+        setUserAnswer("");
       }
     }, 2000);
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-finance-dark text-finance-offwhite">
-      <Navbar />
+      <ModernNavbar />
       
       <main className="flex-1 py-8 px-6">
         <div className="max-w-5xl mx-auto">
@@ -200,12 +206,17 @@ const MasterWave = () => {
                       </div>
                       
                       <div className="flex gap-4">
-                        <Button variant="ghost" onClick={() => handleAnswer(false)}>
+                        <Button 
+                          variant="ghost" 
+                          onClick={() => handleAnswer(false)}
+                          disabled={answered}
+                        >
                           Passer
                         </Button>
                         <Button 
                           variant="finance" 
                           onClick={() => handleAnswer(Math.random() > 0.4)}
+                          disabled={answered}
                         >
                           Soumettre
                         </Button>
