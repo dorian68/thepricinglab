@@ -16,12 +16,57 @@ import { toast } from "sonner";
 type QuizQuestion = {
   question: string;
   options: string[];
-  correctAnswer: number;
+  answer: "A" | "B" | "C" | "D";
   explanation: string;
+  on_wrong_answer: string;
   difficulty: 1 | 2 | 3 | 4 | 5;
 };
 
+const API_URL = "https://dorian68.app.n8n.cloud/webhook-test/435a0a2a-33bd-4afb-9f7f-8891ba6b6cb2";
+
+// Fonction pour charger dynamiquement les questions depuis le webhook
+async function loadQuizFromWebhook(apiUrl: string): Promise<QuizQuestion[]> {
+  try {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        topics: ["volatility", "greeks"],
+        difficulty: "advanced",
+        count: 5
+      })
+    });
+    
+
+    if (!response.ok) {
+      throw new Error(`Erreur serveur : ${response.status}`);
+    }
+
+    const generateQuestions: QuizQuestion[] = await response.json();
+    
+    if (!Array.isArray(generateQuestions) || generateQuestions.length === 0) {
+      throw new Error("Aucune question reçue ou format invalide.");
+    }
+
+    return generateQuestions;
+  } catch (error) {
+    console.error("Erreur lors du chargement des questions :", error);
+    return [];
+  }
+}
+
+const webhookUrl = "https://dorian68.app.n8n.cloud/webhook-test/435a0a2a-33bd-4afb-9f7f-8891ba6b6cb2";
+
+loadQuizFromWebhook(webhookUrl).then((generateQuestions) => {
+  if (generateQuestions.length > 0) {
+    console.log("Questions prêtes à être utilisées :", generateQuestions);
+    // Utiliser ici dans ta logique React/vue/etc.
+  }
+});
+
+
 // Fonction pour générer des questions basées sur les sujets et la difficulté
+/*
 const generateQuestions = (topics: string[], difficulty: string, count: number = 5): QuizQuestion[] => {
   // Cette fonction simule la génération de questions
   // Dans une implémentation réelle, ces questions viendraient d'une API ou d'une base de données
@@ -45,14 +90,16 @@ const generateQuestions = (topics: string[], difficulty: string, count: number =
         `Option C pour ${topic}`,
         `Option D pour ${topic}`
       ],
-      correctAnswer: Math.floor(Math.random() * 4),
+      answer: Math.floor(Math.random() * 4),
       explanation: `Explication de la réponse correcte pour ${topic}`,
       difficulty: questionLevel
     });
   }
   
   return questions;
-};
+};*/
+
+
 
 const SurvivalWaveDetail = () => {
   const { id } = useParams();
