@@ -64,13 +64,23 @@ interface StrategyCardProps {
   strategy: Strategy;
   isSelected: boolean;
   onClick: () => void;
-  t: TFunction; // Updated type here
+  t: TFunction;
 }
 
 const StrategyCard: React.FC<StrategyCardProps> = ({ strategy, isSelected, onClick, t }) => {
-  // Try to find translations for strategy name and description
-  const strategyName = safeTranslate(t, `strategies.${strategy.id}.name`, strategy.name);
-  const strategyDescription = safeTranslate(t, `strategies.${strategy.id}.description`, strategy.description);
+  // Utilisation des clés de traduction spécifiques pour chaque stratégie
+  // S'il n'y a pas de traduction, on utilise un libellé plus explicite au lieu du champ brut
+  const strategyName = safeTranslate(
+    t, 
+    `strategies.${strategy.id}.name`, 
+    strategy.name || `Strategy ${strategy.id}`
+  );
+  
+  const strategyDescription = safeTranslate(
+    t, 
+    `strategies.${strategy.id}.description`, 
+    strategy.description || `Configuration for ${strategy.name || strategy.id} strategy`
+  );
 
   return (
     <Card 
