@@ -22,47 +22,39 @@ type QuizQuestion = {
   difficulty: 1 | 2 | 3 | 4 | 5;
 };
 
-const API_URL = "https://dorian68.app.n8n.cloud/webhook-test/435a0a2a-33bd-4afb-9f7f-8891ba6b6cb2";
+const generateQuestions = async (
+  topics: string[],
+  difficulty: string,
+  count: number = 5
+): Promise<QuizQuestion[]> => {
+  const webhookUrl = "https://dorian68.app.n8n.cloud/webhook-test/435a0a2a-33bd-4afb-9f7f-8891ba6b6cb2";
 
-// Fonction pour charger dynamiquement les questions depuis le webhook
-async function loadQuizFromWebhook(apiUrl: string): Promise<QuizQuestion[]> {
+  const difficultyLabel = 
+    difficulty === 'beginner' ? 'faciles' :
+    difficulty === 'intermediate' ? 'intermédiaires' :
+    difficulty === 'advanced' ? 'difficiles' :
+    difficulty === 'expert' ? 'expertes' : 'variées';
+
+  const prompt = `Peux-tu me générer ${count} questions ${difficultyLabel} en finance de marché sur les thèmes suivants : ${topics.join(", ")} ? 
+Je souhaite des QCM avec 4 propositions, une seule correcte, une explication détaillée et une note pédagogique si possible. Format JSON uniquement.`;
+
   try {
-    const response = await fetch(apiUrl, {
+    const response = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        topics: ["volatility", "greeks"],
-        difficulty: "advanced",
-        count: 5
-      })
+      body: JSON.stringify({ text: prompt }),
     });
-    
 
-    if (!response.ok) {
-      throw new Error(`Erreur serveur : ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`Erreur serveur : ${response.status}`);
+    const questions: QuizQuestion[] = await response.json();
 
-    const generateQuestions: QuizQuestion[] = await response.json();
-    
-    if (!Array.isArray(generateQuestions) || generateQuestions.length === 0) {
-      throw new Error("Aucune question reçue ou format invalide.");
-    }
-
-    return generateQuestions;
+    if (!Array.isArray(questions)) throw new Error("Format JSON invalide");
+    return questions;
   } catch (error) {
-    console.error("Erreur lors du chargement des questions :", error);
+    console.error("Erreur de récupération des questions via RAG :", error);
     return [];
   }
-}
-
-const webhookUrl = "https://dorian68.app.n8n.cloud/webhook-test/435a0a2a-33bd-4afb-9f7f-8891ba6b6cb2";
-
-loadQuizFromWebhook(webhookUrl).then((generateQuestions) => {
-  if (generateQuestions.length > 0) {
-    console.log("Questions prêtes à être utilisées :", generateQuestions);
-    // Utiliser ici dans ta logique React/vue/etc.
-  }
-});
+};
 
 
 // Fonction pour générer des questions basées sur les sujets et la difficulté
@@ -159,8 +151,9 @@ const SurvivalWaveDetail = () => {
     if (wave) {
       const difficulty = getDifficultyByWaveId(wave.id);
       const questionCount = Math.min(10, Math.max(5, wave.id + 4)); // 5 à 10 questions selon le niveau
-      const generatedQuestions = generateQuestions(wave.topics, difficulty, questionCount);
-      setQuestions(generatedQuestions);
+      generateQuestions(wave.topics, difficulty, questionCount).then((generatedQuestions) => {
+        setQuestions(generatedQuestions);
+      });
     }
   }, [wave]);
 
@@ -212,8 +205,9 @@ const SurvivalWaveDetail = () => {
     if (wave) {
       const difficulty = getDifficultyByWaveId(wave.id);
       const questionCount = Math.min(10, Math.max(5, wave.id + 4));
-      const generatedQuestions = generateQuestions(wave.topics, difficulty, questionCount);
-      setQuestions(generatedQuestions);
+      generateQuestions(wave.topics, difficulty, questionCount).then((generatedQuestions) => {
+        setQuestions(generatedQuestions);
+      });
     }
     
     toast.success("Mode Survie démarré ! Bonne chance !");
@@ -250,7 +244,7 @@ const SurvivalWaveDetail = () => {
     setSelectedOption(optionIndex);
     setAnswered(true);
     
-    const correct = questions[currentChallenge]?.correctAnswer === optionIndex;
+    const correct = questions[currentChallenge]?.answer === ["A", "B", "C", "D"][optionIndex];
     setAnswerCorrect(correct);
     
     if (correct) {
@@ -465,7 +459,7 @@ const SurvivalWaveDetail = () => {
                             key={index}
                             className={`flex items-center space-x-2 p-3 rounded-md border relative h-[56px] 
                               ${!answered ? 'cursor-pointer' : 'cursor-default'} 
-                              ${answered && index === getCurrentQuestion()?.correctAnswer 
+                              ${answered && index === ["A", "B", "C", "D"].indexOf(getCurrentQuestion()?.answer || "")
                                 ? 'bg-green-900/20 border-green-500/30' 
                                 : answered && index === selectedOption 
                                   ? 'bg-red-900/20 border-red-500/30' 
@@ -477,10 +471,10 @@ const SurvivalWaveDetail = () => {
                               <span className={`h-4 w-4 rounded-full border ${answered && index === selectedOption ? 'bg-finance-accent border-finance-accent' : 'border-finance-steel'}`}></span>
                               <span className="ml-2 flex-1">{option}</span>
                               
-                              {answered && index === getCurrentQuestion()?.correctAnswer && (
+                              {answered && index === ["A", "B", "C", "D"].indexOf(getCurrentQuestion()?.answer || "") && (
                                 <Check className="h-5 w-5 text-green-500 absolute right-3" />
                               )}
-                              {answered && index === selectedOption && index !== getCurrentQuestion()?.correctAnswer && (
+                              {answered && index === selectedOption && ["A", "B", "C", "D"][index] !== getCurrentQuestion()?.answer && (
                                 <X className="h-5 w-5 text-red-500 absolute right-3" />
                               )}
                             </div>
