@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
@@ -20,6 +19,7 @@ import {
   Clock4
 } from "lucide-react";
 import { useSurvivalWaves, getDifficultyColorClass, SubscriptionPlan } from "@/data/survival-waves";
+import SurvivalButton from "@/components/survival/SurvivalButton";
 
 const SurvivalMode = () => {
   const { t } = useTranslation();
@@ -274,20 +274,10 @@ const SurvivalMode = () => {
                     </div>
                     
                     {wave.unlocked ? (
-                      <Button 
-                        variant="finance" 
-                        className={`w-full ${isCompleted ? 'bg-green-600 hover:bg-green-700' : ''}`} 
-                        asChild
-                      >
-                        <Link to={`/survival-mode/wave/${wave.id}`}>
-                          {isCompleted 
-                            ? "Rejouer" 
-                            : hasProgress 
-                              ? "Continuer" 
-                              : t('survivalMode.startWave')} 
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
+                      <SurvivalButton 
+                        waveId={wave.id}
+                        className="w-full"
+                      />
                     ) : (
                       <Button variant="finance" className="w-full" asChild>
                         <Link to={`/pricing?recommended=${wave.requiredPlan}`}>

@@ -222,6 +222,12 @@ export type Database = {
         Args: { "": string } | { "": unknown } | { "": unknown }
         Returns: string
       }
+      match_documents: {
+        Args: { embedding_input: string; match_count?: number }
+        Returns: {
+          content: string
+        }[]
+      }
       sparsevec_out: {
         Args: { "": unknown }
         Returns: unknown
