@@ -27,7 +27,8 @@ const generateQuestions = async (
   difficulty: string,
   count: number = 5
 ): Promise<QuizQuestion[]> => {
-  const webhookUrl = "https://dorian68.app.n8n.cloud/webhook-test/435a0a2a-33bd-4afb-9f7f-8891ba6b6cb2";
+  // const webhookUrl = "https://dorian68.app.n8n.cloud/webhook-test/435a0a2a-33bd-4afb-9f7f-8891ba6b6cb2";
+  const webhookUrl ="https://dorian68.app.n8n.cloud/webhook/435a0a2a-33bd-4afb-9f7f-8891ba6b6cb2"
 
   const difficultyLabel = 
     difficulty === 'beginner' ? 'faciles' :
@@ -49,49 +50,13 @@ Je souhaite des QCM avec 4 propositions, une seule correcte, une explication dé
     const questions: QuizQuestion[] = await response.json();
 
     if (!Array.isArray(questions)) throw new Error("Format JSON invalide");
+    console.log("----------------- Questions générées ----------------- :", questions);
     return questions;
   } catch (error) {
     console.error("Erreur de récupération des questions via RAG :", error);
     return [];
   }
 };
-
-
-// Fonction pour générer des questions basées sur les sujets et la difficulté
-/*
-const generateQuestions = (topics: string[], difficulty: string, count: number = 5): QuizQuestion[] => {
-  // Cette fonction simule la génération de questions
-  // Dans une implémentation réelle, ces questions viendraient d'une API ou d'une base de données
-  const questions: QuizQuestion[] = [];
-  
-  const difficultyLevel = 
-    difficulty === 'beginner' ? 1 :
-    difficulty === 'intermediate' ? 2 :
-    difficulty === 'advanced' ? 3 :
-    difficulty === 'expert' ? 4 : 5;
-  
-  for (let i = 0; i < count; i++) {
-    const topic = topics[Math.floor(Math.random() * topics.length)];
-    const questionLevel = Math.min(5, Math.max(1, difficultyLevel + (i % 3 - 1))) as 1 | 2 | 3 | 4 | 5;
-    
-    questions.push({
-      question: `Question ${i+1} sur ${topic} (Niveau ${questionLevel}/5)`,
-      options: [
-        `Option A pour ${topic}`,
-        `Option B pour ${topic}`,
-        `Option C pour ${topic}`,
-        `Option D pour ${topic}`
-      ],
-      answer: Math.floor(Math.random() * 4),
-      explanation: `Explication de la réponse correcte pour ${topic}`,
-      difficulty: questionLevel
-    });
-  }
-  
-  return questions;
-};*/
-
-
 
 const SurvivalWaveDetail = () => {
   const { id } = useParams();
