@@ -113,15 +113,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       })
       throw error
     }
-<<<<<<< HEAD
-
-    toast({
-      title: "Inscription réussie",
-      description: "Bienvenue sur The Pricing Library !",
-    })
-    console.log("Inscription réussie");
-=======
->>>>>>> 580fbae72be1a10837612cd21d23e579db46c581
   }
 
   const signIn = async (email: string, password: string) => {

@@ -6,12 +6,14 @@ import './i18n'
 import App from './App.tsx'
 import './index.css'
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { Toaster } from "sonner"
 
 // Wrap with Suspense to handle i18n loading
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <Suspense fallback="Loading...">
+    <Suspense fallback={<div className="h-screen w-full flex items-center justify-center text-white">Loading...</div>}>
       <TooltipProvider>
+        <Toaster position="top-right" />
         <App />
       </TooltipProvider>
     </Suspense>
