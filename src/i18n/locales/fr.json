@@ -1,3 +1,4 @@
+
 {
   "common": {
     "exercises": "Exercices",
@@ -422,11 +423,11 @@
       "title": "Concepts Fondamentaux",
       "blackScholes": {
         "title": "Modèle Black-Scholes",
-        "description": "Maîtrisez le modèle de pricing d'options fondamental"
+        "description": "Maîtrisez le modèle fondamental de pricing d'options"
       },
       "yieldCurves": {
         "title": "Courbes de Rendement",
-        "description": "Comprenez les taux d'intérêt et les courbes de rendement"
+        "description": "Comprendre les taux d'intérêt et les courbes de rendement"
       },
       "greeks": {
         "title": "Greeks des Options",
@@ -436,26 +437,27 @@
     "advanced": {
       "tab": "Avancé",
       "title": "Techniques Avancées",
-      "description": "Allez au-delà des bases avec nos cours avancés sur la volatilité, la couverture et les produits dérivés complexes.",
+      "description": "Allez au-delà des bases avec nos cours avancés sur la volatilité, la couverture et les dérivés complexes.",
       "impliedVol": {
         "title": "Analyse de la Volatilité Implicite",
         "description": "Comprendre et analyser la volatilité implicite à travers les prix d'exercice et les maturités"
       },
       "volProducts": {
         "title": "Produits de Volatilité",
-        "description": "Tradez et investissez dans la volatilité grâce à des produits financiers spécialisés"
+        "description": "Trader et investir dans la volatilité via des produits financiers spécialisés"
       },
       "hedging": {
         "title": "Stratégies de Couverture Avancées",
-        "description": "Implémentez des techniques de couverture sophistiquées pour des portefeuilles complexes"
-      }
+        "description": "Mettre en œuvre des techniques de couverture sophistiquées pour des portefeuilles complexes"
+      },
+      "overview": "Vue d'ensemble avancée"
     },
     "complex": {
       "tab": "Complexe",
       "title": "Méthodes Complexes",
       "exotic": {
         "title": "Options Exotiques",
-        "description": "Évaluez et analysez les produits dérivés path-dependent et multi-actifs"
+        "description": "Évaluer et analyser des dérivés path-dependent et multi-actifs"
       },
       "monteCarlo": {
         "title": "Méthodes Monte Carlo",
@@ -463,7 +465,7 @@
       },
       "stochastic": {
         "title": "Calcul Stochastique",
-        "description": "Appliquez des techniques mathématiques avancées à la modélisation financière"
+        "description": "Appliquer des techniques mathématiques avancées à la modélisation financière"
       }
     },
     "beginner": "Débutant",
@@ -475,26 +477,48 @@
     "unlockNow": "Débloquer maintenant",
     "unlockContent": "Débloquer le contenu",
     "learning": {
-      "title": "Continuez Votre Apprentissage",
-      "subtitle": "Explorez d'autres façons d'améliorer vos compétences en finance quantitative",
+      "title": "Poursuivez votre apprentissage",
+      "subtitle": "Explorez d'autres moyens d'améliorer vos compétences en finance quantitative",
       "mentoring": "Mentorat 1-à-1",
-      "practice": "Exercices Pratiques"
+      "practice": "Exercices pratiques"
     },
     "difficulty": "Difficulté",
-    "skillsGained": "Compétences Acquises",
-    "volSkillsDescription": "Analyse de surface de volatilité, pricing de swaps de variance, stratégies de trading sur volatilité, et plus encore.",
+    "skillsGained": "Compétences acquises",
+    "volSkillsDescription": "Analyse de surface de volatilité, pricing de swaps de variance, stratégies de trading de volatilité, et plus encore.",
     "subscribeToAccess": "S'abonner pour accéder",
-    "alreadySubscribed": "Déjà abonné?",
-    "backToExercises": "Retour aux Exercices",
-    "unlockCourse": "Débloquer ce Cours",
+    "alreadySubscribed": "Déjà abonné ?",
+    "backToExercises": "Retour aux exercices",
+    "unlockCourse": "Débloquer ce cours",
     "advancedCoursesInfo": "Les cours avancés sont disponibles avec nos forfaits Étudiant et Pro. Abonnez-vous pour y accéder."
   },
   "community": {
     "title": "Communauté",
-    "subtitle": "Connectez-vous avec d'autres quants et traders",
+    "subtitle": "Rejoignez notre communauté de professionnels de la finance quantitative",
+    "notifications": "Notifications",
+    "newTopic": "Nouveau sujet",
+    "recentDiscussions": "Discussions récentes",
+    "viewAllDiscussions": "Voir toutes les discussions",
+    "upcomingEvents": "Événements à venir",
+    "viewAllEvents": "Voir tous les événements",
+    "communityPoll": "Sondage communautaire",
+    "onlineMembers": "Membres en ligne",
+    "lastReply": "Dernière réponse",
+    "registerEvent": "S'inscrire",
     "forum": {
-      "title": "Forum de discussion",
-      "description": "Échangez des idées et posez des questions"
+      "title": "Forum de Discussion",
+      "description": "Échangez avec la communauté"
+    },
+    "projects": {
+      "title": "Projets et Challenges",
+      "description": "Nouveaux problèmes chaque semaine"
+    },
+    "pair": {
+      "title": "Pair Programming",
+      "description": "Codez ensemble sur des projets"
+    },
+    "leaderboard": {
+      "title": "Leaderboard & Hackathons",
+      "description": "Classements et événements"
     },
     "chat": {
       "title": "Chat en direct",
@@ -502,11 +526,11 @@
     },
     "events": {
       "title": "Événements",
-      "description": "Webinaires, ateliers et meetups"
+      "description": "Webinaires, ateliers et rencontres"
     },
     "mentoring": {
       "title": "Mentorat",
-      "description": "Accompagnement individuel par des experts du secteur"
+      "description": "Accompagnement personnalisé par des experts du secteur"
     }
   },
   "exercisesPage": {

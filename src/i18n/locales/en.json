@@ -1,3 +1,4 @@
+
 {
   "common": {
     "exercises": "Exercises",
@@ -448,7 +449,8 @@
       "hedging": {
         "title": "Advanced Hedging Strategies",
         "description": "Implement sophisticated hedging techniques for complex portfolios"
-      }
+      },
+      "overview": "Advanced Overview"
     },
     "complex": {
       "tab": "Complex",
@@ -492,9 +494,31 @@
   "community": {
     "title": "Community",
     "subtitle": "Connect with fellow quants and traders",
+    "notifications": "Notifications",
+    "newTopic": "New Topic",
+    "recentDiscussions": "Recent Discussions",
+    "viewAllDiscussions": "View All Discussions",
+    "upcomingEvents": "Upcoming Events",
+    "viewAllEvents": "View All Events",
+    "communityPoll": "Community Poll",
+    "onlineMembers": "Online Members",
+    "lastReply": "Last Reply",
+    "registerEvent": "Register",
     "forum": {
       "title": "Discussion Forum",
       "description": "Exchange ideas and ask questions"
+    },
+    "projects": {
+      "title": "Projects & Challenges",
+      "description": "New problems every week"
+    },
+    "pair": {
+      "title": "Pair Programming",
+      "description": "Code together on projects"
+    },
+    "leaderboard": {
+      "title": "Leaderboard & Hackathons",
+      "description": "Rankings and events"
     },
     "chat": {
       "title": "Live Chat",

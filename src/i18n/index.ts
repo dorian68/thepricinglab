@@ -6,7 +6,7 @@ import enTranslation from './locales/en.json';
 import frTranslation from './locales/fr.json';
 import { cleanTranslationObject, cleanCaptions } from '../utils/translationUtils';
 
-// Ajouter les traductions manquantes
+// Additional missing translations
 const additionalEnTranslations = {
   navbar: {
     blog: "Blog",
@@ -24,7 +24,23 @@ const additionalEnTranslations = {
   },
   coursesPage: {
     advanced: {
-      overview: "Advanced Overview"
+      overview: "Advanced Overview",
+      impliedVol: {
+        lesson1: "Introduction to Implied Volatility",
+        lesson2: "Historical vs Implied Volatility",
+        lesson3: "Volatility Surface",
+        lesson4: "Exercise: Calculate Implied Volatility",
+        lesson5: "Notebook: Volatility Smile",
+        lesson6: "Module Quiz"
+      },
+      volProducts: {
+        lesson1: "Introduction to Volatility Products",
+        lesson2: "VIX and Other Volatility Indices",
+        lesson3: "Variance and Volatility Swaps",
+        lesson4: "Exercise: Pricing a Variance Swap",
+        lesson5: "Notebook: Volatility Trading Strategies",
+        lesson6: "Module Quiz"
+      }
     }
   }
 };
@@ -46,7 +62,23 @@ const additionalFrTranslations = {
   },
   coursesPage: {
     advanced: {
-      overview: "Vue d'ensemble avancée"
+      overview: "Vue d'ensemble avancée",
+      impliedVol: {
+        lesson1: "Introduction à la volatilité implicite",
+        lesson2: "Volatilité historique vs. volatilité implicite",
+        lesson3: "Surface de volatilité",
+        lesson4: "Exercice: Calculer la volatilité implicite",
+        lesson5: "Notebook: Smile de volatilité",
+        lesson6: "Quiz de module"
+      },
+      volProducts: {
+        lesson1: "Introduction aux produits de volatilité",
+        lesson2: "VIX et autres indices de volatilité",
+        lesson3: "Swaps de variance et de volatilité",
+        lesson4: "Exercice: Pricing d'un swap de variance",
+        lesson5: "Notebook: Stratégies de trading sur volatilité",
+        lesson6: "Quiz de module"
+      }
     }
   }
 };

@@ -17,11 +17,11 @@ const AppShell: React.FC = () => {
   useEffect(() => {
     console.log("AppShell: Auth state", { isAuthenticated, profile, isLoading });
     
-    // Vérifiez que i18n a été correctement initialisé
+    // Check that i18n has been properly initialized
     if (!i18n.isInitialized) {
-      console.error("i18n n'a pas été correctement initialisé");
-      toast.error("Erreur d'initialisation", {
-        description: "Problème avec les traductions. Rechargement nécessaire.",
+      console.error("i18n has not been properly initialized");
+      toast.error("Initialization Error", {
+        description: "Translation problem. Reload may be required.",
       });
     }
   }, [isAuthenticated, profile, isLoading, i18n]);
@@ -30,7 +30,7 @@ const AppShell: React.FC = () => {
     <div className="flex flex-col min-h-screen bg-finance-dark text-finance-offwhite overflow-x-hidden">
       <ModernNavbar />
       <div className="flex-1">
-        <Suspense fallback={<div className="h-screen w-full flex items-center justify-center">Chargement...</div>}>
+        <Suspense fallback={<div className="h-screen w-full flex items-center justify-center">{t('common.loading', 'Loading...')}</div>}>
           <Outlet />
         </Suspense>
       </div>

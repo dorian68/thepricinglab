@@ -36,32 +36,32 @@ const CourseAdvanced = () => {
       description: st('coursesPage.advanced.impliedVol.description', "Understanding and analyzing implied volatility across strike prices and maturities"),
       lessons: [
         { 
-          title: "Introduction à la volatilité implicite", 
+          title: st('coursesPage.advanced.impliedVol.lesson1', "Introduction to Implied Volatility"), 
           duration: "15 min", 
           type: "lecture" 
         },
         { 
-          title: "Volatilité historique vs. volatilité implicite", 
+          title: st('coursesPage.advanced.impliedVol.lesson2', "Historical vs Implied Volatility"), 
           duration: "20 min", 
           type: "lecture" 
         },
         { 
-          title: "Surface de volatilité", 
+          title: st('coursesPage.advanced.impliedVol.lesson3', "Volatility Surface"), 
           duration: "30 min", 
           type: "lecture" 
         },
         { 
-          title: "Exercice: Calculer la volatilité implicite", 
+          title: st('coursesPage.advanced.impliedVol.lesson4', "Exercise: Calculate Implied Volatility"), 
           duration: "45 min", 
           type: "exercise" 
         },
         { 
-          title: "Notebook: Smile de volatilité", 
+          title: st('coursesPage.advanced.impliedVol.lesson5', "Notebook: Volatility Smile"), 
           duration: "60 min", 
           type: "notebook" 
         },
         { 
-          title: "Quiz de module", 
+          title: st('coursesPage.advanced.impliedVol.lesson6', "Module Quiz"), 
           duration: "15 min", 
           type: "quiz" 
         }
@@ -73,32 +73,32 @@ const CourseAdvanced = () => {
       description: st('coursesPage.advanced.volProducts.description', "Trade and invest in volatility through specialized financial products"),
       lessons: [
         { 
-          title: "Introduction aux produits de volatilité", 
+          title: st('coursesPage.advanced.volProducts.lesson1', "Introduction to Volatility Products"), 
           duration: "20 min", 
           type: "lecture" 
         },
         { 
-          title: "VIX et autres indices de volatilité", 
+          title: st('coursesPage.advanced.volProducts.lesson2', "VIX and Other Volatility Indices"), 
           duration: "25 min", 
           type: "lecture" 
         },
         { 
-          title: "Swaps de variance et de volatilité", 
+          title: st('coursesPage.advanced.volProducts.lesson3', "Variance and Volatility Swaps"), 
           duration: "35 min", 
           type: "lecture" 
         },
         { 
-          title: "Exercice: Pricing d'un swap de variance", 
+          title: st('coursesPage.advanced.volProducts.lesson4', "Exercise: Pricing a Variance Swap"), 
           duration: "50 min", 
           type: "exercise" 
         },
         { 
-          title: "Notebook: Stratégies de trading sur volatilité", 
+          title: st('coursesPage.advanced.volProducts.lesson5', "Notebook: Volatility Trading Strategies"), 
           duration: "60 min", 
           type: "notebook" 
         },
         { 
-          title: "Quiz de module", 
+          title: st('coursesPage.advanced.volProducts.lesson6', "Module Quiz"), 
           duration: "15 min", 
           type: "quiz" 
         }
