@@ -20,11 +20,13 @@ const AppShell: React.FC = () => {
     // Check that i18n has been properly initialized
     if (!i18n.isInitialized) {
       console.error("i18n has not been properly initialized");
-      toast.error("Initialization Error", {
-        description: "Translation problem. Reload may be required.",
+      toast.error(t("common.error", "Error"), {
+        description: t("i18n.initError", "Translation problem. Reload may be required."),
       });
+    } else {
+      console.log("i18n initialized successfully in AppShell");
     }
-  }, [isAuthenticated, profile, isLoading, i18n]);
+  }, [isAuthenticated, profile, isLoading, i18n, t]);
   
   return (
     <div className="flex flex-col min-h-screen bg-finance-dark text-finance-offwhite overflow-x-hidden">

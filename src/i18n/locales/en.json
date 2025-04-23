@@ -1,4 +1,3 @@
-
 {
   "common": {
     "exercises": "Exercises",
@@ -31,13 +30,57 @@
     "profile": "Profile",
     "settings": "Settings",
     "logout": "Logout",
-    "survivalMode": "Survival Mode"
+    "survivalMode": "Survival Mode",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "languageSwitcher": {
     "switchLanguage": "Switch Language",
     "tooltip": "Change the site language",
     "en": "English",
     "fr": "Français"
+  },
+  "navbar": {
+    "home": "Home",
+    "courses": "Courses",
+    "community": "Community",
+    "tradingLab": "Trading Lab",
+    "trainingLab": "Training Lab",
+    "pricing": "Pricing",
+    "tools": "Tools",
+    "blog": "Blog",
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout",
+    "profile": "Profile",
+    "settings": "Settings",
+    "mentoring": "Mentoring",
+    "bugs": "Report Bug",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "greeting": "Hello"
+  },
+  "auth": {
+    "signin": {
+      "title": "Sign In",
+      "button": "Sign In",
+      "success": "Sign in successful",
+      "error": "Sign in error",
+      "welcome": "Welcome back"
+    },
+    "signup": {
+      "title": "Sign Up",
+      "button": "Sign Up",
+      "success": "Sign up successful",
+      "error": "Sign up error" 
+    },
+    "signout": {
+      "button": "Sign Out",
+      "success": "Sign out successful",
+      "successMessage": "See you soon!",
+      "error": "Error",
+      "errorMessage": "An error occurred during sign out"
+    }
   },
   "home": {
     "hero": {

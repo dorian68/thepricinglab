@@ -145,4 +145,19 @@ i18n
 // Force loading of translations
 i18n.loadNamespaces('translation');
 
+// Add debugging to help troubleshoot i18n issues
+if (process.env.NODE_ENV === 'development') {
+  i18n.on('initialized', () => {
+    console.log('i18n initialized successfully');
+  });
+  
+  i18n.on('languageChanged', (lng) => {
+    console.log(`Language changed to: ${lng}`);
+  });
+  
+  i18n.on('missingKey', (lngs, namespace, key) => {
+    console.warn(`Missing translation key: ${key} for languages: ${lngs.join(', ')}`);
+  });
+}
+
 export default i18n;

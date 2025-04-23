@@ -1,4 +1,3 @@
-
 {
   "common": {
     "exercises": "Exercices",
@@ -31,7 +30,9 @@
     "profile": "Profil",
     "settings": "Paramètres",
     "logout": "Déconnexion",
-    "survivalMode": "Mode Survie"
+    "survivalMode": "Mode Survie",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu"
   },
   "languageSwitcher": {
     "switchLanguage": "Changer de langue",
@@ -426,7 +427,7 @@
         "description": "Maîtrisez le modèle fondamental de pricing d'options"
       },
       "yieldCurves": {
-        "title": "Courbes de Rendement",
+        "title": "Courbes de Taux",
         "description": "Comprendre les taux d'intérêt et les courbes de rendement"
       },
       "greeks": {
@@ -437,14 +438,14 @@
     "advanced": {
       "tab": "Avancé",
       "title": "Techniques Avancées",
-      "description": "Allez au-delà des bases avec nos cours avancés sur la volatilité, la couverture et les dérivés complexes.",
+      "description": "Allez au-delà des bases avec nos cours avancés sur la volatilité, la couverture et les produits dérivés complexes.",
       "impliedVol": {
-        "title": "Analyse de la Volatilité Implicite",
-        "description": "Comprendre et analyser la volatilité implicite à travers les prix d'exercice et les maturités"
+        "title": "Analyse de Volatilité Implicite",
+        "description": "Comprendre et analyser la volatilité implicite selon les prix d'exercice et les maturités"
       },
       "volProducts": {
         "title": "Produits de Volatilité",
-        "description": "Trader et investir dans la volatilité via des produits financiers spécialisés"
+        "description": "Trader et investir dans la volatilité à travers des produits financiers spécialisés"
       },
       "hedging": {
         "title": "Stratégies de Couverture Avancées",
@@ -457,7 +458,7 @@
       "title": "Méthodes Complexes",
       "exotic": {
         "title": "Options Exotiques",
-        "description": "Évaluer et analyser des dérivés path-dependent et multi-actifs"
+        "description": "Évaluer et analyser des produits dérivés path-dependent et multi-actifs"
       },
       "monteCarlo": {
         "title": "Méthodes Monte Carlo",
@@ -478,22 +479,22 @@
     "unlockContent": "Débloquer le contenu",
     "learning": {
       "title": "Poursuivez votre apprentissage",
-      "subtitle": "Explorez d'autres moyens d'améliorer vos compétences en finance quantitative",
+      "subtitle": "Explorez d'autres façons d'améliorer vos compétences en finance quantitative",
       "mentoring": "Mentorat 1-à-1",
       "practice": "Exercices pratiques"
     },
     "difficulty": "Difficulté",
     "skillsGained": "Compétences acquises",
-    "volSkillsDescription": "Analyse de surface de volatilité, pricing de swaps de variance, stratégies de trading de volatilité, et plus encore.",
-    "subscribeToAccess": "S'abonner pour accéder",
-    "alreadySubscribed": "Déjà abonné ?",
+    "volSkillsDescription": "Analyse de surface de volatilité, pricing de swaps de variance, stratégies de trading sur volatilité et plus encore.",
+    "subscribeToAccess": "Abonnez-vous pour accéder",
+    "alreadySubscribed": "Déjà abonné?",
     "backToExercises": "Retour aux exercices",
     "unlockCourse": "Débloquer ce cours",
     "advancedCoursesInfo": "Les cours avancés sont disponibles avec nos forfaits Étudiant et Pro. Abonnez-vous pour y accéder."
   },
   "community": {
     "title": "Communauté",
-    "subtitle": "Rejoignez notre communauté de professionnels de la finance quantitative",
+    "subtitle": "Connectez-vous avec d'autres quants et traders",
     "notifications": "Notifications",
     "newTopic": "Nouveau sujet",
     "recentDiscussions": "Discussions récentes",
@@ -505,19 +506,19 @@
     "lastReply": "Dernière réponse",
     "registerEvent": "S'inscrire",
     "forum": {
-      "title": "Forum de Discussion",
-      "description": "Échangez avec la communauté"
+      "title": "Forum de discussion",
+      "description": "Échangez des idées et posez des questions"
     },
     "projects": {
-      "title": "Projets et Challenges",
+      "title": "Projets et défis",
       "description": "Nouveaux problèmes chaque semaine"
     },
     "pair": {
-      "title": "Pair Programming",
+      "title": "Programmation en binôme",
       "description": "Codez ensemble sur des projets"
     },
     "leaderboard": {
-      "title": "Leaderboard & Hackathons",
+      "title": "Classement et Hackathons",
       "description": "Classements et événements"
     },
     "chat": {
@@ -536,5 +537,47 @@
   "exercisesPage": {
     "duration": "Durée",
     "hours": "heures"
+  },
+  "navbar": {
+    "home": "Accueil",
+    "courses": "Cours",
+    "community": "Communauté",
+    "tradingLab": "Labo de Trading",
+    "trainingLab": "Labo d'Entraînement",
+    "pricing": "Tarifs",
+    "tools": "Outils",
+    "blog": "Blog",
+    "login": "Connexion",
+    "signup": "Inscription",
+    "logout": "Déconnexion",
+    "profile": "Profil",
+    "settings": "Paramètres",
+    "mentoring": "Mentorat",
+    "bugs": "Signaler un bug",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "greeting": "Bonjour"
+  },
+  "auth": {
+    "signin": {
+      "title": "Connexion",
+      "button": "Se connecter",
+      "success": "Connexion réussie",
+      "error": "Erreur de connexion",
+      "welcome": "Bienvenue"
+    },
+    "signup": {
+      "title": "Inscription",
+      "button": "S'inscrire",
+      "success": "Inscription réussie",
+      "error": "Erreur lors de l'inscription"
+    },
+    "signout": {
+      "button": "Déconnexion",
+      "success": "Déconnexion réussie",
+      "successMessage": "À bientôt !",
+      "error": "Erreur",
+      "errorMessage": "Une erreur est survenue lors de la déconnexion"
+    }
   }
 }
