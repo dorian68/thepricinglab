@@ -1,5 +1,5 @@
 
-import React, { Suspense, ErrorBoundary as ReactErrorBoundary } from 'react' 
+import React, { Suspense } from 'react' 
 import { createRoot } from 'react-dom/client'
 // Import i18n configuration first to ensure it's loaded before components
 import './i18n'
@@ -8,22 +8,33 @@ import './index.css'
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "sonner"
 
-// Error Boundary
-class ErrorBoundary extends React.Component {
-  constructor(props) {
+// Define proper interface for ErrorBoundary state
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+// Define proper interface for ErrorBoundary props
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+}
+
+// Error Boundary with proper TypeScript types
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error, errorInfo) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     console.error("Application Error:", error, errorInfo);
   }
 
-  render() {
+  render(): React.ReactNode {
     if (this.state.hasError) {
       return (
         <div className="h-screen w-full flex flex-col items-center justify-center text-white p-4">
