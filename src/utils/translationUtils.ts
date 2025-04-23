@@ -25,12 +25,22 @@ export const safeTranslate = (
       // First attempt: Try the simple form which works in most cases
       try {
         translated = t(key, fallback);
+        
+        // If translation returned the key itself, it means it wasn't found
+        if (translated === key && fallback) {
+          translated = fallback;
+        }
       } catch (e) {
         // If that didn't work, try the object format as a fallback approach
         console.warn(`Simple translation format failed for "${key}", trying alternative format:`, e);
         try {
           // We need to cast this as any since the type definitions are strict but implementations may vary
           translated = t(key, { defaultValue: fallback }) as string;
+          
+          // Same check for key returning as above
+          if (translated === key && fallback) {
+            translated = fallback;
+          }
         } catch (err) {
           console.warn(`All translation attempts failed for "${key}":`, err);
           translated = fallback;

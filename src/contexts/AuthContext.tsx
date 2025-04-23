@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/integrations/supabase/client'
 import { UserProfile } from '@/types/auth'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 
 interface AuthContextType {
   user: User | null
@@ -23,7 +23,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const { toast } = useToast()
 
   // Récupérer le profil utilisateur
   const fetchProfile = async (userId: string) => {
@@ -48,36 +47,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Initialiser la session et configurer les listeners d'auth
   useEffect(() => {
+    console.log("AuthContext: Initializing auth state")
+    
     // Configuration du listener d'état d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, currentSession) => {
+        console.log("AuthContext: Auth state changed", _event)
         setSession(currentSession)
         setUser(currentSession?.user ?? null)
         
         // Utilisation de setTimeout pour éviter le deadlock avec Supabase
         if (currentSession?.user) {
           setTimeout(async () => {
+            console.log("AuthContext: Fetching profile for user", currentSession.user.id)
             const profile = await fetchProfile(currentSession.user.id)
             setProfile(profile)
+            setIsLoading(false)
           }, 0)
         } else {
           setProfile(null)
+          setIsLoading(false)
         }
-        
-        setIsLoading(false)
       }
     )
 
     // Vérification initiale de la session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      console.log("AuthContext: Initial session check", currentSession ? "session found" : "no session")
       setSession(currentSession)
       setUser(currentSession?.user ?? null)
       
       if (currentSession?.user) {
-        fetchProfile(currentSession.user.id).then(setProfile)
+        fetchProfile(currentSession.user.id).then(profile => {
+          setProfile(profile)
+          console.log("AuthContext: Profile loaded", profile)
+          setIsLoading(false)
+        })
+      } else {
+        setIsLoading(false)
       }
-      
-      setIsLoading(false)
     })
 
     return () => {
@@ -100,29 +108,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) throw error
 
-      toast({
-        title: "Inscription réussie",
-        description: "Bienvenue sur The Pricing Library !",
-      })
+      toast("Inscription réussie! Bienvenue sur The Pricing Library !")
     } catch (error) {
       console.error("Erreur lors de l'inscription:", error)
-      toast({
-        title: "Erreur lors de l'inscription",
-        description: error instanceof Error ? error.message : "Une erreur est survenue",
-        variant: "destructive",
-      })
+      toast(error instanceof Error ? error.message : "Une erreur est survenue")
       throw error
     }
 
-    toast({
-      title: "Inscription réussie",
-      description: "Bienvenue sur The Pricing Library !",
-    })
+    toast("Inscription réussie! Bienvenue sur The Pricing Library !")
     console.log("Inscription réussie");
   }
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log("AuthContext: Signing in", email)
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -130,17 +129,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) throw error
 
-      toast({
-        title: "Connexion réussie",
-        description: "Bon retour parmi nous !",
-      })
+      toast("Connexion réussie! Bon retour parmi nous !")
     } catch (error) {
       console.error("Erreur lors de la connexion:", error)
-      toast({
-        title: "Erreur lors de la connexion",
-        description: error instanceof Error ? error.message : "Une erreur est survenue",
-        variant: "destructive",
-      })
+      toast(error instanceof Error ? error.message : "Une erreur est survenue")
       throw error
     }
   }
@@ -150,17 +142,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { error } = await supabase.auth.signOut()
       if (error) throw error
       
-      toast({
-        title: "Déconnexion réussie",
-        description: "À bientôt !",
-      })
+      toast("Déconnexion réussie. À bientôt !")
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error)
-      toast({
-        title: "Erreur lors de la déconnexion",
-        description: error instanceof Error ? error.message : "Une erreur est survenue",
-        variant: "destructive",
-      })
+      toast(error instanceof Error ? error.message : "Une erreur est survenue")
       throw error
     }
   }

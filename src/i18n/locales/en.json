@@ -30,13 +30,57 @@
     "profile": "Profile",
     "settings": "Settings",
     "logout": "Logout",
-    "survivalMode": "Survival Mode"
+    "survivalMode": "Survival Mode",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "languageSwitcher": {
     "switchLanguage": "Switch Language",
     "tooltip": "Change the site language",
     "en": "English",
     "fr": "Français"
+  },
+  "navbar": {
+    "home": "Home",
+    "courses": "Courses",
+    "community": "Community",
+    "tradingLab": "Trading Lab",
+    "trainingLab": "Training Lab",
+    "pricing": "Pricing",
+    "tools": "Tools",
+    "blog": "Blog",
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout",
+    "profile": "Profile",
+    "settings": "Settings",
+    "mentoring": "Mentoring",
+    "bugs": "Report Bug",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "greeting": "Hello"
+  },
+  "auth": {
+    "signin": {
+      "title": "Sign In",
+      "button": "Sign In",
+      "success": "Sign in successful",
+      "error": "Sign in error",
+      "welcome": "Welcome back"
+    },
+    "signup": {
+      "title": "Sign Up",
+      "button": "Sign Up",
+      "success": "Sign up successful",
+      "error": "Sign up error" 
+    },
+    "signout": {
+      "button": "Sign Out",
+      "success": "Sign out successful",
+      "successMessage": "See you soon!",
+      "error": "Error",
+      "errorMessage": "An error occurred during sign out"
+    }
   },
   "home": {
     "hero": {
@@ -448,7 +492,8 @@
       "hedging": {
         "title": "Advanced Hedging Strategies",
         "description": "Implement sophisticated hedging techniques for complex portfolios"
-      }
+      },
+      "overview": "Advanced Overview"
     },
     "complex": {
       "tab": "Complex",
@@ -492,9 +537,31 @@
   "community": {
     "title": "Community",
     "subtitle": "Connect with fellow quants and traders",
+    "notifications": "Notifications",
+    "newTopic": "New Topic",
+    "recentDiscussions": "Recent Discussions",
+    "viewAllDiscussions": "View All Discussions",
+    "upcomingEvents": "Upcoming Events",
+    "viewAllEvents": "View All Events",
+    "communityPoll": "Community Poll",
+    "onlineMembers": "Online Members",
+    "lastReply": "Last Reply",
+    "registerEvent": "Register",
     "forum": {
       "title": "Discussion Forum",
       "description": "Exchange ideas and ask questions"
+    },
+    "projects": {
+      "title": "Projects & Challenges",
+      "description": "New problems every week"
+    },
+    "pair": {
+      "title": "Pair Programming",
+      "description": "Code together on projects"
+    },
+    "leaderboard": {
+      "title": "Leaderboard & Hackathons",
+      "description": "Rankings and events"
     },
     "chat": {
       "title": "Live Chat",

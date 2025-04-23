@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Menu } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -5,9 +6,11 @@ import DesktopNav from "./navigation/DesktopNav";
 import MobileNav from "./navigation/MobileNav";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { safeTranslate } from "../utils/translationUtils";
 
 const ModernNavbar = () => {
   const { t } = useTranslation();
+  const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
   const isMobile = useIsMobile();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -34,14 +37,14 @@ const ModernNavbar = () => {
   return (
     <nav 
       className="sticky top-0 z-50 bg-finance-dark/95 backdrop-blur-sm border-b border-finance-steel/20" 
-      aria-label="Navigation principale"
+      aria-label={st('navigation.main', 'Main navigation')}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link 
             to="/" 
             className="flex-shrink-0 flex items-center md:hidden"
-            aria-label="Accueil The Pricing Library"
+            aria-label={st('navigation.homeLink', 'The Pricing Library Home')}
           >
             <span className="terminal-text text-finance-accent text-xl font-bold">TPL</span>
           </Link>
@@ -54,9 +57,9 @@ const ModernNavbar = () => {
               className="inline-flex items-center justify-center p-2 rounded-md text-finance-offwhite hover:text-finance-accent focus:outline-none focus:ring-2 focus:ring-inset focus:ring-finance-accent"
               aria-expanded={isOpen}
               aria-controls="mobile-menu"
-              aria-label={isOpen ? "Fermer le menu de navigation" : "Ouvrir le menu de navigation"}
+              aria-label={isOpen ? st('navbar.closeMenu', 'Close navigation menu') : st('navbar.openMenu', 'Open navigation menu')}
             >
-              <span className="sr-only">{isOpen ? t('navigation.closeMenu') : t('navigation.openMenu')}</span>
+              <span className="sr-only">{isOpen ? st('navbar.closeMenu', 'Close menu') : st('navbar.openMenu', 'Open menu')}</span>
               <Menu className="block h-6 w-6" aria-hidden="true" />
             </button>
           </div>

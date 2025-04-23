@@ -6,44 +6,49 @@ import { safeTranslate } from "../../utils/translationUtils";
 
 const CoursesMenu = () => {
   const { t } = useTranslation();
+  const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
   
   return (
     <div className="grid grid-cols-2 gap-3 p-4 w-[500px]">
-      <NavMenuSection title={safeTranslate(t, 'courses.fundamentals', 'Fundamentals')}>
+      <NavMenuSection title={st('courses.fundamentals', 'Fundamentals')}>
         <NavMenuItem 
-          to="/courses/blackscholes" 
-          title={safeTranslate(t, 'coursesPage.fundamentals.blackScholes.title', 'Black-Scholes Model')} 
+          to="/courses/fundamentals/black-scholes" 
+          title={st('coursesPage.fundamentals.blackScholes.title', 'Black-Scholes Model')} 
         />
         <NavMenuItem 
-          to="/courses/yield-curves" 
-          title={safeTranslate(t, 'coursesPage.fundamentals.yieldCurves.title', 'Yield Curves')} 
+          to="/courses/fundamentals/yield-curves" 
+          title={st('coursesPage.fundamentals.yieldCurves.title', 'Yield Curves')} 
         />
         <NavMenuItem 
-          to="/courses/greeks" 
-          title={safeTranslate(t, 'coursesPage.fundamentals.greeks.title', 'Option Greeks')} 
+          to="/courses/fundamentals/greeks" 
+          title={st('coursesPage.fundamentals.greeks.title', 'Option Greeks')} 
         />
       </NavMenuSection>
       
       <div>
-        <NavMenuSection title={safeTranslate(t, 'courses.advanced', 'Advanced')}>
+        <NavMenuSection title={st('courses.advanced', 'Advanced')}>
           <NavMenuItem 
-            to="/courses/implied-vol" 
-            title={safeTranslate(t, 'coursesPage.advanced.impliedVol.title', 'Implied Volatility')} 
+            to="/courses/advanced/implied-vol" 
+            title={st('coursesPage.advanced.impliedVol.title', 'Implied Volatility')} 
           />
           <NavMenuItem 
-            to="/courses/vol-products" 
-            title={safeTranslate(t, 'coursesPage.advanced.volProducts.title', 'Volatility Products')} 
+            to="/courses/advanced/vol-products" 
+            title={st('coursesPage.advanced.volProducts.title', 'Volatility Products')} 
+          />
+          <NavMenuItem 
+            to="/courses/advanced" 
+            title={st('coursesPage.advanced.overview', 'Advanced Overview')} 
           />
         </NavMenuSection>
         
-        <NavMenuSection title={safeTranslate(t, 'courses.complex', 'Complex')}>
+        <NavMenuSection title={st('courses.complex', 'Complex')}>
           <NavMenuItem 
-            to="/courses/exotic-options" 
-            title={safeTranslate(t, 'coursesPage.complex.exotic.title', 'Exotic Options')} 
+            to="/courses/complex/exotic-options" 
+            title={st('coursesPage.complex.exotic.title', 'Exotic Options')} 
           />
           <NavMenuItem 
-            to="/courses/monte-carlo" 
-            title={safeTranslate(t, 'coursesPage.complex.monteCarlo.title', 'Monte Carlo Methods')} 
+            to="/courses/complex/monte-carlo" 
+            title={st('coursesPage.complex.monteCarlo.title', 'Monte Carlo Methods')} 
           />
         </NavMenuSection>
       </div>

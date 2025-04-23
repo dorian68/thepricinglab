@@ -11,7 +11,7 @@ import {
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import NavItem from "./NavItem";
 import LanguageSwitcher from "../LanguageSwitcher";
 import TrainingLabMenu from "./TrainingLabMenu";
@@ -19,26 +19,27 @@ import TradingLabMenu from "./TradingLabMenu";
 import CoursesMenu from "./CoursesMenu";
 import CommunityMenu from "./CommunityMenu";
 import ToolsMenu from "./ToolsMenu";
+import { safeTranslate } from "../../utils/translationUtils";
 
 const DesktopNav = () => {
   const { t } = useTranslation()
   const { user, profile, signOut, isAuthenticated } = useAuth()
   const navigate = useNavigate()
-  const { toast } = useToast()
+
+  console.log("DesktopNav: Auth state", { isAuthenticated, profile })
+
+  const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
 
   const handleSignOut = async () => {
     try {
       await signOut()
       navigate("/")
-      toast({
-        title: t("auth.signout.success", "Déconnexion réussie"),
-        description: t("auth.signout.successMessage", "À bientôt !"),
+      toast(st("auth.signout.success", "Déconnexion réussie"), {
+        description: st("auth.signout.successMessage", "À bientôt !")
       })
     } catch (error) {
-      toast({
-        title: t("auth.signout.error", "Erreur"),
-        description: t("auth.signout.errorMessage", "Une erreur est survenue lors de la déconnexion"),
-        variant: "destructive",
+      toast(st("auth.signout.error", "Erreur"), {
+        description: st("auth.signout.errorMessage", "Une erreur est survenue lors de la déconnexion")
       })
     }
   }
@@ -57,7 +58,7 @@ const DesktopNav = () => {
               {/* Courses */}
               <NavItem 
                 icon={BookOpen} 
-                label={t('navbar.courses')}
+                label={st('navbar.courses', 'Cours')}
               >
                 <CoursesMenu />
               </NavItem>
@@ -65,7 +66,7 @@ const DesktopNav = () => {
               {/* Trading Lab Section */}
               <NavItem 
                 icon={BarChart3} 
-                label={t('navbar.tradingLab', 'Trading Lab')}
+                label={st('navbar.tradingLab', 'Trading Lab')}
                 highlighted={true}
               >
                 <TradingLabMenu />
@@ -74,7 +75,7 @@ const DesktopNav = () => {
               {/* Community */}
               <NavItem 
                 icon={Users} 
-                label={t('navbar.community')}
+                label={st('navbar.community', 'Communauté')}
               >
                 <CommunityMenu />
               </NavItem>
@@ -83,13 +84,13 @@ const DesktopNav = () => {
               <NavItem 
                 to="/pricing" 
                 icon={CreditCard} 
-                label={t('navbar.pricing', 'Tarifs')} 
+                label={st('navbar.pricing', 'Tarifs')} 
               />
               
               {/* Tools */}
               <NavItem 
                 icon={Wrench} 
-                label={t('navbar.tools')}
+                label={st('navbar.tools', 'Outils')}
               >
                 <ToolsMenu />
               </NavItem>
@@ -98,7 +99,7 @@ const DesktopNav = () => {
               <NavItem 
                 to="/blog" 
                 icon={FileText} 
-                label={t('navbar.blog')} 
+                label={st('navbar.blog', 'Blog')} 
               />
               
             </NavigationMenuList>
@@ -115,7 +116,9 @@ const DesktopNav = () => {
                 to="/dashboard" 
                 className="text-finance-offwhite hover:text-finance-accent transition-colors"
               >
-                {profile.prenom ? `Bonjour, ${profile.prenom}` : "Mon compte"}
+                {profile.prenom 
+                  ? `${st('navbar.greeting', 'Bonjour')}, ${profile.prenom}` 
+                  : st('navigation.profile', 'Mon compte')}
               </Link>
               <Button 
                 variant="financeOutline" 
@@ -124,19 +127,19 @@ const DesktopNav = () => {
                 className="flex items-center gap-2"
               >
                 <LogOut className="h-4 w-4" />
-                {t('auth.signout.button')}
+                {st('auth.signout.button', 'Déconnexion')}
               </Button>
             </div>
           ) : (
             <>
               <Button variant="financeOutline" size="sm" className="mr-2" asChild>
                 <Link to="/login">
-                  {t('auth.signin.button')}
+                  {st('auth.signin.button', 'Se connecter')}
                 </Link>
               </Button>
               <Button variant="finance" size="sm" asChild>
                 <Link to="/signup">
-                  {t('auth.signup.button')}
+                  {st('auth.signup.button', "S'inscrire")}
                 </Link>
               </Button>
             </>
