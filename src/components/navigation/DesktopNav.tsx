@@ -21,27 +21,27 @@ import CommunityMenu from "./CommunityMenu";
 import ToolsMenu from "./ToolsMenu";
 
 const DesktopNav = () => {
-  const { t } = useTranslation();
-  const { user, profile, signOut } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const { t } = useTranslation()
+  const { user, profile, signOut, isAuthenticated } = useAuth()
+  const navigate = useNavigate()
+  const { toast } = useToast()
 
   const handleSignOut = async () => {
     try {
-      await signOut();
-      navigate("/");
+      await signOut()
+      navigate("/")
       toast({
-        title: t("auth.signout.success"),
-        description: t("auth.signout.successMessage"),
-      });
+        title: t("auth.signout.success", "Déconnexion réussie"),
+        description: t("auth.signout.successMessage", "À bientôt !"),
+      })
     } catch (error) {
       toast({
-        title: t("auth.signout.error"),
-        description: t("auth.signout.errorMessage"),
+        title: t("auth.signout.error", "Erreur"),
+        description: t("auth.signout.errorMessage", "Une erreur est survenue lors de la déconnexion"),
         variant: "destructive",
-      });
+      })
     }
-  };
+  }
 
   return (
     <div className="hidden md:flex items-center justify-between w-full">
@@ -109,9 +109,12 @@ const DesktopNav = () => {
       <div className="flex items-center space-x-4">
         <LanguageSwitcher />
         <div className="ml-4 flex items-center md:ml-6">
-          {user && profile ? (
+          {isAuthenticated && profile ? (
             <div className="flex items-center gap-4">
-              <Link to="/dashboard" className="text-finance-offwhite hover:text-finance-accent transition-colors">
+              <Link 
+                to="/dashboard" 
+                className="text-finance-offwhite hover:text-finance-accent transition-colors"
+              >
                 {profile.prenom ? `Bonjour, ${profile.prenom}` : "Mon compte"}
               </Link>
               <Button 
@@ -141,7 +144,7 @@ const DesktopNav = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default DesktopNav;
+export default DesktopNav

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { BookOpen } from "lucide-react";
@@ -12,14 +11,14 @@ import AchievementsTab from "../components/dashboard/tabs/AchievementsTab";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
-  const { profile } = useAuth();
+  const { profile, isAuthenticated } = useAuth();
   
   return (
     <div className="flex flex-col min-h-screen bg-finance-dark text-finance-offwhite">
       <Navbar />
       
       {/* Welcome Message */}
-      {profile && (
+      {isAuthenticated && profile && (
         <div className="bg-finance-burgundy/10 border-b border-finance-steel/10">
           <div className="max-w-7xl mx-auto px-6 py-4">
             <p className="text-finance-accent flex items-center gap-2">
