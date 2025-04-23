@@ -126,6 +126,48 @@ export type Database = {
         }
         Relationships: []
       }
+      questions: {
+        Row: {
+          answer: string
+          created_at: string | null
+          difficulty: number | null
+          explanation: string | null
+          id: string
+          on_wrong_answer: string | null
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          question: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string | null
+          difficulty?: number | null
+          explanation?: string | null
+          id?: string
+          on_wrong_answer?: string | null
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          question: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string | null
+          difficulty?: number | null
+          explanation?: string | null
+          id?: string
+          on_wrong_answer?: string | null
+          option_a?: string
+          option_b?: string
+          option_c?: string
+          option_d?: string
+          question?: string
+        }
+        Relationships: []
+      }
       user_activity: {
         Row: {
           activity_type: string
