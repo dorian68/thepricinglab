@@ -87,7 +87,7 @@ const Home = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/courses/fundamentals/black-scholes" className="finance-button text-center">
+                <Link to="/courses" className="finance-button text-center">
                   {st('home.hero.startCourse', 'Start Learning')}
                 </Link>
                 <Link to="/signup" className="finance-button-outline text-center">

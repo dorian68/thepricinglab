@@ -87,6 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       title: "Inscription réussie",
       description: "Bienvenue sur The Pricing Library !",
     })
+    console.log("Inscription réussie");
   }
 
   const signIn = async (email: string, password: string) => {

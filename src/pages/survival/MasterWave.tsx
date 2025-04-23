@@ -275,8 +275,7 @@ const MasterWave = () => {
         </div>
       </main>
       
-      <Footer />
-    </div>
+     </div>
   );
 };
 

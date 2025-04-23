@@ -264,8 +264,7 @@ const IntermediateWave = () => {
         </div>
       </main>
       
-      <Footer />
-    </div>
+     </div>
   );
 };
 
