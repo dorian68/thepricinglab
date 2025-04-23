@@ -267,7 +267,8 @@ const LegendaryWave = () => {
         </div>
       </main>
       
-     </div>
+      <Footer />
+    </div>
   );
 };
 

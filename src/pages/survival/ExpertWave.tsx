@@ -264,7 +264,8 @@ const ExpertWave = () => {
         </div>
       </main>
       
-     </div>
+      <Footer />
+    </div>
   );
 };
 

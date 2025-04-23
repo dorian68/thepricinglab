@@ -372,6 +372,7 @@ const YieldCurvesCourse = () => {
         </div>
       </main>
       
+      <Footer />
     </div>
   );
 };

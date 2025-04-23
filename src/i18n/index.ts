@@ -42,15 +42,9 @@ i18n
       console.warn(`Missing translation key: ${key} for language: ${lng}`);
     },
     parseMissingKeyHandler: (key) => {
-      // Remove the "[caption]" prefix and transform into a readable format
-      const sanitizedKey = key.replace(/\[caption\]([a-zA-Z0-9]*)/g, '$1');
-      // Format the key into a more readable form
-      const readableKey = sanitizedKey.split('.').pop() || sanitizedKey;
-      // Convert camelCase to Title Case with spaces
-      return readableKey
-        .replace(/([A-Z])/g, ' $1')
-        .replace(/^./, (str) => str.toUpperCase())
-        .trim();
+      // If a key is missing, return a more user-friendly fallback without [caption]
+      const fallback = key.split('.').pop() || key;
+      return cleanCaptions(fallback.replace(/([A-Z])/g, ' $1').toLowerCase());
     }
   });
 

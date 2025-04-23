@@ -277,6 +277,7 @@ const ImpliedVolCourse = () => {
         </div>
       </main>
       
+      <Footer />
     </div>
   );
 };

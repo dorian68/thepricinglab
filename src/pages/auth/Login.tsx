@@ -9,15 +9,14 @@ import { toast } from 'sonner'
 
 const Login = () => {
   const { t } = useTranslation()
-  const { user, signIn, isAuthenticated } = useAuth()
+  const { user, signIn } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   })
 
-  if (isAuthenticated) {
-    console.log("Login: User is authenticated, redirecting to dashboard")
+  if (user) {
     return <Navigate to="/dashboard" replace />
   }
 

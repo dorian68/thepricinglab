@@ -478,7 +478,8 @@ const BeginnerWave = () => {
         </div>
       </main>
       
-     </div>
+      <Footer />
+    </div>
   );
 };
 

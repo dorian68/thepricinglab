@@ -293,6 +293,7 @@ const VolProductsCourse = () => {
         </div>
       </main>
       
+      <Footer />
     </div>
   );
 };

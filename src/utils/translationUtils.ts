@@ -53,9 +53,7 @@ export const safeTranslate = (
  */
 export const cleanCaptions = (text: string): string => {
   if (!text) return '';
-  // Modification: Ne remplace plus 'title' par rien et ne supprime plus uniquement '[caption]'
-  // mais supprime complètement les patterns comme '[caption]button' ou autres variantes
-  return text.replace(/\[caption\]([a-zA-Z0-9]*)/g, '');
+  return text.replace(/\[caption\]\s*/g, '').replace(/title/g, '');
 };
 
 /**

@@ -1067,6 +1067,7 @@ const BlackScholesCourse = () => {
         </div>
       </main>
       
+      <Footer />
     </div>
   );
 };

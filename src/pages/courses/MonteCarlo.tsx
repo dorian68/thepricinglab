@@ -292,6 +292,7 @@ const MonteCarloCourse = () => {
         </div>
       </main>
       
+      <Footer />
     </div>
   );
 };
