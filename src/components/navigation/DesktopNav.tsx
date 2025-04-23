@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { 
   Home, BookOpen, Dumbbell, Users, CreditCard, Wrench, FileText, Bug, BarChart3, LogOut
@@ -11,6 +11,7 @@ import {
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import NavItem from "./NavItem";
 import LanguageSwitcher from "../LanguageSwitcher";
 import TrainingLabMenu from "./TrainingLabMenu";
@@ -22,6 +23,25 @@ import ToolsMenu from "./ToolsMenu";
 const DesktopNav = () => {
   const { t } = useTranslation();
   const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate("/");
+      toast({
+        title: t("auth.signout.success"),
+        description: t("auth.signout.successMessage"),
+      });
+    } catch (error) {
+      toast({
+        title: t("auth.signout.error"),
+        description: t("auth.signout.errorMessage"),
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="hidden md:flex items-center justify-between w-full">
@@ -91,29 +111,29 @@ const DesktopNav = () => {
         <div className="ml-4 flex items-center md:ml-6">
           {user && profile ? (
             <div className="flex items-center gap-4">
-              <span className="text-finance-offwhite">
-                {t('navbar.greeting', { name: profile.prenom })}
-              </span>
+              <Link to="/dashboard" className="text-finance-offwhite hover:text-finance-accent transition-colors">
+                {profile.prenom ? `Bonjour, ${profile.prenom}` : "Mon compte"}
+              </Link>
               <Button 
                 variant="financeOutline" 
                 size="sm" 
-                onClick={signOut}
+                onClick={handleSignOut}
                 className="flex items-center gap-2"
               >
                 <LogOut className="h-4 w-4" />
-                {t('navbar.logout', 'Déconnexion')}
+                {t('auth.signout.button')}
               </Button>
             </div>
           ) : (
             <>
               <Button variant="financeOutline" size="sm" className="mr-2" asChild>
                 <Link to="/login">
-                  {t('navbar.login')}
+                  {t('auth.signin.button')}
                 </Link>
               </Button>
               <Button variant="finance" size="sm" asChild>
                 <Link to="/signup">
-                  {t('navbar.signup')}
+                  {t('auth.signup.button')}
                 </Link>
               </Button>
             </>
