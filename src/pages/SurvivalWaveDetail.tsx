@@ -11,6 +11,7 @@ import { ArrowLeft, Clock, Check, X, Zap, Trophy, AlertTriangle, Heart, Flame } 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useLocation } from "react-router-dom";
 
 // Type pour les questions QCM
 type QuizQuestion = {
@@ -22,43 +23,43 @@ type QuizQuestion = {
   difficulty: 1 | 2 | 3 | 4 | 5;
 };
 
-const generateQuestions = async (
-  topics: string[],
-  difficulty: string,
-  count: number = 5
-): Promise<QuizQuestion[]> => {
-  // const webhookUrl = "https://dorian68.app.n8n.cloud/webhook-test/435a0a2a-33bd-4afb-9f7f-8891ba6b6cb2";
-  const webhookUrl ="https://dorian68.app.n8n.cloud/webhook/435a0a2a-33bd-4afb-9f7f-8891ba6b6cb2"
-
-  const difficultyLabel = 
-    difficulty === 'beginner' ? 'faciles' :
-    difficulty === 'intermediate' ? 'intermédiaires' :
-    difficulty === 'advanced' ? 'difficiles' :
-    difficulty === 'expert' ? 'expertes' : 'variées';
-
-  const prompt = `Peux-tu me générer ${count} questions ${difficultyLabel} en finance de marché sur les thèmes suivants : ${topics.join(", ")} ? 
-Je souhaite des QCM avec 4 propositions, une seule correcte, une explication détaillée et une note pédagogique si possible. Format JSON uniquement.`;
-
+// Récupère les questions depuis sessionStorage
+const generateQuestions = (): QuizQuestion[] => {
   try {
-    const response = await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: prompt }),
-    });
+    const stored = sessionStorage.getItem('survival-questions');
+    console.log("Stored questions:", stored); // Debugging line
+    const parsed = stored ? JSON.parse(stored) : [];
 
-    if (!response.ok) throw new Error(`Erreur serveur : ${response.status}`);
-    const questions: QuizQuestion[] = await response.json();
+    if (!Array.isArray(parsed)) throw new Error("Format de question invalide");
 
-    if (!Array.isArray(questions)) throw new Error("Format JSON invalide");
-    console.log("----------------- Questions générées ----------------- :", questions);
-    return questions;
+        // Transformer chaque objet en QuizQuestion
+    const formatted = parsed.map((q: any) => ({
+      question: q.question,
+      options: [q.option_a, q.option_b, q.option_c, q.option_d],
+      answer: q.answer,
+      explanation: q.explanation,
+      on_wrong_answer: q.on_wrong_answer,
+      difficulty: q.difficulty
+    }));
+
+    return formatted;
+
   } catch (error) {
-    console.error("Erreur de récupération des questions via RAG :", error);
+    console.error("Erreur de récupération des questions :", error);
     return [];
   }
 };
 
+
+
 const SurvivalWaveDetail = () => {
+  const location = useLocation();
+
+  //const questionsFromNavigate = location?.state?.questions;
+ // const [questions, setQuestions] = useState<QuizQuestion[]>(questionsFromNavigate ?? []);
+ const [questions, setQuestions] = useState<QuizQuestion[]>(() => generateQuestions());
+
+
   const { id } = useParams();
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -80,7 +81,6 @@ const SurvivalWaveDetail = () => {
   const [lives, setLives] = useState(3);
   const [combo, setCombo] = useState(0);
   const [maxCombo, setMaxCombo] = useState(0);
-  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [mistakes, setMistakes] = useState<number[]>([]);
   const [successRate, setSuccessRate] = useState(0);
   
@@ -113,15 +113,12 @@ const SurvivalWaveDetail = () => {
 
   // Générer des questions au démarrage du jeu
   useEffect(() => {
-    if (wave) {
-      const difficulty = getDifficultyByWaveId(wave.id);
-      const questionCount = Math.min(10, Math.max(5, wave.id + 4)); // 5 à 10 questions selon le niveau
-      generateQuestions(wave.topics, difficulty, questionCount).then((generatedQuestions) => {
-        setQuestions(generatedQuestions);
-      });
+    if (wave && questions.length === 0) {
+      const loaded = generateQuestions();
+      setQuestions(loaded);
     }
   }, [wave]);
-
+  
   useEffect(() => {
     // Redirect if wave doesn't exist or isn't unlocked
     if (!wave) {
@@ -168,11 +165,11 @@ const SurvivalWaveDetail = () => {
     
     // Générer de nouvelles questions
     if (wave) {
-      const difficulty = getDifficultyByWaveId(wave.id);
-      const questionCount = Math.min(10, Math.max(5, wave.id + 4));
-      generateQuestions(wave.topics, difficulty, questionCount).then((generatedQuestions) => {
-        setQuestions(generatedQuestions);
-      });
+      //const difficulty = getDifficultyByWaveId(wave.id);
+      //const questionCount = Math.min(10, Math.max(5, wave.id + 4));
+      const loadedQuestions = generateQuestions();
+      console.log("Loaded questions:", loadedQuestions); // Debugging line
+      setQuestions(loadedQuestions);
     }
     
     toast.success("Mode Survie démarré ! Bonne chance !");
@@ -563,7 +560,6 @@ const SurvivalWaveDetail = () => {
         </div>
       </main>
       
-      <Footer />
     </div>
   );
 };

@@ -401,7 +401,6 @@ const SurvivalMode = () => {
         </div>
       </section>
       
-      <Footer />
     </div>
   );
 };

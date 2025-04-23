@@ -18,7 +18,7 @@ const SurvivalButton = ({ waveId, className }: SurvivalButtonProps) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://dorian68.app.n8n.cloud/webhook-test/435a0a2a-33bd-4afb-9f7f-8891ba6b6cb2', {
+      const response = await fetch('https://dorian68.app.n8n.cloud/webhook/50081d45-67d1-408c-a9ae-780d0464095f', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -33,12 +33,16 @@ const SurvivalButton = ({ waveId, className }: SurvivalButtonProps) => {
       }
 
       const questions = await response.json();
+      console.log('Questions:', questions);
       
       // Store questions in sessionStorage to persist across navigation
       sessionStorage.setItem('survival-questions', JSON.stringify(questions));
-      
+      console.log('Questions stored in sessionStorage:', questions);
       // Navigate to the wave detail page
-      navigate(`/survival-mode/wave/${waveId}`);
+      navigate(`/survival-mode/wave/${waveId}`, {
+        state: { questions } // Pass the questions to the next page
+      });
+
     } catch (error) {
       console.error('Failed to fetch questions:', error);
       toast.error("Erreur lors de la génération des questions. Veuillez réessayer.");
