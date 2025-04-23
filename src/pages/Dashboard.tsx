@@ -16,6 +16,8 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const { profile, isAuthenticated } = useAuth();
   
+  console.log("Dashboard: Auth state", { isAuthenticated, profile })
+  
   return (
     <div className="flex flex-col min-h-screen bg-finance-dark text-finance-offwhite">
       <Navbar />

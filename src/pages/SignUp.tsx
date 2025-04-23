@@ -6,10 +6,11 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 
 const SignUp = () => {
   const { t } = useTranslation()
-  const { user, signUp } = useAuth()
+  const { isAuthenticated, signUp } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [formData, setFormData] = useState({
@@ -19,21 +20,25 @@ const SignUp = () => {
     password: '',
   })
 
-  if (user) {
+  if (isAuthenticated) {
+    console.log("SignUp: User is authenticated, redirecting to dashboard")
     return <Navigate to="/dashboard" replace />
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!acceptedTerms) {
+      toast.error("Veuillez accepter les conditions d'utilisation")
       return
     }
     
     setIsLoading(true)
     try {
       await signUp(formData.email, formData.password, formData.prenom, formData.nom)
+      toast.success(t('auth.signup.success', 'Inscription réussie!'))
     } catch (error) {
       console.error('Erreur lors de l\'inscription:', error)
+      toast.error(error instanceof Error ? error.message : "Une erreur est survenue")
     } finally {
       setIsLoading(false)
     }

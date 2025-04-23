@@ -11,7 +11,7 @@ import {
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import NavItem from "./NavItem";
 import LanguageSwitcher from "../LanguageSwitcher";
 import TrainingLabMenu from "./TrainingLabMenu";
@@ -24,21 +24,19 @@ const DesktopNav = () => {
   const { t } = useTranslation()
   const { user, profile, signOut, isAuthenticated } = useAuth()
   const navigate = useNavigate()
-  const { toast } = useToast()
+
+  console.log("DesktopNav: Auth state", { isAuthenticated, profile })
 
   const handleSignOut = async () => {
     try {
       await signOut()
       navigate("/")
-      toast({
-        title: t("auth.signout.success", "Déconnexion réussie"),
-        description: t("auth.signout.successMessage", "À bientôt !"),
+      toast(t("auth.signout.success", "Déconnexion réussie"), {
+        description: t("auth.signout.successMessage", "À bientôt !")
       })
     } catch (error) {
-      toast({
-        title: t("auth.signout.error", "Erreur"),
-        description: t("auth.signout.errorMessage", "Une erreur est survenue lors de la déconnexion"),
-        variant: "destructive",
+      toast(t("auth.signout.error", "Erreur"), {
+        description: t("auth.signout.errorMessage", "Une erreur est survenue lors de la déconnexion")
       })
     }
   }
@@ -124,19 +122,19 @@ const DesktopNav = () => {
                 className="flex items-center gap-2"
               >
                 <LogOut className="h-4 w-4" />
-                {t('auth.signout.button')}
+                {t('auth.signout.button', 'Déconnexion')}
               </Button>
             </div>
           ) : (
             <>
               <Button variant="financeOutline" size="sm" className="mr-2" asChild>
                 <Link to="/login">
-                  {t('auth.signin.button')}
+                  {t('auth.signin.button', 'Se connecter')}
                 </Link>
               </Button>
               <Button variant="finance" size="sm" asChild>
                 <Link to="/signup">
-                  {t('auth.signup.button')}
+                  {t('auth.signup.button', "S'inscrire")}
                 </Link>
               </Button>
             </>
