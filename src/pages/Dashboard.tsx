@@ -24,7 +24,7 @@ const Dashboard = () => {
           <div className="max-w-7xl mx-auto px-6 py-4">
             <p className="text-finance-accent flex items-center gap-2">
               <span className="text-2xl">👋</span>
-              Bonjour {profile.prenom}, ravi de vous revoir sur The Pricing Library !
+              Bonjour {profile?.prenom || "utilisateur"}, ravi de vous revoir sur The Pricing Library !
             </p>
           </div>
         </div>
@@ -36,7 +36,9 @@ const Dashboard = () => {
           <div className="flex flex-col md:flex-row justify-between md:items-center gap-6">
             <div>
               <h1 className="text-2xl font-bold terminal-text">Tableau de bord</h1>
-              <p className="text-finance-lightgray">Bonjour, Julien. Continuez votre progression.</p>
+              <p className="text-finance-lightgray">
+                {profile?.prenom ? `Bonjour, ${profile.prenom}` : "Bonjour"}. Continuez votre progression.
+              </p>
             </div>
             
             <div className="flex space-x-4">
