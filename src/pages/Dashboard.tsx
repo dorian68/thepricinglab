@@ -1,5 +1,5 @@
-
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Link } from "react-router-dom";
@@ -142,10 +142,23 @@ const QuizResult = ({
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
+  const { profile } = useAuth();
   
   return (
     <div className="flex flex-col min-h-screen bg-finance-dark text-finance-offwhite">
       <Navbar />
+      
+      {/* Welcome Message */}
+      {profile && (
+        <div className="bg-finance-burgundy/10 border-b border-finance-steel/10">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <p className="text-finance-accent flex items-center gap-2">
+              <span className="text-2xl">👋</span>
+              Bonjour {profile.prenom}, ravi de vous revoir sur The Pricing Library !
+            </p>
+          </div>
+        </div>
+      )}
       
       {/* Dashboard Header */}
       <header className="py-8 px-6 border-b border-finance-steel/10">

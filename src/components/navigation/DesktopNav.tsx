@@ -3,13 +3,14 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { 
-  Home, BookOpen, Dumbbell, Users, CreditCard, Wrench, FileText, Bug, BarChart3
+  Home, BookOpen, Dumbbell, Users, CreditCard, Wrench, FileText, Bug, BarChart3, LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
+import { useAuth } from "@/contexts/AuthContext";
 import NavItem from "./NavItem";
 import LanguageSwitcher from "../LanguageSwitcher";
 import TrainingLabMenu from "./TrainingLabMenu";
@@ -20,6 +21,7 @@ import ToolsMenu from "./ToolsMenu";
 
 const DesktopNav = () => {
   const { t } = useTranslation();
+  const { user, profile, signOut } = useAuth();
 
   return (
     <div className="hidden md:flex items-center justify-between w-full">
@@ -87,16 +89,35 @@ const DesktopNav = () => {
       <div className="flex items-center space-x-4">
         <LanguageSwitcher />
         <div className="ml-4 flex items-center md:ml-6">
-          <Button variant="financeOutline" size="sm" className="mr-2" asChild>
-            <Link to="/login">
-              {t('navbar.login')}
-            </Link>
-          </Button>
-          <Button variant="finance" size="sm" asChild>
-            <Link to="/signup">
-              {t('navbar.signup')}
-            </Link>
-          </Button>
+          {user && profile ? (
+            <div className="flex items-center gap-4">
+              <span className="text-finance-offwhite">
+                {t('navbar.greeting', { name: profile.prenom })}
+              </span>
+              <Button 
+                variant="financeOutline" 
+                size="sm" 
+                onClick={signOut}
+                className="flex items-center gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                {t('navbar.logout', 'Déconnexion')}
+              </Button>
+            </div>
+          ) : (
+            <>
+              <Button variant="financeOutline" size="sm" className="mr-2" asChild>
+                <Link to="/login">
+                  {t('navbar.login')}
+                </Link>
+              </Button>
+              <Button variant="finance" size="sm" asChild>
+                <Link to="/signup">
+                  {t('navbar.signup')}
+                </Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </div>
