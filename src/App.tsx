@@ -66,6 +66,7 @@ import Performance from './pages/trading/Performance';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminRouteGuard from './components/admin/AdminRouteGuard';
+import CourseAdvanced from './pages/CourseAdvanced';
 
 const queryClient = new QueryClient();
 
@@ -89,13 +90,14 @@ const App = () => {
                   <Route path="/signup" element={<SignUp />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/courses" element={<Courses />} />
-                  <Route path="/courses/black-scholes" element={<BlackScholes />} />
-                  <Route path="/courses/exotic-options" element={<ExoticOptions />} />
-                  <Route path="/courses/greeks" element={<Greeks />} />
-                  <Route path="/courses/implied-vol" element={<ImpliedVol />} />
-                  <Route path="/courses/monte-carlo" element={<MonteCarlo />} />
-                  <Route path="/courses/vol-products" element={<VolProducts />} />
-                  <Route path="/courses/yield-curves" element={<YieldCurves />} />
+                  <Route path="/courses/fundamentals/black-scholes" element={<BlackScholes />} />
+                  <Route path="/courses/complex/exotic-options" element={<ExoticOptions />} />
+                  <Route path="/courses/fundamentals/greeks" element={<Greeks />} />
+                  <Route path="/courses/advanced/implied-vol" element={<ImpliedVol />} />
+                  <Route path="/courses/complex/monte-carlo" element={<MonteCarlo />} />
+                  <Route path="/courses/advanced/vol-products" element={<VolProducts />} />
+                  <Route path="/courses/fundamentals/yield-curves" element={<YieldCurves />} />
+                  <Route path="/courses/advanced" element={<CourseAdvanced />} />
                   <Route path="/practice" element={<Practice />} />
                   <Route path="/exercises" element={<Exercises />} />
                   <Route path="/exercises/:id" element={<ExerciseDetail />} />

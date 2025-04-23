@@ -6,9 +6,65 @@ import enTranslation from './locales/en.json';
 import frTranslation from './locales/fr.json';
 import { cleanTranslationObject, cleanCaptions } from '../utils/translationUtils';
 
+// Ajouter les traductions manquantes
+const additionalEnTranslations = {
+  navbar: {
+    blog: "Blog",
+    mentoring: "Mentoring",
+    trainingLab: "Training Lab",
+    tradingLab: "Trading Lab"
+  },
+  contact: "Contact",
+  footer: {
+    legal: "Legal",
+    terms: "Terms",
+    privacy: "Privacy",
+    cookies: "Cookies",
+    copyright: "© 2025 The Pricing Lab"
+  },
+  coursesPage: {
+    advanced: {
+      overview: "Advanced Overview"
+    }
+  }
+};
+
+const additionalFrTranslations = {
+  navbar: {
+    blog: "Blog",
+    mentoring: "Mentorat",
+    trainingLab: "Labo d'Entraînement",
+    tradingLab: "Labo de Trading"
+  },
+  contact: "Contact",
+  footer: {
+    legal: "Mentions légales",
+    terms: "Conditions",
+    privacy: "Confidentialité",
+    cookies: "Cookies",
+    copyright: "© 2025 The Pricing Lab"
+  },
+  coursesPage: {
+    advanced: {
+      overview: "Vue d'ensemble avancée"
+    }
+  }
+};
+
+// Merge additional translations
+const mergedEnTranslation = { 
+  ...enTranslation, 
+  ...additionalEnTranslations 
+};
+
+const mergedFrTranslation = { 
+  ...frTranslation, 
+  ...additionalFrTranslations 
+};
+
 // Process translation files to remove any [caption] markers
-const cleanedEnTranslation = cleanTranslationObject(enTranslation);
-const cleanedFrTranslation = cleanTranslationObject(frTranslation);
+const cleanedEnTranslation = cleanTranslationObject(mergedEnTranslation);
+const cleanedFrTranslation = cleanTranslationObject(mergedFrTranslation);
 
 // Initialize i18next
 i18n
