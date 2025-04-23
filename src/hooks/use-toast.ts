@@ -7,18 +7,29 @@ type ToastProps = {
   title?: string
   description?: string
   variant?: "default" | "destructive"
+  id?: string
 }
 
-// Simplified version of the toast hook
 export function useToast() {
+  const [toasts, setToasts] = useState<ToastProps[]>([])
+
   const toast = useCallback(({ title, description, variant = "default" }: ToastProps) => {
+    const id = Date.now().toString()
+    const newToast = { id, title, description, variant }
+    
     sonnerToast(title, {
       description,
       className: variant === "destructive" ? "bg-destructive" : undefined
     })
+
+    setToasts(prevToasts => [...prevToasts, newToast])
   }, [])
 
-  return { toast }
+  const dismissToast = useCallback((id: string) => {
+    setToasts(prevToasts => prevToasts.filter(toast => toast.id !== id))
+  }, [])
+
+  return { toasts, toast, dismissToast }
 }
 
 // Re-export the sonner toast for direct usage
