@@ -17,6 +17,8 @@ const LanguageSwitcher = () => {
 
   const changeLanguage = (language: string) => {
     i18n.changeLanguage(language);
+    // Force reload translations after language change
+    window.location.reload();
   };
 
   return (
