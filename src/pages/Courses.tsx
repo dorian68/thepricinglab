@@ -269,7 +269,6 @@ const Courses = () => {
         </div>
       </main>
       
-      <Footer />
     </div>
   );
 };

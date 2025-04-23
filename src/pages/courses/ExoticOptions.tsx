@@ -296,7 +296,6 @@ const ExoticOptionsCourse = () => {
         </div>
       </main>
       
-      <Footer />
     </div>
   );
 };

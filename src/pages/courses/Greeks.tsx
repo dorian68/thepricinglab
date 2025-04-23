@@ -421,7 +421,6 @@ const GreeksCourse = () => {
         </div>
       </main>
       
-      <Footer />
     </div>
   );
 };

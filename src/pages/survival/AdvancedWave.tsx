@@ -264,7 +264,6 @@ const AdvancedWave = () => {
         </div>
       </main>
       
-      <Footer />
     </div>
   );
 };

@@ -1,14 +1,16 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { User } from '@supabase/supabase-js'
+import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/integrations/supabase/client'
 import { UserProfile } from '@/types/auth'
-import { useToast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 
 interface AuthContextType {
   user: User | null
   profile: UserProfile | null
+  session: Session | null
   isLoading: boolean
+  isAuthenticated: boolean
   signUp: (email: string, password: string, prenom: string, nom: string) => Promise<void>
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
@@ -18,114 +20,146 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
+  const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const { toast } = useToast()
 
   // Récupérer le profil utilisateur
   const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
 
-    if (error) {
-      console.error('Erreur lors de la récupération du profil:', error)
+      if (error) {
+        console.error('Erreur lors de la récupération du profil:', error)
+        return null
+      }
+
+      return data as UserProfile
+    } catch (error) {
+      console.error('Erreur inattendue lors de la récupération du profil:', error)
       return null
     }
-
-    return data as UserProfile
   }
 
-  // Initialiser la session
+  // Initialiser la session et configurer les listeners d'auth
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUser(session.user)
-        fetchProfile(session.user.id).then(setProfile)
+    console.log("AuthContext: Initializing auth state")
+    
+    // Configuration du listener d'état d'authentification
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, currentSession) => {
+        console.log("AuthContext: Auth state changed", _event)
+        setSession(currentSession)
+        setUser(currentSession?.user ?? null)
+        
+        // Utilisation de setTimeout pour éviter le deadlock avec Supabase
+        if (currentSession?.user) {
+          setTimeout(async () => {
+            console.log("AuthContext: Fetching profile for user", currentSession.user.id)
+            const profile = await fetchProfile(currentSession.user.id)
+            setProfile(profile)
+            setIsLoading(false)
+          }, 0)
+        } else {
+          setProfile(null)
+          setIsLoading(false)
+        }
       }
-      setIsLoading(false)
-    })
+    )
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        const profile = await fetchProfile(session.user.id)
-        setProfile(profile)
+    // Vérification initiale de la session
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      console.log("AuthContext: Initial session check", currentSession ? "session found" : "no session")
+      setSession(currentSession)
+      setUser(currentSession?.user ?? null)
+      
+      if (currentSession?.user) {
+        fetchProfile(currentSession.user.id).then(profile => {
+          setProfile(profile)
+          console.log("AuthContext: Profile loaded", profile)
+          setIsLoading(false)
+        })
       } else {
-        setProfile(null)
+        setIsLoading(false)
       }
-      setIsLoading(false)
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
 
   const signUp = async (email: string, password: string, prenom: string, nom: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          prenom,
-          nom,
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            prenom,
+            nom,
+          },
         },
-      },
-    })
-
-    if (error) {
-      toast({
-        title: "Erreur lors de l'inscription",
-        description: error.message,
-        variant: "destructive",
       })
+
+      if (error) throw error
+
+      toast("Inscription réussie! Bienvenue sur The Pricing Library !")
+    } catch (error) {
+      console.error("Erreur lors de l'inscription:", error)
+      toast(error instanceof Error ? error.message : "Une erreur est survenue")
       throw error
     }
-
-    toast({
-      title: "Inscription réussie",
-      description: "Bienvenue sur The Pricing Library !",
-    })
   }
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-
-    if (error) {
-      toast({
-        title: "Erreur lors de la connexion",
-        description: error.message,
-        variant: "destructive",
+    try {
+      console.log("AuthContext: Signing in", email)
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       })
+
+      if (error) throw error
+
+      toast("Connexion réussie! Bon retour parmi nous !")
+    } catch (error) {
+      console.error("Erreur lors de la connexion:", error)
+      toast(error instanceof Error ? error.message : "Une erreur est survenue")
       throw error
     }
-
-    toast({
-      title: "Connexion réussie",
-      description: "Bon retour parmi nous !",
-    })
   }
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    if (error) {
-      toast({
-        title: "Erreur lors de la déconnexion",
-        description: error.message,
-        variant: "destructive",
-      })
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) throw error
+      
+      toast("Déconnexion réussie. À bientôt !")
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error)
+      toast(error instanceof Error ? error.message : "Une erreur est survenue")
       throw error
     }
-    setUser(null)
-    setProfile(null)
+  }
+
+  const value = {
+    user,
+    profile,
+    session,
+    isLoading,
+    isAuthenticated: !!session,
+    signUp,
+    signIn,
+    signOut,
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, isLoading, signUp, signIn, signOut }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   )
