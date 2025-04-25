@@ -17,46 +17,25 @@ export const safeTranslate = (
   key: string,
   fallback: string
 ): string => {
-  // Handle different ways the t function can be called from react-i18next
-  let translated: string | null | undefined;
-  
   try {
     if (typeof t === 'function') {
-      // First attempt: Try the simple form which works in most cases
-      try {
-        translated = t(key, fallback);
-        
-        // If translation returned the key itself, it means it wasn't found
-        if (translated === key && fallback) {
-          translated = fallback;
-        }
-      } catch (e) {
-        // If that didn't work, try the object format as a fallback approach
-        console.warn(`Simple translation format failed for "${key}", trying alternative format:`, e);
-        try {
-          // We need to cast this as any since the type definitions are strict but implementations may vary
-          translated = t(key, { defaultValue: fallback }) as string;
-          
-          // Same check for key returning as above
-          if (translated === key && fallback) {
-            translated = fallback;
-          }
-        } catch (err) {
-          console.warn(`All translation attempts failed for "${key}":`, err);
-          translated = fallback;
-        }
+      let translated = t(key, { defaultValue: fallback });
+
+      // Gestion d’échec silencieuse
+      if (!translated || translated === key || translated.includes('Translation not found')) {
+        translated = fallback;
       }
+
+      return cleanCaptions(translated.toString());
     } else {
-      translated = fallback;
+      return cleanCaptions(fallback);
     }
   } catch (error) {
-    console.warn(`Translation error for key "${key}":`, error);
-    translated = fallback;
+    console.warn(`Erreur de traduction pour la clé "${key}" :`, error);
+    return cleanCaptions(fallback);
   }
-  
-  // Always clean the result, whether it's the translation or the fallback
-  return cleanCaptions(translated?.toString() || fallback);
 };
+
 
 /**
  * Process a block of text to remove [caption] markers

@@ -17,25 +17,8 @@ import {
   X
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { safeTranslate } from "../utils/translationUtils";
 import { Link } from "react-router-dom";
-
-// Filter categories
-const categories = [
-  { id: "all", name: "Tous" },
-  { id: "options", name: "Options" },
-  { id: "volatility", name: "Volatilité" },
-  { id: "rates", name: "Taux d'intérêt" },
-  { id: "risk", name: "Gestion du risque" },
-  { id: "simulation", name: "Simulation" }
-];
-
-// Difficulty levels
-const levels = [
-  { id: "beginner", name: "Débutant" },
-  { id: "intermediate", name: "Intermédiaire" },
-  { id: "advanced", name: "Avancé" },
-  { id: "expert", name: "Expert" }
-];
 
 // Sample exercise data
 const exercisesData = [
@@ -203,12 +186,31 @@ const simulationSteps = [
 
 const Exercises = () => {
   const { t } = useTranslation();
+  const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
   const [activeCategory, setActiveCategory] = useState("all");
   const [activeLevel, setActiveLevel] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeExercise, setActiveExercise] = useState<any>(null);
   const [currentStep, setCurrentStep] = useState(1);
   
+  // Filter categories
+  const categories = [
+    { id: "all", name: st('exercises.categories.all','all') },
+    { id: "options", name: st('exercises.categories.options','') },
+    { id: "volatility", name: st('exercises.categories.volatility','') },
+    { id: "rates", name: st('exercises.categories.rates','') },
+    { id: "risk", name: st('exercises.categories.risk','') },
+    { id: "simulation", name: st('exercises.categories.simulation','') }
+  ];
+
+// Difficulty levels
+const levels = [
+  { id: "beginner", name: st('exercises.difficulty.beginner','Débutant') },
+  { id: "intermediate", name: st('exercises.difficulty.intermediate','Intermédiaire') },
+  { id: "advanced", name: st('exercises.difficulty.advanced','Avanc__é') },
+  { id: "expert", name: st('exercises.difficulty.expert','Expert') }
+];
+
   // Filter exercises based on selected filters
   const filteredExercises = exercisesData.filter(exercise => {
     // Category filter

@@ -5,6 +5,8 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import enTranslation from './locales/en.json';
 import frTranslation from './locales/fr.json';
 import { cleanTranslationObject, cleanCaptions } from '../utils/translationUtils';
+import { title } from 'process';
+import { Subtitles } from 'lucide-react';
 
 // Additional missing translations
 const additionalEnTranslations = {
@@ -28,6 +30,8 @@ const additionalEnTranslations = {
     complex: "Complex"
   },
   coursesPage: {
+    title: "Courses",
+    subtitle: "From fundamental concepts to advanced techniques in quantitative finance",
     locked: "Locked",
     level: "Level",
     duration: "Duration",
@@ -48,6 +52,8 @@ const additionalEnTranslations = {
       expert: "Expert"
     },
     fundamentals: {
+      tab: "Fundamentals",
+      title: "Fundamental Concepts",
       blackScholes: {
         title: "Black-Scholes Model",
         description: "Master the cornerstone option pricing model that revolutionized financial markets",
@@ -74,6 +80,8 @@ const additionalEnTranslations = {
       }
     },
     advanced: {
+      tab: "Advanced",
+      title: "Advanced Techniques",
       overview: "Advanced Overview",
       impliedVol: {
         title: "Implied Volatility",
@@ -113,6 +121,8 @@ const additionalEnTranslations = {
       }
     },
     complex: {
+      tab: "complex",
+      title: "Complex Methods",
       exotic: {
         title: "Exotic Options",
         description: "Price and hedge complex derivatives like barriers, Asians, and lookbacks",
@@ -137,7 +147,13 @@ const additionalEnTranslations = {
           varianceReduction: "Variance Reduction Techniques"
         }
       }
-    }
+    },
+    learning: {
+      title: "Continue Your Learning",
+      subtitle: "Explore other ways to improve your quantitative finance skills",
+      mentoring: "1-on-1 Mentoring",
+      practice: "Practice Exercises"
+    },
   }
 };
 
@@ -162,6 +178,7 @@ const additionalFrTranslations = {
     complex: "Complexe"
   },
   coursesPage: {
+    title: "Cours",
     locked: "Verrouillé",
     level: "Niveau",
     duration: "Durée",
@@ -181,7 +198,13 @@ const additionalFrTranslations = {
       advanced: "Avancé",
       expert: "Expert"
     },
+    subtitle: "Des concepts fondamentaux aux techniques avancées en finance quantitative",
+    description: "Cours interactifs sur la finance quantitative, le pricing d'options et les stratégies de trading",
+
+
     fundamentals: {
+      tab: "Fondamentaux",
+      title: "Concepts Fondamentaux",
       blackScholes: {
         title: "Modèle Black-Scholes",
         description: "Maîtrisez le modèle fondamental d'évaluation des options qui a révolutionné les marchés financiers",
@@ -208,6 +231,8 @@ const additionalFrTranslations = {
       }
     },
     advanced: {
+      tab: "Avancé",
+      title: "Techniques Avancées",
       overview: "Vue d'ensemble avancée",
       impliedVol: {
         title: "Volatilité Implicite",
@@ -247,6 +272,8 @@ const additionalFrTranslations = {
       }
     },
     complex: {
+      tab: "Complexe",
+      title: "Méthodes Complexes",
       exotic: {
         title: "Options Exotiques",
         description: "Évaluer et couvrir des dérivés complexes comme les barrières, les asiatiques et les lookbacks",
@@ -271,7 +298,13 @@ const additionalFrTranslations = {
           varianceReduction: "Techniques de Réduction de Variance"
         }
       }
-    }
+    },
+    learning: {
+      title: "Poursuivez votre apprentissage",
+      subtitle: "Explorez d'autres façons d'améliorer vos compétences en finance quantitative",
+      mentoring: "Mentorat 1-à-1",
+      practice: "Exercices pratiques"
+    },
   }
 };
 

@@ -181,7 +181,14 @@
   "exercises": {
     "title": "Exercises",
     "subtitle": "Improve your skills with our interactive exercises",
-    "categories": "Categories",
+    "categories": {
+      "all": "All",
+      "options": "Options",
+      "volatility": "Volatility",
+      "rates": "Interest Rates",
+      "risk": "Risk Management",
+      "simulation": "Simulation"
+    },
     "recentlyAdded": "Recently Added",
     "popular": "Popular",
     "startExercise": "Start Exercise",
@@ -463,9 +470,9 @@
     "description": "Interactive courses on quantitative finance, options pricing, and trading strategies",
     "fundamentals": {
       "tab": "Fundamentals",
-      "title": "Fundamental Concepts",
+      "Title": "Fundamental Concepts",
       "blackScholes": {
-        "title": "Black-Scholes Model",
+        "title": "Black-Scholes Model---",
         "description": "Master the foundational option pricing model"
       },
       "yieldCurves": {
@@ -477,7 +484,7 @@
         "description": "Master Delta, Gamma, Theta, Vega, and Rho"
       }
     },
-    "advanced": {
+    "advancedTab": {
       "tab": "Advanced",
       "title": "Advanced Techniques",
       "description": "Go beyond the basics with our advanced courses on volatility, hedging, and complex derivatives.",

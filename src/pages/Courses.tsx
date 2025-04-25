@@ -31,9 +31,12 @@ const Courses = () => {
   };
 
   const courses = {
+    title: st('coursesPage.title', "Courses"),
+    subtitle: st('coursesPage.subtitle', "From fundamental concepts to advanced techniques in quantitative finance"),
+    description: st('coursesPage.description', "Interactive courses on quantitative finance, options pricing, and trading strategies"),
     fundamentals: [
       {
-        title: st('coursesPage.fundamentals.blackScholes.title', "Black-Scholes Model"),
+        title: st('coursesPage.fundamentals.blackScholes.title', "----choles Model"),
         description: st('coursesPage.fundamentals.blackScholes.description', "Master the foundational option pricing model"),
         image: "https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?q=80&w=1740&auto=format&fit=crop",
         url: "/courses/fundamentals/black-scholes",
@@ -230,7 +233,7 @@ const Courses = () => {
           </div>
           
           <TabsContent value="fundamentals">
-            <h2 className="text-2xl font-bold mb-6">{st('coursesPage.fundamentals.title', "Fundamental Concepts")}</h2>
+            <h2 className="text-2xl font-bold mb-6">{st('coursesPage.fundamentals.titless', "Fundamental Concepts")}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {courses.fundamentals.map(renderCourseCard)}
             </div>

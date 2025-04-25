@@ -139,7 +139,14 @@
   "exercises": {
     "title": "Exercices",
     "subtitle": "Améliorez vos compétences grâce à nos exercices interactifs",
-    "categories": "Catégories",
+    "categories": {
+      "all": "Tous",
+      "options": "Options",
+      "volatility": "Volatilité",
+      "rates": "Taux d'intérêt",
+      "risk": "Gestion des risques",
+      "simulation": "Simulation"
+    },
     "recentlyAdded": "Récemment ajoutés",
     "popular": "Populaires",
     "startExercise": "Commencer l'exercice",
@@ -471,9 +478,8 @@
     },
     "beginner": "Débutant",
     "intermediate": "Intermédiaire",
-    "advanced": "Avancé",
     "expert": "Expert",
-    "startCourse": "Commencer le cours",
+    "startCourse": "Commencer le cours----",
     "unlock": "Débloquer",
     "unlockNow": "Débloquer maintenant",
     "unlockContent": "Débloquer le contenu",
