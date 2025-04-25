@@ -65,7 +65,6 @@ const Home = () => {
   
   return (
     <div className="flex flex-col min-h-screen bg-finance-dark text-finance-offwhite">
-      <Navbar />
       
       {/* Animated background canvas */}
       <MarketVisuals />

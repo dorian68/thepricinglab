@@ -31,7 +31,7 @@ export const safeTranslate = (
       return cleanCaptions(fallback);
     }
   } catch (error) {
-    console.warn(`Erreur de traduction pour la clé "${key}" :`, error);
+    //console.warn(`Erreur de traduction pour la clé "${key}" :`, error);
     return cleanCaptions(fallback);
   }
 };

@@ -412,7 +412,7 @@ i18n
     // Add missing key handling to show a more user-friendly fallback
     saveMissing: true,
     missingKeyHandler: (lng, ns, key) => {
-      console.warn(`Missing translation key: ${key} for language: ${lng}`);
+      //console.warn(`Missing translation key: ${key} for language: ${lng}`);
     },
     parseMissingKeyHandler: (key) => {
       // Remove the "[caption]" prefix and transform into a readable format
@@ -433,15 +433,15 @@ i18n.loadNamespaces('translation');
 // Add debugging to help troubleshoot i18n issues
 if (process.env.NODE_ENV === 'development') {
   i18n.on('initialized', () => {
-    console.log('i18n initialized successfully');
+    //console.log('i18n initialized successfully');
   });
   
   i18n.on('languageChanged', (lng) => {
-    console.log(`Language changed to: ${lng}`);
+    //console.log(`Language changed to: ${lng}`);
   });
   
   i18n.on('missingKey', (lngs, namespace, key) => {
-    console.warn(`Missing translation key: ${key} for languages: ${lngs.join(', ')}`);
+    //console.warn(`Missing translation key: ${key} for languages: ${lngs.join(', ')}`);
   });
 }
 

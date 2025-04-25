@@ -23,8 +23,12 @@ import { safeTranslate } from "../../utils/translationUtils";
 
 const DesktopNav = () => {
   const { t } = useTranslation()
-  const { user, profile, signOut, isAuthenticated } = useAuth()
+  const { user, profile, signOut, isAuthenticated, isLoading } = useAuth()
   const navigate = useNavigate()
+
+
+  //if (isLoading || (isAuthenticated && !profile)) {
+  //}
 
   console.log("DesktopNav: Auth state", { isAuthenticated, profile })
 

@@ -32,7 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .select('*')
         .eq('id', userId)
         .single()
-
+      console.log("Supabase profile fetch result:", { data, error });
       if (error) {
         console.error('Erreur lors de la récupération du profil:', error)
         return null

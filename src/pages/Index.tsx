@@ -17,7 +17,7 @@ const Index = () => {
     
     const result = t(key);
     if (result === key) {
-      console.warn(`Missing translation: ${key} in ${i18n.language}`);
+      //console.warn(`Missing translation: ${key} in ${i18n.language}`);
       return defaultValue || key.split('.').pop() || key;
     }
     return result;
@@ -25,7 +25,6 @@ const Index = () => {
   
   return (
     <div className="flex flex-col min-h-screen bg-[#1A1F2C] text-white">
-      <Navbar />
       
       <MarketVisuals />
       
