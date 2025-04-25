@@ -196,7 +196,18 @@
     "performanceDesc": "Suivez et analysez vos résultats",
     "calculator": "Calculateur",
     "simulators": "Simulateurs",
-    "models": "Modèles"
+    "models": "Modèles",
+    "strategyDescriptions":{
+    "longCall": "Achat d'une option d'achat. Profit potentiel illimité si le prix monte, perte limitée à la prime.",
+    "longPut": "Achat d'une option de vente. Profit potentiel si le prix baisse, perte limitée à la prime.",
+    "coveredCall": "Détention du sous-jacent et vente d'un call. Augmente le rendement mais limite le potentiel de hausse.",
+    "protectivePut":"Détention du sous-jacent et achat d'un put. Limite les pertes potentielles en cas de baisse du prix.",
+    "straddle":"Achat d'un call et d'un put au même strike. Profite d'une forte volatilité dans un sens ou dans l'autre.",
+    "strangle":"Achat d'un call OTM et d'un put OTM. Moins cher qu'un straddle mais nécessite un mouvement plus important",
+    "bullCallSpread":"Achat d'un call ITM et vente d'un call OTM. Profit limité mais coût réduit.",
+    "bearPutSpread":"Achat d'un put ITM et vente d'un put OTM. Profit limité mais coût réduit",
+    "ironCondor":"Combinaison d'un bull put spread et d'un bear call spread. Profit si le prix reste dans une fourchette.",
+    "butterflySpread":"Combinaison d'un bull spread et d'un bear spread. Profit maximal si le prix est exactement au strike moyen à l'échéance."
   },
   "survivalMode": {
     "title": "Mode Survie",
@@ -585,5 +596,22 @@
       "error": "Erreur",
       "errorMessage": "Une erreur est survenue lors de la déconnexion"
     }
+  },
+  "footer": {
+    "about": "À propos",
+    "contact": "Contact",
+    "privacyPolicy": "Politique de confidentialité",
+    "termsOfService": "Conditions d'utilisation",
+    "help": "Aide",
+    "faq": "FAQ",
+    "blog": "Blog",
+    "community": "Communauté",
+    "newsletter": {
+      "title": "Abonnez-vous à notre newsletter",
+      "description": "Recevez les dernières nouvelles et mises à jour directement dans votre boîte de réception.",
+      "emailPlaceholder": "Entrez votre adresse e-mail",
+      "subscribeButton": "S'abonner"
+    }
   }
+}
 }

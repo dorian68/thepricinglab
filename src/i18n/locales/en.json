@@ -72,7 +72,7 @@
       "title": "Sign Up",
       "button": "Sign Up",
       "success": "Sign up successful",
-      "error": "Sign up error" 
+      "error": "Sign up error"
     },
     "signout": {
       "button": "Sign Out",
@@ -238,7 +238,20 @@
     "performanceDesc": "Track and analyze your results",
     "calculator": "Calculator",
     "simulators": "Simulators",
-    "models": "Models"
+    "models": "Models",
+    "strategyDescriptions": {
+      "longCall": "Buying a call option. Unlimited potential profit if the price rises, limited loss to the premium paid.",
+      "longPut": "Buying a put option. Potential profit if the price falls, limited loss to the premium paid.",
+      "coveredCall": "Holding the underlying asset and selling a call. Increases yield but limits upside potential.",
+      "protectivePut": "Holding the underlying asset and buying a put. Limits potential losses if the price drops.",
+      "straddle": "Buying a call and a put at the same strike. Profits from high volatility in either direction.",
+      "strangle": "Buying an OTM call and an OTM put. Cheaper than a straddle but requires a larger move.",
+      "bullCallSpread": "Buying an ITM call and selling an OTM call. Limited profit, reduced cost.",
+      "bearPutSpread": "Buying an ITM put and selling an OTM put. Limited profit, reduced cost.",
+      "ironCondor": "Combining a bull put spread and a bear call spread. Profits if the price stays within a range.",
+      "butterflySpread": "Combining a bull spread and a bear spread. Maximum profit if the price is exactly at the middle strike at expiration."
+    }
+    
   },
   "survivalMode": {
     "title": "Survival Mode",
@@ -470,7 +483,7 @@
     "description": "Interactive courses on quantitative finance, options pricing, and trading strategies",
     "fundamentals": {
       "tab": "Fundamentals",
-      "Title": "Fundamental Concepts",
+      "title": "Fundamental Concepts",
       "blackScholes": {
         "title": "Black-Scholes Model---",
         "description": "Master the foundational option pricing model"
@@ -520,7 +533,24 @@
     },
     "beginner": "Beginner",
     "intermediate": "Intermediate",
-    "advanced": "Advanced",
+    "advanced": {
+      "tab": "Avancé",
+      "title": "Techniques Avancées",
+      "description": "Allez au-delà des bases avec nos cours avancés sur la volatilité, la couverture et les produits dérivés complexes.",
+      "impliedVol": {
+        "title": "Analyse de Volatilité Implicite",
+        "description": "Comprendre et analyser la volatilité implicite selon les prix d'exercice et les maturités"
+      },
+      "volProducts": {
+        "title": "Produits de Volatilité",
+        "description": "Trader et investir dans la volatilité à travers des produits financiers spécialisés"
+      },
+      "hedging": {
+        "title": "Stratégies de Couverture Avancées",
+        "description": "Mettre en œuvre des techniques de couverture sophistiquées pour des portefeuilles complexes"
+      },
+      "overview": "Vue d'ensemble avancée"
+    },
     "expert": "Expert",
     "startCourse": "Start Course",
     "unlock": "Unlock",
@@ -586,5 +616,25 @@
   "exercisesPage": {
     "duration": "Duration",
     "hours": "hours"
+  },
+  "footer": {
+    "about": "About Us",
+    "contact": "Contact Us",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "help": "Help Center",
+    "blog": "Blog",
+    "community": "Community",
+    "newsletter": {
+      "title": "Abonnez-vous à notre newsletter",
+      "description": "Recevez les dernières nouvelles et mises à jour directement dans votre boîte de réception.",
+      "emailPlaceholder": "Entrez votre adresse e-mail",
+      "subscribeButton": "S'abonner"
+    },
+    "subscribe": "Subscribe",
+    "followUs": "Follow Us",
+    "privacyPolicy": "Politique de confidentialité",
+    "termsOfService": "Conditions d'utilisation",
+    "faq": "FAQ"
   }
 }

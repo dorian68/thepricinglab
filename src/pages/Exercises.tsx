@@ -207,7 +207,7 @@ const Exercises = () => {
 const levels = [
   { id: "beginner", name: st('exercises.difficulty.beginner','Débutant') },
   { id: "intermediate", name: st('exercises.difficulty.intermediate','Intermédiaire') },
-  { id: "advanced", name: st('exercises.difficulty.advanced','Avanc__é') },
+  { id: "advanced", name: st('exercises.difficulty.advanced','Avancé') },
   { id: "expert", name: st('exercises.difficulty.expert','Expert') }
 ];
 

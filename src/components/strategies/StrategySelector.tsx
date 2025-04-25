@@ -71,7 +71,8 @@ const StrategyCard: React.FC<StrategyCardProps> = ({ strategy, isSelected, onCli
   // Traduction des noms et descriptions des stratégies
   // Assurer qu'on n'affiche jamais les valeurs brutes "name" ou "description"
   const strategyId = strategy.id || '';
-  
+  console.log("--------------------------------------");
+  console.log(strategy);
   // Déterminer un nom lisible pour la stratégie
   let displayName = strategy.name;
   if (!displayName || displayName === "name") {
@@ -85,17 +86,9 @@ const StrategyCard: React.FC<StrategyCardProps> = ({ strategy, isSelected, onCli
   }
   
   // Utiliser les traductions si disponibles, sinon utiliser les noms formatés
-  const strategyName = safeTranslate(
-    t, 
-    `strategies.${strategyId}.name`, 
-    displayName
-  );
+  const strategyName = displayName;
   
-  const strategyDescription = safeTranslate(
-    t, 
-    `strategies.${strategyId}.description`, 
-    displayDescription
-  );
+  const strategyDescription = displayDescription;
 
   return (
     <Card 

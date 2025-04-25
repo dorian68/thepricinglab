@@ -1,5 +1,13 @@
 
 import { Strategy } from '../../types/strategies';
+import { useTranslation } from "react-i18next";
+import { safeTranslate } from "../../utils/translationUtils";
+import i18n from '../../i18n'; // adapte le chemin selon ton architecture
+
+
+const st = (id: string, fallback: string) =>
+  i18n.t(`tradingLab.strategyDescriptions.${id}`, { defaultValue: fallback });
+//const strategieDescriptions = {};
 
 export const defaultStrategies: Strategy[] = [
   // Vanilla Strategies
@@ -7,7 +15,7 @@ export const defaultStrategies: Strategy[] = [
     id: 'long-call',
     name: 'Long Call',
     category: 'vanilla',
-    description: 'Achat d\'une option d\'achat. Profit potentiel illimité si le prix monte, perte limitée à la prime.',
+    description: st("longCall",'Achat d\'une option d\'achat. Profit potentiel illimité si le prix monte, perte limitée à la prime.'),
     parameters: {
       spotPrice: 100,
       volatility: 0.2,
@@ -28,7 +36,7 @@ export const defaultStrategies: Strategy[] = [
     id: 'long-put',
     name: 'Long Put',
     category: 'vanilla',
-    description: 'Achat d\'une option de vente. Profit potentiel si le prix baisse, perte limitée à la prime.',
+    description: st("longPut",'Achat d\'une option de vente. Profit potentiel si le prix baisse, perte limitée à la prime.'),
     parameters: {
       spotPrice: 100,
       volatility: 0.2,
@@ -49,7 +57,7 @@ export const defaultStrategies: Strategy[] = [
     id: 'covered-call',
     name: 'Covered Call',
     category: 'vanilla',
-    description: 'Détention du sous-jacent et vente d\'un call. Augmente le rendement mais limite le potentiel de hausse.',
+    description: st("coveredCall","Détention du sous-jacent et vente d'un call. Augmente le rendement mais limite le potentiel de hausse."),
     parameters: {
       spotPrice: 100,
       volatility: 0.2,
@@ -70,7 +78,7 @@ export const defaultStrategies: Strategy[] = [
     id: 'protective-put',
     name: 'Protective Put',
     category: 'vanilla',
-    description: 'Détention du sous-jacent et achat d\'un put. Limite les pertes potentielles en cas de baisse du prix.',
+    description: st("protectivePut","Détention du sous-jacent et achat d\'un put. Limite les pertes potentielles en cas de baisse du prix."),
     parameters: {
       spotPrice: 100,
       volatility: 0.2,
@@ -93,7 +101,7 @@ export const defaultStrategies: Strategy[] = [
     id: 'straddle',
     name: 'Straddle',
     category: 'advanced',
-    description: 'Achat d\'un call et d\'un put au même strike. Profite d\'une forte volatilité dans un sens ou dans l\'autre.',
+    description: st("straddle","Achat d\'un call et d\'un put au même strike. Profite d\'une forte volatilité dans un sens ou dans l\'autre."),
     parameters: {
       spotPrice: 100,
       volatility: 0.2,
@@ -120,7 +128,7 @@ export const defaultStrategies: Strategy[] = [
     id: 'strangle',
     name: 'Strangle',
     category: 'advanced',
-    description: 'Achat d\'un call OTM et d\'un put OTM. Moins cher qu\'un straddle mais nécessite un mouvement plus important.',
+    description: st("strangle","Achat d\'un call OTM et d\'un put OTM. Moins cher qu\'un straddle mais nécessite un mouvement plus important."),
     parameters: {
       spotPrice: 100,
       volatility: 0.2,
@@ -147,7 +155,7 @@ export const defaultStrategies: Strategy[] = [
     id: 'bull-call-spread',
     name: 'Bull Call Spread',
     category: 'advanced',
-    description: 'Achat d\'un call ITM et vente d\'un call OTM. Profit limité mais coût réduit.',
+    description: st("bullCallSpread","Achat d\'un call ITM et vente d\'un call OTM. Profit limité mais coût réduit."),
     parameters: {
       spotPrice: 100,
       volatility: 0.2,
@@ -174,7 +182,7 @@ export const defaultStrategies: Strategy[] = [
     id: 'bear-put-spread',
     name: 'Bear Put Spread',
     category: 'advanced',
-    description: 'Achat d\'un put ITM et vente d\'un put OTM. Profit limité mais coût réduit.',
+    description: st("bearPutSpread","Achat d\'un put ITM et vente d\'un put OTM. Profit limité mais coût réduit."),
     parameters: {
       spotPrice: 100,
       volatility: 0.2,
@@ -201,7 +209,7 @@ export const defaultStrategies: Strategy[] = [
     id: 'iron-condor',
     name: 'Iron Condor',
     category: 'advanced',
-    description: 'Combinaison d\'un bull put spread et d\'un bear call spread. Profit si le prix reste dans une fourchette.',
+    description: st("ironCondor","Combinaison d\'un bull put spread et d\'un bear call spread. Profit si le prix reste dans une fourchette."),
     parameters: {
       spotPrice: 100,
       volatility: 0.2,
@@ -240,7 +248,7 @@ export const defaultStrategies: Strategy[] = [
     id: 'butterfly-spread',
     name: 'Butterfly Spread',
     category: 'advanced',
-    description: 'Combinaison d\'un bull spread et d\'un bear spread. Profit maximal si le prix est exactement au strike moyen à l\'échéance.',
+    description: st("butterflySpread",'Combinaison d\'un bull spread et d\'un bear spread. Profit maximal si le prix est exactement au strike moyen à l\'échéance.'),
     parameters: {
       spotPrice: 100,
       volatility: 0.2,

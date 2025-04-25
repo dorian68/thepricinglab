@@ -34,7 +34,7 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="text-sm font-medium text-finance-offwhite mb-3">{safeTranslate(t, 'footer.company', 'Entreprise')}</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="/about" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'about', 'À propos')}</a></li>
+              <li><a href="/about" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'footer.about', 'À propos')}</a></li>
               <li><a href="/blog" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.blog', 'Blog')}</a></li>
               <li><a href="/mentoring" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.mentoring', 'Mentorat')}</a></li>
               <li><a href="/contact" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'contact', 'Contact')}</a></li>

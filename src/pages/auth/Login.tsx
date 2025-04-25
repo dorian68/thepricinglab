@@ -27,6 +27,7 @@ const Login = () => {
     try {
       await signIn(formData.email, formData.password)
       toast.success(t('auth.login.success', 'Connexion réussie'))
+      console.log("Login: User signed in successfully")
     } catch (error) {
       console.error('Erreur lors de la connexion:', error)
       toast.error(t('auth.login.error', 'Erreur de connexion. Veuillez vérifier vos identifiants.'))

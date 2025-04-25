@@ -14,10 +14,25 @@ const additionalEnTranslations = {
     blog: "Blog",
     mentoring: "Mentoring",
     trainingLab: "Training Lab",
-    tradingLab: "Trading Lab"
+    tradingLab: "Trading Lab",
+    courses: "Courses",
+    exercices: "Exercises",
+    tools: "Tools",
+    community: "Community"
   },
   contact: "Contact",
   footer: {
+    company: "Company",
+    about: "About",
+    contact: "Contact",
+    help: "Help",
+    faq: "FAQ",
+    blog: "Blog",
+    community: "Community",
+    newsletter: "Subscribe to our newsletter",
+    subscribe: "Subscribe",
+    products: "Products",
+    courses: "Courses",
     legal: "Legal",
     terms: "Terms",
     privacy: "Privacy",
@@ -32,6 +47,7 @@ const additionalEnTranslations = {
   coursesPage: {
     title: "Courses",
     subtitle: "From fundamental concepts to advanced techniques in quantitative finance",
+    description: "Interactive courses on quantitative finance, option pricing and trading strategies",
     locked: "Locked",
     level: "Level",
     duration: "Duration",
@@ -43,6 +59,7 @@ const additionalEnTranslations = {
     unlockNow: "Unlock Now",
     discoverOther: "Discover Other Courses",
     coursePreview: "Course Preview",
+    startCourse: "Start Course",
     alreadySubscribed: "Already subscribed?",
     unlockContent: "Unlock Content",
     levels: {
@@ -121,7 +138,7 @@ const additionalEnTranslations = {
       }
     },
     complex: {
-      tab: "complex",
+      tab: "Complex",
       title: "Complex Methods",
       exotic: {
         title: "Exotic Options",
@@ -153,19 +170,48 @@ const additionalEnTranslations = {
       subtitle: "Explore other ways to improve your quantitative finance skills",
       mentoring: "1-on-1 Mentoring",
       practice: "Practice Exercises"
+    }
+  },
+  tradingLab:{
+    strategyDescriptions: {
+      longCall: "Buying a call option. Unlimited potential profit if the price rises, limited loss to the premium paid.",
+      longPut: "Buying a put option. Potential profit if the price falls, limited loss to the premium paid.",
+      coveredCall: "Holding the underlying asset and selling a call. Increases yield but limits upside potential.",
+      protectivePut: "Holding the underlying asset and buying a put. Limits potential losses if the price drops.",
+      straddle: "Buying a call and a put at the same strike. Profits from high volatility in either direction.",
+      strangle: "Buying an OTM call and an OTM put. Cheaper than a straddle but requires a larger move.",
+      bullCallSpread: "Buying an ITM call and selling an OTM call. Limited profit, reduced cost.",
+      bearPutSpread: "Buying an ITM put and selling an OTM put. Limited profit, reduced cost.",
+      ironCondor: "Combining a bull put spread and a bear call spread. Profits if the price stays within a range.",
+      butterflySpread: "Combining a bull spread and a bear spread. Maximum profit if the price is exactly at the middle strike at expiration."
     },
-  }
+  
+},
 };
-
 const additionalFrTranslations = {
   navbar: {
     blog: "Blog",
     mentoring: "Mentorat",
     trainingLab: "Labo d'Entraînement",
-    tradingLab: "Labo de Trading"
+    tradingLab: "Labo de Trading",
+    courses: "Cours",
+    exercices: "Exercices",
+    tools: "Outils",
+    community: "Communauté"
   },
   contact: "Contact",
   footer: {
+    company: "Compagnie",
+    about: "À propos",
+    contact: "Contact",
+    help: "Aide",
+    faq: "FAQ",
+    blog: "Blog",
+    community: "Communauté",
+    newsletter: "Abonnez-vous à notre newsletter",
+    subscribe: "S'abonner",
+    products: "Produits",
+    courses: "Cours",
     legal: "Mentions légales",
     terms: "Conditions",
     privacy: "Confidentialité",
@@ -179,6 +225,8 @@ const additionalFrTranslations = {
   },
   coursesPage: {
     title: "Cours",
+    subtitle: "Des concepts fondamentaux aux techniques avancées en finance quantitative",
+    description: "Cours interactifs sur la finance quantitative, le pricing d'options et les stratégies de trading",
     locked: "Verrouillé",
     level: "Niveau",
     duration: "Durée",
@@ -190,18 +238,16 @@ const additionalFrTranslations = {
     unlockNow: "Débloquer maintenant",
     discoverOther: "Découvrir autres cours",
     coursePreview: "Aperçu du cours",
-    alreadySubscribed: "Déjà abonné?",
-    unlockContent: "Débloquer ce contenu",
+    startCourse: "Démarrer le cours",
+    alreadySubscribed: "Déjà abonné ?",
+    unlockContent: "Débloquer ce contenu"
+    },
     levels: {
       beginner: "Débutant",
       intermediate: "Intermédiaire",
       advanced: "Avancé",
       expert: "Expert"
     },
-    subtitle: "Des concepts fondamentaux aux techniques avancées en finance quantitative",
-    description: "Cours interactifs sur la finance quantitative, le pricing d'options et les stratégies de trading",
-
-
     fundamentals: {
       tab: "Fondamentaux",
       title: "Concepts Fondamentaux",
@@ -276,7 +322,7 @@ const additionalFrTranslations = {
       title: "Méthodes Complexes",
       exotic: {
         title: "Options Exotiques",
-        description: "Évaluer et couvrir des dérivés complexes comme les barrières, les asiatiques et les lookbacks",
+        description: "Évaluez et couvrez des dérivés complexes comme les barrières, asiatiques, lookbacks",
         duration: "6 heures",
         preview: "Apprenez les techniques de pricing et de couverture pour les structures d'options avancées.",
         topics: {
@@ -287,10 +333,10 @@ const additionalFrTranslations = {
         }
       },
       monteCarlo: {
-        title: "Méthodes Monte Carlo",
-        description: "Implémenter des techniques de simulation pour évaluer des options path-dependent",
+        title: "Méthodes de Monte Carlo",
+        description: "Mettez en œuvre des techniques de simulation pour le pricing des options path-dépendantes",
         duration: "6,5 heures",
-        preview: "Maîtrisez les techniques basées sur la simulation pour évaluer des dérivés complexes.",
+        preview: "Maîtrisez les techniques de simulation pour le pricing des dérivés complexes.",
         topics: {
           simulation: "Simulation de Trajectoires",
           asian: "Pricing d'Options Asiatiques",
@@ -301,12 +347,26 @@ const additionalFrTranslations = {
     },
     learning: {
       title: "Poursuivez votre apprentissage",
-      subtitle: "Explorez d'autres façons d'améliorer vos compétences en finance quantitative",
-      mentoring: "Mentorat 1-à-1",
+      subtitle: "Explorez d'autres moyens d'améliorer vos compétences en finance quantitative",
+      mentoring: "Mentorat individuel",
       practice: "Exercices pratiques"
     },
+    tradingLab:{
+      strategyDescriptions:{
+      longCall: "Achat d'une option d'achat. Profit potentiel illimité si le prix monte, perte limitée à la prime.",
+      longPut: "Achat d'une option de vente. Profit potentiel si le prix baisse, perte limitée à la prime.",
+      coveredCall: "Détention du sous-jacent et vente d'un call. Augmente le rendement mais limite le potentiel de hausse.",
+      protectivePut:"Détention du sous-jacent et achat d'un put. Limite les pertes potentielles en cas de baisse du prix.",
+      straddle:"Achat d'un call et d'un put au même strike. Profite d'une forte volatilité dans un sens ou dans l'autre.",
+      strangle:"Achat d'un call OTM et d'un put OTM. Moins cher qu'un straddle mais nécessite un mouvement plus important",
+      bullCallSpread:"Achat d'un call ITM et vente d'un call OTM. Profit limité mais coût réduit.",
+      bearPutSpread:"Achat d'un put ITM et vente d'un put OTM. Profit limité mais coût réduit",
+      ironCondor:"Combinaison d'un bull put spread et d'un bear call spread. Profit si le prix reste dans une fourchette.",
+      butterflySpread:"Combinaison d'un bull spread et d'un bear spread. Profit maximal si le prix est exactement au strike moyen à l'échéance."
+    }
   }
 };
+
 
 // Merge additional translations
 const mergedEnTranslation = { 
