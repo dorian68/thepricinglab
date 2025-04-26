@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -11,11 +10,6 @@ import PayoffChart from '@/components/strategies/PayoffChart';
 import GreekDisplay from '@/components/strategies/GreekDisplay';
 import MarkdownMathRenderer from '../../components/editors/MarkdownMathRenderer';
 import { Strategy } from '@/types/community';
-
-// Fix the params type
-interface RouteParams {
-  id: string;
-}
 
 // Add mock strategies data properly typed
 const mockStrategies: Strategy[] = [
@@ -49,7 +43,8 @@ const mockStrategies: Strategy[] = [
 ];
 
 const StrategyDetail = () => {
-  const { id } = useParams<RouteParams>();
+  // Fix the type issue with useParams
+  const { id } = useParams<{ id: string }>();
   const { t } = useTranslation();
   const [strategy, setStrategy] = useState<Strategy | undefined>(undefined);
   const [results, setResults] = useState<any>(null); // Placeholder for strategy results

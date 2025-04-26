@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -10,17 +9,11 @@ import { ChevronLeft, ThumbsUp, Eye, Calendar, User, MessageSquare, Share2, Book
 import MarkdownMathRenderer from '../../components/editors/MarkdownMathRenderer';
 import { Article } from '@/types/community';
 
-// Fix the type issue by defining the correct interface that matches Record<string, string>
-interface RouteParams {
-  id: string;
-}
-
 const ArticleDetail: React.FC = () => {
   const { t } = useTranslation();
-  const { id } = useParams<RouteParams>();
+  const { id } = useParams<{ id: string }>();
   const [article, setArticle] = useState<Article | null>(null);
 
-  // Mock article data (replace with actual data fetching later)
   const mockArticles: Article[] = [
     {
       id: "1",
@@ -43,7 +36,7 @@ const ArticleDetail: React.FC = () => {
       author: "Pierre Durant",
       authorAvatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&auto=format&fit=crop&q=60",
       summary: "Analyse des modèles de Heston et SABR pour la capture de la dynamique de la volatilité.",
-      content: "## Les modèles de volatilité stochastique\n\nLes modèles de volatilité stochastique, tels que Heston et SABR, sont essentiels pour capturer la dynamique de la volatilité observée sur les marchés financiers. Ces modèles permettent de mieux pricer et gérer les risques associés aux produits dérivés.\n\n### Modèle de Heston\n\nLe modèle de Heston est un modèle à deux facteurs qui décrit l'évolution du prix d'un actif et de sa variance instantanée. Il est largement utilisé pour pricer les options européennes et américaines.\n\n### Modèle SABR\n\nLe modèle SABR (Stochastic Alpha Beta Rho) est un modèle de volatilité stochastique utilisé pour modéliser les taux d'intérêt et les smile de volatilité. Il est particulièrement utile pour pricer les caps et les floors.\n\n### Applications\n\nCes modèles sont utilisés par les traders et les gestionnaires de risques pour:\n\n- Pricer les options et autres produits dérivés\n- Couvrir les risques de volatilité\n- Gérer les portefeuilles d'options",
+      content: "## Les modèles de volatilité stochastique\n\nLes modèles de volatilité stochastique, tels que Heston et SABR, sont essentiels pour capturer la dynamique de la volatilité observée sur les marchés financiers. Ces modèles permettent de mieux pricer et gérer les risques associés aux produits dérivés.\n\n### Modèle de Heston\n\nLe modèle de Heston est un mod��le à deux facteurs qui décrit l'évolution du prix d'un actif et de sa variance instantanée. Il est largement utilisé pour pricer les options européennes et américaines.\n\n### Modèle SABR\n\nLe modèle SABR (Stochastic Alpha Beta Rho) est un modèle de volatilité stochastique utilisé pour modéliser les taux d'intérêt et les smile de volatilité. Il est particulièrement utile pour pricer les caps et les floors.\n\n### Applications\n\nCes modèles sont utilisés par les traders et les gestionnaires de risques pour:\n\n- Pricer les options et autres produits dérivés\n- Couvrir les risques de volatilité\n- Gérer les portefeuilles d'options",
       date: "5 Mai 2025",
       views: 287,
       likes: 45,
@@ -67,7 +60,6 @@ const ArticleDetail: React.FC = () => {
   ];
 
   useEffect(() => {
-    // Simulate fetching article data based on ID
     const fetchedArticle = mockArticles.find(article => article.id === id);
     if (fetchedArticle) {
       setArticle(fetchedArticle);
