@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { BookOpen, Code, Search, Filter, User, Calendar, ChevronRight } from "lucide-react";
+import { BookOpen, Code, Search, Filter, User, Calendar, ChevronRight, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
