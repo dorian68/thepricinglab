@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -5,17 +6,22 @@ import { safeTranslate } from '@/utils/translationUtils';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, ThumbsUp, Eye, Calendar, User, MessageSquare, Share2, Bookmark } from 'lucide-react';
+import { ChevronLeft, ThumbsUp, Eye, Calendar, User, MessageSquare, Share2, Bookmark, BookOpen } from 'lucide-react';
 import PayoffChart from '@/components/strategies/PayoffChart';
 import GreekDisplay from '@/components/strategies/GreekDisplay';
 import MarkdownMathRenderer from '../../components/editors/MarkdownMathRenderer';
 import { Strategy } from '@/types/community';
 
-// Add mock strategies data directly in the component
-const mockStrategies = [
+// Fix the params type
+interface RouteParams {
+  id: string;
+}
+
+// Add mock strategies data properly typed
+const mockStrategies: Strategy[] = [
   {
     id: 1,
-    type: "strategy",
+    type: "strategy" as const, // Use const assertion to ensure it's exactly "strategy"
     title: "Stratégie de Volatilité avec Butterfly Spread",
     author: "Alex Dupont",
     authorAvatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&auto=format&fit=crop&q=60",
@@ -43,7 +49,7 @@ const mockStrategies = [
 ];
 
 const StrategyDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams<RouteParams>();
   const { t } = useTranslation();
   const [strategy, setStrategy] = useState<Strategy | undefined>(undefined);
   const [results, setResults] = useState<any>(null); // Placeholder for strategy results

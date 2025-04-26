@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -9,13 +10,14 @@ import { ChevronLeft, ThumbsUp, Eye, Calendar, User, MessageSquare, Share2, Book
 import MarkdownMathRenderer from '../../components/editors/MarkdownMathRenderer';
 import { Article } from '@/types/community';
 
-interface Params {
+// Fix the type issue by defining the correct interface that matches Record<string, string>
+interface RouteParams {
   id: string;
 }
 
 const ArticleDetail: React.FC = () => {
   const { t } = useTranslation();
-  const { id } = useParams<Params>();
+  const { id } = useParams<RouteParams>();
   const [article, setArticle] = useState<Article | null>(null);
 
   // Mock article data (replace with actual data fetching later)

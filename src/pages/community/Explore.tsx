@@ -6,13 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ChevronRight, ThumbsUp, Eye, Calendar, User, MessageSquare, BookOpen } from 'lucide-react';
-import { Publication } from '@/types/community';
+import { Publication, Article, Strategy } from '@/types/community';
 
-// Update the sample publications to include the required content field
-const samplePublications: Publication[] = [
+const samplePublications: (Article | Strategy)[] = [
   {
     id: 1,
-    type: "article",
+    type: "article" as const,
     title: "Introduction aux Options Exotiques",
     author: "Sophie Martin",
     authorAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&auto=format&fit=crop&q=60",
@@ -26,7 +25,7 @@ const samplePublications: Publication[] = [
   },
   {
     id: 2,
-    type: "strategy",
+    type: "strategy" as const,
     title: "Arbitrage de Volatilité avec Straddles",
     author: "Luc Dubois",
     authorAvatar: "https://images.unsplash.com/photo-1500648767791-00d5a469aa9d?w=400&auto=format&fit=crop&q=60",
@@ -41,7 +40,7 @@ const samplePublications: Publication[] = [
   },
   {
     id: 3,
-    type: "article",
+    type: "article" as const,
     title: "L'Impact des Taux d'Intérêt sur les Marchés Boursiers",
     author: "Chloé Leclerc",
     authorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd8a72fbc?w=400&auto=format&fit=crop&q=60",
@@ -55,7 +54,7 @@ const samplePublications: Publication[] = [
   },
   {
     id: 4,
-    type: "strategy",
+    type: "strategy" as const,
     title: "Couverture de Portefeuille avec des Options Put",
     author: "Thierry Girard",
     authorAvatar: "https://images.unsplash.com/photo-1502823403499-b1bca814266c?w=400&auto=format&fit=crop&q=60",
@@ -70,7 +69,7 @@ const samplePublications: Publication[] = [
   },
   {
     id: 5,
-    type: "article",
+    type: "article" as const,
     title: "Les Tendances Actuelles du Trading Algorithmique",
     author: "Isabelle Morin",
     authorAvatar: "https://images.unsplash.com/photo-1488426862026-730f9ca8cb9c?w=400&auto=format&fit=crop&q=60",
@@ -86,7 +85,7 @@ const samplePublications: Publication[] = [
 
 const Explore = () => {
   const { t } = useTranslation();
-  const [publications, setPublications] = useState<Publication[]>(samplePublications);
+  const [publications, setPublications] = useState<(Article | Strategy)[]>(samplePublications);
 
   useEffect(() => {
     // Simulate fetching publications from an API

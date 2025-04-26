@@ -15,6 +15,7 @@ export interface Publication {
   likes: number;
   tags: string[];
   published: boolean;
+  strategyType?: StrategyType; // Make strategyType optional on base Publication
 }
 
 export interface Article extends Publication {
