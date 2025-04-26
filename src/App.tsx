@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -55,6 +54,7 @@ import Explore from './pages/community/Explore';
 import Contribute from './pages/community/Contribute';
 import ArticleDetail from './pages/community/ArticleDetail';
 import StrategyDetail from './pages/community/StrategyDetail';
+import StrategyBuilder from './pages/community/StrategyBuilder';
 
 import VolatilityCalculator from './components/tools/VolatilityCalculator';
 import BlackScholesCalculator from './components/tools/BlackScholesCalculator';
@@ -122,6 +122,7 @@ const App = () => {
                   <Route path="/community/contribute" element={<Contribute />} />
                   <Route path="/community/article/:id" element={<ArticleDetail />} />
                   <Route path="/community/strategy/:id" element={<StrategyDetail />} />
+                  <Route path="/community/strategy-builder" element={<StrategyBuilder />} />
                   
                   <Route path="/blog" element={<Blog />} />
                   <Route path="/blog/:slug" element={<BlogPost />} />

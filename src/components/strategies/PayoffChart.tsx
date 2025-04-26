@@ -1,5 +1,7 @@
 
 import React from 'react';
+import { LineChart } from '@/components/ui/chart';
+import { Strategy } from '@/types/community';
 
 interface PayoffChartProps {
   strategy: any;
@@ -7,7 +9,7 @@ interface PayoffChartProps {
 }
 
 const PayoffChart: React.FC<PayoffChartProps> = ({ strategy, results }) => {
-  // Safely handle the case where strategy or results is undefined
+  // If no results are available yet, show placeholder
   if (!strategy || !results) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -18,13 +20,31 @@ const PayoffChart: React.FC<PayoffChartProps> = ({ strategy, results }) => {
     );
   }
 
+  // Transform the data into the format expected by LineChart
+  const chartData = results.payoff ? 
+    results.payoff.map((value: number, index: number) => ({
+      x: index,
+      y: value,
+    })) :
+    // If results has payoff points already formatted (x,y)
+    results.payoffPoints || [];
+
   return (
-    <div className="flex items-center justify-center h-full">
-      <p className="text-center text-finance-lightgray">
-        Diagramme de Payoff à implémenter avec une bibliothèque de graphiques
-        <br />
-        (Cette composante est un placeholder pour l'instant)
-      </p>
+    <div className="h-full">
+      {chartData.length > 0 ? (
+        <LineChart
+          data={chartData}
+          color="#8884d8"
+          xLabel="Prix du sous-jacent"
+          yLabel="Profit/Perte"
+        />
+      ) : (
+        <div className="flex items-center justify-center h-full">
+          <p className="text-center text-finance-lightgray">
+            Pas assez de données pour afficher le graphique
+          </p>
+        </div>
+      )}
     </div>
   );
 };
