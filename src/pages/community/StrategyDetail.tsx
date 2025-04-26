@@ -9,26 +9,170 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MarkdownMathRenderer from "../../components/editors/MarkdownMathRenderer";
 import { Strategy, Publication } from "../../types/community";
+import PayoffChart from "../../components/strategies/PayoffChart";
+import GreekDisplay from "../../components/strategies/GreekDisplay";
 
-const PayoffChart = ({ strategy, results }: any) => {
-  return (
-    <div className="flex items-center justify-center h-full">
-      <p className="text-center text-finance-lightgray">
-        Diagramme de Payoff à implémenter
-      </p>
-    </div>
-  );
-};
+const mockStrategies: Strategy[] = [
+  {
+    id: 1,
+    type: "strategy",
+    strategyType: "trading",
+    title: "Bull Call Spread sur l'indice CAC 40",
+    author: "Sophie Martin",
+    authorAvatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    summary: "Une stratégie de spread haussier utilisant des options call pour limiter le risque tout en profitant d'une hausse modérée du marché.",
+    content: `
+# Bull Call Spread sur l'indice CAC 40
 
-const GreekDisplay = ({ strategy, results }: any) => {
-  return (
-    <div className="flex items-center justify-center h-full">
-      <p className="text-center text-finance-lightgray">
-        Analyse des Greeks à implémenter
-      </p>
-    </div>
-  );
-};
+## Présentation de la stratégie
+
+Le Bull Call Spread est une stratégie d'options qui consiste à:
+1. Acheter une option call à un prix d'exercice (strike) donné
+2. Vendre une option call à un prix d'exercice plus élevé
+
+Les deux options ont la même date d'expiration.
+
+## Construction de la stratégie
+
+Pour cette stratégie sur le CAC 40 (cours actuel: 7500 points), nous allons:
+- Acheter un call avec strike à 7400 points (légèrement ITM)
+- Vendre un call avec strike à 7600 points (OTM)
+- Échéance: 3 mois
+
+## Profil de risque/rendement
+
+Cette stratégie offre:
+- Un coût initial réduit (comparé à l'achat d'un call simple)
+- Un gain maximal limité mais connu à l'avance
+- Une perte limitée au coût initial (net premium)
+
+## Formule mathématique du payoff
+
+Le payoff à l'échéance (P) en fonction du prix du sous-jacent (S) est:
+$$
+P(S) = 
+\\begin{cases}
+-p_{net}, & \\text{si } S \\leq K_1 \\\\
+S - K_1 - p_{net}, & \\text{si } K_1 < S < K_2 \\\\
+K_2 - K_1 - p_{net}, & \\text{si } S \\geq K_2
+\\end{cases}
+$$
+
+Où:
+- $K_1$ est le strike du call acheté (7400)
+- $K_2$ est le strike du call vendu (7600)
+- $p_{net}$ est la prime nette payée (prime du call acheté - prime du call vendu)
+
+## Diagramme de construction
+
+\`\`\`mermaid
+graph TD
+    A[Analyser le marché] -->|Anticipation haussière modérée| B[Choisir deux strikes]
+    B --> C[Acheter Call ITM/ATM]
+    B --> D[Vendre Call OTM]
+    C --> E[Calculer coût net]
+    D --> E
+    E --> F[Déterminer profil risque/rendement]
+    F --> G[Exécuter la stratégie]
+\`\`\`
+
+## Avantages et inconvénients
+
+### Avantages
+- Coût réduit par rapport à un call simple
+- Risque limité à la prime nette payée
+- Bonne stratégie pour un marché modérément haussier
+
+### Inconvénients
+- Gain limité par le strike du call vendu
+- Nécessite une hausse suffisante pour être rentable
+- Performance sous-optimale dans un marché fortement haussier
+
+## Analyse des Greeks
+
+Cette stratégie présente un profil de Greeks intéressant:
+- **Delta**: Positif mais inférieur à 1, augmente quand le sous-jacent approche du strike inférieur
+- **Gamma**: Positif, maximal autour des deux strikes
+- **Vega**: Positif mais diminue avec le temps
+- **Theta**: Négatif, la stratégie perd de la valeur avec le temps
+
+## Scénarios
+
+1. **Scénario baissier**: CAC 40 à 7300 à l'échéance → Perte limitée à la prime nette
+2. **Scénario modérément haussier**: CAC 40 à 7550 à l'échéance → Profit mais inférieur au maximum
+3. **Scénario fortement haussier**: CAC 40 à 7700 à l'échéance → Profit maximal atteint
+    `,
+    date: "2024-04-18",
+    views: 324,
+    likes: 41,
+    tags: ["Options", "Stratégie haussière", "CAC 40", "Spread"],
+    published: true
+  },
+  {
+    id: 2,
+    type: "strategy",
+    strategyType: "hedging",
+    title: "Collar de protection sur portefeuille d'actions européennes",
+    author: "Alexandre Dupont",
+    authorAvatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    summary: "Une stratégie de protection de portefeuille combinant options put et call pour limiter à la fois les pertes et les gains potentiels.",
+    content: `
+# Collar de protection sur portefeuille d'actions européennes
+
+## Présentation de la stratégie
+
+Le Collar est une stratégie de protection qui consiste à:
+1. Détenir un portefeuille d'actions
+2. Acheter des options put pour protéger contre une baisse
+3. Vendre des options call pour financer partiellement ou totalement les puts
+
+## Construction du Collar
+
+Pour protéger un portefeuille qui suit l'Euro Stoxx 50:
+- Position longue sur le portefeuille (valeur: 100 000€)
+- Achat de puts avec strike à -10% du niveau actuel
+- Vente de calls avec strike à +10% du niveau actuel
+- Échéance: 6 mois
+
+## Avantages de cette stratégie
+
+Le Collar offre:
+- Une protection contre les baisses importantes
+- Un coût de mise en place réduit (voire nul)
+- Une exposition maintenue au marché actions
+    `,
+    date: "2024-04-10",
+    views: 187,
+    likes: 23,
+    tags: ["Hedging", "Protection", "Collar", "Euro Stoxx"],
+    published: true
+  },
+  {
+    id: 3,
+    type: "strategy",
+    strategyType: "pricing",
+    title: "Volatility Skew Arbitrage sur options vanilles",
+    author: "Marie Lambert",
+    authorAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    summary: "Exploiter les inefficiences du smile de volatilité pour créer des stratégies d'arbitrage à faible risque.",
+    content: `
+# Volatility Skew Arbitrage sur options vanilles
+
+## Principe de l'arbitrage de volatilité
+
+Cette stratégie vise à exploiter les incohérences dans la structure de la volatilité implicite (skew ou smile) des options sur un même sous-jacent à différents strikes.
+
+## Fondements mathématiques
+
+En théorie, sous les hypothèses de Black-Scholes, la volatilité implicite devrait être constante pour toutes les options d'un même sous-jacent à même échéance. En pratique, on observe souvent un "skew" ou un "smile".
+    `,
+    date: "2024-04-05",
+    views: 216,
+    likes: 28,
+    tags: ["Volatilité", "Arbitrage", "Smile", "Pricing"],
+    published: true
+  }
+];
 
 const StrategyDetail = () => {
   const { id } = useParams<{id: string}>();
