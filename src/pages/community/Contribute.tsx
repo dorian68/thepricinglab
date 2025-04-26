@@ -19,6 +19,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "../../contexts/AuthContext";
+import MarkdownMathEditor from "../../components/editors/MarkdownMathEditor";
+import { PublicationFormData, PublicationType, StrategyType } from "../../types/community";
 
 // Type definitions
 interface Tag {
@@ -29,13 +31,16 @@ interface Tag {
 const Contribute = () => {
   const navigate = useNavigate();
   const { profile } = useAuth();
-  const [activeTab, setActiveTab] = useState("article");
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [summary, setSummary] = useState("");
-  const [tags, setTags] = useState<Tag[]>([]);
+  const [activeTab, setActiveTab] = useState<PublicationType>("article");
+  const [formData, setFormData] = useState<PublicationFormData>({
+    title: "",
+    summary: "",
+    content: "",
+    tags: [],
+    type: "article",
+    strategyType: "pricing"
+  });
   const [tagInput, setTagInput] = useState("");
-  const [strategyType, setStrategyType] = useState("pricing");
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // For a real implementation, we'd use the user's session
@@ -44,18 +49,20 @@ const Contribute = () => {
     : "Utilisateur anonyme";
 
   const addTag = () => {
-    if (tagInput.trim() !== "" && tags.length < 5) {
-      const newTag = {
-        id: Date.now().toString(),
-        text: tagInput.trim()
-      };
-      setTags([...tags, newTag]);
+    if (tagInput.trim() !== "" && formData.tags.length < 5) {
+      setFormData({
+        ...formData,
+        tags: [...formData.tags, tagInput.trim()]
+      });
       setTagInput("");
     }
   };
 
-  const removeTag = (id: string) => {
-    setTags(tags.filter(tag => tag.id !== id));
+  const removeTag = (tagToRemove: string) => {
+    setFormData({
+      ...formData,
+      tags: formData.tags.filter(tag => tag !== tagToRemove)
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -63,6 +70,15 @@ const Contribute = () => {
       e.preventDefault();
       addTag();
     }
+  };
+  
+  const handleChange = (field: keyof PublicationFormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+  
+  const handleTabChange = (tab: PublicationType) => {
+    setActiveTab(tab);
+    setFormData(prev => ({ ...prev, type: tab }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -75,13 +91,8 @@ const Contribute = () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       console.log("Publication created:", {
-        type: activeTab,
-        title,
+        ...formData,
         author,
-        content,
-        summary,
-        tags: tags.map(t => t.text),
-        strategyType: activeTab === "strategy" ? strategyType : null,
         date: new Date().toISOString().split('T')[0],
         published: true
       });
@@ -102,7 +113,7 @@ const Contribute = () => {
         <meta name="description" content="Partagez vos connaissances et stratégies en finance quantitative avec notre communauté" />
       </Helmet>
 
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold mb-2">Contribuer à la communauté</h1>
           <p className="text-finance-lightgray">
@@ -110,7 +121,7 @@ const Contribute = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="article" value={activeTab} onValueChange={setActiveTab}>
+        <Tabs defaultValue="article" value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="grid grid-cols-2 mb-6">
             <TabsTrigger value="article" className="flex items-center">
               <BookOpen className="mr-2 h-4 w-4" />
@@ -135,13 +146,13 @@ const Contribute = () => {
                 </CardDescription>
               </CardHeader>
               
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="title">Titre</Label>
                   <Input 
                     id="title" 
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    value={formData.title}
+                    onChange={(e) => handleChange("title", e.target.value)}
                     placeholder={activeTab === "article" ? "Titre de votre article" : "Nom de votre stratégie"}
                     required
                   />
@@ -151,14 +162,15 @@ const Contribute = () => {
                   <Label htmlFor="summary">Résumé</Label>
                   <Textarea 
                     id="summary"
-                    value={summary}
-                    onChange={(e) => setSummary(e.target.value)}
+                    value={formData.summary}
+                    onChange={(e) => handleChange("summary", e.target.value)}
                     placeholder="Résumé en quelques phrases (300 caractères max)"
                     maxLength={300}
                     required
+                    className="resize-none"
                   />
                   <div className="text-right text-xs text-finance-lightgray">
-                    {summary.length}/300
+                    {formData.summary.length}/300
                   </div>
                 </div>
                 
@@ -166,8 +178,8 @@ const Contribute = () => {
                   <div className="space-y-2">
                     <Label>Type de stratégie</Label>
                     <RadioGroup 
-                      value={strategyType}
-                      onValueChange={setStrategyType}
+                      value={formData.strategyType}
+                      onValueChange={(value: StrategyType) => handleChange("strategyType", value)}
                       className="flex flex-col space-y-2"
                     >
                       <div className="flex items-center space-x-2">
@@ -192,15 +204,13 @@ const Contribute = () => {
                 
                 <div className="space-y-2">
                   <Label htmlFor="content">{activeTab === "article" ? "Contenu" : "Description et formules"}</Label>
-                  <Textarea 
-                    id="content"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
+                  <MarkdownMathEditor
+                    value={formData.content}
+                    onChange={(value) => handleChange("content", value)}
                     placeholder={activeTab === "article" 
                       ? "Contenu détaillé de votre article..." 
                       : "Description détaillée de votre stratégie, incluant formules et méthodologie..."}
-                    className="min-h-[200px]"
-                    required
+                    height="min-h-[400px]"
                   />
                 </div>
                 
@@ -213,26 +223,26 @@ const Contribute = () => {
                       onChange={(e) => setTagInput(e.target.value)}
                       onKeyDown={handleKeyDown}
                       placeholder="Ajouter un tag et appuyer sur Enter"
-                      disabled={tags.length >= 5}
+                      disabled={formData.tags.length >= 5}
                     />
                     <Button 
                       type="button" 
                       onClick={addTag}
-                      disabled={tags.length >= 5 || tagInput.trim() === ""}
+                      disabled={formData.tags.length >= 5 || tagInput.trim() === ""}
                       size="icon"
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
                   </div>
                   
-                  {tags.length > 0 && (
+                  {formData.tags.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {tags.map(tag => (
-                        <Badge key={tag.id} variant="secondary" className="flex items-center gap-1">
-                          {tag.text}
+                      {formData.tags.map((tag, index) => (
+                        <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                          {tag}
                           <button 
                             type="button" 
-                            onClick={() => removeTag(tag.id)}
+                            onClick={() => removeTag(tag)}
                             className="text-finance-lightgray hover:text-finance-accent"
                           >
                             <X className="h-3 w-3" />

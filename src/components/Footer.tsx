@@ -2,6 +2,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { safeTranslate } from '../utils/translationUtils';
+import { Link } from 'react-router-dom';
 
 /**
  * Footer component for the application
@@ -24,29 +25,29 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="text-sm font-medium text-finance-offwhite mb-3">{safeTranslate(t, 'footer.products', 'Produits')}</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="/courses" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.courses', 'Cours')}</a></li>
-              <li><a href="/exercises" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.exercises', 'Exercices')}</a></li>
-              <li><a href="/tools" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.tools', 'Outils')}</a></li>
-              <li><a href="/community" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.community', 'Communauté')}</a></li>
+              <li><Link to="/courses" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.courses', 'Cours')}</Link></li>
+              <li><Link to="/exercises" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.exercises', 'Exercices')}</Link></li>
+              <li><Link to="/tools" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.tools', 'Outils')}</Link></li>
+              <li><Link to="/community" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.community', 'Communauté')}</Link></li>
             </ul>
           </div>
           
           <div>
             <h4 className="text-sm font-medium text-finance-offwhite mb-3">{safeTranslate(t, 'footer.company', 'Entreprise')}</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="/about" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'footer.about', 'À propos')}</a></li>
-              <li><a href="/blog" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.blog', 'Blog')}</a></li>
-              <li><a href="/mentoring" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.mentoring', 'Mentorat')}</a></li>
-              <li><a href="/contact" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'contact', 'Contact')}</a></li>
+              <li><Link to="/about" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'footer.about', 'À propos')}</Link></li>
+              <li><Link to="/blog" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.blog', 'Blog')}</Link></li>
+              <li><Link to="/mentoring" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.mentoring', 'Mentorat')}</Link></li>
+              <li><Link to="/contact" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'contact', 'Contact')}</Link></li>
             </ul>
           </div>
           
           <div>
             <h4 className="text-sm font-medium text-finance-offwhite mb-3">{safeTranslate(t, 'footer.legal', 'Légal')}</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="/terms" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'footer.terms', 'CGU')}</a></li>
-              <li><a href="/privacy" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'footer.privacy', 'Confidentialité')}</a></li>
-              <li><a href="/cookies" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'footer.cookies', 'Cookies')}</a></li>
+              <li><Link to="/terms" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'footer.terms', 'CGU')}</Link></li>
+              <li><Link to="/privacy" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'footer.privacy', 'Confidentialité')}</Link></li>
+              <li><Link to="/cookies" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'footer.cookies', 'Cookies')}</Link></li>
             </ul>
           </div>
         </div>

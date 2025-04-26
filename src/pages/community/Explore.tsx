@@ -1,23 +1,23 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { BookOpen, Code, Search, Filter, User, Calendar, ChevronRight, Eye } from "lucide-react";
+import { BookOpen, Code, Search, Filter, Calendar, ChevronRight, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Publication } from "@/types/community";
 
 // Mock data for community publications
-const mockPublications = [
+const mockPublications: Publication[] = [
   {
     id: 1,
     type: "article",
     title: "Calibrage du modèle Heston pour options exotiques",
     author: "Martin Dubois",
     authorAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    excerpt: "Une analyse approfondie de la méthode de calibrage du modèle de Heston pour le pricing d'options exotiques, en particulier les options à barrière et les options asiatiques...",
+    summary: "Une analyse approfondie de la méthode de calibrage du modèle de Heston pour le pricing d'options exotiques, en particulier les options à barrière et les options asiatiques...",
     date: "2024-04-22",
     views: 475,
     likes: 38,
@@ -30,7 +30,7 @@ const mockPublications = [
     title: "Stratégie d'arbitrage de volatilité pour indices",
     author: "Sophie Martin",
     authorAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    excerpt: "Cette stratégie vise à exploiter les différences entre volatilité implicite et réalisée sur les indices majeurs. Particulièrement efficace en période de forte volatilité, elle permet...",
+    summary: "Cette stratégie vise à exploiter les différences entre volatilité implicite et réalisée sur les indices majeurs. Particulièrement efficace en période de forte volatilité, elle permet...",
     date: "2024-04-19",
     views: 322,
     likes: 24,
@@ -43,7 +43,7 @@ const mockPublications = [
     title: "Impact des taux négatifs sur les modèles de Black-Scholes",
     author: "Alexandre Dupont",
     authorAvatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    excerpt: "Dans un environnement de taux d'intérêt négatifs, le modèle classique de Black-Scholes présente des limitations importantes. Cet article examine les ajustements nécessaires et propose...",
+    summary: "Dans un environnement de taux d'intérêt négatifs, le modèle classique de Black-Scholes présente des limitations importantes. Cet article examine les ajustements nécessaires et propose...",
     date: "2024-04-15",
     views: 289,
     likes: 32,
@@ -56,7 +56,7 @@ const mockPublications = [
     title: "Couverture dynamique pour options sur taux",
     author: "Émilie Lambert",
     authorAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    excerpt: "Stratégie de couverture dynamique pour options sur taux d'intérêt utilisant une combinaison de Delta et Vega hedging. Cette approche optimise le ratio coût-efficacité des couvertures...",
+    summary: "Stratégie de couverture dynamique pour options sur taux d'intérêt utilisant une combinaison de Delta et Vega hedging. Cette approche optimise le ratio coût-efficacité des couvertures...",
     date: "2024-04-10",
     views: 178,
     likes: 15,
@@ -69,7 +69,7 @@ const mockPublications = [
     title: "Optimisation de Monte Carlo pour produits structurés",
     author: "Thomas Richard",
     authorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    excerpt: "Les techniques d'optimisation de Monte Carlo permettent d'accélérer significativement le pricing des produits structurés complexes. Cet article présente des approches avancées de réduction de variance...",
+    summary: "Les techniques d'optimisation de Monte Carlo permettent d'accélérer significativement le pricing des produits structurés complexes. Cet article présente des approches avancées de réduction de variance...",
     date: "2024-04-05",
     views: 211,
     likes: 22,
@@ -86,7 +86,7 @@ const Explore = () => {
   const filteredPublications = mockPublications.filter(pub => {
     const matchesType = activeTab === "all" || pub.type === activeTab;
     const matchesSearch = pub.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         pub.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         pub.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          pub.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
     
     return matchesType && matchesSearch && pub.published;
@@ -162,19 +162,7 @@ const Explore = () => {
 };
 
 interface PublicationProps {
-  publication: {
-    id: number;
-    type: string;
-    title: string;
-    author: string;
-    authorAvatar: string;
-    excerpt: string;
-    date: string;
-    views: number;
-    likes: number;
-    tags: string[];
-    published: boolean;
-  };
+  publication: Publication;
 }
 
 const PublicationCard = ({ publication }: PublicationProps) => {
@@ -203,9 +191,9 @@ const PublicationCard = ({ publication }: PublicationProps) => {
         </div>
         
         <CardDescription className="text-finance-lightgray mb-4">
-          {publication.excerpt.length > 300 
-            ? `${publication.excerpt.substring(0, 300)}...` 
-            : publication.excerpt}
+          {publication.summary.length > 300 
+            ? `${publication.summary.substring(0, 300)}...` 
+            : publication.summary}
         </CardDescription>
         
         <div className="flex flex-wrap gap-2 mb-3">

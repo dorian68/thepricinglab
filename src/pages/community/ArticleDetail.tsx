@@ -1,123 +1,226 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowLeft, User, Calendar, Eye, BookOpen, ThumbsUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowLeft, Calendar, User, Eye, ThumbsUp, ChevronRight, Share2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { MarkdownMathRenderer } from "../../components/editors/MarkdownMathRenderer";
+import { Article, Publication } from "../../types/community";
 
-// Mock data for a detailed article view
-const mockArticles = [
+// Mock article data
+const mockArticles: Article[] = [
   {
-    id: "1",
+    id: 1,
     type: "article",
     title: "Calibrage du modèle Heston pour options exotiques",
     author: "Martin Dubois",
     authorAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    summary: "Une analyse approfondie de la méthode de calibrage du modèle de Heston pour le pricing d'options exotiques.",
     content: `
 # Calibrage du modèle Heston pour options exotiques
 
-Le modèle de Heston est l'un des modèles de volatilité stochastique les plus populaires en finance quantitative. Contrairement au modèle de Black-Scholes qui suppose une volatilité constante, le modèle de Heston permet à la volatilité de suivre un processus stochastique, ce qui reflète mieux le comportement réel des marchés financiers.
+## Introduction
 
-## Formulation mathématique du modèle
+Le modèle de Heston est l'un des modèles à volatilité stochastique les plus utilisés en finance quantitative. Contrairement au modèle de Black-Scholes qui suppose une volatilité constante, le modèle de Heston permet de capturer des phénomènes plus complexes comme le smile de volatilité.
 
-Dans le modèle de Heston, le prix de l'actif sous-jacent \(S_t\) et sa variance instantanée \(v_t\) évoluent selon les équations différentielles stochastiques suivantes:
+## Le modèle mathématique
 
-\[
-dS_t = \mu S_t dt + \sqrt{v_t} S_t dW_t^S
-\]
+Le modèle de Heston est décrit par le système d'équations différentielles stochastiques suivant :
 
-\[
-dv_t = \kappa(\theta - v_t)dt + \sigma \sqrt{v_t} dW_t^v
-\]
+$$
+\\begin{align}
+dS_t &= \\mu S_t dt + \\sqrt{v_t} S_t dW_t^S \\\\
+dv_t &= \\kappa(\\theta - v_t)dt + \\sigma\\sqrt{v_t}dW_t^v
+\\end{align}
+$$
 
-où:
-- \(\mu\) est le rendement moyen de l'actif
-- \(\kappa\) est la vitesse de retour à la moyenne pour la variance
-- \(\theta\) est la variance à long terme
-- \(\sigma\) est la volatilité de la volatilité
-- \(W_t^S\) et \(W_t^v\) sont des mouvements browniens avec une corrélation \(\rho\)
+où :
+- $S_t$ est le prix de l'actif sous-jacent
+- $v_t$ est la variance instantanée
+- $\\mu$ est le rendement attendu
+- $\\kappa$ est la vitesse de retour à la moyenne
+- $\\theta$ est la variance long terme
+- $\\sigma$ est la volatilité de la volatilité
+- $W_t^S$ et $W_t^v$ sont des mouvements browniens avec une corrélation $\\rho$
 
-## Processus de calibrage
+## Procédure de calibrage
 
-Le calibrage du modèle de Heston pour les options exotiques nécessite une attention particulière car ces produits sont souvent sensibles à toute la structure de la volatilité. Voici une approche étape par étape:
+Le calibrage du modèle de Heston nécessite de déterminer les paramètres suivants :
+- $v_0$ : variance initiale
+- $\\kappa$ : vitesse de retour à la moyenne
+- $\\theta$ : niveau de variance long terme
+- $\\sigma$ : volatilité de la volatilité
+- $\\rho$ : corrélation entre les deux mouvements browniens
 
-1. **Collecte des données de marché**: Obtenir les prix d'options vanille pour différentes échéances et strikes
-2. **Définition de la fonction objectif**: Minimiser l'erreur quadratique entre les prix de marché et les prix du modèle
-3. **Optimisation des paramètres**: Utiliser des algorithmes comme Levenberg-Marquardt ou Nelder-Mead
-4. **Validation**: Vérifier que le modèle calibré reproduit correctement les prix des options vanille
-5. **Extension aux options exotiques**: Utiliser les paramètres calibrés pour valoriser les options exotiques
+### Méthode des moindres carrés
 
-## Défis spécifiques pour les options exotiques
+Une approche standard consiste à minimiser l'écart quadratique entre les prix d'options observés sur le marché et les prix théoriques calculés avec le modèle de Heston :
 
-Les options exotiques, comme les options à barrière ou les options asiatiques, présentent des défis supplémentaires:
+$$
+\\min_{\\kappa, \\theta, \\sigma, \\rho, v_0} \\sum_{i=1}^{N} (P_i^{market} - P_i^{Heston})^2
+$$
 
-- **Dépendance au chemin**: Beaucoup d'options exotiques dépendent du chemin suivi par l'actif sous-jacent
-- **Sensibilité à la corrélation**: Le paramètre de corrélation \(\rho\) peut avoir un impact significatif
-- **Méthodes numériques**: Souvent, des méthodes Monte Carlo avancées sont nécessaires pour la valorisation
+où $P_i^{market}$ est le prix de l'option $i$ observé sur le marché et $P_i^{Heston}$ est le prix théorique selon le modèle de Heston.
 
-## Exemple de mise en œuvre
+### Exemple avec Python
 
-Voici un exemple simplifié de calibrage en Python utilisant SciPy:
+Voici un exemple de code Python utilisant la bibliothèque scipy pour calibrer le modèle de Heston :
 
 \`\`\`python
 import numpy as np
 from scipy.optimize import minimize
+from scipy.integrate import quad
 
-def heston_option_price(params, strikes, maturities, market_prices):
-    # Calcul des prix d'options selon le modèle de Heston
-    # Params = [kappa, theta, sigma, rho, v0]
-    # [...]
-    return model_prices
+def heston_characteristic_function(u, T, r, v0, kappa, theta, sigma, rho):
+    # Implémentation de la fonction caractéristique du modèle de Heston
+    # ...
+    return cf
 
-def objective_function(params, strikes, maturities, market_prices):
-    model_prices = heston_option_price(params, strikes, maturities, market_prices)
+def heston_call_price(S0, K, T, r, v0, kappa, theta, sigma, rho):
+    # Calcul du prix d'option d'achat avec la méthode d'intégration
+    # ...
+    return call_price
+
+def objective_function(params, market_prices, strikes, S0, T, r):
+    v0, kappa, theta, sigma, rho = params
+    model_prices = np.array([heston_call_price(S0, K, T, r, v0, kappa, theta, sigma, rho) for K in strikes])
     return np.sum((model_prices - market_prices)**2)
 
-# Données de marché
-strikes = [...]
-maturities = [...]
-market_prices = [...]
+# Exemple de calibrage
+initial_params = [0.1, 2.0, 0.04, 0.3, -0.7]  # v0, kappa, theta, sigma, rho
+bounds = [(0.001, 1.0), (0.1, 10.0), (0.001, 0.2), (0.01, 1.0), (-0.99, 0.99)]
 
-# Paramètres initiaux
-initial_params = [1.0, 0.04, 0.2, -0.7, 0.04]
-
-# Optimisation
 result = minimize(
     objective_function,
     initial_params,
-    args=(strikes, maturities, market_prices),
-    method='Nelder-Mead'
+    args=(market_prices, strikes, S0, T, r),
+    method='L-BFGS-B',
+    bounds=bounds
 )
 
 calibrated_params = result.x
 \`\`\`
 
+## Application aux options exotiques
+
+Une fois le modèle calibré, il peut être utilisé pour évaluer des options exotiques comme :
+
+1. **Options barrières** - Options dont le payoff dépend du franchissement d'un certain niveau de prix
+2. **Options asiatiques** - Options dont le payoff dépend de la moyenne du prix du sous-jacent
+3. **Options lookback** - Options dont le payoff dépend du maximum ou du minimum atteint par le sous-jacent
+
+### Exemple de diagramme de flux de calibrage
+
+\`\`\`mermaid
+graph TD
+    A[Collecter les données de marché] --> B[Définir la fonction objectif]
+    B --> C[Initialiser les paramètres]
+    C --> D[Optimiser avec algorithme numérique]
+    D --> E{Convergence?}
+    E -- Non --> F[Ajuster paramètres ou contraintes]
+    F --> D
+    E -- Oui --> G[Paramètres calibrés]
+    G --> H[Valoriser options exotiques]
+\`\`\`
+
 ## Conclusion
 
-Un calibrage précis du modèle de Heston est essentiel pour la valorisation correcte des options exotiques. En comprenant les subtilités du modèle et en utilisant des techniques d'optimisation robustes, on peut obtenir des paramètres qui reflètent fidèlement la dynamique du marché et permettent une valorisation fiable des produits dérivés complexes.
+Le calibrage du modèle de Heston est une étape cruciale pour la valorisation précise des options exotiques. En capturant de manière plus réaliste la dynamique de la volatilité, ce modèle permet d'obtenir des prix plus cohérents avec les observations de marché, particulièrement pour les options à longue maturité ou les options dont la valeur dépend fortement de la trajectoire du sous-jacent.
 
-`,
+## Références
+
+1. Heston, S. L. (1993). A closed-form solution for options with stochastic volatility with applications to bond and currency options. *The Review of Financial Studies*, 6(2), 327-343.
+2. Gatheral, J. (2006). *The volatility surface: a practitioner's guide*. John Wiley & Sons.
+    `,
     date: "2024-04-22",
     views: 475,
     likes: 38,
     tags: ["Heston", "Calibrage", "Options exotiques"],
+    published: true
+  },
+  {
+    id: 2,
+    type: "article",
+    title: "Impact des taux négatifs sur les modèles de Black-Scholes",
+    author: "Alexandre Dupont",
+    authorAvatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+    summary: "Dans un environnement de taux d'intérêt négatifs, le modèle classique de Black-Scholes présente des limitations importantes.",
+    content: `
+# Impact des taux négatifs sur les modèles de Black-Scholes
+
+## Introduction au problème des taux négatifs
+
+Depuis quelques années, plusieurs banques centrales ont mis en place des politiques de taux d'intérêt négatifs. Cette situation, jamais envisagée dans les modèles financiers classiques, pose d'importants défis pour la valorisation des produits dérivés.
+
+Le modèle de Black-Scholes, développé en 1973, suppose implicitement que les taux d'intérêt sont positifs. Lorsque ce n'est pas le cas, plusieurs anomalies apparaissent.
+
+## La formule de Black-Scholes
+
+Rappelons la formule classique de Black-Scholes pour une option d'achat :
+
+$$
+C(S, t) = S_t \\Phi(d_1) - K e^{-r(T-t)} \\Phi(d_2)
+$$
+
+où :
+
+$$
+d_1 = \\frac{\\ln(S_t/K) + (r + \\sigma^2/2)(T-t)}{\\sigma\\sqrt{T-t}}
+$$
+
+$$
+d_2 = d_1 - \\sigma\\sqrt{T-t}
+$$
+
+Avec $r$ négatif, cette formule produit des résultats contre-intuitifs.
+    `,
+    date: "2024-04-15",
+    views: 289,
+    likes: 32,
+    tags: ["Black-Scholes", "Taux négatifs", "Modélisation"],
     published: true
   }
 ];
 
 const ArticleDetail = () => {
   const { id } = useParams<{id: string}>();
-  const article = mockArticles.find(a => a.id === id);
+  const [article, setArticle] = useState<Article | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [relatedArticles, setRelatedArticles] = useState<Publication[]>([]);
+
+  useEffect(() => {
+    // In a real app, we would fetch the article from an API
+    // For demo purposes, we'll use the mock data
+    const articleId = parseInt(id || "0");
+    const foundArticle = mockArticles.find(a => a.id === articleId);
+    
+    if (foundArticle) {
+      setArticle(foundArticle);
+      
+      // Find related articles based on tags
+      const related = mockArticles
+        .filter(a => a.id !== articleId && a.tags.some(tag => foundArticle.tags.includes(tag)))
+        .slice(0, 3);
+      
+      setRelatedArticles(related);
+    }
+    
+    setLoading(false);
+  }, [id]);
+
+  if (loading) {
+    return <div className="container mx-auto px-4 py-8 text-center">Chargement...</div>;
+  }
 
   if (!article) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold mb-4">Article non trouvé</h1>
-        <p className="mb-6">L'article que vous recherchez n'existe pas ou a été supprimé.</p>
-        <Button asChild>
-          <Link to="/community/explore">Revenir aux publications</Link>
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h1 className="text-2xl font-bold mb-4">Article introuvable</h1>
+        <p className="text-finance-lightgray mb-6">Cet article n'existe pas ou a été supprimé.</p>
+        <Button asChild variant="finance">
+          <Link to="/community/explore">Retour aux publications</Link>
         </Button>
       </div>
     );
@@ -127,83 +230,115 @@ const ArticleDetail = () => {
     <div className="container mx-auto px-4 py-8">
       <Helmet>
         <title>{article.title} | The Pricing Library</title>
-        <meta name="description" content={article.title} />
+        <meta name="description" content={article.summary} />
       </Helmet>
 
       <div className="max-w-4xl mx-auto">
-        <div className="mb-6">
-          <Button variant="outline" asChild className="mb-6">
-            <Link to="/community/explore">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Retour aux publications
-            </Link>
-          </Button>
-        </div>
-
-        <article className="finance-card p-6">
-          <header className="mb-6">
-            <Badge variant="secondary" className="mb-3">Article</Badge>
-            <h1 className="text-3xl font-bold mb-4">{article.title}</h1>
-            
-            <div className="flex items-center flex-wrap gap-y-3">
-              <div className="flex items-center mr-6">
-                <div className="h-10 w-10 rounded-full overflow-hidden mr-2">
-                  <img 
-                    src={article.authorAvatar}
-                    alt={article.author}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <span className="text-finance-accent">{article.author}</span>
-              </div>
-              
-              <div className="flex items-center mr-6">
-                <Calendar className="h-4 w-4 mr-1 text-finance-lightgray" />
-                <span className="text-finance-lightgray">{article.date}</span>
-              </div>
-              
-              <div className="flex items-center mr-6">
-                <Eye className="h-4 w-4 mr-1 text-finance-lightgray" />
-                <span className="text-finance-lightgray">{article.views} vues</span>
-              </div>
-              
-              <div className="flex items-center">
-                <ThumbsUp className="h-4 w-4 mr-1 text-finance-lightgray" />
-                <span className="text-finance-lightgray">{article.likes} j'aime</span>
+        <div className="mb-8">
+          <Link to="/community/explore" className="text-finance-accent flex items-center hover:underline mb-6">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Retour aux publications
+          </Link>
+          
+          <Badge className="mb-4" variant="secondary">Article</Badge>
+          
+          <h1 className="text-3xl font-bold mb-6">{article.title}</h1>
+          
+          <div className="flex items-center mb-6">
+            <div className="h-10 w-10 rounded-full overflow-hidden mr-3">
+              <img 
+                src={article.authorAvatar} 
+                alt={article.author} 
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <div>
+              <div className="text-finance-offwhite font-medium">{article.author}</div>
+              <div className="flex items-center text-xs text-finance-lightgray">
+                <Calendar className="h-3 w-3 mr-1" />
+                <span>Publié le {article.date}</span>
               </div>
             </div>
-          </header>
-          
-          <div className="prose prose-invert max-w-none">
-            {/* In a real app, we would render markdown with a library like react-markdown */}
-            <div dangerouslySetInnerHTML={{ __html: article.content.replace(/\n/g, '<br />') }} />
           </div>
           
-          <div className="mt-6 pt-6 border-t border-gray-800">
-            <div className="flex flex-wrap gap-2 mb-6">
-              {article.tags.map((tag, index) => (
-                <Badge key={index} variant="level">
-                  {tag}
-                </Badge>
+          <div className="flex flex-wrap gap-2 mb-6">
+            {article.tags.map((tag, index) => (
+              <Badge key={index} variant="level" className="text-xs">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+          
+          <div className="flex items-center space-x-4 text-sm text-finance-lightgray mb-6">
+            <div className="flex items-center">
+              <Eye className="h-4 w-4 mr-1" />
+              <span>{article.views} vues</span>
+            </div>
+            <div className="flex items-center">
+              <ThumbsUp className="h-4 w-4 mr-1" />
+              <span>{article.likes} likes</span>
+            </div>
+          </div>
+          
+          <Separator className="mb-8" />
+          
+          <div className="prose prose-invert max-w-none mb-8">
+            <MarkdownMathRenderer content={article.content} />
+          </div>
+          
+          <div className="flex justify-between items-center border-t border-finance-steel/20 pt-6 mt-12">
+            <div>
+              <p className="text-sm text-finance-lightgray">Cet article vous a-t-il été utile ?</p>
+              <div className="flex items-center mt-2">
+                <Button variant="outline" size="sm" className="flex items-center mr-2">
+                  <ThumbsUp className="h-4 w-4 mr-1" />
+                  J'aime
+                </Button>
+                <Button variant="outline" size="sm" className="flex items-center">
+                  <Share2 className="h-4 w-4 mr-1" />
+                  Partager
+                </Button>
+              </div>
+            </div>
+            <div>
+              <Button asChild variant="finance">
+                <Link to="/community/contribute">Rédiger un article</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        {relatedArticles.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-xl font-bold mb-6">Articles connexes</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {relatedArticles.map(related => (
+                <Card key={related.id} className="overflow-hidden hover:border-finance-accent transition-colors duration-300">
+                  <CardHeader className="pb-2">
+                    <Badge variant="secondary" className="mb-2 w-fit">
+                      Article
+                    </Badge>
+                    <CardTitle className="text-lg">{related.title}</CardTitle>
+                  </CardHeader>
+                  
+                  <CardContent className="pb-2">
+                    <CardDescription className="text-finance-lightgray text-sm line-clamp-3">
+                      {related.summary}
+                    </CardDescription>
+                  </CardContent>
+                  
+                  <CardFooter>
+                    <Button variant="link" asChild className="text-finance-accent p-0">
+                      <Link to={`/community/article/${related.id}`}>
+                        Lire la suite <ChevronRight className="h-4 w-4 ml-1" />
+                      </Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
               ))}
             </div>
-            
-            <div className="flex justify-between">
-              <Button variant="outline" className="flex items-center">
-                <ThumbsUp className="mr-2 h-4 w-4" />
-                J'aime
-              </Button>
-              <Button variant="finance">Partager</Button>
-            </div>
           </div>
-        </article>
-        
-        <Card className="mt-8 p-6">
-          <h3 className="text-xl font-semibold mb-4">Commentaires</h3>
-          <p className="text-finance-lightgray italic">
-            La fonctionnalité de commentaires sera disponible prochainement.
-          </p>
-        </Card>
+        )}
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -271,7 +272,7 @@ const Community = () => {
         </div>
       </div>
       
-      {/* New collaborative content section */}
+      {/* Updated collaborative content section with clear calls-to-action */}
       <div className="finance-card p-6 mb-8">
         <h2 className="text-xl font-semibold mb-4">Publications collaboratives</h2>
         <p className="text-finance-lightgray mb-4">
