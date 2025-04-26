@@ -208,6 +208,8 @@
     "bearPutSpread":"Achat d'un put ITM et vente d'un put OTM. Profit limité mais coût réduit",
     "ironCondor":"Combinaison d'un bull put spread et d'un bear call spread. Profit si le prix reste dans une fourchette.",
     "butterflySpread":"Combinaison d'un bull spread et d'un bear spread. Profit maximal si le prix est exactement au strike moyen à l'échéance."
+    }
+
   },
   "survivalMode": {
     "title": "Mode Survie",
@@ -613,5 +615,4 @@
       "subscribeButton": "S'abonner"
     }
   }
-}
 }

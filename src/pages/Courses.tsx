@@ -1,5 +1,6 @@
 
 import React, { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet-async";
@@ -13,12 +14,17 @@ import { ChevronRight, LockIcon, BookOpen, Sparkles, Star, Award, Zap } from "lu
 import { SubscriptionPlan } from "@/data/survival-waves";
 import { safeTranslate } from "../utils/translationUtils";
 
+
 const Courses = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState("fundamentals");
-  const [userPlan] = useState<SubscriptionPlan>("freemium"); // Simulate user's current plan
-  
+  const { profile } = useAuth();
+  const userPlan = (profile?.plan ?? "freemium") as SubscriptionPlan;
+  console.log(" ------------------------------------- Courses: User plan ------------------------------------- ", userPlan);
+
+
+
   // Helper function for safe translations
   const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
   

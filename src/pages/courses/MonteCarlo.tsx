@@ -89,9 +89,7 @@ const MonteCarloCourse = () => {
   };
   
   return (
-    <div className="flex flex-col min-h-screen bg-finance-dark text-finance-offwhite">
-      <Navbar />
-      
+    <div className="flex flex-col min-h-screen bg-finance-dark text-finance-offwhite">      
       <main className="flex-1 py-8 px-6">
         <div className="max-w-7xl mx-auto">
           {/* Breadcrumb */}
