@@ -18,7 +18,7 @@ const AppShell: React.FC = () => {
     console.log("AppShell: Auth state", { isAuthenticated, profile, isLoading });
     
     // Check that i18n has been properly initialized
-    if (!i18n.isInitialized) {
+    if (i18n && !i18n.isInitialized) {
       console.error("i18n has not been properly initialized");
       toast.error(t("common.error", "Error"), {
         description: t("i18n.initError", "Translation problem. Reload may be required."),

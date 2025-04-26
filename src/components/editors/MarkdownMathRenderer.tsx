@@ -20,27 +20,38 @@ const MarkdownMathRenderer: React.FC<MarkdownMathRendererProps> = ({
 
   // Initialize mermaid when the component mounts
   useEffect(() => {
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: 'dark',
-      securityLevel: 'loose'
-    });
+    try {
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: 'dark',
+        securityLevel: 'loose'
+      });
+    } catch (error) {
+      console.error("Error initializing mermaid:", error);
+    }
   }, []);
 
   // Process mermaid diagrams after the content is rendered
   useEffect(() => {
     if (mermaidContainerRef.current) {
-      const mermaidDiagrams = mermaidContainerRef.current.querySelectorAll('.language-mermaid');
-      if (mermaidDiagrams.length > 0) {
-        try {
-          // Use type assertion to solve the TypeScript error
-          mermaid.init(undefined, mermaidDiagrams as NodeListOf<HTMLElement>);
-        } catch (error) {
-          console.error('Mermaid diagram rendering error:', error);
+      try {
+        const mermaidDiagrams = mermaidContainerRef.current.querySelectorAll('.language-mermaid');
+        if (mermaidDiagrams.length > 0) {
+          // Use type assertion to solve the TypeScript error and wrap in try/catch
+          try {
+            mermaid.init(undefined, mermaidDiagrams as NodeListOf<HTMLElement>);
+          } catch (error) {
+            console.error('Mermaid diagram rendering error:', error);
+          }
         }
+      } catch (error) {
+        console.error("Error processing mermaid diagrams:", error);
       }
     }
   }, [content]);
+
+  // Handle null or undefined content gracefully
+  const safeContent = content || '';
 
   return (
     <div ref={mermaidContainerRef} className={className}>
@@ -62,7 +73,7 @@ const MarkdownMathRenderer: React.FC<MarkdownMathRendererProps> = ({
           }
         }}
       >
-        {content}
+        {safeContent}
       </ReactMarkdown>
     </div>
   );

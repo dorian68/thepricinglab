@@ -7,6 +7,17 @@ interface GreekDisplayProps {
 }
 
 const GreekDisplay: React.FC<GreekDisplayProps> = ({ strategy, results }) => {
+  // Safely handle the case where strategy or results is undefined
+  if (!strategy || !results) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-center text-finance-lightgray">
+          Données Greeks non disponibles
+        </p>
+      </div>
+    );
+  }
+  
   return (
     <div className="flex items-center justify-center h-full">
       <p className="text-center text-finance-lightgray">

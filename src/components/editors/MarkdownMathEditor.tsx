@@ -1,13 +1,10 @@
+
 import React, { useCallback, useState, useRef, useEffect } from 'react';
-import ReactMarkdown from 'react-markdown';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-import rehypeRaw from 'rehype-raw';
-import 'katex/dist/katex.min.css';
 import { Bold, Italic, List, Code, Image, Link as LinkIcon } from 'lucide-react';
-import mermaid from 'mermaid';
+import 'katex/dist/katex.min.css';
+import MarkdownMathRenderer from './MarkdownMathRenderer';
 
 interface MarkdownMathEditorProps {
   value: string;
@@ -26,28 +23,7 @@ const MarkdownMathEditor: React.FC<MarkdownMathEditorProps> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const previewRef = useRef<HTMLDivElement>(null);
   
-  // Initialize mermaid
-  useEffect(() => {
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: 'dark',
-      securityLevel: 'loose'
-    });
-  }, []);
-
-  // Render mermaid diagrams
-  useEffect(() => {
-    if (!isEditing && previewRef.current) {
-      const mermaidDiagrams = previewRef.current.querySelectorAll('.language-mermaid');
-      if (mermaidDiagrams.length > 0) {
-        // Use type assertion to solve the TypeScript error
-        mermaid.init(undefined, mermaidDiagrams as NodeListOf<HTMLElement>);
-      }
-    }
-  }, [isEditing, value]);
-
   const handleTextareaChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e.target.value);
   }, [onChange]);
@@ -142,27 +118,8 @@ const MarkdownMathEditor: React.FC<MarkdownMathEditorProps> = ({
             className={`w-full font-mono ${height} p-4 resize-none`}
           />
         ) : (
-          <div ref={previewRef} className={`w-full prose prose-invert prose-pre:bg-finance-steel/10 prose-pre:p-4 prose-pre:rounded-md max-w-none ${height} overflow-y-auto border border-finance-steel/20 rounded-md p-4`}>
-            <ReactMarkdown
-              remarkPlugins={[remarkMath]}
-              rehypePlugins={[rehypeKatex, rehypeRaw]}
-              components={{
-                code({ node, className, children, ...props }) {
-                  const match = /language-(\w+)/.exec(className || '');
-                  return match && match[1] === 'mermaid' ? (
-                    <div className="language-mermaid">
-                      {String(children).replace(/\n$/, '')}
-                    </div>
-                  ) : (
-                    <code className={className} {...props}>
-                      {children}
-                    </code>
-                  );
-                }
-              }}
-            >
-              {value}
-            </ReactMarkdown>
+          <div className={`w-full prose prose-invert prose-pre:bg-finance-steel/10 prose-pre:p-4 prose-pre:rounded-md max-w-none ${height} overflow-y-auto border border-finance-steel/20 rounded-md p-4`}>
+            <MarkdownMathRenderer content={value} />
           </div>
         )}
       </div>

@@ -1,231 +1,164 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { safeTranslate } from '@/utils/translationUtils';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ChevronRight, ThumbsUp, Eye, Calendar, User, MessageSquare, BookOpen } from 'lucide-react';
+import { Publication } from '@/types/community';
 
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
-import { BookOpen, Code, Search, Filter, Calendar, ChevronRight, Eye } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Publication } from "@/types/community";
-
-// Mock data for community publications
-const mockPublications: Publication[] = [
+// Update the sample publications to include the required content field
+const samplePublications: Publication[] = [
   {
     id: 1,
     type: "article",
-    title: "Calibrage du modèle Heston pour options exotiques",
-    author: "Martin Dubois",
-    authorAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    summary: "Une analyse approfondie de la méthode de calibrage du modèle de Heston pour le pricing d'options exotiques, en particulier les options à barrière et les options asiatiques...",
-    content: "", // Added empty content to fix type error
-    date: "2024-04-22",
-    views: 475,
-    likes: 38,
-    tags: ["Heston", "Calibrage", "Options exotiques"],
+    title: "Introduction aux Options Exotiques",
+    author: "Sophie Martin",
+    authorAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&auto=format&fit=crop&q=60",
+    summary: "Un guide approfondi pour comprendre et valoriser les options exotiques sur les marchés financiers modernes.",
+    content: "# Introduction aux Options Exotiques\n\nLes options exotiques sont des contrats financiers qui diffèrent des options vanilles standard par leurs structures de payoff plus complexes et leurs conditions d'exercice spécifiques...",
+    date: "12 Avril 2025",
+    views: 342,
+    likes: 28,
+    tags: ["Options", "Pricing", "Marchés dérivés"],
     published: true
   },
   {
     id: 2,
     type: "strategy",
-    title: "Stratégie d'arbitrage de volatilité pour indices",
-    author: "Sophie Martin",
-    authorAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    summary: "Cette stratégie vise à exploiter les différences entre volatilité implicite et réalisée sur les indices majeurs. Particulièrement efficace en période de forte volatilité, elle permet...",
-    content: "", // Added empty content to fix type error
-    date: "2024-04-19",
-    views: 322,
-    likes: 24,
-    tags: ["Arbitrage", "Volatilité", "SPX", "Stratégie quantitative"],
-    published: true
+    title: "Arbitrage de Volatilité avec Straddles",
+    author: "Luc Dubois",
+    authorAvatar: "https://images.unsplash.com/photo-1500648767791-00d5a469aa9d?w=400&auto=format&fit=crop&q=60",
+    summary: "Stratégie d'arbitrage de volatilité utilisant des straddles pour exploiter les écarts de prix sur le marché.",
+    content: "# Arbitrage de Volatilité avec Straddles\n\nCette stratégie exploite les différences entre la volatilité implicite et la volatilité réalisée en utilisant des straddles...",
+    date: "18 Avril 2025",
+    views: 287,
+    likes: 22,
+    tags: ["Volatilité", "Arbitrage", "Straddles"],
+    published: true,
+    strategyType: "pricing"
   },
   {
     id: 3,
     type: "article",
-    title: "Impact des taux négatifs sur les modèles de Black-Scholes",
-    author: "Alexandre Dupont",
-    authorAvatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    summary: "Dans un environnement de taux d'intérêt négatifs, le modèle classique de Black-Scholes présente des limitations importantes. Cet article examine les ajustements nécessaires et propose...",
-    content: "", // Added empty content to fix type error
-    date: "2024-04-15",
-    views: 289,
-    likes: 32,
-    tags: ["Black-Scholes", "Taux négatifs", "Modélisation"],
+    title: "L'Impact des Taux d'Intérêt sur les Marchés Boursiers",
+    author: "Chloé Leclerc",
+    authorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd8a72fbc?w=400&auto=format&fit=crop&q=60",
+    summary: "Analyse de l'influence des taux d'intérêt sur la performance des marchés boursiers et les stratégies d'investissement.",
+    content: "# L'Impact des Taux d'Intérêt sur les Marchés Boursiers\n\nLes taux d'intérêt jouent un rôle crucial dans la détermination de la santé économique et de la performance des marchés boursiers...",
+    date: "22 Avril 2025",
+    views: 412,
+    likes: 35,
+    tags: ["Taux d'intérêt", "Marchés boursiers", "Investissement"],
     published: true
   },
   {
     id: 4,
     type: "strategy",
-    title: "Couverture dynamique pour options sur taux",
-    author: "Émilie Lambert",
-    authorAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    summary: "Stratégie de couverture dynamique pour options sur taux d'intérêt utilisant une combinaison de Delta et Vega hedging. Cette approche optimise le ratio coût-efficacité des couvertures...",
-    content: "", // Added empty content to fix type error
-    date: "2024-04-10",
-    views: 178,
-    likes: 15,
-    tags: ["Hedging", "Options sur taux", "Delta", "Vega"],
-    published: true
+    title: "Couverture de Portefeuille avec des Options Put",
+    author: "Thierry Girard",
+    authorAvatar: "https://images.unsplash.com/photo-1502823403499-b1bca814266c?w=400&auto=format&fit=crop&q=60",
+    summary: "Techniques de couverture de portefeuille utilisant des options put pour minimiser les risques de baisse.",
+    content: "# Couverture de Portefeuille avec des Options Put\n\nLa couverture de portefeuille avec des options put est une stratégie défensive visant à protéger un portefeuille contre les pertes potentielles dues à une baisse du marché...",
+    date: "25 Avril 2025",
+    views: 367,
+    likes: 30,
+    tags: ["Couverture", "Options Put", "Gestion des risques"],
+    published: true,
+    strategyType: "hedging"
   },
   {
     id: 5,
     type: "article",
-    title: "Optimisation de Monte Carlo pour produits structurés",
-    author: "Thomas Richard",
-    authorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    summary: "Les techniques d'optimisation de Monte Carlo permettent d'accélérer significativement le pricing des produits structurés complexes. Cet article présente des approches avancées de réduction de variance...",
-    content: "", // Added empty content to fix type error
-    date: "2024-04-05",
-    views: 211,
-    likes: 22,
-    tags: ["Monte Carlo", "Produits structurés", "Optimisation"],
+    title: "Les Tendances Actuelles du Trading Algorithmique",
+    author: "Isabelle Morin",
+    authorAvatar: "https://images.unsplash.com/photo-1488426862026-730f9ca8cb9c?w=400&auto=format&fit=crop&q=60",
+    summary: "Exploration des dernières tendances et technologies dans le domaine du trading algorithmique.",
+    content: "# Les Tendances Actuelles du Trading Algorithmique\n\nLe trading algorithmique continue d'évoluer avec l'introduction de nouvelles technologies et approches. Cet article examine les tendances actuelles...",
+    date: "29 Avril 2025",
+    views: 451,
+    likes: 42,
+    tags: ["Trading algorithmique", "Technologies financières", "Marchés financiers"],
     published: true
   }
 ];
 
 const Explore = () => {
-  const [activeTab, setActiveTab] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const { t } = useTranslation();
+  const [publications, setPublications] = useState<Publication[]>(samplePublications);
 
-  // Filter publications based on active tab and search query
-  const filteredPublications = mockPublications.filter(pub => {
-    const matchesType = activeTab === "all" || pub.type === activeTab;
-    const matchesSearch = pub.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         pub.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         pub.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    return matchesType && matchesSearch && pub.published;
-  });
+  useEffect(() => {
+    // Simulate fetching publications from an API
+    setTimeout(() => {
+      setPublications(samplePublications);
+    }, 500);
+  }, []);
+
+  // Make sure all publications have a content property
+  for (const pub of samplePublications) {
+    if (!pub.content) {
+      pub.content = `# ${pub.title}\n\n${pub.summary}\n\nContenu détaillé à venir...`;
+    }
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Helmet>
-        <title>Publications de la communauté | The Pricing Library</title>
-        <meta name="description" content="Découvrez les articles et stratégies publiés par notre communauté d'experts en finance quantitative" />
-      </Helmet>
+      <h1 className="text-2xl font-bold terminal-text mb-4">{safeTranslate(t, 'community.explorePublications', 'Explorer les Publications')}</h1>
+      <p className="text-finance-lightgray mb-8">
+        {safeTranslate(t, 'community.discoverArticlesStrategies', 'Découvrez les articles et stratégies partagés par notre communauté.')}
+      </p>
 
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-2xl font-bold mb-2">Publications de la communauté</h1>
-          <p className="text-finance-lightgray">
-            Découvrez les articles et stratégies publiés par notre communauté d'experts
-          </p>
-        </div>
-        
-        <Button asChild variant="finance">
-          <Link to="/community/contribute">
-            Contribuer
-          </Link>
-        </Button>
-      </div>
-
-      <div className="mb-8">
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="relative flex-grow">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-finance-lightgray" />
-            <Input
-              className="pl-10"
-              placeholder="Rechercher par titre, contenu ou tag..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <Button variant="outline" className="flex items-center md:w-auto">
-            <Filter className="mr-2 h-4 w-4" />
-            Filtres avancés
-          </Button>
-        </div>
-
-        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6">
-            <TabsTrigger value="all">Tous</TabsTrigger>
-            <TabsTrigger value="article">Articles</TabsTrigger>
-            <TabsTrigger value="strategy">Stratégies</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="all" className="space-y-6">
-            {filteredPublications.map(publication => (
-              <PublicationCard key={publication.id} publication={publication} />
-            ))}
-          </TabsContent>
-
-          <TabsContent value="article" className="space-y-6">
-            {filteredPublications.filter(p => p.type === "article").map(publication => (
-              <PublicationCard key={publication.id} publication={publication} />
-            ))}
-          </TabsContent>
-
-          <TabsContent value="strategy" className="space-y-6">
-            {filteredPublications.filter(p => p.type === "strategy").map(publication => (
-              <PublicationCard key={publication.id} publication={publication} />
-            ))}
-          </TabsContent>
-        </Tabs>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {publications.map((publication) => (
+          <Card key={publication.id} className="bg-finance-card border-finance-steel/20">
+            <CardHeader>
+              <CardTitle className="flex justify-between items-start">
+                <Link to={`/community/${publication.type}/${publication.id}`} className="hover:underline">
+                  {publication.title}
+                </Link>
+                {publication.published && (
+                  <Badge variant="secondary">{safeTranslate(t, 'common.published', 'Publié')}</Badge>
+                )}
+              </CardTitle>
+              <CardDescription className="text-finance-lightgray">
+                {publication.summary}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-finance-lightgray">
+              <div className="flex items-center mb-2">
+                <User className="h-4 w-4 mr-2 text-finance-accent" />
+                <span>{publication.author}</span>
+              </div>
+              <div className="flex items-center mb-2">
+                <Calendar className="h-4 w-4 mr-2 text-finance-accent" />
+                <span>{publication.date}</span>
+              </div>
+              <div className="flex items-center">
+                <BookOpen className="h-4 w-4 mr-2 text-finance-accent" />
+                <span>{publication.type === 'article' ? safeTranslate(t, 'community.article', 'Article') : safeTranslate(t, 'community.strategy', 'Stratégie')}</span>
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-between items-center">
+              <Link to={`/community/${publication.type}/${publication.id}`} className="text-finance-accent hover:underline flex items-center">
+                {safeTranslate(t, 'common.readMore', 'Lire plus')}
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Link>
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center">
+                  <Eye className="h-4 w-4 mr-1 text-finance-accent" />
+                  <span>{publication.views}</span>
+                </div>
+                <div className="flex items-center">
+                  <ThumbsUp className="h-4 w-4 mr-1 text-finance-accent" />
+                  <span>{publication.likes}</span>
+                </div>
+              </div>
+            </CardFooter>
+          </Card>
+        ))}
       </div>
     </div>
-  );
-};
-
-interface PublicationProps {
-  publication: Publication;
-}
-
-const PublicationCard = ({ publication }: PublicationProps) => {
-  return (
-    <Card className="overflow-hidden hover:border-finance-accent transition-colors duration-300">
-      <CardHeader className="pb-3">
-        <div className="flex justify-between">
-          <Badge variant={publication.type === "article" ? "secondary" : "premium"}>
-            {publication.type === "article" ? "Article" : "Stratégie"}
-          </Badge>
-          <span className="text-sm text-finance-lightgray">{publication.date}</span>
-        </div>
-        <CardTitle className="text-xl mt-2">{publication.title}</CardTitle>
-      </CardHeader>
-      
-      <CardContent className="pb-3">
-        <div className="flex items-center mb-3">
-          <div className="h-8 w-8 rounded-full overflow-hidden mr-2">
-            <img 
-              src={publication.authorAvatar}
-              alt={publication.author}
-              className="h-full w-full object-cover"
-            />
-          </div>
-          <span className="text-finance-accent">{publication.author}</span>
-        </div>
-        
-        <CardDescription className="text-finance-lightgray mb-4">
-          {publication.summary.length > 300 
-            ? `${publication.summary.substring(0, 300)}...` 
-            : publication.summary}
-        </CardDescription>
-        
-        <div className="flex flex-wrap gap-2 mb-3">
-          {publication.tags.map((tag, index) => (
-            <Badge key={index} variant="level" className="text-xs">
-              {tag}
-            </Badge>
-          ))}
-        </div>
-      </CardContent>
-      
-      <CardFooter className="flex justify-between pt-0">
-        <div className="flex items-center text-sm text-finance-lightgray">
-          <Eye className="h-4 w-4 mr-1" />
-          <span className="mr-4">{publication.views}</span>
-          <BookOpen className="h-4 w-4 mr-1" />
-          <span>{publication.likes}</span>
-        </div>
-        
-        <Button variant="link" asChild className="text-finance-accent p-0">
-          <Link to={`/community/${publication.type}/${publication.id}`}>
-            Lire la suite <ChevronRight className="h-4 w-4 ml-1" />
-          </Link>
-        </Button>
-      </CardFooter>
-    </Card>
   );
 };
 
