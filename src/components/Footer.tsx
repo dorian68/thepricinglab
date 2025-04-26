@@ -52,7 +52,7 @@ const Footer: React.FC = () => {
         </div>
         
         <div className="border-t border-finance-steel/10 mt-8 pt-6 text-center text-finance-lightgray text-sm">
-          <p>© {currentYear} The Pricing Lab. {safeTranslate(t, 'footer.copyright', 'Tous droits réservés.')}</p>
+          <p>© {currentYear} The Pricing Lab.</p>
         </div>
       </div>
     </footer>

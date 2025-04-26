@@ -37,7 +37,6 @@ const additionalEnTranslations = {
     terms: "Terms",
     privacy: "Privacy",
     cookies: "Cookies",
-    copyright: "© 2025 The Pricing Lab"
   },
   courses: {
     fundamentals: "Fundamentals",
@@ -216,7 +215,6 @@ const additionalFrTranslations = {
     terms: "Conditions",
     privacy: "Confidentialité",
     cookies: "Cookies",
-    copyright: "© 2025 The Pricing Lab"
   },
   courses: {
     fundamentals: "Fondamentaux",
