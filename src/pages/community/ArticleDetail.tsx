@@ -6,7 +6,8 @@ import { ArrowLeft, Calendar, User, Eye, ThumbsUp, ChevronRight, Share2 } from "
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { MarkdownMathRenderer } from "../../components/editors/MarkdownMathRenderer";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import MarkdownMathRenderer from "../../components/editors/MarkdownMathRenderer";
 import { Article, Publication } from "../../types/community";
 
 // Mock article data

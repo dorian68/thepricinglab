@@ -1,4 +1,3 @@
-
 import React, { useCallback, useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Textarea } from '@/components/ui/textarea';
@@ -43,7 +42,8 @@ const MarkdownMathEditor: React.FC<MarkdownMathEditorProps> = ({
     if (!isEditing && previewRef.current) {
       const mermaidDiagrams = previewRef.current.querySelectorAll('.language-mermaid');
       if (mermaidDiagrams.length > 0) {
-        mermaid.init(undefined, mermaidDiagrams);
+        // Use type assertion to solve the TypeScript error
+        mermaid.init(undefined, mermaidDiagrams as NodeListOf<HTMLElement>);
       }
     }
   }, [isEditing, value]);
@@ -160,7 +160,6 @@ const MarkdownMathEditor: React.FC<MarkdownMathEditorProps> = ({
                   );
                 }
               }}
-              extraCommands={[]}
             >
               {value}
             </ReactMarkdown>

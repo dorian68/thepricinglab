@@ -33,7 +33,8 @@ const MarkdownMathRenderer: React.FC<MarkdownMathRendererProps> = ({
       const mermaidDiagrams = mermaidContainerRef.current.querySelectorAll('.language-mermaid');
       if (mermaidDiagrams.length > 0) {
         try {
-          mermaid.init(undefined, mermaidDiagrams);
+          // Use type assertion to solve the TypeScript error
+          mermaid.init(undefined, mermaidDiagrams as NodeListOf<HTMLElement>);
         } catch (error) {
           console.error('Mermaid diagram rendering error:', error);
         }

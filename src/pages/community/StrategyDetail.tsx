@@ -1,141 +1,34 @@
-
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowLeft, Calendar, User, Eye, ThumbsUp, ChevronRight, Share2, Calculator, BarChart3, TrendingUp, Activity } from "lucide-react";
+import { ArrowLeft, Calendar, User, Eye, ThumbsUp, ChevronRight, Share2, Calculator, BarChart3, TrendingUp, Activity, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MarkdownMathRenderer } from "../../components/editors/MarkdownMathRenderer";
+import MarkdownMathRenderer from "../../components/editors/MarkdownMathRenderer";
 import { Strategy, Publication } from "../../types/community";
-import { PayoffChart } from "../../components/strategies/PayoffChart";
-import { GreekDisplay } from "../../components/strategies/GreekDisplay";
 
-// Mock strategy data
-const mockStrategies: Strategy[] = [
-  {
-    id: 1,
-    type: "strategy",
-    title: "Stratégie d'arbitrage de volatilité pour indices",
-    author: "Sophie Martin",
-    authorAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    summary: "Cette stratégie vise à exploiter les différences entre volatilité implicite et réalisée sur les indices majeurs.",
-    content: `
-# Stratégie d'arbitrage de volatilité pour indices
+const PayoffChart = ({ strategy, results }: any) => {
+  return (
+    <div className="flex items-center justify-center h-full">
+      <p className="text-center text-finance-lightgray">
+        Diagramme de Payoff à implémenter
+      </p>
+    </div>
+  );
+};
 
-## Principe de base
-
-Cette stratégie consiste à exploiter les écarts entre la volatilité implicite des options et la volatilité réalisée historique des indices sous-jacents. L'idée fondamentale est que la volatilité implicite contient souvent une prime de risque qui peut être exploitée dans certaines conditions de marché.
-
-## Structure de la stratégie
-
-La stratégie se compose des éléments suivants :
-
-1. **Identification des indices cibles** - Nous nous concentrons sur les indices liquides comme S&P 500, EuroStoxx 50 et Nikkei 225
-2. **Analyse du terme de volatilité** - Construction de la structure par terme de volatilité implicite
-3. **Calcul de l'écart de volatilité** - Comparaison avec les volatilités réalisées historiques
-4. **Construction de position** - Utilisation de straddles/strangles/condors pour exploiter les écarts
-
-### Formule de calcul de l'écart de volatilité
-
-$$
-\\text{Écart de volatilité} = \\sigma_{\\text{implicite}} - \\sigma_{\\text{réalisée}}
-$$
-
-Où :
-- $\\sigma_{\\text{implicite}}$ est la volatilité implicite des options
-- $\\sigma_{\\text{réalisée}}$ est la volatilité réalisée calculée sur une fenêtre historique
-
-## Conditions d'entrée
-
-La stratégie est déclenchée lorsque :
-
-1. L'écart de volatilité dépasse 5 points de pourcentage
-2. Le marché présente des signes de stabilisation (RSI entre 40 et 60)
-3. Les volumes d'options sont suffisamment importants pour assurer la liquidité
-
-## Position et sizing
-
-Pour un indice donné, nous utilisons la combinaison suivante :
-
-- **Position longue** : Vente de straddles ATM avec expiration 1-2 mois
-- **Protection** : Achat de strangles OTM avec même expiration (risk reversal)
-- **Scaling** : Sizing basé sur un risque maximal de 2% du portefeuille par position
-
-## Gestion des risques
-
-La stratégie comprend plusieurs mécanismes de protection :
-
-1. **Stop-loss automatique** - Sortie si la perte atteint 3% de la position
-2. **Protection contre les événements extrêmes** - Les strangles OTM limitent les pertes en cas de mouvements importants
-3. **Surveillance des catalyseurs** - Réduction des positions avant annonces macroéconomiques majeures
-
-## Backtesting et résultats
-
-Sur la période 2010-2023, cette stratégie a généré :
-
-- Rendement annualisé : 14.2% 
-- Ratio de Sharpe : 1.76
-- Drawdown maximum : 12%
-- Taux de succès : 67%
-
-### Visualisation des performances
-
-\`\`\`mermaid
-graph LR
-    A[Entrée] -->|Écart > 5%| B[Construction position]
-    B --> C{Performance?}
-    C -->|Target atteint| D[Sortie +]
-    C -->|Stop-loss| E[Sortie -]
-    C -->|Expiration| F[Évaluation]
-    F -->|Rollover?| G[Nouvelle position]
-    F -->|Clôture| H[Fin]
-\`\`\`
-
-## Adaptation du modèle
-
-Le modèle est adaptable selon les conditions de marché :
-
-1. En période de haute volatilité : réduction des positions et extension des protections
-2. En période de basse volatilité : augmentation du levier et réduction des protections
-
-## Conclusion
-
-Cette stratégie d'arbitrage de volatilité offre une exposition intéressante aux primes de risque de volatilité tout en maintenant un profil de risque contrôlé grâce aux protections via options. Son principal avantage est sa faible corrélation avec les rendements des indices, ce qui en fait un bon diversificateur de portefeuille.
-    `,
-    date: "2024-04-19",
-    views: 322,
-    likes: 24,
-    tags: ["Arbitrage", "Volatilité", "SPX", "Stratégie quantitative"],
-    published: true,
-    strategyType: "trading"
-  },
-  {
-    id: 2,
-    type: "strategy",
-    title: "Couverture dynamique pour options sur taux",
-    author: "Émilie Lambert",
-    authorAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    summary: "Stratégie de couverture dynamique pour options sur taux d'intérêt utilisant une combinaison de Delta et Vega hedging.",
-    content: `
-# Couverture dynamique pour options sur taux
-
-Cette stratégie propose une approche optimisée pour couvrir les options sur taux d'intérêt en utilisant une combinaison de Delta et Vega hedging.
-
-## Modèle de base
-
-Le modèle utilise une extension du cadre de Black pour les options sur taux, avec ajustement pour la structure par terme des taux forward.
-    `,
-    date: "2024-04-10",
-    views: 178,
-    likes: 15,
-    tags: ["Hedging", "Options sur taux", "Delta", "Vega"],
-    published: true,
-    strategyType: "hedging"
-  }
-];
+const GreekDisplay = ({ strategy, results }: any) => {
+  return (
+    <div className="flex items-center justify-center h-full">
+      <p className="text-center text-finance-lightgray">
+        Analyse des Greeks à implémenter
+      </p>
+    </div>
+  );
+};
 
 const StrategyDetail = () => {
   const { id } = useParams<{id: string}>();
@@ -145,15 +38,12 @@ const StrategyDetail = () => {
   const [activeTab, setActiveTab] = useState("description");
 
   useEffect(() => {
-    // In a real app, we would fetch the strategy from an API
-    // For demo purposes, we'll use the mock data
     const strategyId = parseInt(id || "0");
     const foundStrategy = mockStrategies.find(s => s.id === strategyId);
     
     if (foundStrategy) {
       setStrategy(foundStrategy);
       
-      // Find related strategies based on tags
       const related = mockStrategies
         .filter(s => s.id !== strategyId && s.tags.some(tag => foundStrategy.tags.includes(tag)))
         .slice(0, 3);
@@ -164,7 +54,6 @@ const StrategyDetail = () => {
     setLoading(false);
   }, [id]);
 
-  // Mock strategy results for demonstration
   const mockResults = {
     totalPrice: 4.25,
     totalGreeks: {
@@ -318,7 +207,6 @@ const StrategyDetail = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="h-96">
-                    {/* Use the PayoffChart component from the Trading Lab */}
                     <PayoffChart
                       strategy={{
                         id: "strategy-1",
@@ -395,7 +283,6 @@ const StrategyDetail = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="h-96">
-                    {/* Use the GreekDisplay component from the Trading Lab */}
                     <GreekDisplay
                       strategy={{
                         id: "strategy-1",

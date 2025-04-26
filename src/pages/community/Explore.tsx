@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -18,6 +19,7 @@ const mockPublications: Publication[] = [
     author: "Martin Dubois",
     authorAvatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     summary: "Une analyse approfondie de la méthode de calibrage du modèle de Heston pour le pricing d'options exotiques, en particulier les options à barrière et les options asiatiques...",
+    content: "", // Added empty content to fix type error
     date: "2024-04-22",
     views: 475,
     likes: 38,
@@ -31,6 +33,7 @@ const mockPublications: Publication[] = [
     author: "Sophie Martin",
     authorAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     summary: "Cette stratégie vise à exploiter les différences entre volatilité implicite et réalisée sur les indices majeurs. Particulièrement efficace en période de forte volatilité, elle permet...",
+    content: "", // Added empty content to fix type error
     date: "2024-04-19",
     views: 322,
     likes: 24,
@@ -44,6 +47,7 @@ const mockPublications: Publication[] = [
     author: "Alexandre Dupont",
     authorAvatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     summary: "Dans un environnement de taux d'intérêt négatifs, le modèle classique de Black-Scholes présente des limitations importantes. Cet article examine les ajustements nécessaires et propose...",
+    content: "", // Added empty content to fix type error
     date: "2024-04-15",
     views: 289,
     likes: 32,
@@ -57,6 +61,7 @@ const mockPublications: Publication[] = [
     author: "Émilie Lambert",
     authorAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     summary: "Stratégie de couverture dynamique pour options sur taux d'intérêt utilisant une combinaison de Delta et Vega hedging. Cette approche optimise le ratio coût-efficacité des couvertures...",
+    content: "", // Added empty content to fix type error
     date: "2024-04-10",
     views: 178,
     likes: 15,
@@ -70,6 +75,7 @@ const mockPublications: Publication[] = [
     author: "Thomas Richard",
     authorAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     summary: "Les techniques d'optimisation de Monte Carlo permettent d'accélérer significativement le pricing des produits structurés complexes. Cet article présente des approches avancées de réduction de variance...",
+    content: "", // Added empty content to fix type error
     date: "2024-04-05",
     views: 211,
     likes: 22,
