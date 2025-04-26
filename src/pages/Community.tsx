@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import {
   MessageSquare,
@@ -25,11 +24,14 @@ import {
   Calendar as CalendarIcon,
   Code,
   Laptop,
-  Zap
+  Zap,
+  BookOpen,
+  FileText
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { safeTranslate } from "@/utils/translationUtils";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "../contexts/AuthContext";
 
 // Category data
 const categories = [
@@ -234,9 +236,11 @@ const polls = [
 
 const Community = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("forum");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const { profile } = useAuth();
   
   // Filter topics based on search query and selected category
   const filteredTopics = topics.filter(topic => {
@@ -263,6 +267,28 @@ const Community = () => {
           <Button variant="finance" className="flex items-center">
             <PlusCircle className="mr-2 h-4 w-4" />
             {safeTranslate(t, 'community.newTopic', 'Nouveau sujet')}
+          </Button>
+        </div>
+      </div>
+      
+      {/* New collaborative content section */}
+      <div className="finance-card p-6 mb-8">
+        <h2 className="text-xl font-semibold mb-4">Publications collaboratives</h2>
+        <p className="text-finance-lightgray mb-4">
+          Découvrez les articles et stratégies publiés par la communauté ou contribuez avec votre propre contenu.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 mt-4">
+          <Button asChild variant="default" className="flex items-center">
+            <Link to="/community/explore">
+              <BookOpen className="mr-2 h-4 w-4" />
+              Explorer les publications
+            </Link>
+          </Button>
+          <Button asChild variant="finance" className="flex items-center">
+            <Link to="/community/contribute">
+              <FileText className="mr-2 h-4 w-4" />
+              Contribuer
+            </Link>
           </Button>
         </div>
       </div>

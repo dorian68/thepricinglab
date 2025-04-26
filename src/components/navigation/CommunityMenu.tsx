@@ -1,6 +1,6 @@
 
 import React from "react";
-import { MessageSquare, Award, Code, LineChart } from "lucide-react";
+import { MessageSquare, Award, Code, LineChart, BookOpen, Edit } from "lucide-react";
 import { NavMenuItem } from "./NavMenuSection";
 import { useTranslation } from "react-i18next";
 import { safeTranslate } from "../../utils/translationUtils";
@@ -20,6 +20,18 @@ const CommunityMenu = () => {
           icon={MessageSquare} 
           title={st('community.forum.title', 'Discussion Forum')} 
           description={st('community.forum.description', 'Exchange ideas and ask questions')} 
+        />
+        <NavMenuItem 
+          to="/community/explore" 
+          icon={BookOpen} 
+          title={'Publications collaboratives'} 
+          description={'Articles et stratégies de la communauté'} 
+        />
+        <NavMenuItem 
+          to="/community/contribute" 
+          icon={Edit} 
+          title={'Contribuer'} 
+          description={'Écrire un article ou partager une stratégie'} 
         />
         <NavMenuItem 
           to="/projects" 

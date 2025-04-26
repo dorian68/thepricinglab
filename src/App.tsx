@@ -51,6 +51,10 @@ import Forum from './pages/community/Forum';
 import Chat from './pages/community/Chat';
 import WeeklyChallenge from './pages/community/WeeklyChallenge';
 import PairProgramming from './pages/community/PairProgramming';
+import Explore from './pages/community/Explore';
+import Contribute from './pages/community/Contribute';
+import ArticleDetail from './pages/community/ArticleDetail';
+import StrategyDetail from './pages/community/StrategyDetail';
 
 import VolatilityCalculator from './components/tools/VolatilityCalculator';
 import BlackScholesCalculator from './components/tools/BlackScholesCalculator';
@@ -112,6 +116,13 @@ const App = () => {
                   <Route path="/community/chat" element={<Chat />} />
                   <Route path="/community/weekly-challenge" element={<WeeklyChallenge />} />
                   <Route path="/community/pair-programming" element={<PairProgramming />} />
+                  
+                  {/* New community routes for collaborative publishing */}
+                  <Route path="/community/explore" element={<Explore />} />
+                  <Route path="/community/contribute" element={<Contribute />} />
+                  <Route path="/community/article/:id" element={<ArticleDetail />} />
+                  <Route path="/community/strategy/:id" element={<StrategyDetail />} />
+                  
                   <Route path="/blog" element={<Blog />} />
                   <Route path="/blog/:slug" element={<BlogPost />} />
                   <Route path="/pricing" element={<Pricing />} />
