@@ -1,10 +1,11 @@
 
 import React from 'react';
 import { LineChart } from '@/components/ui/chart';
-import { Strategy } from '@/types/community';
+import { Strategy as CommunityStrategy } from '@/types/community';
+import { Strategy as TradingStrategy } from '@/types/strategies';
 
 interface PayoffChartProps {
-  strategy: any;
+  strategy: CommunityStrategy | TradingStrategy | any;
   results: any;
 }
 

@@ -21,8 +21,10 @@ import GreekDisplay from '@/components/strategies/GreekDisplay';
 import StrategyForm from '@/components/strategies/StrategyForm';
 
 import { Strategy, StrategyType } from '@/types/community';
+import { Strategy as TradingStrategy } from '@/types/strategies';
 import { calculateStrategyResults } from '@/utils/options/strategyCalculator';
 import { defaultStrategies } from '@/utils/options/strategyDefaults';
+import { adaptCommunityToTradingStrategy, adaptTradingToCommunityStrategy } from '@/utils/options/strategyAdapter';
 
 const StrategyBuilder: React.FC = () => {
   const { t } = useTranslation();
@@ -32,24 +34,51 @@ const StrategyBuilder: React.FC = () => {
   const [strategyTitle, setStrategyTitle] = useState<string>('Nouvelle Stratégie');
   const [strategyDescription, setStrategyDescription] = useState<string>('Description de la stratégie');
   const [strategyType, setStrategyType] = useState<StrategyType>('pricing');
-  const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(defaultStrategies[0]);
+  
+  // Using the community strategy type for storage with translation to trading strategy when needed
+  const [selectedStrategy, setSelectedStrategy] = useState<Strategy>(() => {
+    const communityStrategy: Strategy = {
+      id: "new-strategy",
+      type: "strategy",
+      title: "Nouvelle Stratégie",
+      author: "Current User",
+      summary: "Description de la stratégie",
+      content: "",
+      date: new Date().toISOString(),
+      views: 0,
+      likes: 0,
+      tags: ["options"],
+      published: true,
+      strategyType: "pricing",
+      strategyData: defaultStrategies[0].parameters
+    };
+    return communityStrategy;
+  });
+  
   const [results, setResults] = useState<any>(null);
   const [pricingMethod, setPricingMethod] = useState<'analytical' | 'monteCarlo'>('analytical');
   
   // Calculate results when strategy changes or pricing method changes
   useEffect(() => {
     if (selectedStrategy) {
-      const calculatedResults = calculateStrategyResults(selectedStrategy);
+      const tradingStrategy = adaptCommunityToTradingStrategy(selectedStrategy);
+      const calculatedResults = calculateStrategyResults(tradingStrategy);
       setResults(calculatedResults);
     }
   }, [selectedStrategy, pricingMethod]);
 
-  const handleStrategyFormChange = (updatedStrategy: Strategy) => {
-    setSelectedStrategy(updatedStrategy);
+  const handleStrategyFormChange = (updatedTradingStrategy: TradingStrategy) => {
+    // Convert the trading strategy to community strategy format
+    const updatedCommunityStrategy = {
+      ...selectedStrategy,
+      strategyData: updatedTradingStrategy.parameters
+    };
+    setSelectedStrategy(updatedCommunityStrategy as Strategy);
   };
 
   const handleCalculate = () => {
-    const calculatedResults = calculateStrategyResults(selectedStrategy);
+    const tradingStrategy = adaptCommunityToTradingStrategy(selectedStrategy);
+    const calculatedResults = calculateStrategyResults(tradingStrategy);
     setResults(calculatedResults);
   };
 
@@ -70,7 +99,13 @@ const StrategyBuilder: React.FC = () => {
             <Input 
               id="title" 
               value={strategyTitle} 
-              onChange={(e) => setStrategyTitle(e.target.value)} 
+              onChange={(e) => {
+                setStrategyTitle(e.target.value);
+                setSelectedStrategy({
+                  ...selectedStrategy,
+                  title: e.target.value
+                });
+              }} 
               placeholder="Ex: Butterfly Spread sur Actions Tech" 
             />
           </div>
@@ -80,7 +115,13 @@ const StrategyBuilder: React.FC = () => {
             <Input 
               id="description" 
               value={strategyDescription} 
-              onChange={(e) => setStrategyDescription(e.target.value)} 
+              onChange={(e) => {
+                setStrategyDescription(e.target.value);
+                setSelectedStrategy({
+                  ...selectedStrategy,
+                  summary: e.target.value
+                });
+              }} 
               placeholder="Décrivez brièvement cette stratégie" 
             />
           </div>
@@ -89,7 +130,13 @@ const StrategyBuilder: React.FC = () => {
             <Label htmlFor="strategyType">Type de stratégie</Label>
             <Select 
               value={strategyType}
-              onValueChange={(value: StrategyType) => setStrategyType(value)}
+              onValueChange={(value: StrategyType) => {
+                setStrategyType(value);
+                setSelectedStrategy({
+                  ...selectedStrategy,
+                  strategyType: value
+                });
+              }}
             >
               <SelectTrigger id="strategyType">
                 <SelectValue />
@@ -216,20 +263,8 @@ const StrategyBuilder: React.FC = () => {
     }
   ];
 
-  const handleNext = () => {
-    if (activeStep < steps.length - 1) {
-      setActiveStep(activeStep + 1);
-    } else {
-      // Handle final submission
-      handlePublish();
-    }
-  };
-
-  const handleBack = () => {
-    if (activeStep > 0) {
-      setActiveStep(activeStep - 1);
-    }
-  };
+  // For the StrategyForm, we need to convert our Community Strategy to Trading Strategy
+  const tradingStrategyForForm = adaptCommunityToTradingStrategy(selectedStrategy);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -259,13 +294,123 @@ const StrategyBuilder: React.FC = () => {
         </CardHeader>
         
         <CardContent>
-          {steps[activeStep].content}
+          {activeStep === 0 && steps[0].content}
+          
+          {activeStep === 1 && (
+            <div>
+              <StrategyForm 
+                strategy={tradingStrategyForForm}
+                onParametersChange={handleStrategyFormChange}
+              />
+            </div>
+          )}
+          
+          {activeStep === 2 && (
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label>Méthode de pricing</Label>
+                <div className="flex items-center space-x-4">
+                  <Select 
+                    value={pricingMethod}
+                    onValueChange={(value: 'analytical' | 'monteCarlo') => setPricingMethod(value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="analytical">Pricing Analytique</SelectItem>
+                      <SelectItem value="monteCarlo">Monte Carlo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Button variant="finance" onClick={handleCalculate}>
+                    <Calculator className="mr-2 h-4 w-4" />
+                    Calculer
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="bg-finance-charcoal">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Diagramme de payoff</CardTitle>
+                  </CardHeader>
+                  <CardContent className="h-80">
+                    <PayoffChart strategy={tradingStrategyForForm} results={results} />
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-finance-charcoal">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Sensibilités (Greeks)</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <GreekDisplay strategy={tradingStrategyForForm} results={results} />
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+          
+          {activeStep === 3 && (
+            <div className="space-y-6">
+              <Card className="bg-finance-charcoal p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-finance-accent font-medium">Visibilité</h3>
+                    <p className="text-sm text-finance-lightgray">Rendre cette stratégie visible pour la communauté</p>
+                  </div>
+                  <Switch 
+                    checked={isPublic} 
+                    onCheckedChange={(checked) => {
+                      setIsPublic(checked);
+                      setSelectedStrategy({
+                        ...selectedStrategy,
+                        published: checked
+                      });
+                    }} 
+                    className="data-[state=checked]:bg-finance-accent" 
+                  />
+                </div>
+              </Card>
+              
+              <div className="bg-finance-charcoal p-4 rounded-lg">
+                <h3 className="text-lg font-medium mb-2">Résumé de la stratégie</h3>
+                
+                <div className="space-y-2">
+                  <div>
+                    <span className="text-finance-lightgray text-sm">Titre:</span>
+                    <p className="text-finance-offwhite">{strategyTitle}</p>
+                  </div>
+                  
+                  <div>
+                    <span className="text-finance-lightgray text-sm">Description:</span>
+                    <p className="text-finance-offwhite">{strategyDescription}</p>
+                  </div>
+                  
+                  <div>
+                    <span className="text-finance-lightgray text-sm">Type:</span>
+                    <p className="text-finance-offwhite capitalize">{strategyType}</p>
+                  </div>
+                  
+                  <div>
+                    <span className="text-finance-lightgray text-sm">Visibilité:</span>
+                    <p className="text-finance-offwhite">{isPublic ? 'Publique' : 'Privée'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
         
         <CardFooter className="flex justify-between border-t border-finance-steel pt-4">
           <Button 
             variant="outline" 
-            onClick={handleBack} 
+            onClick={() => {
+              if (activeStep > 0) {
+                setActiveStep(activeStep - 1);
+              }
+            }} 
             disabled={activeStep === 0}
           >
             <ChevronLeft className="mr-2 h-4 w-4" />
@@ -274,7 +419,14 @@ const StrategyBuilder: React.FC = () => {
           
           <Button 
             variant="finance" 
-            onClick={handleNext}
+            onClick={() => {
+              if (activeStep < steps.length - 1) {
+                setActiveStep(activeStep + 1);
+              } else {
+                // Handle final submission
+                handlePublish();
+              }
+            }}
           >
             {activeStep === steps.length - 1 ? (
               <>

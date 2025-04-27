@@ -1,10 +1,11 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Strategy } from '@/types/community';
+import { Strategy as CommunityStrategy } from '@/types/community';
+import { Strategy as TradingStrategy } from '@/types/strategies';
 
 interface GreekDisplayProps {
-  strategy: any;
+  strategy: CommunityStrategy | TradingStrategy | any;
   results: any;
 }
 
