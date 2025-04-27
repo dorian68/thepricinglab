@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
@@ -158,7 +157,7 @@ const StrategyBuilder: React.FC = () => {
       content: (
         <div>
           <StrategyForm 
-            strategy={selectedStrategy}
+            strategy={adaptCommunityToTradingStrategy(selectedStrategy)}
             onParametersChange={handleStrategyFormChange}
           />
         </div>
@@ -198,7 +197,7 @@ const StrategyBuilder: React.FC = () => {
                 <CardTitle className="text-lg">Diagramme de payoff</CardTitle>
               </CardHeader>
               <CardContent className="h-80">
-                <PayoffChart strategy={selectedStrategy} results={results} />
+                <PayoffChart strategy={adaptCommunityToTradingStrategy(selectedStrategy)} results={results} />
               </CardContent>
             </Card>
             
@@ -207,7 +206,7 @@ const StrategyBuilder: React.FC = () => {
                 <CardTitle className="text-lg">Sensibilités (Greeks)</CardTitle>
               </CardHeader>
               <CardContent>
-                <GreekDisplay strategy={selectedStrategy} results={results} />
+                <GreekDisplay strategy={adaptCommunityToTradingStrategy(selectedStrategy)} results={results} />
               </CardContent>
             </Card>
           </div>
@@ -227,7 +226,13 @@ const StrategyBuilder: React.FC = () => {
               </div>
               <Switch 
                 checked={isPublic} 
-                onCheckedChange={setIsPublic} 
+                onCheckedChange={(checked) => {
+                  setIsPublic(checked);
+                  setSelectedStrategy({
+                    ...selectedStrategy,
+                    published: checked
+                  });
+                }} 
                 className="data-[state=checked]:bg-finance-accent" 
               />
             </div>
@@ -263,9 +268,6 @@ const StrategyBuilder: React.FC = () => {
     }
   ];
 
-  // For the StrategyForm, we need to convert our Community Strategy to Trading Strategy
-  const tradingStrategyForForm = adaptCommunityToTradingStrategy(selectedStrategy);
-
   return (
     <div className="container mx-auto px-4 py-8">
       <Helmet>
@@ -299,7 +301,7 @@ const StrategyBuilder: React.FC = () => {
           {activeStep === 1 && (
             <div>
               <StrategyForm 
-                strategy={tradingStrategyForForm}
+                strategy={adaptCommunityToTradingStrategy(selectedStrategy)}
                 onParametersChange={handleStrategyFormChange}
               />
             </div>
@@ -336,7 +338,7 @@ const StrategyBuilder: React.FC = () => {
                     <CardTitle className="text-lg">Diagramme de payoff</CardTitle>
                   </CardHeader>
                   <CardContent className="h-80">
-                    <PayoffChart strategy={tradingStrategyForForm} results={results} />
+                    <PayoffChart strategy={adaptCommunityToTradingStrategy(selectedStrategy)} results={results} />
                   </CardContent>
                 </Card>
                 
@@ -345,7 +347,7 @@ const StrategyBuilder: React.FC = () => {
                     <CardTitle className="text-lg">Sensibilités (Greeks)</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <GreekDisplay strategy={tradingStrategyForForm} results={results} />
+                    <GreekDisplay strategy={adaptCommunityToTradingStrategy(selectedStrategy)} results={results} />
                   </CardContent>
                 </Card>
               </div>
