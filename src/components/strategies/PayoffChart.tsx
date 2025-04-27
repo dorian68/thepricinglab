@@ -3,6 +3,7 @@ import React from 'react';
 import { LineChart } from '@/components/ui/chart';
 import { Strategy as CommunityStrategy } from '@/types/community';
 import { Strategy as TradingStrategy } from '@/types/strategies';
+import { getCalculationStrategy } from '@/utils/options/strategyAdapter';
 
 interface PayoffChartProps {
   strategy: CommunityStrategy | TradingStrategy | any;
