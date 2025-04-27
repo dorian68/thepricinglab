@@ -1,3 +1,4 @@
+
 import { Strategy as CommunityStrategy } from '@/types/community';
 import { Strategy as TradingStrategy, OptionLeg } from '@/types/strategies';
 
