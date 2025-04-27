@@ -12,7 +12,7 @@ export function adaptCommunityToTradingStrategy(communityStrategy: CommunityStra
   return {
     id: communityStrategy.id.toString(),
     name: communityStrategy.title || "Unnamed Strategy",
-    category: "vanilla", // Default category
+    category: strategyData.category || "vanilla", // Default category
     description: communityStrategy.summary || "",
     parameters: {
       spotPrice: strategyData.spotPrice || 100,
