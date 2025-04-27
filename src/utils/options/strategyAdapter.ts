@@ -1,4 +1,3 @@
-
 import { Strategy as CommunityStrategy } from '@/types/community';
 import { Strategy as TradingStrategy, OptionLeg } from '@/types/strategies';
 
@@ -33,6 +32,30 @@ export function adaptCommunityToTradingStrategy(communityStrategy: CommunityStra
 }
 
 /**
+ * Check if a strategy object is a Community Strategy
+ */
+export function isCommunityStrategy(strategy: any): strategy is CommunityStrategy {
+  return strategy && typeof strategy === 'object' && 'type' in strategy && strategy.type === 'strategy';
+}
+
+/**
+ * Check if a strategy object is a Trading Strategy
+ */
+export function isTradingStrategy(strategy: any): strategy is TradingStrategy {
+  return strategy && typeof strategy === 'object' && 'parameters' in strategy;
+}
+
+/**
+ * Get appropriate strategy object for the calculations
+ */
+export function getCalculationStrategy(strategy: CommunityStrategy | TradingStrategy): TradingStrategy {
+  if (isCommunityStrategy(strategy)) {
+    return adaptCommunityToTradingStrategy(strategy);
+  }
+  return strategy;
+}
+
+/**
  * Adapts a trading strategy to a community strategy format
  */
 export function adaptTradingToCommunityStrategy(
@@ -58,28 +81,4 @@ export function adaptTradingToCommunityStrategy(
       category: tradingStrategy.category
     }
   };
-}
-
-/**
- * Check if a strategy object is a Community Strategy
- */
-export function isCommunityStrategy(strategy: any): strategy is CommunityStrategy {
-  return strategy && typeof strategy === 'object' && 'type' in strategy && strategy.type === 'strategy';
-}
-
-/**
- * Check if a strategy object is a Trading Strategy
- */
-export function isTradingStrategy(strategy: any): strategy is TradingStrategy {
-  return strategy && typeof strategy === 'object' && 'parameters' in strategy;
-}
-
-/**
- * Get appropriate strategy object for the calculations
- */
-export function getCalculationStrategy(strategy: CommunityStrategy | TradingStrategy): TradingStrategy {
-  if (isCommunityStrategy(strategy)) {
-    return adaptCommunityToTradingStrategy(strategy);
-  }
-  return strategy;
 }

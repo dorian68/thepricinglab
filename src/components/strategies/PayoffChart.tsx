@@ -6,12 +6,13 @@ import { Strategy as TradingStrategy } from '@/types/strategies';
 import { getCalculationStrategy } from '@/utils/options/strategyAdapter';
 
 interface PayoffChartProps {
-  strategy: CommunityStrategy | TradingStrategy | any;
+  strategy: CommunityStrategy | TradingStrategy;
   results: any;
+  interactive?: boolean;
 }
 
-const PayoffChart: React.FC<PayoffChartProps> = ({ strategy, results }) => {
-  // If no results are available yet, show placeholder
+const PayoffChart: React.FC<PayoffChartProps> = ({ strategy, results, interactive = false }) => {
+  // Si aucun résultat n'est disponible, afficher un placeholder
   if (!strategy || !results) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -39,6 +40,9 @@ const PayoffChart: React.FC<PayoffChartProps> = ({ strategy, results }) => {
           color="#8884d8"
           xLabel="Prix du sous-jacent"
           yLabel="Profit/Perte"
+          showAxes={true}
+          animate={!interactive} // Disable animation in interactive mode
+          className="w-full h-full"
         />
       ) : (
         <div className="flex items-center justify-center h-full">
