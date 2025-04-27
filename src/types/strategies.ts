@@ -22,7 +22,7 @@ export interface StrategyParameters {
 export interface Strategy {
   id: string;
   name: string;
-  category: 'vanilla' | 'advanced';
+  category: 'vanilla' | 'advanced' | 'structured';
   description: string;
   parameters: StrategyParameters;
 }
