@@ -16,6 +16,7 @@ export interface Publication {
   tags: string[];
   published: boolean;
   strategyType?: StrategyType; // Make strategyType optional on base Publication
+  isDraft?: boolean; // Add isDraft property
 }
 
 export interface Article extends Publication {
