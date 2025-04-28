@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Strategy, 
@@ -10,7 +9,7 @@ import {
   PositionType,
   BarrierType
 } from '@/types/strategies';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +25,8 @@ import GreekDisplay from './GreekDisplay';
 import AssetSelector from './AssetSelector';
 import { createDefaultStructuredStrategy } from '@/utils/options/strategyAdapter';
 import { calculateStrategyResults } from '@/utils/options/strategyCalculator';
+import { TemplateGallery } from './TemplateGallery';
+import { getTemplateStrategy } from '@/utils/options/strategyTemplates';
 
 interface StructuredProductBuilderProps {
   onSave: (strategy: Strategy, isDraft: boolean) => void;
@@ -45,8 +46,8 @@ const StructuredProductBuilder: React.FC<StructuredProductBuilderProps> = ({
   const [calculationResults, setCalculationResults] = useState<any>(null);
   const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
   const [simulationPaths, setSimulationPaths] = useState(1000);
+  const [showTemplates, setShowTemplates] = useState(true);
 
-  // Effect to calculate results when strategy changes
   useEffect(() => {
     if (strategy?.parameters?.legs?.length > 0) {
       calculateResults();
@@ -55,12 +56,10 @@ const StructuredProductBuilder: React.FC<StructuredProductBuilderProps> = ({
 
   const calculateResults = () => {
     try {
-      // For monte carlo pricing we would use a different function, but for now we just use the same
       const results = calculateStrategyResults(strategy);
       setCalculationResults(results);
     } catch (error) {
       console.error("Error calculating strategy results:", error);
-      // In a real app, we would show an error message to the user
     }
   };
 
@@ -132,11 +131,9 @@ const StructuredProductBuilder: React.FC<StructuredProductBuilderProps> = ({
       const updatedLegs = [...prev.parameters.legs];
       
       if (type === 'none') {
-        // Remove barrier property if it exists
         const { barrier, ...legWithoutBarrier } = updatedLegs[index];
         updatedLegs[index] = legWithoutBarrier as OptionLeg;
       } else {
-        // Add or update barrier
         updatedLegs[index] = {
           ...updatedLegs[index],
           barrier: {
@@ -226,8 +223,8 @@ const StructuredProductBuilder: React.FC<StructuredProductBuilderProps> = ({
       parameters: {
         ...prev.parameters,
         underlyingAssets: [...(prev.parameters.underlyingAssets || []), asset],
-        spotPrice: asset.price, // Update main spot price with first asset
-        volatility: asset.volatility // Update main volatility with first asset
+        spotPrice: asset.price,
+        volatility: asset.volatility
       }
     }));
   };
@@ -248,7 +245,6 @@ const StructuredProductBuilder: React.FC<StructuredProductBuilderProps> = ({
         asset.id === updatedAsset.id ? updatedAsset : asset
       );
       
-      // If this is the main asset, update the main strategy parameters too
       const isMainAsset = prev.parameters.underlyingAssets?.[0]?.id === updatedAsset.id;
       
       return {
@@ -265,6 +261,42 @@ const StructuredProductBuilder: React.FC<StructuredProductBuilderProps> = ({
       };
     });
   };
+
+  const handleTemplateSelect = (templateName: string) => {
+    const template = getTemplateStrategy(templateName);
+    if (template) {
+      setStrategy(template);
+      setShowTemplates(false);
+    }
+  };
+
+  if (showTemplates) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Choisir un modèle de produit structuré</CardTitle>
+            <CardDescription>
+              Sélectionnez un modèle pour démarrer ou créez votre produit from scratch
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <TemplateGallery onSelectTemplate={handleTemplateSelect} />
+            
+            <div className="flex justify-center pt-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowTemplates(false)}
+                className="w-full max-w-md"
+              >
+                Créer from scratch
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -676,7 +708,6 @@ const StructuredProductBuilder: React.FC<StructuredProductBuilderProps> = ({
                                 id={`flow-outcome-value-${flow.id}`} 
                                 value={flow.outcome.value}
                                 onChange={(e) => {
-                                  // Allow percentage strings or numeric values
                                   const value = e.target.value.endsWith('%') 
                                     ? e.target.value 
                                     : isNaN(Number(e.target.value)) ? e.target.value : Number(e.target.value);
