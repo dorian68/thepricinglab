@@ -67,7 +67,7 @@ const PayoffChart: React.FC<PayoffChartProps> = ({ strategy, results, interactiv
     <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none">
       {results.breakEvenPoints.map((point: number, index: number) => {
         // Convert break-even price to position in the chart
-        const spotRange = strategy.parameters.spotPrice;
+        const spotRange = getCalculationStrategy(strategy).parameters.spotPrice;
         const minPrice = spotRange * 0.5;
         const maxPrice = spotRange * 1.5;
         const xPos = ((point - minPrice) / (maxPrice - minPrice)) * 100;
@@ -91,18 +91,20 @@ const PayoffChart: React.FC<PayoffChartProps> = ({ strategy, results, interactiv
     </div>
   ) : null;
 
+  // Pass only the expected props to LineChart, without tooltipFormatter
+  const chartProps = {
+    data: chartData,
+    color: "#8884d8",
+    xLabel: "Prix du sous-jacent",
+    yLabel: "Profit/Perte",
+    showAxes: true,
+    animate: !interactive,
+    className: "w-full h-full"
+  };
+
   return (
     <div ref={chartRef} className="h-full relative">
-      <LineChart
-        data={chartData}
-        color="#8884d8"
-        xLabel="Prix du sous-jacent"
-        yLabel="Profit/Perte"
-        showAxes={true}
-        animate={!interactive} // Disable animation in interactive mode
-        tooltipFormatter={formatTooltip}
-        className="w-full h-full"
-      />
+      <LineChart {...chartProps} />
       {breakEvenOverlay}
     </div>
   );

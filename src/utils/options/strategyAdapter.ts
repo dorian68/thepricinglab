@@ -142,6 +142,7 @@ export function createDefaultStructuredStrategy(): TradingStrategy {
           dividendYield: 0.01
         }
       ]
-    }
+    },
+    isDraft: false
   };
 }

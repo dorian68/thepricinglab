@@ -20,7 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Plus, X, Save, Calculator, Code, Lightning } from 'lucide-react';
+import { Plus, X, Save, Calculator, Code, Zap } from 'lucide-react';
 import PayoffChart from './PayoffChart';
 import GreekDisplay from './GreekDisplay';
 import AssetSelector from './AssetSelector';
@@ -905,7 +905,7 @@ const StructuredProductBuilder: React.FC<StructuredProductBuilderProps> = ({
                 className="flex items-center gap-2"
                 onClick={() => handleSave(false)}
               >
-                <Lightning className="h-4 w-4" />
+                <Zap className="h-4 w-4" />
                 {strategy.isDraft ? "Publier" : "Mettre à jour"}
               </Button>
             </div>
