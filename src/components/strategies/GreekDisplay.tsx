@@ -29,6 +29,11 @@ const GreekDisplay: React.FC<GreekDisplayProps> = ({ strategy, results }) => {
     return num.toFixed(4);
   };
 
+  // Get pricing info
+  const tradingStrategy = getCalculationStrategy(strategy);
+  const isStructured = tradingStrategy.category === 'structured';
+  const nominal = tradingStrategy.parameters.nominal;
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -60,8 +65,11 @@ const GreekDisplay: React.FC<GreekDisplayProps> = ({ strategy, results }) => {
 
       {results.totalPrice !== undefined && (
         <Card className="p-3 bg-finance-charcoal border-finance-accent mt-4">
-          <div className="text-xs text-finance-lightgray mb-1">Prix Total</div>
-          <div className="text-xl font-bold text-finance-accent">{formatNumber(results.totalPrice)}</div>
+          <div className="text-xs text-finance-lightgray mb-1">
+            {isStructured ? "Valeur du Produit" : "Prix Total"}
+            {isStructured && nominal ? ` (par ${nominal}€ de nominal)` : ""}
+          </div>
+          <div className="text-xl font-bold text-finance-accent">{formatNumber(results.totalPrice)}€</div>
         </Card>
       )}
       
@@ -70,13 +78,13 @@ const GreekDisplay: React.FC<GreekDisplayProps> = ({ strategy, results }) => {
           {results.maxProfit !== undefined && (
             <Card className="p-3 bg-finance-charcoal border-green-700">
               <div className="text-xs text-finance-lightgray mb-1">Profit Max</div>
-              <div className="text-lg font-semibold text-green-500">{formatNumber(results.maxProfit)}</div>
+              <div className="text-lg font-semibold text-green-500">{formatNumber(results.maxProfit)}€</div>
             </Card>
           )}
           {results.maxLoss !== undefined && (
             <Card className="p-3 bg-finance-charcoal border-red-700">
               <div className="text-xs text-finance-lightgray mb-1">Perte Max</div>
-              <div className="text-lg font-semibold text-red-500">{formatNumber(results.maxLoss)}</div>
+              <div className="text-lg font-semibold text-red-500">{formatNumber(results.maxLoss)}€</div>
             </Card>
           )}
         </div>

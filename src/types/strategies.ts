@@ -1,6 +1,9 @@
 
 export type OptionType = 'call' | 'put';
 export type PositionType = 'long' | 'short';
+export type AssetType = 'stock' | 'bond' | 'index' | 'future' | 'option';
+export type BarrierType = 'knock-in' | 'knock-out' | 'none';
+export type CouponType = 'fixed' | 'variable' | 'digital';
 
 export interface OptionLeg {
   strike: number;
@@ -8,6 +11,49 @@ export interface OptionLeg {
   position: PositionType;
   quantity: number;
   isSelected?: boolean; // Used for multi-leg editing
+  barrier?: {
+    type: BarrierType;
+    level: number;
+  };
+}
+
+export interface UnderlyingAsset {
+  id: string;
+  name: string;
+  type: AssetType;
+  price: number;
+  volatility: number;
+  dividendYield?: number;
+  maturityDate?: Date;
+  interestRate?: number;
+}
+
+export interface Coupon {
+  type: CouponType;
+  value: number;
+  condition?: {
+    assetId: string;
+    threshold: number;
+    operator: '>' | '<' | '>=' | '<=' | '=';
+  };
+}
+
+export interface StructuredProductFlow {
+  id: string;
+  type: 'barrier' | 'coupon' | 'autocall' | 'redemption';
+  description: string;
+  condition?: {
+    assetId: string;
+    threshold: number;
+    operator: '>' | '<' | '>=' | '<=' | '=';
+    observationDate?: Date;
+    isPeriodic?: boolean;
+    frequency?: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  };
+  outcome: {
+    type: 'payment' | 'redemption' | 'continuation';
+    value: number | string;
+  };
 }
 
 export interface StrategyParameters {
@@ -17,6 +63,10 @@ export interface StrategyParameters {
   interestRate: number;
   dividendYield: number;
   legs: OptionLeg[];
+  underlyingAssets?: UnderlyingAsset[];
+  structuredFlows?: StructuredProductFlow[];
+  coupons?: Coupon[];
+  nominal?: number;
 }
 
 export interface Strategy {
@@ -25,6 +75,7 @@ export interface Strategy {
   category: 'vanilla' | 'advanced' | 'structured';
   description: string;
   parameters: StrategyParameters;
+  isDraft?: boolean;
 }
 
 export interface Greeks {
@@ -48,4 +99,17 @@ export interface StrategyResult {
   breakEvenPoints: number[];
   maxProfit?: number;
   maxLoss?: number;
+  var?: number;  // Value at Risk
+  cvar?: number; // Conditional Value at Risk
+}
+
+export interface StressTestScenario {
+  name: string;
+  description: string;
+  parameters: {
+    volatilityChange: number;
+    interestRateChange: number;
+    spotPriceChange: number;
+  };
+  result?: StrategyResult;
 }
