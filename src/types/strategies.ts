@@ -72,7 +72,7 @@ export interface StrategyParameters {
 export interface Strategy {
   id: string;
   name: string;
-  category: 'vanilla' | 'advanced' | 'structured';
+  category: 'vanilla' | 'advanced' | 'structured' | 'income' | 'growth' | 'protection';
   description: string;
   parameters: StrategyParameters;
   isDraft?: boolean;
