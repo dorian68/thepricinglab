@@ -59,13 +59,18 @@ const UserModelsSection: React.FC<UserModelsSectionProps> = ({
   };
   
   const handleSubmitModel = (formData: CalibrationModelFormData) => {
+    // Convert File object to string (in a real app, you'd upload the file to a server)
+    const demoFileName = formData.demoFile ? formData.demoFile.name : undefined;
+    
     const newModel: CalibrationModel = {
       id: uuidv4(),
       ...formData,
       author: userName,
       authorId: userId,
       createdAt: new Date().toISOString(),
-      isDraft: true
+      isDraft: true,
+      // Convert File to string (filename in this case)
+      demoFile: demoFileName
     };
     
     setUserModels(prev => [newModel, ...prev]);

@@ -1,3 +1,4 @@
+
 export type PublicationType = 'article' | 'strategy';
 export type StrategyType = 'pricing' | 'hedging' | 'trading' | 'other';
 
@@ -21,7 +22,7 @@ export interface Publication {
   isDraft?: boolean;
 }
 
-// New interface for user calibration models
+// Updated interface for user calibration models with demoFile as string
 export interface CalibrationModel {
   id: string;
   name: string;
@@ -33,7 +34,7 @@ export interface CalibrationModel {
   createdAt: string;
   isPublic: boolean;
   isDraft: boolean;
-  demoFile?: string;
+  demoFile?: string; // Changed from File to string
 }
 
 export interface Article extends Publication {

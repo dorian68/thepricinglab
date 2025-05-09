@@ -1,7 +1,5 @@
-
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import type { TFunction } from 'i18next';
 import { defaultStrategies } from '../../utils/options/strategyDefaults';
 import { Strategy } from '../../types/strategies';
 import { Card } from '@/components/ui/card';
@@ -64,7 +62,7 @@ interface StrategyCardProps {
   strategy: Strategy;
   isSelected: boolean;
   onClick: () => void;
-  t: TFunction;
+  t: any; // Changed from TFunction to any to avoid i18next dependency
 }
 
 const StrategyCard: React.FC<StrategyCardProps> = ({ strategy, isSelected, onClick, t }) => {

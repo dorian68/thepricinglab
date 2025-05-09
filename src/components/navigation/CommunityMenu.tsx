@@ -11,7 +11,6 @@ const CommunityMenu: React.FC = () => {
   return (
     <div className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-2">
       <NavMenuSection
-        className="row-span-3"
         items={[
           {
             title: safeTranslate(t, "navbar.community.forum.title", "Forum"),

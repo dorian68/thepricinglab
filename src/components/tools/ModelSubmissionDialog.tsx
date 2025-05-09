@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -9,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { CalibrationDomain, CalibrationModelFormData } from '@/types/community';
 import { UploadCloud } from 'lucide-react';
-import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 
 interface ModelSubmissionDialogProps {
