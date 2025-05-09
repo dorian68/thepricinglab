@@ -1,57 +1,70 @@
 
 import React from "react";
-import { MessageSquare, Award, Code, LineChart, BookOpen, Edit } from "lucide-react";
-import { NavMenuItem } from "./NavMenuSection";
-import { useTranslation } from "react-i18next";
+import { NavMenuSection } from "./NavMenuSection";
+import { UsersRound, MessageCircle, ScrollText, Code2, Trophy, Briefcase } from "lucide-react";
 import { safeTranslate } from "../../utils/translationUtils";
+import { useTranslation } from "react-i18next";
 
-const CommunityMenu = () => {
+const CommunityMenu: React.FC = () => {
   const { t } = useTranslation();
-  const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
-  
+
   return (
-    <div className="p-4 w-[380px]">
-      <p className="text-sm text-finance-accent mb-4 font-medium">
-        {st('community.subtitle', 'Connect with fellow quants and traders')}
-      </p>
-      <ul className="space-y-3">
-        <NavMenuItem 
-          to="/community/forum" 
-          icon={MessageSquare} 
-          title={st('community.forum.title', 'Discussion Forum')} 
-          description={st('community.forum.description', 'Exchange ideas and ask questions')} 
-        />
-        <NavMenuItem 
-          to="/community/explore" 
-          icon={BookOpen} 
-          title={'Publications collaboratives'} 
-          description={'Articles et stratégies de la communauté'} 
-        />
-        <NavMenuItem 
-          to="/community/contribute" 
-          icon={Edit} 
-          title={'Contribuer'} 
-          description={'Écrire un article ou partager une stratégie'} 
-        />
-        <NavMenuItem 
-          to="/projects" 
-          icon={Award} 
-          title={st('community.projects.title', 'Projects & Challenges')} 
-          description={st('community.projects.description', 'New problems every week')} 
-        />
-        <NavMenuItem 
-          to="/community/pair-programming" 
-          icon={Code} 
-          title={st('community.pair.title', 'Pair Programming')} 
-          description={st('community.pair.description', 'Code together on projects')} 
-        />
-        <NavMenuItem 
-          to="/community/leaderboard" 
-          icon={LineChart} 
-          title={st('community.leaderboard.title', 'Leaderboard & Hackathons')} 
-          description={st('community.leaderboard.description', 'Rankings and events')} 
-        />
-      </ul>
+    <div className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-2">
+      <NavMenuSection
+        className="row-span-3"
+        items={[
+          {
+            title: safeTranslate(t, "navbar.community.forum.title", "Forum"),
+            href: "/community/forum",
+            description: safeTranslate(
+              t,
+              "navbar.community.forum.desc",
+              "Échangez avec la communauté"
+            ),
+            icon: <MessageCircle className="h-5 w-5" />,
+          },
+          {
+            title: safeTranslate(t, "navbar.community.contribute.title", "Contribuer"),
+            href: "/community/contribute",
+            description: safeTranslate(
+              t,
+              "navbar.community.contribute.desc",
+              "Partagez vos connaissances"
+            ),
+            icon: <ScrollText className="h-5 w-5" />,
+          },
+          {
+            title: safeTranslate(t, "navbar.community.pair.title", "Pair Programming"),
+            href: "/community/pair-programming",
+            description: safeTranslate(
+              t,
+              "navbar.community.pair.desc",
+              "Codez en collaboration"
+            ),
+            icon: <Code2 className="h-5 w-5" />,
+          },
+          {
+            title: safeTranslate(t, "navbar.community.challenge.title", "Weekly Challenge"),
+            href: "/community/weekly-challenge",
+            description: safeTranslate(
+              t,
+              "navbar.community.challenge.desc",
+              "Relevez le défi hebdomadaire"
+            ),
+            icon: <Trophy className="h-5 w-5" />,
+          },
+          {
+            title: safeTranslate(t, "navbar.community.jobs.title", "Offres d'emploi"),
+            href: "/jobs",
+            description: safeTranslate(
+              t,
+              "navbar.community.jobs.desc",
+              "Carrières en finance quantitative"
+            ),
+            icon: <Briefcase className="h-5 w-5" />,
+          },
+        ]}
+      />
     </div>
   );
 };

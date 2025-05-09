@@ -9,6 +9,9 @@ import { LineChart, BarChart } from '@/components/ui/chart';
 import { RefreshCw, Download, Upload, FileSpreadsheet, CheckCircle } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Label } from "@/components/ui/label";
+import { useAuth } from '@/contexts/AuthContext';
+import { Separator } from '@/components/ui/separator';
+import UserModelsSection from './UserModelsSection';
 
 // Génération d'une surface de volatilité fictive
 const generateVolSurface = () => {
@@ -240,6 +243,9 @@ const ModelCalibration: React.FC = () => {
       z: point.impliedVol * 100 // Convertir en pourcentage
     }));
   };
+  
+  // Get the auth context
+  const { isAuthenticated, user, profile } = useAuth();
   
   return (
     <div className="space-y-6">
@@ -492,6 +498,16 @@ const ModelCalibration: React.FC = () => {
           </>
         )}
       </div>
+      
+      {/* Add a separator between the official models and the user models */}
+      <Separator className="my-8" />
+      
+      {/* Add the user models section */}
+      <UserModelsSection 
+        isAuthenticated={isAuthenticated} 
+        userName={profile?.prenom || user?.email?.split('@')[0] || 'Utilisateur'} 
+        userId={user?.id || 'unknown-user'}
+      />
     </div>
   );
 };

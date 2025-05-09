@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
@@ -44,6 +44,7 @@ import BugReport from './pages/BugReport';
 import NotFound from './pages/NotFound';
 import AppShell from './components/AppShell';
 import SignUp from './pages/SignUp';
+import Jobs from './pages/Jobs';
 
 // Pages de la communauté
 import Forum from './pages/community/Forum';
@@ -74,7 +75,7 @@ import CourseAdvanced from './pages/CourseAdvanced';
 
 const queryClient = new QueryClient();
 
-const App = () => {
+function App() {
   return (
     <I18nextProvider i18n={i18n}>
       <HelmetProvider>
@@ -87,7 +88,7 @@ const App = () => {
               <link rel="canonical" href="https://thepricinglab.com" />
             </Helmet>
             <Toaster position="top-right" />
-            <BrowserRouter>
+            <Router>
               <Routes>
                 <Route element={<AppShell />}>
                   <Route index element={<Home />} />
@@ -112,17 +113,15 @@ const App = () => {
                   <Route path="/tools/monte-carlo" element={<MonteCarloSimulator />} />
                   <Route path="/tools/model-calibration" element={<ModelCalibration />} />
                   <Route path="/community" element={<Community />} />
-                  <Route path="/community/forum" element={<Forum />} />
                   <Route path="/community/chat" element={<Chat />} />
-                  <Route path="/community/weekly-challenge" element={<WeeklyChallenge />} />
-                  <Route path="/community/pair-programming" element={<PairProgramming />} />
-                  
-                  {/* New community routes for collaborative publishing */}
-                  <Route path="/community/explore" element={<Explore />} />
+                  <Route path="/community/forum" element={<Forum />} />
                   <Route path="/community/contribute" element={<Contribute />} />
-                  <Route path="/community/article/:id" element={<ArticleDetail />} />
-                  <Route path="/community/strategy/:id" element={<StrategyDetail />} />
+                  <Route path="/community/explore" element={<Explore />} />
                   <Route path="/community/strategy-builder" element={<StrategyBuilder />} />
+                  <Route path="/community/strategy/:id" element={<StrategyDetail />} />
+                  <Route path="/community/article/:id" element={<ArticleDetail />} />
+                  <Route path="/community/pair-programming" element={<PairProgramming />} />
+                  <Route path="/community/weekly-challenge" element={<WeeklyChallenge />} />
                   
                   <Route path="/blog" element={<Blog />} />
                   <Route path="/blog/:slug" element={<BlogPost />} />
@@ -158,7 +157,7 @@ const App = () => {
                   <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
-            </BrowserRouter>
+            </Router>
           </AuthProvider>
         </QueryClientProvider>
       </HelmetProvider>

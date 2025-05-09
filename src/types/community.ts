@@ -1,6 +1,8 @@
-
 export type PublicationType = 'article' | 'strategy';
 export type StrategyType = 'pricing' | 'hedging' | 'trading' | 'other';
+
+// New type for calibration model domains
+export type CalibrationDomain = 'equity' | 'rates' | 'fx' | 'vol' | 'commodities' | 'credit' | 'other';
 
 export interface Publication {
   id: number | string;
@@ -15,8 +17,23 @@ export interface Publication {
   likes: number;
   tags: string[];
   published: boolean;
-  strategyType?: StrategyType; // Make strategyType optional on base Publication
-  isDraft?: boolean; // Add isDraft property
+  strategyType?: StrategyType;
+  isDraft?: boolean;
+}
+
+// New interface for user calibration models
+export interface CalibrationModel {
+  id: string;
+  name: string;
+  description: string;
+  code: string;
+  domain: CalibrationDomain;
+  author: string;
+  authorId: string;
+  createdAt: string;
+  isPublic: boolean;
+  isDraft: boolean;
+  demoFile?: string;
 }
 
 export interface Article extends Publication {
@@ -36,4 +53,14 @@ export interface PublicationFormData {
   tags: string[];
   type: PublicationType;
   strategyType?: StrategyType;
+}
+
+// Form data for calibration model submission
+export interface CalibrationModelFormData {
+  name: string;
+  description: string;
+  code: string;
+  domain: CalibrationDomain;
+  isPublic: boolean;
+  demoFile?: File | null;
 }
