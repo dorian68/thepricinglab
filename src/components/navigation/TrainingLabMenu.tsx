@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Zap, List, Brain, BarChart4, Trophy } from "lucide-react";
-import { NavMenuItem } from "./NavMenuSection";
+import { NavMenuSection, NavMenuLink } from "./NavMenuSection";
 import { useTranslation } from "react-i18next";
 
 const TrainingLabMenu = () => {
@@ -11,33 +11,33 @@ const TrainingLabMenu = () => {
     <div className="p-4 w-[380px]">
       <p className="text-sm text-finance-accent mb-4 font-medium">{t('trainingLab.subtitle')}</p>
       <ul className="space-y-3">
-        <NavMenuItem 
+        <NavMenuLink 
           to="/exercises" 
-          icon={List} 
+          icon={<List className="h-4 w-4" />} 
           title={t('trainingLab.exercises')} 
           description={t('exercises.subtitle')} 
         />
-        <NavMenuItem 
+        <NavMenuLink 
           to="/survival-mode" 
-          icon={Zap} 
+          icon={<Zap className="h-4 w-4" />} 
           title={t('survivalMode.title')} 
           description={t('survivalMode.subtitle')} 
         />
-        <NavMenuItem 
+        <NavMenuLink 
           to="/quizzes" 
-          icon={Brain} 
+          icon={<Brain className="h-4 w-4" />} 
           title={t('trainingLab.quizzes')} 
           description={t('trainingLab.progress')} 
         />
-        <NavMenuItem 
+        <NavMenuLink 
           to="/practice" 
-          icon={BarChart4} 
+          icon={<BarChart4 className="h-4 w-4" />} 
           title={t('trainingLab.practice')} 
           description={t('trainingLab.performance')} 
         />
-        <NavMenuItem 
+        <NavMenuLink 
           to="/leaderboard" 
-          icon={Trophy} 
+          icon={<Trophy className="h-4 w-4" />} 
           title={t('trainingLab.leaderboard')} 
           description={t('leaderboard.subtitle')} 
         />

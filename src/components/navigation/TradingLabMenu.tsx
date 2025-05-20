@@ -1,7 +1,7 @@
 
 import React from "react";
 import { LineChart, Workflow, Share2, GitBranch, BarChart } from "lucide-react";
-import { NavMenuItem } from "./NavMenuSection";
+import { NavMenuSection, NavMenuLink } from "./NavMenuSection";
 import { useTranslation } from "react-i18next";
 import { safeTranslate } from "../../utils/translationUtils";
 
@@ -15,33 +15,33 @@ const TradingLabMenu = () => {
         {st('tradingLab.subtitle', 'Test, validate and monitor your trading strategies')}
       </p>
       <ul className="space-y-3">
-        <NavMenuItem 
+        <NavMenuLink 
           to="/exercises" 
-          icon={LineChart} 
+          icon={<LineChart className="h-4 w-4" />} 
           title={st('tradingLab.exercises', 'Exercises')} 
           description={st('tradingLab.exercisesDesc', 'Practice with interactive exercises')} 
         />
-        <NavMenuItem 
+        <NavMenuLink 
           to="/trading/backtest" 
-          icon={Workflow} 
+          icon={<Workflow className="h-4 w-4" />} 
           title={st('tradingLab.backtest', 'Backtest')} 
           description={st('tradingLab.backtestDesc', 'Evaluate strategies on historical data')} 
         />
-        <NavMenuItem 
+        <NavMenuLink 
           to="/trading/scenarios" 
-          icon={Share2} 
+          icon={<Share2 className="h-4 w-4" />} 
           title={st('tradingLab.scenarios', 'Scenarios')} 
           description={st('tradingLab.scenariosDesc', 'Test market scenarios and assumptions')} 
         />
-        <NavMenuItem 
+        <NavMenuLink 
           to="/trading/strategies" 
-          icon={GitBranch} 
+          icon={<GitBranch className="h-4 w-4" />} 
           title={st('tradingLab.strategies', 'Strategies')} 
           description={st('tradingLab.strategiesDesc', 'Build and test trading strategies')} 
         />
-        <NavMenuItem 
+        <NavMenuLink 
           to="/trading/performance" 
-          icon={BarChart} 
+          icon={<BarChart className="h-4 w-4" />} 
           title={st('tradingLab.performance', 'Performance')} 
           description={st('tradingLab.performanceDesc', 'Track and analyze your results')} 
         />

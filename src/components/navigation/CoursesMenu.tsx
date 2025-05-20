@@ -1,6 +1,6 @@
 
 import React from "react";
-import { NavMenuItem, NavMenuSection } from "./NavMenuSection";
+import { NavMenuSection, NavMenuLink } from "./NavMenuSection";
 import { useTranslation } from "react-i18next";
 import { safeTranslate } from "../../utils/translationUtils";
 
@@ -11,44 +11,52 @@ const CoursesMenu = () => {
   return (
     <div className="grid grid-cols-2 gap-3 p-4 w-[500px]">
       <NavMenuSection title={st('courses.fundamentals', 'Fundamentals')}>
-        <NavMenuItem 
+        <NavMenuLink 
           to="/courses/fundamentals/black-scholes" 
           title={st('coursesPage.fundamentals.blackScholes.title', 'Black-Scholes Model')} 
+          description=""
         />
-        <NavMenuItem 
+        <NavMenuLink 
           to="/courses/fundamentals/yield-curves" 
           title={st('coursesPage.fundamentals.yieldCurves.title', 'Yield Curves')} 
+          description=""
         />
-        <NavMenuItem 
+        <NavMenuLink 
           to="/courses/fundamentals/greeks" 
           title={st('coursesPage.fundamentals.greeks.title', 'Option Greeks')} 
+          description=""
         />
       </NavMenuSection>
       
       <div>
         <NavMenuSection title={st('courses.advanced', 'Advanced')}>
-          <NavMenuItem 
+          <NavMenuLink 
             to="/courses/advanced/implied-vol" 
             title={st('coursesPage.advanced.impliedVol.title', 'Implied Volatility')} 
+            description=""
           />
-          <NavMenuItem 
+          <NavMenuLink 
             to="/courses/advanced/vol-products" 
             title={st('coursesPage.advanced.volProducts.title', 'Volatility Products')} 
+            description=""
           />
-          <NavMenuItem 
+          <NavMenuLink 
             to="/courses/advanced" 
             title={st('coursesPage.advanced.overview', 'Advanced Overview')} 
+            description=""
           />
         </NavMenuSection>
         
         <NavMenuSection title={st('courses.complex', 'Complex')}>
-          <NavMenuItem 
+          <NavMenuLink 
             to="/courses/complex/exotic-options" 
             title={st('coursesPage.complex.exotic.title', 'Exotic Options')} 
+            description=""
           />
-          <NavMenuItem 
+          <NavMenuLink 
             to="/courses/complex/monte-carlo" 
             title={st('coursesPage.complex.monteCarlo.title', 'Monte Carlo Methods')} 
+            description=""
           />
         </NavMenuSection>
       </div>
