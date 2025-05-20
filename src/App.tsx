@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -61,6 +62,7 @@ import VolatilityCalculator from './components/tools/VolatilityCalculator';
 import BlackScholesCalculator from './components/tools/BlackScholesCalculator';
 import MonteCarloSimulator from './components/tools/MonteCarloSimulator';
 import ModelCalibration from './components/tools/ModelCalibration';
+import PayoffVisualizer from './pages/tools/PayoffVisualizer';  // Add new import
 
 import TradingExercises from './pages/trading/TradingExercises';
 import Backtest from './pages/trading/Backtest';
@@ -112,6 +114,7 @@ function App() {
                   <Route path="/tools/black-scholes" element={<BlackScholesCalculator />} />
                   <Route path="/tools/monte-carlo" element={<MonteCarloSimulator />} />
                   <Route path="/tools/model-calibration" element={<ModelCalibration />} />
+                  <Route path="/tools/payoff-visualizer" element={<PayoffVisualizer />} />  {/* Add new route */}
                   <Route path="/community" element={<Community />} />
                   <Route path="/community/chat" element={<Chat />} />
                   <Route path="/community/forum" element={<Forum />} />

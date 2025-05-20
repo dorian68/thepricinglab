@@ -1,46 +1,42 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { LucideIcon } from "lucide-react";
 
-interface NavMenuItemProps {
-  to: string;
-  icon?: LucideIcon;
+export interface NavMenuItem {
   title: string;
-  description?: string;
+  href: string;
+  description: string;
+  icon?: React.ReactNode;
+  disabled?: boolean;
 }
 
-const NavMenuItem = ({ to, icon: Icon, title, description }: NavMenuItemProps) => (
-  <li>
-    <Link 
-      to={to}
-      className="flex p-2 hover:bg-finance-charcoal/50 rounded-md"
-    >
-      {Icon && (
-        <div className="mr-3 text-finance-accent">
-          <Icon className="h-5 w-5" />
-        </div>
-      )}
-      <div>
-        <div className="font-medium">{title}</div>
-        {description && <div className="text-sm text-finance-lightgray">{description}</div>}
-      </div>
-    </Link>
-  </li>
-);
-
-interface NavMenuSectionProps {
-  title?: string;
-  children: React.ReactNode;
+export interface NavMenuSectionProps {
+  items: NavMenuItem[];
+  className?: string;
 }
 
-const NavMenuSection = ({ title, children }: NavMenuSectionProps) => (
-  <div>
-    {title && <h3 className="font-medium text-sm mb-1 text-finance-accent">{title}</h3>}
-    <ul className="space-y-2">
-      {children}
-    </ul>
-  </div>
-);
-
-export { NavMenuItem, NavMenuSection };
+export const NavMenuSection: React.FC<NavMenuSectionProps> = ({ items, className = "" }) => {
+  return (
+    <div className={`grid gap-3 ${className}`}>
+      {items.map((item) => (
+        <Link
+          key={item.title}
+          to={item.disabled ? "#" : item.href}
+          className={`group grid grid-cols-[24px_1fr] items-start gap-3 rounded-lg p-3 text-finance-offwhite transition-colors hover:bg-finance-steel/20 hover:text-finance-offwhite ${
+            item.disabled ? "cursor-not-allowed opacity-50" : ""
+          }`}
+        >
+          {item.icon && <div className="text-finance-accent">{item.icon}</div>}
+          <div className="grid gap-1">
+            <span className="font-medium leading-none group-hover:text-finance-accent transition-colors">
+              {item.title}
+            </span>
+            <span className="text-xs leading-none text-finance-lightgray">
+              {item.description}
+            </span>
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+};

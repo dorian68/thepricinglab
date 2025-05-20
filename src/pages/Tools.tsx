@@ -12,7 +12,8 @@ import {
   Activity,
   Dices,
   Database,
-  Gauge
+  Gauge,
+  BarChart // Adding BarChart icon for the Payoff Visualizer
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -150,6 +151,12 @@ const Tools = () => {
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     <ToolCard 
+                      icon={BarChart} 
+                      title={safeTranslate(t, 'tools.payoff.title', 'Visualiseur de Payoff')}
+                      description={safeTranslate(t, 'tools.payoff.description', 'Construisez et analysez des stratégies optionnelles complexes avec visualisation en temps réel.')}
+                      path="/tools/payoff-visualizer"
+                    />
+                    <ToolCard 
                       icon={Gauge} 
                       title={safeTranslate(t, 'tools.volatility.title', 'Calculatrice de Volatilité')}
                       description={safeTranslate(t, 'tools.volatility.description', 'Mesurez la volatilité historique et analysez ses variations dans le temps.')}
@@ -239,6 +246,12 @@ const Tools = () => {
                   <h2 className="text-xl font-medium mb-6">{safeTranslate(t, 'tools.visualizersTitle', 'Visualiseurs')}</h2>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <ToolCard 
+                      icon={BarChart} 
+                      title={safeTranslate(t, 'tools.payoff.title', 'Visualiseur de Payoff')}
+                      description={safeTranslate(t, 'tools.payoff.description', 'Construisez et analysez des stratégies optionnelles complexes avec visualisation en temps réel.')}
+                      path="/tools/payoff-visualizer"
+                    />
                     <ToolCard 
                       icon={Database} 
                       title={safeTranslate(t, 'tools.modelCalibration.title', 'Calibration de Modèles')}
