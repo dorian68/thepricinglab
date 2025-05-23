@@ -1,8 +1,9 @@
+
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { 
-  X, Home, BookOpen, Dumbbell, Users, CreditCard, Wrench, FileText, Bug, BarChart3
+  X, Home, BookOpen, Dumbbell, Users, CreditCard, Wrench, FileText, Bug, BarChart3, LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LanguageSwitcher from "../LanguageSwitcher";
@@ -14,6 +15,8 @@ import {
   SheetContent,
   SheetClose,
 } from "@/components/ui/sheet";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -22,6 +25,24 @@ interface MobileNavProps {
 
 const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
   const { t } = useTranslation();
+  const { user, profile, signOut, isAuthenticated, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      navigate("/")
+      toast(st("auth.signout.success", "Déconnexion réussie"), {
+        description: st("auth.signout.successMessage", "À bientôt !")
+      })
+    } catch (error) {
+      toast(st("auth.signout.error", "Erreur"), {
+        description: st("auth.signout.errorMessage", "Une erreur est survenue lors de la déconnexion")
+      })
+    }
+  }
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -55,6 +76,7 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
                 {safeTranslate(t, 'navbar.home', 'Home')}
               </Link>
 
+              {/* Courses */}
               <MobileNavSection 
                 title={safeTranslate(t, 'navbar.courses', 'Cours')} 
                 icon={BookOpen}
@@ -89,6 +111,7 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
                 </Link>
               </MobileNavSection>
 
+              {/* Training Lab Section */}
               <MobileNavSection 
                 title={safeTranslate(t, 'navbar.trainingLab', 'Training Lab')} 
                 icon={Dumbbell} 
@@ -117,6 +140,7 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
                 </Link>
               </MobileNavSection>
 
+              {/* Trading Lab Section */}
               <MobileNavSection 
                 title={safeTranslate(t, 'navbar.tradingLab', 'Trading Lab')} 
                 icon={BarChart3}
@@ -158,36 +182,49 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
                 </Link>
               </MobileNavSection>
 
+              {/* Community */}
               <MobileNavSection 
                 title={safeTranslate(t, 'navbar.community', 'Communauté')} 
                 icon={Users}
               >
                 <Link
                   to="/community/forum"
-                  className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+                  className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium rounded-md hover:bg-finance-steel/10"
+                  onClick={onClose}
                 >
                   {safeTranslate(t, 'community.forum', 'Forum & Chat')}
                 </Link>
                 <Link
                   to="/community/challenges"
-                  className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+                  className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium rounded-md hover:bg-finance-steel/10"
+                  onClick={onClose}
                 >
                   {safeTranslate(t, 'community.challenges', 'Défis Hebdomadaires')}
                 </Link>
                 <Link
                   to="/community/pair-programming"
-                  className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+                  className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium rounded-md hover:bg-finance-steel/10"
+                  onClick={onClose}
                 >
                   {safeTranslate(t, 'community.pairProgramming', 'Pair Programming')}
                 </Link>
                 <Link
                   to="/community/leaderboard"
-                  className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium"
+                  className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium rounded-md hover:bg-finance-steel/10"
+                  onClick={onClose}
                 >
                   {safeTranslate(t, 'community.leaderboard', 'Leaderboard & Hackathons')}
                 </Link>
+                <Link
+                  to="/community/playground"
+                  className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium rounded-md hover:bg-finance-steel/10"
+                  onClick={onClose}
+                >
+                  {safeTranslate(t, 'navbar.community.notebook.title', 'Notebook Playground')}
+                </Link>
               </MobileNavSection>
 
+              {/* Pricing */}
               <Link
                 to="/pricing"
                 className="flex items-center px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium rounded-md hover:bg-finance-steel/10"
@@ -197,6 +234,7 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
                 {safeTranslate(t, 'navbar.pricing', 'Tarifs')}
               </Link>
 
+              {/* Tools */}
               <MobileNavSection 
                 title={safeTranslate(t, 'navbar.tools', 'Outils')} 
                 icon={Wrench}
@@ -204,29 +242,34 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
                 <Link
                   to="/tools/volatility-calculator"
                   className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium rounded-md hover:bg-finance-steel/10"
+                  onClick={onClose}
                 >
                   {safeTranslate(t, 'tools.volatilityCalculator', 'Calculatrices de Volatilité')}
                 </Link>
                 <Link
                   to="/tools/black-scholes"
                   className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium rounded-md hover:bg-finance-steel/10"
+                  onClick={onClose}
                 >
                   {safeTranslate(t, 'tools.blackScholes', 'Simulateur Black-Scholes')}
                 </Link>
                 <Link
                   to="/tools/monte-carlo"
                   className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium rounded-md hover:bg-finance-steel/10"
+                  onClick={onClose}
                 >
                   {safeTranslate(t, 'tools.monteCarlo', 'Monte Carlo')}
                 </Link>
                 <Link
                   to="/tools/model-calibration"
                   className="block px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium rounded-md hover:bg-finance-steel/10"
+                  onClick={onClose}
                 >
                   {safeTranslate(t, 'tools.modelCalibration', 'Calibration de Modèles')}
                 </Link>
               </MobileNavSection>
 
+              {/* Blog */}
               <Link
                 to="/blog"
                 className="flex items-center px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium rounded-md hover:bg-finance-steel/10"
@@ -236,6 +279,7 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
                 {safeTranslate(t, 'navbar.blog', 'Blog')}
               </Link>
 
+              {/* Bug Report */}
               <Link
                 to="/bug-report"
                 className="flex items-center px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium rounded-md hover:bg-finance-steel/10"
@@ -252,16 +296,41 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
               <LanguageSwitcher />
             </div>
             <div className="space-y-2">
-              <Button variant="financeOutline" size="sm" className="w-full" asChild>
-                <Link to="/login" onClick={onClose}>
-                  {safeTranslate(t, 'navbar.login', 'Login')}
-                </Link>
-              </Button>
-              <Button variant="finance" size="sm" className="w-full" asChild>
-                <Link to="/signup" onClick={onClose}>
-                  {safeTranslate(t, 'navbar.signup', 'Sign Up')}
-                </Link>
-              </Button>
+              {isAuthenticated && profile ? (
+                <div className="space-y-2">
+                  <Link 
+                    to="/dashboard" 
+                    onClick={onClose}
+                    className="flex items-center px-3 py-2 text-finance-offwhite hover:text-finance-accent font-medium rounded-md hover:bg-finance-steel/10"
+                  >
+                    {profile.prenom 
+                      ? `${st('navbar.greeting', 'Bonjour')}, ${profile.prenom}` 
+                      : st('navigation.profile', 'Mon compte')}
+                  </Link>
+                  <Button 
+                    variant="financeOutline" 
+                    size="sm" 
+                    onClick={handleSignOut}
+                    className="w-full flex items-center justify-center gap-2"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    {st('auth.signout.button', 'Déconnexion')}
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <Button variant="financeOutline" size="sm" className="w-full" asChild>
+                    <Link to="/login" onClick={onClose}>
+                      {safeTranslate(t, 'auth.signin.button', 'Se connecter')}
+                    </Link>
+                  </Button>
+                  <Button variant="finance" size="sm" className="w-full" asChild>
+                    <Link to="/signup" onClick={onClose}>
+                      {safeTranslate(t, 'auth.signup.button', "S'inscrire")}
+                    </Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
