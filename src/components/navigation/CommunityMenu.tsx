@@ -1,7 +1,7 @@
 
 import React from "react";
 import { NavMenuSection } from "./NavMenuSection";
-import { UsersRound, MessageCircle, ScrollText, Code2, Trophy, Briefcase } from "lucide-react";
+import { UsersRound, MessageCircle, ScrollText, Code2, Trophy, Briefcase, BookOpen } from "lucide-react";
 import { safeTranslate } from "../../utils/translationUtils";
 import { useTranslation } from "react-i18next";
 
@@ -51,6 +51,16 @@ const CommunityMenu: React.FC = () => {
               "Relevez le défi hebdomadaire"
             ),
             icon: <Trophy className="h-5 w-5" />,
+          },
+          {
+            title: safeTranslate(t, "navbar.community.notebook.title", "Notebook Playground"),
+            href: "/community/playground",
+            description: safeTranslate(
+              t,
+              "navbar.community.notebook.desc",
+              "Explorez et testez des notebooks"
+            ),
+            icon: <BookOpen className="h-5 w-5" />,
           },
           {
             title: safeTranslate(t, "navbar.community.jobs.title", "Offres d'emploi"),

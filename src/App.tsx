@@ -57,12 +57,14 @@ import Contribute from './pages/community/Contribute';
 import ArticleDetail from './pages/community/ArticleDetail';
 import StrategyDetail from './pages/community/StrategyDetail';
 import StrategyBuilder from './pages/community/StrategyBuilder';
+import Playground from './pages/community/Playground';
+import SharedNotebook from './pages/community/SharedNotebook';
 
 import VolatilityCalculator from './components/tools/VolatilityCalculator';
 import BlackScholesCalculator from './components/tools/BlackScholesCalculator';
 import MonteCarloSimulator from './components/tools/MonteCarloSimulator';
 import ModelCalibration from './components/tools/ModelCalibration';
-import PayoffVisualizer from './pages/tools/PayoffVisualizer';  // Add new import
+import PayoffVisualizer from './pages/tools/PayoffVisualizer';
 
 import TradingExercises from './pages/trading/TradingExercises';
 import Backtest from './pages/trading/Backtest';
@@ -114,12 +116,14 @@ function App() {
                   <Route path="/tools/black-scholes" element={<BlackScholesCalculator />} />
                   <Route path="/tools/monte-carlo" element={<MonteCarloSimulator />} />
                   <Route path="/tools/model-calibration" element={<ModelCalibration />} />
-                  <Route path="/tools/payoff-visualizer" element={<PayoffVisualizer />} />  {/* Add new route */}
+                  <Route path="/tools/payoff-visualizer" element={<PayoffVisualizer />} />
                   <Route path="/community" element={<Community />} />
                   <Route path="/community/chat" element={<Chat />} />
                   <Route path="/community/forum" element={<Forum />} />
                   <Route path="/community/contribute" element={<Contribute />} />
                   <Route path="/community/explore" element={<Explore />} />
+                  <Route path="/community/playground" element={<Playground />} />
+                  <Route path="/community/playground/shared" element={<SharedNotebook />} />
                   <Route path="/community/strategy-builder" element={<StrategyBuilder />} />
                   <Route path="/community/strategy/:id" element={<StrategyDetail />} />
                   <Route path="/community/article/:id" element={<ArticleDetail />} />
