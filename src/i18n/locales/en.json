@@ -32,7 +32,9 @@
     "logout": "Logout",
     "survivalMode": "Survival Mode",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "main": "Main navigation",
+    "homeLink": "The Pricing Library Home"
   },
   "languageSwitcher": {
     "switchLanguage": "Switch Language",
@@ -58,7 +60,33 @@
     "bugs": "Report Bug",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
-    "greeting": "Hello"
+    "greeting": "Hello",
+    "community": {
+      "forum": {
+        "title": "Forum",
+        "desc": "Exchange with the community"
+      },
+      "contribute": {
+        "title": "Contribute",
+        "desc": "Share your knowledge"
+      },
+      "pair": {
+        "title": "Pair Programming",
+        "desc": "Code in collaboration"
+      },
+      "challenge": {
+        "title": "Weekly Challenge",
+        "desc": "Take on the weekly challenge"
+      },
+      "notebook": {
+        "title": "Notebook Playground",
+        "desc": "Explore and test notebooks"
+      },
+      "jobs": {
+        "title": "Job Opportunities",
+        "desc": "Careers in quantitative finance"
+      }
+    }
   },
   "auth": {
     "signin": {
@@ -251,7 +279,17 @@
       "ironCondor": "Combining a bull put spread and a bear call spread. Profits if the price stays within a range.",
       "butterflySpread": "Combining a bull spread and a bear spread. Maximum profit if the price is exactly at the middle strike at expiration."
     }
-    
+  },
+  "trainingLab": {
+    "title": "Training Lab",
+    "subtitle": "Improve your skills with our interactive learning tools",
+    "exercises": "Interactive Exercises",
+    "survivalMode": "Survival Mode",
+    "quizzes": "Progressive Quizzes",
+    "practice": "Practice",
+    "performance": "Performance",
+    "progress": "Progress",
+    "leaderboard": "Leaderboards"
   },
   "survivalMode": {
     "title": "Survival Mode",
@@ -584,38 +622,27 @@
     "onlineMembers": "Online Members",
     "lastReply": "Last Reply",
     "registerEvent": "Register",
-    "forum": {
-      "title": "Discussion Forum",
-      "description": "Exchange ideas and ask questions"
-    },
-    "projects": {
-      "title": "Projects & Challenges",
-      "description": "New problems every week"
-    },
-    "pair": {
-      "title": "Pair Programming",
-      "description": "Code together on projects"
-    },
-    "leaderboard": {
-      "title": "Leaderboard & Hackathons",
-      "description": "Rankings and events"
-    },
-    "chat": {
-      "title": "Live Chat",
-      "description": "Get real-time help from the community"
-    },
-    "events": {
-      "title": "Events",
-      "description": "Webinars, workshops, and meetups"
-    },
-    "mentoring": {
-      "title": "Mentoring",
-      "description": "One-on-one guidance from industry experts"
-    }
+    "forum": "Forum & Chat",
+    "challenges": "Weekly Challenges",
+    "pairProgramming": "Pair Programming",
+    "leaderboard": "Leaderboard & Hackathons",
+    "playground": "Notebook Playground",
+    "contribute": "Contribute",
+    "weeklyChallenge": "Weekly Challenge",
+    "jobs": "Job Opportunities"
   },
   "exercisesPage": {
     "duration": "Duration",
     "hours": "hours"
+  },
+  "tools": {
+    "title": "Tools",
+    "subtitle": "Calculation tools and simulators for your quantitative analysis",
+    "volatilityCalculator": "Volatility Calculators",
+    "blackScholes": "Black-Scholes Simulator",
+    "monteCarlo": "Monte Carlo",
+    "modelCalibration": "Model Calibration",
+    "payoffVisualizer": "Payoff Visualizer"
   },
   "footer": {
     "about": "About Us",
@@ -626,15 +653,15 @@
     "blog": "Blog",
     "community": "Community",
     "newsletter": {
-      "title": "Abonnez-vous à notre newsletter",
-      "description": "Recevez les dernières nouvelles et mises à jour directement dans votre boîte de réception.",
-      "emailPlaceholder": "Entrez votre adresse e-mail",
-      "subscribeButton": "S'abonner"
+      "title": "Subscribe to our newsletter",
+      "description": "Get the latest news and updates directly in your inbox.",
+      "emailPlaceholder": "Enter your email address",
+      "subscribeButton": "Subscribe"
     },
     "subscribe": "Subscribe",
     "followUs": "Follow Us",
-    "privacyPolicy": "Politique de confidentialité",
-    "termsOfService": "Conditions d'utilisation",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
     "faq": "FAQ"
   }
 }

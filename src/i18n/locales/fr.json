@@ -32,7 +32,9 @@
     "logout": "Déconnexion",
     "survivalMode": "Mode Survie",
     "openMenu": "Ouvrir le menu",
-    "closeMenu": "Fermer le menu"
+    "closeMenu": "Fermer le menu",
+    "main": "Navigation principale",
+    "homeLink": "Accueil The Pricing Library"
   },
   "languageSwitcher": {
     "switchLanguage": "Changer de langue",
@@ -183,7 +185,7 @@
   },
   "tradingLab": {
     "title": "Le Laboratoire de Trading",
-    "subtitle": "Expérimentez avec des outils interactifs de pricing et de trading",
+    "subtitle": "Testez, validez et surveillez vos stratégies de trading",
     "exercises": "Exercices",
     "exercisesDesc": "Pratiquez avec des exercices interactifs pour améliorer vos compétences en trading",
     "backtest": "Backtest",
@@ -210,6 +212,17 @@
     "butterflySpread":"Combinaison d'un bull spread et d'un bear spread. Profit maximal si le prix est exactement au strike moyen à l'échéance."
     }
 
+  },
+  "trainingLab": {
+    "title": "Labo d'Entraînement",
+    "subtitle": "Améliorez vos compétences avec nos outils d'apprentissage interactifs",
+    "exercises": "Exercices Interactifs",
+    "survivalMode": "Mode Survie",
+    "quizzes": "Quiz Progressifs",
+    "practice": "Pratique",
+    "performance": "Performances",
+    "progress": "Progression",
+    "leaderboard": "Classements"
   },
   "survivalMode": {
     "title": "Mode Survie",
@@ -524,34 +537,14 @@
     "onlineMembers": "Membres en ligne",
     "lastReply": "Dernière réponse",
     "registerEvent": "S'inscrire",
-    "forum": {
-      "title": "Forum de discussion",
-      "description": "Échangez des idées et posez des questions"
-    },
-    "projects": {
-      "title": "Projets et défis",
-      "description": "Nouveaux problèmes chaque semaine"
-    },
-    "pair": {
-      "title": "Programmation en binôme",
-      "description": "Codez ensemble sur des projets"
-    },
-    "leaderboard": {
-      "title": "Classement et Hackathons",
-      "description": "Classements et événements"
-    },
-    "chat": {
-      "title": "Chat en direct",
-      "description": "Obtenez de l'aide en temps réel de la communauté"
-    },
-    "events": {
-      "title": "Événements",
-      "description": "Webinaires, ateliers et rencontres"
-    },
-    "mentoring": {
-      "title": "Mentorat",
-      "description": "Accompagnement personnalisé par des experts du secteur"
-    }
+    "forum": "Forum & Chat",
+    "challenges": "Défis Hebdomadaires",
+    "pairProgramming": "Pair Programming",
+    "leaderboard": "Leaderboard & Hackathons",
+    "playground": "Notebook Playground",
+    "contribute": "Contribuer",
+    "weeklyChallenge": "Défi Hebdomadaire",
+    "jobs": "Offres d'emploi"
   },
   "exercisesPage": {
     "duration": "Durée",
@@ -575,7 +568,33 @@
     "bugs": "Signaler un bug",
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu",
-    "greeting": "Bonjour"
+    "greeting": "Bonjour",
+    "community": {
+      "forum": {
+        "title": "Forum",
+        "desc": "Échangez avec la communauté"
+      },
+      "contribute": {
+        "title": "Contribuer",
+        "desc": "Partagez vos connaissances"
+      },
+      "pair": {
+        "title": "Pair Programming",
+        "desc": "Codez en collaboration"
+      },
+      "challenge": {
+        "title": "Défi Hebdomadaire",
+        "desc": "Relevez le défi hebdomadaire"
+      },
+      "notebook": {
+        "title": "Notebook Playground",
+        "desc": "Explorez et testez des notebooks"
+      },
+      "jobs": {
+        "title": "Offres d'emploi",
+        "desc": "Carrières en finance quantitative"
+      }
+    }
   },
   "auth": {
     "signin": {
