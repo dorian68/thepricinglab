@@ -265,10 +265,10 @@ print("Fichier ${selectedFile.name} prêt à être exécuté")`}
                         Environnement Python interactif avec The Pricing Library (TPL) préchargé.
                       </div>
                       <div className="bg-finance-dark p-3 rounded font-mono text-sm">
-                        <div className="text-green-400">>>> import tpl as QuantLib</div>
-                        <div className="text-green-400">>>> print("TPL Environment Ready")</div>
+                        <div className="text-green-400">{`>>> import tpl as QuantLib`}</div>
+                        <div className="text-green-400">{`>>> print("TPL Environment Ready")`}</div>
                         <div className="text-finance-offwhite">TPL Environment Ready</div>
-                        <div className="text-green-400">>>> # Votre code ici...</div>
+                        <div className="text-green-400">{`>>> # Votre code ici...`}</div>
                       </div>
                     </div>
                   ) : (

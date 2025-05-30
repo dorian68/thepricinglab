@@ -117,7 +117,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             >
               <ExternalLink className="h-3 w-3" />
             </a>
-          </a>
+          </Button>
         </div>
       </CardFooter>
     </Card>
