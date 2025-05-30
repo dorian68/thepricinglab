@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -27,12 +26,18 @@ import {
   Laptop,
   Zap,
   BookOpen,
-  FileText
+  FileText,
+  Github
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { safeTranslate } from "@/utils/translationUtils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../contexts/AuthContext";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import GitHubConnector from "@/components/github/GitHubConnector";
+import ProjectCard from "@/components/github/ProjectCard";
+import { useGitHubConnection } from "@/hooks/useGitHubConnection";
+import { ProjectMetadata } from "@/types/github";
 
 // Category data
 const categories = [
@@ -242,6 +247,9 @@ const Community = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { profile } = useAuth();
+  const { projects, removeProject, searchCommunityProjects, isLoading } = useGitHubConnection();
+  const [communityProjects, setCommunityProjects] = useState<ProjectMetadata[]>([]);
+  const [projectsTab, setProjectsTab] = useState<"my-projects" | "community">("my-projects");
   
   // Filter topics based on search query and selected category
   const filteredTopics = topics.filter(topic => {
@@ -249,6 +257,12 @@ const Community = () => {
     const matchesCategory = selectedCategory ? topic.category === selectedCategory : true;
     return matchesSearch && matchesCategory;
   });
+
+  useEffect(() => {
+    if (projectsTab === "community") {
+      searchCommunityProjects().then(setCommunityProjects);
+    }
+  }, [projectsTab]);
   
   return (
     <div className="container mx-auto px-4 py-8">
@@ -271,141 +285,252 @@ const Community = () => {
           </Button>
         </div>
       </div>
-      
-      {/* Updated collaborative content section with clear calls-to-action */}
-      <div className="finance-card p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">Publications collaboratives</h2>
-        <p className="text-finance-lightgray mb-4">
-          Découvrez les articles et stratégies publiés par la communauté ou contribuez avec votre propre contenu.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 mt-4">
-          <Button asChild variant="default" className="flex items-center">
-            <Link to="/community/explore">
-              <BookOpen className="mr-2 h-4 w-4" />
-              Explorer les publications
-            </Link>
-          </Button>
-          <Button asChild variant="finance" className="flex items-center">
-            <Link to="/community/contribute">
-              <FileText className="mr-2 h-4 w-4" />
-              Contribuer
-            </Link>
-          </Button>
-        </div>
-      </div>
-      
-      {/* Feature grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        {categories.map((category) => (
-          <Link 
-            key={category.id}
-            to={category.link}
-            className="finance-card p-6 hover:border-finance-accent transition-colors duration-300"
-          >
-            <div className={`p-3 rounded-full ${category.color} inline-flex mb-4`}>
-              <category.icon className="h-6 w-6 text-finance-accent" />
+
+      {/* Main Content Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
+        <TabsList className="grid grid-cols-3 w-full max-w-md">
+          <TabsTrigger value="forum">Forum</TabsTrigger>
+          <TabsTrigger value="projects">
+            <Github className="h-4 w-4 mr-1" />
+            Projets
+          </TabsTrigger>
+          <TabsTrigger value="publications">Publications</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="forum" className="space-y-8 mt-6">
+          {/* Updated collaborative content section with clear calls-to-action */}
+          <div className="finance-card p-6">
+            <h2 className="text-xl font-semibold mb-4">Publications collaboratives</h2>
+            <p className="text-finance-lightgray mb-4">
+              Découvrez les articles et stratégies publiés par la communauté ou contribuez avec votre propre contenu.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 mt-4">
+              <Button asChild variant="default" className="flex items-center">
+                <Link to="/community/explore">
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  Explorer les publications
+                </Link>
+              </Button>
+              <Button asChild variant="finance" className="flex items-center">
+                <Link to="/community/contribute">
+                  <FileText className="mr-2 h-4 w-4" />
+                  Contribuer
+                </Link>
+              </Button>
             </div>
-            <h3 className="text-xl font-semibold text-finance-offwhite mb-2">{category.name}</h3>
-            <p className="text-finance-lightgray mb-4">{category.description}</p>
-            <div className="flex items-center text-finance-accent">
-              <span className="text-sm">Explorer</span>
-              <ChevronRight className="h-4 w-4 ml-1" />
+          </div>
+          
+          {/* Feature grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {categories.map((category) => (
+              <Link 
+                key={category.id}
+                to={category.link}
+                className="finance-card p-6 hover:border-finance-accent transition-colors duration-300"
+              >
+                <div className={`p-3 rounded-full ${category.color} inline-flex mb-4`}>
+                  <category.icon className="h-6 w-6 text-finance-accent" />
+                </div>
+                <h3 className="text-xl font-semibold text-finance-offwhite mb-2">{category.name}</h3>
+                <p className="text-finance-lightgray mb-4">{category.description}</p>
+                <div className="flex items-center text-finance-accent">
+                  <span className="text-sm">Explorer</span>
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </div>
+              </Link>
+            ))}
+          </div>
+          
+          {/* Recent discussions */}
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold flex items-center">
+                <MessageSquare className="h-5 w-5 mr-2 text-finance-accent" />
+                {safeTranslate(t, 'community.recentDiscussions', 'Discussions récentes')}
+              </h2>
+              <Link to="/community/forum" className="text-finance-accent flex items-center hover:underline">
+                {safeTranslate(t, 'community.viewAllDiscussions', 'Voir toutes les discussions')}
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Link>
             </div>
-          </Link>
-        ))}
-      </div>
-      
-      {/* Recent discussions */}
-      <div className="mb-12">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold flex items-center">
-            <MessageSquare className="h-5 w-5 mr-2 text-finance-accent" />
-            {safeTranslate(t, 'community.recentDiscussions', 'Discussions récentes')}
-          </h2>
-          <Link to="/community/forum" className="text-finance-accent flex items-center hover:underline">
-            {safeTranslate(t, 'community.viewAllDiscussions', 'Voir toutes les discussions')}
-            <ChevronRight className="h-4 w-4 ml-1" />
-          </Link>
-        </div>
-        
-        <div className="space-y-4">
-          {topics.slice(0, 3).map((topic) => (
-            <Link 
-              key={topic.id}
-              to="/community/forum"
-              className={`finance-card p-4 hover:border-finance-accent transition-colors duration-300 block ${
-                topic.isSticky || topic.isPinned ? 'border-l-2 border-l-finance-accent' : ''
-              }`}
-            >
-              <div className="flex flex-col md:flex-row md:items-center mb-3">
-                <div className="flex items-center flex-1">
-                  <div className="h-9 w-9 rounded-full overflow-hidden mr-3">
-                    <img 
-                      src={topic.author.avatar} 
-                      alt={topic.author.username} 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div>
-                    <div className="flex items-center">
-                      <span className="text-finance-offwhite font-medium mr-2">{topic.author.username}</span>
-                      {topic.isSticky && (
-                        <Badge variant="secondary" className="mr-1 bg-yellow-900/20 text-yellow-500 border-yellow-500/50">Épinglé</Badge>
-                      )}
-                      {topic.isPinned && (
-                        <Badge variant="secondary" className="bg-blue-900/20 text-blue-500 border-blue-500/50">Annonce</Badge>
-                      )}
+            
+            <div className="space-y-4">
+              {topics.slice(0, 3).map((topic) => (
+                <Link 
+                  key={topic.id}
+                  to="/community/forum"
+                  className={`finance-card p-4 hover:border-finance-accent transition-colors duration-300 block ${
+                    topic.isSticky || topic.isPinned ? 'border-l-2 border-l-finance-accent' : ''
+                  }`}
+                >
+                  <div className="flex flex-col md:flex-row md:items-center mb-3">
+                    <div className="flex items-center flex-1">
+                      <div className="h-9 w-9 rounded-full overflow-hidden mr-3">
+                        <img 
+                          src={topic.author.avatar} 
+                          alt={topic.author.username} 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <div className="flex items-center">
+                          <span className="text-finance-offwhite font-medium mr-2">{topic.author.username}</span>
+                          {topic.isSticky && (
+                            <Badge variant="secondary" className="mr-1 bg-yellow-900/20 text-yellow-500 border-yellow-500/50">Épinglé</Badge>
+                          )}
+                          {topic.isPinned && (
+                            <Badge variant="secondary" className="bg-blue-900/20 text-blue-500 border-blue-500/50">Annonce</Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center mt-2 md:mt-0">
+                      <div className="flex items-center mr-4">
+                        <MessageCircle className="h-4 w-4 text-finance-accent mr-1" />
+                        <span className="text-finance-lightgray text-sm">{topic.replies}</span>
+                      </div>
+                      <div className="flex items-center mr-4">
+                        <Eye className="h-4 w-4 text-finance-accent mr-1" />
+                        <span className="text-finance-lightgray text-sm">{topic.views}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <ThumbsUp className="h-4 w-4 text-finance-accent mr-1" />
+                        <span className="text-finance-lightgray text-sm">{topic.likes}</span>
+                      </div>
                     </div>
                   </div>
+                  
+                  <h3 className="text-lg font-medium text-finance-offwhite mb-3">{topic.title}</h3>
+                  
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {topic.tags.slice(0, 3).map((tag, index) => (
+                      <div 
+                        key={index}
+                        className="flex items-center px-2 py-1 bg-finance-steel/10 rounded-full text-xs text-finance-lightgray"
+                      >
+                        <Hash className="h-3 w-3 mr-1" />
+                        {tag}
+                      </div>
+                    ))}
+                    {topic.tags.length > 3 && (
+                      <div className="flex items-center px-2 py-1 bg-finance-steel/10 rounded-full text-xs text-finance-lightgray">
+                        +{topic.tags.length - 3}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <div className="text-finance-lightgray text-xs flex items-center">
+                      <span className="mr-1">{safeTranslate(t, 'community.lastReply', 'Dernière réponse')}:</span>
+                      <span className="text-finance-accent">{topic.lastReply.username}</span>
+                      <span className="mx-1">•</span>
+                      <span>{topic.lastReply.date}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="projects" className="space-y-6 mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-1">
+              <GitHubConnector />
+            </div>
+            
+            <div className="lg:col-span-2">
+              <div className="finance-card p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold">Projets</h2>
+                  <Tabs value={projectsTab} onValueChange={(value) => setProjectsTab(value as any)}>
+                    <TabsList>
+                      <TabsTrigger value="my-projects">Mes projets</TabsTrigger>
+                      <TabsTrigger value="community">Communauté</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
                 </div>
                 
-                <div className="flex items-center mt-2 md:mt-0">
-                  <div className="flex items-center mr-4">
-                    <MessageCircle className="h-4 w-4 text-finance-accent mr-1" />
-                    <span className="text-finance-lightgray text-sm">{topic.replies}</span>
+                {projectsTab === "my-projects" && (
+                  <div>
+                    {projects.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Github className="h-12 w-12 text-finance-lightgray mx-auto mb-3 opacity-50" />
+                        <p className="text-finance-lightgray">
+                          Aucun projet ajouté. Utilisez le formulaire ci-contre pour ajouter votre premier projet GitHub.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {projects.map((project) => (
+                          <ProjectCard
+                            key={project.id}
+                            project={project}
+                            onRemove={removeProject}
+                            showRemove={true}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center mr-4">
-                    <Eye className="h-4 w-4 text-finance-accent mr-1" />
-                    <span className="text-finance-lightgray text-sm">{topic.views}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <ThumbsUp className="h-4 w-4 text-finance-accent mr-1" />
-                    <span className="text-finance-lightgray text-sm">{topic.likes}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <h3 className="text-lg font-medium text-finance-offwhite mb-3">{topic.title}</h3>
-              
-              <div className="flex flex-wrap gap-2 mb-3">
-                {topic.tags.slice(0, 3).map((tag, index) => (
-                  <div 
-                    key={index}
-                    className="flex items-center px-2 py-1 bg-finance-steel/10 rounded-full text-xs text-finance-lightgray"
-                  >
-                    <Hash className="h-3 w-3 mr-1" />
-                    {tag}
-                  </div>
-                ))}
-                {topic.tags.length > 3 && (
-                  <div className="flex items-center px-2 py-1 bg-finance-steel/10 rounded-full text-xs text-finance-lightgray">
-                    +{topic.tags.length - 3}
+                )}
+                
+                {projectsTab === "community" && (
+                  <div>
+                    {isLoading ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-finance-accent mx-auto"></div>
+                        <p className="text-finance-lightgray mt-2">Chargement des projets communautaires...</p>
+                      </div>
+                    ) : communityProjects.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Github className="h-12 w-12 text-finance-lightgray mx-auto mb-3 opacity-50" />
+                        <p className="text-finance-lightgray">
+                          Aucun projet communautaire trouvé.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {communityProjects.map((project) => (
+                          <ProjectCard
+                            key={project.id}
+                            project={project}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-              
-              <div className="flex justify-between items-center">
-                <div className="text-finance-lightgray text-xs flex items-center">
-                  <span className="mr-1">{safeTranslate(t, 'community.lastReply', 'Dernière réponse')}:</span>
-                  <span className="text-finance-accent">{topic.lastReply.username}</span>
-                  <span className="mx-1">•</span>
-                  <span>{topic.lastReply.date}</span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="publications" className="space-y-8 mt-6">
+          {/* Publications content - keep existing publications section */}
+          <div className="finance-card p-6">
+            <h2 className="text-xl font-semibold mb-4">Publications collaboratives</h2>
+            <p className="text-finance-lightgray mb-4">
+              Découvrez les articles et stratégies publiés par la communauté ou contribuez avec votre propre contenu.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 mt-4">
+              <Button asChild variant="default" className="flex items-center">
+                <Link to="/community/explore">
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  Explorer les publications
+                </Link>
+              </Button>
+              <Button asChild variant="finance" className="flex items-center">
+                <Link to="/community/contribute">
+                  <FileText className="mr-2 h-4 w-4" />
+                  Contribuer
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
       
       {/* Upcoming events */}
       <div className="mb-12">
