@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import MarketVisuals from "../components/MarketVisuals";
+import SEOHead from "../components/SEOHead";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookOpen, Code, Trophy, Users, BarChart3, Zap, ArrowRight, GraduationCap, Rocket, Star } from "lucide-react";
@@ -25,6 +26,12 @@ const Index = () => {
   
   return (
     <div className="flex flex-col min-h-screen bg-[#1A1F2C] text-white">
+      <SEOHead
+        title="The Pricing Library – Formation Finance Quantitative Interactive"
+        description="Maîtrisez la finance quantitative avec nos simulateurs interactifs, cours pratiques et challenges. Black-Scholes, Monte Carlo, Greeks et plus encore."
+        keywords="finance quantitative, formation finance, black-scholes, monte carlo, option pricing, volatilité implicite, greeks, produits dérivés"
+        canonical="https://thepricinglibrary.com"
+      />
       
       <MarketVisuals />
       

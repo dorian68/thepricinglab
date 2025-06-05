@@ -1,8 +1,8 @@
-
 import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import MarketVisuals from "../components/MarketVisuals";
+import SEOHead from "../components/SEOHead";
 import { ArrowRight, BarChart, BookOpen, Users, Award, LucideIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { safeTranslate } from "../utils/translationUtils";
@@ -65,6 +65,12 @@ const Home = () => {
   
   return (
     <div className="flex flex-col min-h-screen bg-finance-dark text-finance-offwhite">
+      <SEOHead
+        title="The Pricing Library – Apprendre la finance quantitative comme un pro"
+        description="Plateforme interactive pour maîtriser les fondamentaux du pricing financier. Exercices pratiques, challenges, et simulateurs pour apprendre par la pratique."
+        keywords="finance quantitative, option pricing, black-scholes, produits dérivés, formation finance, trading, volatilité, greeks, monte carlo"
+        canonical="https://thepricinglibrary.com"
+      />
       
       {/* Animated background canvas */}
       <MarketVisuals />

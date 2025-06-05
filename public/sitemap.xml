@@ -10,187 +10,201 @@
 
   <!-- Page d'accueil -->
   <url>
-    <loc>https://thepricinglab.com/</loc>
+    <loc>https://thepricinglibrary.com/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
 
   <!-- Pages principales -->
   <url>
-    <loc>https://thepricinglab.com/courses</loc>
+    <loc>https://thepricinglibrary.com/courses</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/exercises</loc>
+    <loc>https://thepricinglibrary.com/exercises</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/blog</loc>
+    <loc>https://thepricinglibrary.com/blog</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/pricing</loc>
+    <loc>https://thepricinglibrary.com/pricing</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
 
   <!-- Pages d'outils -->
   <url>
-    <loc>https://thepricinglab.com/tools</loc>
+    <loc>https://thepricinglibrary.com/tools</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/tools/black-scholes</loc>
+    <loc>https://thepricinglibrary.com/tools/black-scholes</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/tools/monte-carlo</loc>
+    <loc>https://thepricinglibrary.com/tools/monte-carlo</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/tools/volatility-calculator</loc>
+    <loc>https://thepricinglibrary.com/tools/volatility-calculator</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/tools/model-calibration</loc>
+    <loc>https://thepricinglibrary.com/tools/model-calibration</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
 
   <!-- Pages de cours -->
   <url>
-    <loc>https://thepricinglab.com/courses/black-scholes</loc>
+    <loc>https://thepricinglibrary.com/courses/black-scholes</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/courses/exotic-options</loc>
+    <loc>https://thepricinglibrary.com/courses/exotic-options</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/courses/greeks</loc>
+    <loc>https://thepricinglibrary.com/courses/greeks</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/courses/implied-vol</loc>
+    <loc>https://thepricinglibrary.com/courses/implied-vol</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/courses/monte-carlo</loc>
+    <loc>https://thepricinglibrary.com/courses/monte-carlo</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/courses/vol-products</loc>
+    <loc>https://thepricinglibrary.com/courses/vol-products</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/courses/yield-curves</loc>
+    <loc>https://thepricinglibrary.com/courses/yield-curves</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
 
   <!-- Articles de blog -->
   <url>
-    <loc>https://thepricinglab.com/blog/understanding-black-scholes-model</loc>
+    <loc>https://thepricinglibrary.com/blog/understanding-black-scholes-model</loc>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/blog/monte-carlo-vs-binomial-trees</loc>
+    <loc>https://thepricinglibrary.com/blog/monte-carlo-vs-binomial-trees</loc>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/blog/quant-interview-questions</loc>
+    <loc>https://thepricinglibrary.com/blog/quant-interview-questions</loc>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/blog/exotic-options-guide</loc>
+    <loc>https://thepricinglibrary.com/blog/exotic-options-guide</loc>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/blog/implied-volatility-options-trading</loc>
+    <loc>https://thepricinglibrary.com/blog/implied-volatility-options-trading</loc>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/blog/yield-curves-guide</loc>
+    <loc>https://thepricinglibrary.com/blog/yield-curves-guide</loc>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/blog/greeks-explained</loc>
+    <loc>https://thepricinglibrary.com/blog/greeks-explained</loc>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/blog/vol-products</loc>
+    <loc>https://thepricinglibrary.com/blog/vol-products</loc>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
+  </url>
+
+  <!-- Pages communauté -->
+  <url>
+    <loc>https://thepricinglibrary.com/community</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <lastmod>2024-12-05</lastmod>
+  </url>
+  <url>
+    <loc>https://thepricinglibrary.com/community/playground</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <lastmod>2024-12-05</lastmod>
+  </url>
+  <url>
+    <loc>https://thepricinglibrary.com/community/forum</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+    <lastmod>2024-12-05</lastmod>
   </url>
 
   <!-- Autres pages importantes -->
   <url>
-    <loc>https://thepricinglab.com/survival-mode</loc>
+    <loc>https://thepricinglibrary.com/survival-mode</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/projects</loc>
+    <loc>https://thepricinglibrary.com/projects</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglab.com/quizzes</loc>
+    <loc>https://thepricinglibrary.com/quizzes</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-    <lastmod>2023-04-17</lastmod>
-  </url>
-  <url>
-    <loc>https://thepricinglab.com/community</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-    <lastmod>2023-04-17</lastmod>
+    <lastmod>2024-12-05</lastmod>
   </url>
 </urlset>

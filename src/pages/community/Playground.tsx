@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNotebookSearch } from '@/hooks/useNotebookSearch';
 import { useNotebook } from '@/hooks/useNotebook';
 import { NotebookItem } from '@/types/notebook';
 import { ProjectMetadata, GitHubFile } from '@/types/github';
 import { Helmet } from 'react-helmet-async';
+import SEOHead from '@/components/SEOHead';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import NotebookList from '@/components/playground/NotebookList';
 import NotebookViewer from '@/components/playground/NotebookViewer';
@@ -78,16 +78,12 @@ const Playground: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Helmet>
-        <title>Notebook Playground | The Pricing Library</title>
-        <meta 
-          name="description" 
-          content="Explore, run and modify quantitative finance notebooks with The Pricing Library" 
-        />
-        {selectedNotebook && (
-          <link rel="canonical" href={selectedNotebook.html_url} />
-        )}
-      </Helmet>
+      <SEOHead
+        title="Notebook Playground - Exécutez vos modèles Python"
+        description="Explorez et exécutez des notebooks Python de finance quantitative. Environnement interactif avec The Pricing Library préchargé."
+        keywords="python notebook, jupyter, finance quantitative, playground, code execution, pricing models"
+        canonical="https://thepricinglibrary.com/community/playground"
+      />
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>

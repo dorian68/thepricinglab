@@ -4,7 +4,7 @@ User-agent: *
 Allow: /
 
 # Specify the location of the sitemap file
-Sitemap: https://thepricinglab.com/sitemap.xml
+Sitemap: https://thepricinglibrary.com/sitemap.xml
 
 # Add more targeted directives for major search engines
 User-agent: Googlebot
@@ -30,3 +30,6 @@ Allow: /
 User-agent: *
 Disallow: /admin-login
 Disallow: /admin-dashboard
+
+# Crawl-delay for politeness (optional)
+Crawl-delay: 1
