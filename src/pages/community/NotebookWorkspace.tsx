@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import SEOHead from '@/components/SEOHead';
@@ -15,7 +14,7 @@ import {
   FileText
 } from 'lucide-react';
 import GitHubIntegration from '@/components/github/GitHubIntegration';
-import { PyodideLoader } from '@/components/python/PyodideLoader';
+import PyodideLoader from '@/components/python/PyodideLoader';
 
 const NotebookWorkspace: React.FC = () => {
   return (
