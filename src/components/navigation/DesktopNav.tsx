@@ -3,14 +3,17 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { 
-  Home, BookOpen, Dumbbell, Users, CreditCard, Wrench, FileText, Bug, BarChart3, LogOut
+  Home, BookOpen, Dumbbell, Users, CreditCard, Wrench, FileText, Bug, BarChart3, LogOut,
+  Code, PieChart, FileSpreadsheet, Activity, LayoutDashboard, TrendingUp
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   NavigationMenu,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/use-permissions";
 import { toast } from "sonner";
 import NavItem from "./NavItem";
 import LanguageSwitcher from "../LanguageSwitcher";
@@ -24,11 +27,8 @@ import { safeTranslate } from "../../utils/translationUtils";
 const DesktopNav = () => {
   const { t } = useTranslation()
   const { user, profile, signOut, isAuthenticated, isLoading } = useAuth()
+  const { isProUser, isAdminUser } = usePermissions()
   const navigate = useNavigate()
-
-
-  //if (isLoading || (isAuthenticated && !profile)) {
-  //}
 
   console.log("DesktopNav: Auth state", { isAuthenticated, profile })
 
@@ -67,14 +67,101 @@ const DesktopNav = () => {
                 <CoursesMenu />
               </NavItem>
 
-              {/* Trading Lab Section */}
+              {/* Labo Trading */}
               <NavItem 
+                to="/labo-trading" 
                 icon={BarChart3} 
-                label={st('navbar.tradingLab', 'Trading Lab')}
-                highlighted={true}
+                label={st('navbar.laboTrading', 'Labo de Trading')}
+              />
+
+              {/* Outils */}
+              <NavItem 
+                icon={Wrench} 
+                label={st('navbar.tools', 'Outils')}
               >
-                <TradingLabMenu />
+                <ToolsMenu />
               </NavItem>
+
+              {/* Exercices */}
+              <NavItem 
+                to="/exercices" 
+                icon={Dumbbell} 
+                label={st('navbar.exercices', 'Exercices')} 
+              />
+
+              {/* Notebooks */}
+              <NavItem 
+                to="/notebooks" 
+                icon={Code} 
+                label={st('navbar.notebooks', 'Notebooks')} 
+              />
+              
+              {/* PRO Features */}
+              {isProUser() && (
+                <>
+                  {/* Surface de Volatilité PRO */}
+                  <NavItem 
+                    to="/vol-surface" 
+                    icon={TrendingUp} 
+                    label={
+                      <div className="flex items-center gap-2">
+                        {st('navbar.volSurface', 'Surface de Vol')}
+                        <Badge variant="premium" className="text-xs">PRO</Badge>
+                      </div>
+                    }
+                  />
+
+                  {/* Quant PRO Tools */}
+                  <NavItem 
+                    to="/quant-tools-pro" 
+                    icon={Activity} 
+                    label={
+                      <div className="flex items-center gap-2">
+                        {st('navbar.quantProTools', 'Quant PRO Tools')}
+                        <Badge variant="premium" className="text-xs">PRO</Badge>
+                      </div>
+                    }
+                  />
+
+                  {/* Rapports PRO */}
+                  <NavItem 
+                    to="/rapports" 
+                    icon={FileSpreadsheet} 
+                    label={
+                      <div className="flex items-center gap-2">
+                        {st('navbar.rapports', 'Rapports')}
+                        <Badge variant="premium" className="text-xs">PRO</Badge>
+                      </div>
+                    }
+                  />
+
+                  {/* API PRO */}
+                  <NavItem 
+                    to="/api" 
+                    icon={PieChart} 
+                    label={
+                      <div className="flex items-center gap-2">
+                        {st('navbar.api', 'API')}
+                        <Badge variant="premium" className="text-xs">PRO</Badge>
+                      </div>
+                    }
+                  />
+                </>
+              )}
+
+              {/* Admin Dashboard */}
+              {isAdminUser() && (
+                <NavItem 
+                  to="/dashboard" 
+                  icon={LayoutDashboard} 
+                  label={
+                    <div className="flex items-center gap-2">
+                      {st('navbar.dashboard', 'Dashboard')}
+                      <Badge variant="error" className="text-xs">ADMIN</Badge>
+                    </div>
+                  }
+                />
+              )}
               
               {/* Community */}
               <NavItem 
@@ -90,14 +177,6 @@ const DesktopNav = () => {
                 icon={CreditCard} 
                 label={st('navbar.pricing', 'Tarifs')} 
               />
-              
-              {/* Tools */}
-              <NavItem 
-                icon={Wrench} 
-                label={st('navbar.tools', 'Outils')}
-              >
-                <ToolsMenu />
-              </NavItem>
               
               {/* Blog */}
               <NavItem 

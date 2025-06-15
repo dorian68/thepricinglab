@@ -76,6 +76,12 @@ import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminRouteGuard from './components/admin/AdminRouteGuard';
 import CourseAdvanced from './pages/CourseAdvanced';
+import LaboTrading from './pages/LaboTrading';
+import Exercices from './pages/Exercices';
+import VolSurface from './pages/VolSurface';
+import QuantProTools from './pages/QuantProTools';
+import Rapports from './pages/Rapports';
+import ApiDocs from './pages/ApiDocs';
 
 const queryClient = new QueryClient();
 
@@ -98,6 +104,7 @@ function App() {
                   <Route index element={<Home />} />
                   <Route path="/signup" element={<SignUp />} />
                   <Route path="/login" element={<Login />} />
+                  
                   <Route path="/courses" element={<Courses />} />
                   <Route path="/courses/fundamentals/black-scholes" element={<BlackScholes />} />
                   <Route path="/courses/complex/exotic-options" element={<ExoticOptions />} />

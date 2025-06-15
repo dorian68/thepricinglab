@@ -2,6 +2,7 @@
 import { type User } from '@supabase/supabase-js'
 
 export type UserPlan = 'freemium' | 'basic' | 'pro' | 'admin'
+export type UserRole = 'student' | 'pro' | 'admin'
 
 export interface UserProfile {
   id: string
@@ -9,6 +10,7 @@ export interface UserProfile {
   prenom: string | null
   nom: string | null
   plan: UserPlan
+  role?: UserRole
   date_inscription: string
 }
 
