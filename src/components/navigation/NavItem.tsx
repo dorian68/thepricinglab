@@ -11,7 +11,7 @@ import {
 interface NavItemProps {
   to?: string;
   icon: LucideIcon;
-  label: React.ReactNode; // Changed from string to ReactNode to accept JSX
+  label: string;
   children?: React.ReactNode;
 }
 

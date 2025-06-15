@@ -3,11 +3,9 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { 
-  Home, BookOpen, Dumbbell, Users, CreditCard, Wrench, FileText, Bug, BarChart3, LogOut,
-  Code, PieChart, FileSpreadsheet, Activity, LayoutDashboard, TrendingUp
+  Home, BookOpen, Dumbbell, Users, CreditCard, Wrench, FileText, Bug, BarChart3, LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   NavigationMenu,
   NavigationMenuList,
@@ -88,80 +86,6 @@ const DesktopNav = () => {
                 icon={Dumbbell} 
                 label={st('navbar.exercices', 'Exercices')} 
               />
-
-              {/* Notebooks */}
-              <NavItem 
-                to="/notebooks" 
-                icon={Code} 
-                label={st('navbar.notebooks', 'Notebooks')} 
-              />
-              
-              {/* PRO Features */}
-              {isProUser() && (
-                <>
-                  {/* Surface de Volatilité PRO */}
-                  <NavItem 
-                    to="/vol-surface" 
-                    icon={TrendingUp} 
-                    label={
-                      <div className="flex items-center gap-2">
-                        {st('navbar.volSurface', 'Surface de Vol')}
-                        <Badge variant="premium" className="text-xs">PRO</Badge>
-                      </div>
-                    }
-                  />
-
-                  {/* Quant PRO Tools */}
-                  <NavItem 
-                    to="/quant-tools-pro" 
-                    icon={Activity} 
-                    label={
-                      <div className="flex items-center gap-2">
-                        {st('navbar.quantProTools', 'Quant PRO Tools')}
-                        <Badge variant="premium" className="text-xs">PRO</Badge>
-                      </div>
-                    }
-                  />
-
-                  {/* Rapports PRO */}
-                  <NavItem 
-                    to="/rapports" 
-                    icon={FileSpreadsheet} 
-                    label={
-                      <div className="flex items-center gap-2">
-                        {st('navbar.rapports', 'Rapports')}
-                        <Badge variant="premium" className="text-xs">PRO</Badge>
-                      </div>
-                    }
-                  />
-
-                  {/* API PRO */}
-                  <NavItem 
-                    to="/api" 
-                    icon={PieChart} 
-                    label={
-                      <div className="flex items-center gap-2">
-                        {st('navbar.api', 'API')}
-                        <Badge variant="premium" className="text-xs">PRO</Badge>
-                      </div>
-                    }
-                  />
-                </>
-              )}
-
-              {/* Admin Dashboard */}
-              {isAdminUser() && (
-                <NavItem 
-                  to="/dashboard" 
-                  icon={LayoutDashboard} 
-                  label={
-                    <div className="flex items-center gap-2">
-                      {st('navbar.dashboard', 'Dashboard')}
-                      <Badge variant="destructive" className="text-xs">ADMIN</Badge>
-                    </div>
-                  }
-                />
-              )}
               
               {/* Community */}
               <NavItem 
