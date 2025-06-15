@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => ({
       "70aefe57-b3fa-4664-aaf6-86e47d3ce99d.lovableproject.com"
     ],
     watch: {
-      // Exclude directories that don't need watching
+      // More aggressive file exclusions to prevent EMFILE error
       ignored: [
         '**/node_modules/**',
         '**/dist/**',
@@ -25,12 +25,21 @@ export default defineConfig(({ mode }) => ({
         '**/supabase/**',
         '**/*.log',
         '**/bun.lockb',
-        '**/package-lock.json'
+        '**/package-lock.json',
+        '**/yarn.lock',
+        '**/.DS_Store',
+        '**/thumbs.db',
+        '**/desktop.ini',
+        '**/*.backup.*',
+        '**/*.original.*',
+        '**/*.txt'
       ],
-      // Use polling for better stability in containers
+      // Disable polling to reduce resource usage
       usePolling: false,
       // Reduce the number of files watched
-      followSymlinks: false
+      followSymlinks: false,
+      // Ignore dotfiles
+      ignoreInitial: true
     },
   },
   plugins: [
@@ -43,9 +52,21 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // Optimize dependencies to reduce file watching
+  // More aggressive optimization to reduce file watching
   optimizeDeps: {
     exclude: ['lucide-react'],
-    include: ['react', 'react-dom']
+    include: ['react', 'react-dom'],
+    // Force pre-bundling to reduce file watching
+    force: true
   },
+  // Reduce build complexity
+  build: {
+    target: 'esnext',
+    minify: false,
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
+  }
 }));
