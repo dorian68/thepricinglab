@@ -1,204 +1,248 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Database, RefreshCw, Upload, Download, FileDown, Search, 
-  Filter, Edit, Trash2, FileText, Users, BookOpen, BarChart 
-} from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Database, Users, BookOpen, FileText, Activity, RefreshCw } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { safeTranslate } from '../../utils/translationUtils';
 
-// Mock database tables
-const mockTables = [
-  { name: 'users', records: 250, lastUpdated: '2024-04-15', size: '1.2 MB' },
-  { name: 'courses', records: 15, lastUpdated: '2024-04-10', size: '0.5 MB' },
-  { name: 'modules', records: 68, lastUpdated: '2024-04-12', size: '0.8 MB' },
-  { name: 'exercises', records: 120, lastUpdated: '2024-04-14', size: '1.0 MB' },
-  { name: 'quizzes', records: 45, lastUpdated: '2024-04-13', size: '0.7 MB' },
-  { name: 'user_progress', records: 890, lastUpdated: '2024-04-15', size: '2.1 MB' },
-];
+interface DatabaseStats {
+  users: number;
+  courses: number;
+  exercises: number;
+  notebooks: number;
+  activity: number;
+}
 
 const AdminDatabase = () => {
   const { t } = useTranslation();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [tables, setTables] = useState(mockTables);
-  
-  const handleSyncDatabase = () => {
-    // In a real application, this would sync the database
-    console.log('Syncing database');
-    alert('Database sync started (mock functionality)');
-  };
-  
-  const handleUploadData = () => {
-    // In a real application, this would upload data
-    console.log('Uploading data');
-  };
-  
-  const handleDownloadBackup = () => {
-    // In a real application, this would download a backup
-    console.log('Downloading backup');
-    alert('Database backup initiated (mock functionality)');
-  };
-  
-  const filteredTables = tables.filter(table => 
-    table.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
-  return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold text-finance-accent">
-          {safeTranslate(t, 'admin.databaseManagement', 'Database Management')}
-        </h2>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleSyncDatabase} className="flex items-center">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            {safeTranslate(t, 'admin.syncDatabase', 'Sync Database')}
-          </Button>
-          <Button variant="outline" onClick={handleUploadData} className="flex items-center">
-            <Upload className="mr-2 h-4 w-4" />
-            {safeTranslate(t, 'admin.uploadData', 'Upload Data')}
-          </Button>
-          <Button variant="outline" onClick={handleDownloadBackup} className="flex items-center">
-            <Download className="mr-2 h-4 w-4" />
-            {safeTranslate(t, 'admin.backup', 'Backup')}
-          </Button>
-        </div>
-      </div>
+  const [stats, setStats] = useState<DatabaseStats>({
+    users: 0,
+    courses: 0,
+    exercises: 0,
+    notebooks: 0,
+    activity: 0
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  useEffect(() => {
+    fetchDatabaseStats();
+  }, []);
+
+  const fetchDatabaseStats = async () => {
+    try {
+      setIsRefreshing(true);
       
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-finance-dark p-4 rounded-lg border border-finance-steel/20">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-finance-offwhite">{safeTranslate(t, 'admin.tables', 'Tables')}</h3>
-            <Database className="h-5 w-5 text-finance-accent" />
+      // Fetch users count
+      const { count: usersCount } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch courses count
+      const { count: coursesCount } = await supabase
+        .from('admin_courses')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch exercises count
+      const { count: exercisesCount } = await supabase
+        .from('admin_exercises')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch notebooks count
+      const { count: notebooksCount } = await supabase
+        .from('admin_notebooks')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch activity count
+      const { count: activityCount } = await supabase
+        .from('user_activity')
+        .select('*', { count: 'exact', head: true });
+
+      setStats({
+        users: usersCount || 0,
+        courses: coursesCount || 0,
+        exercises: exercisesCount || 0,
+        notebooks: notebooksCount || 0,
+        activity: activityCount || 0
+      });
+
+    } catch (error) {
+      console.error('Error fetching database stats:', error);
+      toast.error('Erreur lors du chargement des statistiques');
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  const StatCard = ({ 
+    title, 
+    value, 
+    icon: Icon, 
+    color 
+  }: { 
+    title: string; 
+    value: number; 
+    icon: any; 
+    color: string; 
+  }) => (
+    <Card className="finance-card">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-finance-lightgray">{title}</p>
+            <p className="text-2xl font-bold text-finance-offwhite">{value}</p>
           </div>
-          <p className="text-2xl font-bold text-finance-accent">{tables.length}</p>
+          <div className={`p-3 rounded-full ${color}`}>
+            <Icon className="h-6 w-6" />
+          </div>
         </div>
-        
-        <div className="bg-finance-dark p-4 rounded-lg border border-finance-steel/20">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-finance-offwhite">{safeTranslate(t, 'admin.totalRecords', 'Total Records')}</h3>
-            <FileText className="h-5 w-5 text-finance-accent" />
-          </div>
-          <p className="text-2xl font-bold text-finance-accent">
-            {tables.reduce((sum, table) => sum + table.records, 0)}
+      </CardContent>
+    </Card>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-finance-accent"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-finance-accent">
+            {safeTranslate(t, 'admin.database.title', 'Statistiques de la base de données')}
+          </h2>
+          <p className="text-finance-lightgray">
+            {safeTranslate(t, 'admin.database.description', 'Vue d\'ensemble des données de la plateforme')}
           </p>
         </div>
         
-        <div className="bg-finance-dark p-4 rounded-lg border border-finance-steel/20">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-finance-offwhite">{safeTranslate(t, 'admin.totalSize', 'Total Size')}</h3>
-            <Database className="h-5 w-5 text-finance-accent" />
-          </div>
-          <p className="text-2xl font-bold text-finance-accent">6.3 MB</p>
-        </div>
-        
-        <div className="bg-finance-dark p-4 rounded-lg border border-finance-steel/20">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="text-finance-offwhite">{safeTranslate(t, 'admin.lastBackup', 'Last Backup')}</h3>
-            <Download className="h-5 w-5 text-finance-accent" />
-          </div>
-          <p className="text-2xl font-bold text-finance-accent">2024-04-15</p>
-        </div>
+        <Button 
+          onClick={fetchDatabaseStats}
+          disabled={isRefreshing}
+          variant="outline"
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+          Actualiser
+        </Button>
       </div>
-      
-      <Tabs defaultValue="tables" className="w-full">
-        <TabsList className="grid grid-cols-3 mb-6">
-          <TabsTrigger value="tables" className="flex items-center">
-            <Database className="mr-2 h-4 w-4" />
-            {safeTranslate(t, 'admin.tables', 'Tables')}
-          </TabsTrigger>
-          <TabsTrigger value="tasks" className="flex items-center">
-            <RefreshCw className="mr-2 h-4 w-4" />
-            {safeTranslate(t, 'admin.scheduledTasks', 'Scheduled Tasks')}
-          </TabsTrigger>
-          <TabsTrigger value="logs" className="flex items-center">
-            <FileText className="mr-2 h-4 w-4" />
-            {safeTranslate(t, 'admin.logs', 'Logs')}
-          </TabsTrigger>
-        </TabsList>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <StatCard
+          title="Utilisateurs"
+          value={stats.users}
+          icon={Users}
+          color="bg-blue-500/20 text-blue-400"
+        />
         
-        <TabsContent value="tables">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder={safeTranslate(t, 'admin.searchTables', 'Search tables...')}
-                className="pl-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+        <StatCard
+          title="Cours"
+          value={stats.courses}
+          icon={BookOpen}
+          color="bg-green-500/20 text-green-400"
+        />
+        
+        <StatCard
+          title="Exercices"
+          value={stats.exercises}
+          icon={FileText}
+          color="bg-purple-500/20 text-purple-400"
+        />
+        
+        <StatCard
+          title="Notebooks"
+          value={stats.notebooks}
+          icon={Database}
+          color="bg-orange-500/20 text-orange-400"
+        />
+        
+        <StatCard
+          title="Activités"
+          value={stats.activity}
+          icon={Activity}
+          color="bg-finance-burgundy/20 text-finance-accent"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="finance-card">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Database className="h-5 w-5 mr-2 text-finance-accent" />
+              Tables principales
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span>profiles</span>
+                <Badge variant="default">{stats.users} entrées</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>admin_courses</span>
+                <Badge variant="secondary">{stats.courses} entrées</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>admin_exercises</span>
+                <Badge variant="secondary">{stats.exercises} entrées</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>admin_notebooks</span>
+                <Badge variant="secondary">{stats.notebooks} entrées</Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>user_activity</span>
+                <Badge variant="outline">{stats.activity} entrées</Badge>
+              </div>
             </div>
-          </div>
-          
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{safeTranslate(t, 'admin.tableName', 'Table Name')}</TableHead>
-                  <TableHead>{safeTranslate(t, 'admin.records', 'Records')}</TableHead>
-                  <TableHead>{safeTranslate(t, 'admin.lastUpdated', 'Last Updated')}</TableHead>
-                  <TableHead>{safeTranslate(t, 'admin.size', 'Size')}</TableHead>
-                  <TableHead className="text-right">{safeTranslate(t, 'admin.actions', 'Actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTables.map((table) => (
-                  <TableRow key={table.name}>
-                    <TableCell className="font-medium">{table.name}</TableCell>
-                    <TableCell>{table.records}</TableCell>
-                    <TableCell>{table.lastUpdated}</TableCell>
-                    <TableCell>{table.size}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm">
-                          {safeTranslate(t, 'admin.browse', 'Browse')}
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          {safeTranslate(t, 'admin.export', 'Export')}
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="tasks">
-          <div className="p-6 text-center bg-finance-dark rounded-md border border-finance-steel/20">
-            <RefreshCw className="h-12 w-12 mx-auto text-finance-steel mb-4" />
-            <h3 className="text-xl font-semibold text-finance-accent mb-2">
-              {safeTranslate(t, 'admin.scheduledTasks', 'Scheduled Tasks')}
-            </h3>
-            <p className="text-finance-offwhite mb-4">
-              {safeTranslate(t, 'admin.scheduledTasksDesc', 'Create and manage automated database tasks.')}
-            </p>
-            <Button>
-              {safeTranslate(t, 'admin.createNewTask', 'Create New Task')}
-            </Button>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="logs">
-          <div className="p-6 text-center bg-finance-dark rounded-md border border-finance-steel/20">
-            <FileText className="h-12 w-12 mx-auto text-finance-steel mb-4" />
-            <h3 className="text-xl font-semibold text-finance-accent mb-2">
-              {safeTranslate(t, 'admin.databaseLogs', 'Database Logs')}
-            </h3>
-            <p className="text-finance-offwhite mb-4">
-              {safeTranslate(t, 'admin.databaseLogsDesc', 'View system logs and database activity.')}
-            </p>
-            <Button>
-              {safeTranslate(t, 'admin.viewLogs', 'View Logs')}
-            </Button>
-          </div>
-        </TabsContent>
-      </Tabs>
+          </CardContent>
+        </Card>
+
+        <Card className="finance-card">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Activity className="h-5 w-5 mr-2 text-finance-accent" />
+              État du système
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span>Connexion Supabase</span>
+                <Badge variant="default" className="bg-green-900/20 text-green-400">
+                  Connecté
+                </Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>RLS activé</span>
+                <Badge variant="default" className="bg-green-900/20 text-green-400">
+                  Actif
+                </Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Storage bucket</span>
+                <Badge variant="default" className="bg-green-900/20 text-green-400">
+                  admin-content
+                </Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Dernière mise à jour</span>
+                <Badge variant="outline">
+                  {new Date().toLocaleTimeString('fr-FR')}
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

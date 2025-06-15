@@ -1,85 +1,108 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Lock, Shield } from 'lucide-react';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Lock, Shield, AlertTriangle } from 'lucide-react';
 import { safeTranslate } from '../../utils/translationUtils';
 
 interface LoginFormValues {
-  username: string;
+  email: string;
   password: string;
 }
 
 const AdminLogin = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { signIn, user, isLoading } = useAuth();
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Initialize react-hook-form
   const form = useForm<LoginFormValues>({
     defaultValues: {
-      username: '',
+      email: '',
       password: ''
     }
   });
+
+  useEffect(() => {
+    // If user is already logged in and is admin, redirect to dashboard
+    if (!isLoading && user) {
+      const userRole = user.user_metadata?.role;
+      if (userRole === 'admin') {
+        navigate('/admin-dashboard');
+      } else {
+        setError('Votre compte ne dispose pas des privilèges d\'administrateur');
+      }
+    }
+  }, [user, isLoading, navigate]);
   
-  const onSubmit = (data: LoginFormValues) => {
-    // In a real app, this would be a proper authentication check
-    // For this demo, we'll use a hardcoded admin username/password
-    if (data.username === 'admin' && data.password === 'admin123') {
-      // Store authentication in localStorage or a proper auth state
-      localStorage.setItem('isAdminAuthenticated', 'true');
-      navigate('/admin-dashboard');
-    } else {
-      setError(safeTranslate(t, 'admin.invalidCredentials', 'Invalid username or password'));
+  const onSubmit = async (data: LoginFormValues) => {
+    try {
+      setIsSubmitting(true);
+      setError('');
+      
+      await signIn(data.email, data.password);
+      
+      // The useEffect will handle the redirection based on user role
+    } catch (error: any) {
+      console.error('Login error:', error);
+      setError(error.message || 'Erreur de connexion');
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
   return (
     <>
       <Helmet>
-        <title>Admin Login | The Trading Lab</title>
+        <title>Admin Login | The Pricing Library</title>
       </Helmet>
       
-      <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
+      <div className="min-h-screen bg-finance-dark flex items-center justify-center px-4 py-12">
         <Card className="w-full max-w-md bg-finance-charcoal border-finance-steel/30">
           <CardHeader className="space-y-1">
             <div className="flex justify-center mb-6">
-              <Shield className="h-12 w-12 text-finance-accent" />
+              <div className="p-3 rounded-full bg-finance-burgundy/20">
+                <Shield className="h-8 w-8 text-finance-accent" />
+              </div>
             </div>
             <CardTitle className="text-2xl text-center text-finance-accent">
-              {safeTranslate(t, 'admin.adminLogin', 'Admin Login')}
+              {safeTranslate(t, 'admin.adminLogin', 'Administration')}
             </CardTitle>
             <CardDescription className="text-center text-finance-offwhite">
-              {safeTranslate(t, 'admin.loginDesc', 'Enter your credentials to access the admin panel')}
+              {safeTranslate(t, 'admin.loginDesc', 'Connectez-vous avec vos identifiants administrateur')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {error && (
-              <div className="bg-red-500/20 border border-red-500 text-red-500 p-3 rounded-md mb-4">
-                {error}
-              </div>
+              <Alert className="bg-red-500/20 border-red-500 text-red-500 mb-4">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
             )}
             
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
                 <FormField
                   control={form.control}
-                  name="username"
+                  name="email"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-finance-offwhite">
-                        {safeTranslate(t, 'admin.username', 'Username')}
+                        {safeTranslate(t, 'admin.email', 'Email')}
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="admin"
+                          type="email"
+                          placeholder="admin@example.com"
                           autoCapitalize="none"
                           autoCorrect="off"
                           className="bg-finance-dark text-finance-offwhite"
@@ -97,7 +120,7 @@ const AdminLogin = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-finance-offwhite">
-                        {safeTranslate(t, 'admin.password', 'Password')}
+                        {safeTranslate(t, 'admin.password', 'Mot de passe')}
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -112,16 +135,24 @@ const AdminLogin = () => {
                   )}
                 />
                 
-                <Button className="w-full mt-2 flex items-center justify-center" type="submit">
-                  <Lock className="mr-2 h-4 w-4" />
-                  {safeTranslate(t, 'admin.login', 'Login')}
+                <Button 
+                  className="w-full mt-2 flex items-center justify-center" 
+                  type="submit"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-finance-offwhite mr-2"></div>
+                  ) : (
+                    <Lock className="mr-2 h-4 w-4" />
+                  )}
+                  {safeTranslate(t, 'admin.login', 'Se connecter')}
                 </Button>
               </form>
             </Form>
           </CardContent>
           <CardFooter className="flex justify-center">
             <p className="text-sm text-finance-steel">
-              {safeTranslate(t, 'admin.secureAccess', 'Secure access for administrators only')}
+              {safeTranslate(t, 'admin.secureAccess', 'Accès sécurisé pour les administrateurs uniquement')}
             </p>
           </CardFooter>
         </Card>

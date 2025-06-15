@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/integrations/supabase/client'
@@ -11,6 +10,7 @@ interface AuthContextType {
   session: Session | null
   isLoading: boolean
   isAuthenticated: boolean
+  isAdmin: () => boolean
   signUp: (email: string, password: string, prenom: string, nom: string) => Promise<void>
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
@@ -150,12 +150,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
+  // Helper function to check if user is admin
+  const isAdmin = () => {
+    return user?.user_metadata?.role === 'admin';
+  }
+
   const value = {
     user,
     profile,
     session,
     isLoading,
     isAuthenticated: !!session,
+    isAdmin,
     signUp,
     signIn,
     signOut,
