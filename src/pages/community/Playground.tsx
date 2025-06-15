@@ -18,6 +18,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Link } from 'react-router-dom';
 
 const Playground: React.FC = () => {
   const { notebooks, isLoading, filter, updateFilter } = useNotebookSearch();
@@ -98,7 +99,51 @@ const Playground: React.FC = () => {
             }
           </p>
         </div>
+        
+        <div className="flex gap-3 mt-4 md:mt-0">
+          <Button asChild variant="finance">
+            <Link to="/community/notebook-workspace">
+              <Github className="mr-2 h-4 w-4" />
+              GitHub Workspace
+            </Link>
+          </Button>
+        </div>
       </div>
+
+      {/* Enhanced intro section with workspace link */}
+      <Card className="finance-card mb-6">
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="font-medium mb-3 flex items-center">
+                <BookOpen className="h-5 w-5 mr-2 text-finance-accent" />
+                Community Notebooks
+              </h3>
+              <p className="text-sm text-finance-lightgray mb-4">
+                Explorez des notebooks de finance quantitative partagés par la communauté.
+              </p>
+              <Button variant="outline" size="sm">
+                Parcourir les notebooks
+              </Button>
+            </div>
+            
+            <div>
+              <h3 className="font-medium mb-3 flex items-center">
+                <Github className="h-5 w-5 mr-2 text-finance-accent" />
+                Your GitHub Projects
+              </h3>
+              <p className="text-sm text-finance-lightgray mb-4">
+                Connectez GitHub et exécutez vos propres projets Python dans un environnement complet.
+              </p>
+              <Button asChild variant="finance" size="sm">
+                <Link to="/community/notebook-workspace">
+                  Accéder au Workspace
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 space-y-4">

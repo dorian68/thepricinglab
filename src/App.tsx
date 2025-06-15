@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
@@ -59,6 +58,7 @@ import StrategyDetail from './pages/community/StrategyDetail';
 import StrategyBuilder from './pages/community/StrategyBuilder';
 import Playground from './pages/community/Playground';
 import SharedNotebook from './pages/community/SharedNotebook';
+import NotebookWorkspace from './pages/community/NotebookWorkspace';
 
 import VolatilityCalculator from './components/tools/VolatilityCalculator';
 import BlackScholesCalculator from './components/tools/BlackScholesCalculator';
@@ -160,6 +160,8 @@ function App() {
                       <AdminDashboard />
                     </AdminRouteGuard>
                   } />
+                  
+                  <Route path="/community/notebook-workspace" element={<NotebookWorkspace />} />
                   
                   <Route path="*" element={<NotFound />} />
                 </Route>
