@@ -157,7 +157,7 @@ const DesktopNav = () => {
                   label={
                     <div className="flex items-center gap-2">
                       {st('navbar.dashboard', 'Dashboard')}
-                      <Badge variant="error" className="text-xs">ADMIN</Badge>
+                      <Badge variant="destructive" className="text-xs">ADMIN</Badge>
                     </div>
                   }
                 />
