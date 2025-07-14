@@ -16,7 +16,7 @@ const Footer: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-lg font-medium text-finance-accent mb-4">The Pricing Lab</h3>
+            <h3 className="text-lg font-medium text-finance-accent mb-4">{safeTranslate(t, 'app.title', 'The Pricing Library')}</h3>
             <p className="text-finance-lightgray">
               {safeTranslate(t, 'app.subtitle', 'La référence pour la théorie des options et le pricing quantitatif.')}
             </p>
@@ -48,6 +48,7 @@ const Footer: React.FC = () => {
               <li><Link to="/terms" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'footer.terms', 'CGU')}</Link></li>
               <li><Link to="/privacy" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'footer.privacy', 'Confidentialité')}</Link></li>
               <li><Link to="/cookies" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'footer.cookies', 'Cookies')}</Link></li>
+              <li><Link to="/help" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'footer.help', 'Aide')}</Link></li>
             </ul>
           </div>
         </div>

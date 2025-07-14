@@ -1,4 +1,8 @@
 {
+  "app": {
+    "title": "The Pricing Library",
+    "subtitle": "Maîtrisez la finance quantitative grâce à l'apprentissage interactif"
+  },
   "common": {
     "exercises": "Exercices",
     "challenge": "Défi",
@@ -17,7 +21,28 @@
     "hint": "Indice",
     "solution": "Solution",
     "completed": "Terminé",
-    "progress": "Progression"
+    "progress": "Progression",
+    "contact": "Contact",
+    "about": "À propos",
+    "help": "Aide",
+    "settings": "Paramètres",
+    "profile": "Profil",
+    "logout": "Déconnexion",
+    "welcome": "Bienvenue",
+    "dashboard": "Tableau de bord",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "save": "Enregistrer",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "sort": "Trier",
+    "export": "Exporter",
+    "import": "Importer",
+    "copy": "Copier"
   },
   "navigation": {
     "home": "Accueil",
@@ -619,11 +644,18 @@
     }
   },
   "footer": {
+    "products": "Produits",
+    "company": "Entreprise",
+    "legal": "Légal",
     "about": "À propos",
     "contact": "Contact",
+    "terms": "Conditions d'utilisation",
+    "privacy": "Politique de confidentialité",
+    "help": "Centre d'aide",
+    "cookies": "Politique des cookies",
+    "followUs": "Suivez-nous",
     "privacyPolicy": "Politique de confidentialité",
     "termsOfService": "Conditions d'utilisation",
-    "help": "Aide",
     "faq": "FAQ",
     "blog": "Blog",
     "community": "Communauté",
