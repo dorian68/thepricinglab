@@ -8,6 +8,7 @@ import { Slider } from '@/components/ui/slider';
 import { LineChart } from '@/components/ui/chart';
 import { Calculator, Upload, RefreshCw } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useTranslation } from 'react-i18next';
 
 const assets = [
   { id: 'btc', name: 'Bitcoin (BTC/USD)' },
@@ -55,6 +56,7 @@ const generatePriceSeries = (days: number, initialPrice: number, volatility: num
 };
 
 const VolatilityCalculator: React.FC = () => {
+  const { t } = useTranslation();
   const [selectedAsset, setSelectedAsset] = useState(assets[0].id);
   const [period, setPeriod] = useState<string>('1y');
   const [windowSize, setWindowSize] = useState<number>(20);
@@ -141,14 +143,14 @@ const VolatilityCalculator: React.FC = () => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="p-4 bg-finance-charcoal">
-          <h3 className="text-lg font-medium mb-4 text-finance-accent">Paramètres d'entrée</h3>
+          <h3 className="text-lg font-medium mb-4 text-finance-accent">{t('tools.volatility.inputParameters')}</h3>
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Actif</label>
+              <label className="block text-sm font-medium mb-1">{t('tools.volatility.asset')}</label>
               <Select value={selectedAsset} onValueChange={handleAssetChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Choisir un actif" />
+                  <SelectValue placeholder={t('tools.volatility.chooseAsset')} />
                 </SelectTrigger>
                 <SelectContent>
                   {assets.map(asset => (
@@ -168,33 +170,33 @@ const VolatilityCalculator: React.FC = () => {
                 onClick={handleFileUpload}
               >
                 <Upload size={12} />
-                <span>Upload CSV</span>
+                <span>{t('tools.volatility.uploadCsv')}</span>
               </Button>
               {fileUploaded && (
-                <span className="text-xs text-green-500">Fichier prêt</span>
+                <span className="text-xs text-green-500">{t('tools.volatility.fileReady')}</span>
               )}
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-1">Période</label>
+              <label className="block text-sm font-medium mb-1">{t('tools.volatility.period')}</label>
               <Select value={period} onValueChange={handlePeriodChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Choisir une période" />
+                  <SelectValue placeholder={t('tools.volatility.choosePeriod')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1m">1 mois</SelectItem>
-                  <SelectItem value="3m">3 mois</SelectItem>
-                  <SelectItem value="6m">6 mois</SelectItem>
-                  <SelectItem value="1y">1 an</SelectItem>
-                  <SelectItem value="2y">2 ans</SelectItem>
-                  <SelectItem value="5y">5 ans</SelectItem>
+                  <SelectItem value="1m">{t('tools.volatility.periods.1m')}</SelectItem>
+                  <SelectItem value="3m">{t('tools.volatility.periods.3m')}</SelectItem>
+                  <SelectItem value="6m">{t('tools.volatility.periods.6m')}</SelectItem>
+                  <SelectItem value="1y">{t('tools.volatility.periods.1y')}</SelectItem>
+                  <SelectItem value="2y">{t('tools.volatility.periods.2y')}</SelectItem>
+                  <SelectItem value="5y">{t('tools.volatility.periods.5y')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div>
               <label className="block text-sm font-medium mb-1">
-                Fenêtre glissante (jours): {windowSize}
+                {t('tools.volatility.rollingWindow')}: {windowSize}
               </label>
               <Slider
                 value={[windowSize]}
@@ -214,12 +216,12 @@ const VolatilityCalculator: React.FC = () => {
               {isCalculating ? (
                 <div className="flex items-center">
                   <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                  Calcul en cours...
+                  {t('tools.volatility.calculating')}
                 </div>
               ) : (
                 <div className="flex items-center">
                   <Calculator className="mr-2 h-4 w-4" />
-                  Calculer la volatilité
+                  {t('tools.volatility.calculateVolatility')}
                 </div>
               )}
             </Button>
@@ -229,15 +231,15 @@ const VolatilityCalculator: React.FC = () => {
         {results && (
           <>
             <Card className="p-4 bg-finance-charcoal col-span-1 md:col-span-2">
-              <h3 className="text-lg font-medium mb-4 text-finance-accent">Résultats</h3>
+              <h3 className="text-lg font-medium mb-4 text-finance-accent">{t('tools.volatility.results')}</h3>
               
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="p-3 bg-finance-steel/10 rounded">
-                  <div className="text-sm text-finance-lightgray">Volatilité annualisée</div>
+                  <div className="text-sm text-finance-lightgray">{t('tools.volatility.annualizedVolatility')}</div>
                   <div className="text-2xl font-bold text-finance-accent">{results.annualizedVol}%</div>
                 </div>
                 <div className="p-3 bg-finance-steel/10 rounded">
-                  <div className="text-sm text-finance-lightgray">Volatilité quotidienne</div>
+                  <div className="text-sm text-finance-lightgray">{t('tools.volatility.dailyVolatility')}</div>
                   <div className="text-2xl font-bold text-finance-accent">{results.dailyVol}%</div>
                 </div>
               </div>
@@ -245,21 +247,21 @@ const VolatilityCalculator: React.FC = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Métrique</TableHead>
-                    <TableHead>Valeur</TableHead>
+                    <TableHead>{t('tools.volatility.metric')}</TableHead>
+                    <TableHead>{t('tools.volatility.value')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    <TableCell>Rendement moyen quotidien</TableCell>
+                    <TableCell>{t('tools.volatility.meanDailyReturn')}</TableCell>
                     <TableCell>{results.meanReturn}%</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>Rendement min quotidien</TableCell>
+                    <TableCell>{t('tools.volatility.minDailyReturn')}</TableCell>
                     <TableCell>{results.min}%</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>Rendement max quotidien</TableCell>
+                    <TableCell>{t('tools.volatility.maxDailyReturn')}</TableCell>
                     <TableCell>{results.max}%</TableCell>
                   </TableRow>
                 </TableBody>
@@ -267,32 +269,32 @@ const VolatilityCalculator: React.FC = () => {
             </Card>
             
             <Card className="p-4 bg-finance-charcoal col-span-1 md:col-span-3 h-80">
-              <h3 className="text-lg font-medium mb-2 text-finance-accent">Évolution de la volatilité glissante</h3>
+              <h3 className="text-lg font-medium mb-2 text-finance-accent">{t('tools.volatility.rollingVolatilityEvolution')}</h3>
               <LineChart 
                 data={results.volChartData}
                 color="#ea384c"
-                xLabel="Jours"
-                yLabel="Volatilité (%)"
+                xLabel={t('tools.volatility.days')}
+                yLabel={t('tools.volatility.volatilityPercent')}
               />
             </Card>
             
             <Card className="p-4 bg-finance-charcoal col-span-1 md:col-span-3 h-80">
-              <h3 className="text-lg font-medium mb-2 text-finance-accent">Évolution du prix</h3>
+              <h3 className="text-lg font-medium mb-2 text-finance-accent">{t('tools.volatility.priceEvolution')}</h3>
               <LineChart 
                 data={results.priceChartData}
                 color="#8884d8"
-                xLabel="Jours"
-                yLabel="Prix"
+                xLabel={t('tools.volatility.days')}
+                yLabel={t('tools.volatility.price')}
               />
             </Card>
             
             <Card className="p-4 bg-finance-charcoal col-span-1 md:col-span-3 h-80">
-              <h3 className="text-lg font-medium mb-2 text-finance-accent">Rendements quotidiens</h3>
+              <h3 className="text-lg font-medium mb-2 text-finance-accent">{t('tools.volatility.dailyReturns')}</h3>
               <LineChart 
                 data={results.returnsChartData}
                 color="#82ca9d"
-                xLabel="Jours"
-                yLabel="Rendement (%)"
+                xLabel={t('tools.volatility.days')}
+                yLabel={t('tools.volatility.returnPercent')}
               />
             </Card>
           </>

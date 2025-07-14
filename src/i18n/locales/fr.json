@@ -665,5 +665,50 @@
       "emailPlaceholder": "Entrez votre adresse e-mail",
       "subscribeButton": "S'abonner"
     }
+  },
+  "tools": {
+    "title": "Outils",
+    "subtitle": "Outils de calcul et simulateurs pour vos analyses quantitatives",
+    "volatilityCalculator": "Calculateur de Volatilité",
+    "blackScholes": "Simulateur Black-Scholes",
+    "monteCarlo": "Monte Carlo",
+    "modelCalibration": "Calibration de Modèle",
+    "payoffVisualizer": "Visualiseur de Payoff",
+    "volatility": {
+      "title": "Calculateur de Volatilité",
+      "inputParameters": "Paramètres d'entrée",
+      "asset": "Actif",
+      "chooseAsset": "Choisir un actif",
+      "uploadCsv": "Upload CSV",
+      "fileReady": "Fichier prêt",
+      "period": "Période",
+      "choosePeriod": "Choisir une période",
+      "rollingWindow": "Fenêtre glissante (jours)",
+      "calculateVolatility": "Calculer la volatilité",
+      "calculating": "Calcul en cours...",
+      "results": "Résultats",
+      "annualizedVolatility": "Volatilité annualisée",
+      "dailyVolatility": "Volatilité quotidienne",
+      "metric": "Métrique",
+      "value": "Valeur",
+      "meanDailyReturn": "Rendement moyen quotidien",
+      "minDailyReturn": "Rendement min quotidien",
+      "maxDailyReturn": "Rendement max quotidien",
+      "rollingVolatilityEvolution": "Évolution de la volatilité glissante",
+      "priceEvolution": "Évolution du prix",
+      "dailyReturns": "Rendements quotidiens",
+      "days": "Jours",
+      "volatilityPercent": "Volatilité (%)",
+      "price": "Prix",
+      "returnPercent": "Rendement (%)",
+      "periods": {
+        "1m": "1 mois",
+        "3m": "3 mois",
+        "6m": "6 mois",
+        "1y": "1 an",
+        "2y": "2 ans",
+        "5y": "5 ans"
+      }
+    }
   }
 }
