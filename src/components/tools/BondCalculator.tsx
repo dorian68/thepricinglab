@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 type BondData = {
@@ -10,6 +11,7 @@ type BondData = {
 };
 
 const BondCalculator = () => {
+  const { t } = useTranslation();
   const [faceValue, setFaceValue] = useState<number>(1000);
   const [couponRate, setCouponRate] = useState<number>(0.05);
   const [yieldToMaturity, setYieldToMaturity] = useState<number>(0.05);
@@ -191,13 +193,13 @@ const BondCalculator = () => {
   
   return (
     <div className="finance-card p-6">
-      <h3 className="text-xl font-medium mb-6">Calculateur d'obligations</h3>
+      <h3 className="text-xl font-medium mb-6">{t('tools.bond.title')}</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div>
           <div className="space-y-4">
             <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Valeur nominale</label>
+              <label className="block text-finance-lightgray text-sm mb-1">{t('tools.bond.faceValue')}</label>
               <input
                 type="number"
                 value={faceValue}
@@ -207,7 +209,7 @@ const BondCalculator = () => {
             </div>
             
             <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Taux du coupon (décimal)</label>
+              <label className="block text-finance-lightgray text-sm mb-1">{t('tools.bond.couponRate')}</label>
               <input
                 type="number"
                 step="0.001"
@@ -218,7 +220,7 @@ const BondCalculator = () => {
             </div>
             
             <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Rendement à maturité (décimal)</label>
+              <label className="block text-finance-lightgray text-sm mb-1">{t('tools.bond.yieldToMaturity')}</label>
               <input
                 type="number"
                 step="0.001"
@@ -229,7 +231,7 @@ const BondCalculator = () => {
             </div>
             
             <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Maturité (années)</label>
+              <label className="block text-finance-lightgray text-sm mb-1">{t('tools.bond.maturity')}</label>
               <input
                 type="number"
                 step="1"
@@ -240,16 +242,15 @@ const BondCalculator = () => {
             </div>
             
             <div>
-              <label className="block text-finance-lightgray text-sm mb-1">Fréquence des coupons (par an)</label>
+              <label className="block text-finance-lightgray text-sm mb-1">{t('tools.bond.frequency')}</label>
               <select
                 value={frequency}
                 onChange={(e) => setFrequency(parseInt(e.target.value))}
                 className="w-full bg-finance-dark border border-finance-steel/30 rounded p-2 text-finance-offwhite"
               >
-                <option value={1}>Annuel</option>
-                <option value={2}>Semi-annuel</option>
-                <option value={4}>Trimestriel</option>
-                <option value={12}>Mensuel</option>
+                <option value={1}>{t('tools.bond.annual')}</option>
+                <option value={2}>{t('tools.bond.semiannual')}</option>
+                <option value={4}>{t('tools.bond.quarterly')}</option>
               </select>
             </div>
             
@@ -257,65 +258,47 @@ const BondCalculator = () => {
               onClick={calculate}
               className="finance-button w-full"
             >
-              Calculer
+              {t('tools.bond.calculate')}
             </button>
           </div>
         </div>
         
         <div>
-          <h4 className="text-finance-offwhite font-medium mb-4">Résultats</h4>
+          <h4 className="text-finance-offwhite font-medium mb-4">{t('tools.bond.results')}</h4>
           
           <div className="grid grid-cols-2 gap-4">
             <div className="finance-card p-4">
-              <p className="text-finance-lightgray text-sm mb-1">Prix de l'obligation</p>
+              <p className="text-finance-lightgray text-sm mb-1">{t('tools.bond.bondPrice')}</p>
               <p className="text-2xl font-medium text-finance-offwhite">
                 {bondPrice !== null ? bondPrice.toFixed(2) : "—"}
               </p>
-              <p className="text-xs text-finance-lightgray mt-1">
-                {bondPrice !== null && faceValue ? ((bondPrice / faceValue - 1) * 100).toFixed(2) + "% par rapport au nominal" : ""}
-              </p>
             </div>
             
             <div className="finance-card p-4">
-              <p className="text-finance-lightgray text-sm mb-1">Coupon actuel</p>
-              <p className="text-lg font-medium text-finance-offwhite">
-                {(couponRate * 100).toFixed(2)}%
-              </p>
-              <p className="text-xs text-finance-lightgray mt-1">
-                {(couponRate * faceValue).toFixed(2)} par an
-              </p>
-            </div>
-            
-            <div className="finance-card p-4">
-              <p className="text-finance-lightgray text-sm mb-1">Duration de Macaulay</p>
+              <p className="text-finance-lightgray text-sm mb-1">{t('tools.bond.duration')}</p>
               <p className="text-lg font-medium text-finance-offwhite">
                 {duration !== null ? duration.toFixed(2) : "—"}
               </p>
-              <p className="text-xs text-finance-lightgray mt-1">années</p>
             </div>
             
             <div className="finance-card p-4">
-              <p className="text-finance-lightgray text-sm mb-1">Duration modifiée</p>
+              <p className="text-finance-lightgray text-sm mb-1">{t('tools.bond.modifiedDuration')}</p>
               <p className="text-lg font-medium text-finance-offwhite">
                 {modifiedDuration !== null ? modifiedDuration.toFixed(4) : "—"}
               </p>
-              <p className="text-xs text-finance-lightgray mt-1">sensibilité aux taux</p>
             </div>
             
-            <div className="finance-card p-4 col-span-2">
-              <p className="text-finance-lightgray text-sm mb-1">Convexité</p>
+            <div className="finance-card p-4">
+              <p className="text-finance-lightgray text-sm mb-1">{t('tools.bond.convexity')}</p>
               <p className="text-lg font-medium text-finance-offwhite">
                 {convexity !== null ? convexity.toFixed(4) : "—"}
-              </p>
-              <p className="text-xs text-finance-lightgray mt-1">
-                La convexité capture la relation non-linéaire entre le prix et le rendement
               </p>
             </div>
           </div>
           
           {bondPrice !== null && (
             <div className="mt-6">
-              <h5 className="text-finance-offwhite font-medium mb-3">Relation prix-rendement</h5>
+              <h5 className="text-finance-offwhite font-medium mb-3">{t('tools.bond.yieldPriceRelation')}</h5>
               <div className="h-40">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
@@ -327,7 +310,6 @@ const BondCalculator = () => {
                       dataKey="rate" 
                       tick={{ fill: '#B4B4B4' }} 
                       axisLine={{ stroke: '#444' }}
-                      label={{ value: 'YTM (%)', position: 'insideBottom', offset: -5, fill: '#B4B4B4' }}
                     />
                     <YAxis 
                       domain={['auto', 'auto']}
@@ -336,8 +318,6 @@ const BondCalculator = () => {
                     />
                     <Tooltip 
                       contentStyle={{ backgroundColor: '#1F2023', borderColor: '#333', color: '#E5E5E5' }}
-                      formatter={(value: number) => [value.toFixed(2), "Prix"]}
-                      labelFormatter={(value: number) => `Rendement: ${value}%`}
                     />
                     <Line 
                       type="monotone" 
@@ -354,72 +334,11 @@ const BondCalculator = () => {
         </div>
       </div>
       
-      {/* Price Sensitivity Analysis */}
-      {bondPrice !== null && duration !== null && convexity !== null && (
-        <div className="border-t border-finance-steel/20 pt-6 mt-6">
-          <h4 className="text-finance-offwhite font-medium mb-4">Analyse de sensibilité aux taux</h4>
-          
-          <div className="h-60">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={generatePriceSensitivityData()}
-                margin={{ top: 5, right: 20, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                <XAxis 
-                  dataKey="yieldChange" 
-                  tick={{ fill: '#B4B4B4' }} 
-                  axisLine={{ stroke: '#444' }}
-                  label={{ value: 'Variation de taux (points de base)', position: 'insideBottom', offset: -5, fill: '#B4B4B4' }}
-                />
-                <YAxis 
-                  domain={['auto', 'auto']}
-                  tick={{ fill: '#B4B4B4' }} 
-                  axisLine={{ stroke: '#444' }}
-                />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#1F2023', borderColor: '#333', color: '#E5E5E5' }}
-                  formatter={(value: number) => [value.toFixed(2), ""]}
-                  labelFormatter={(value: number) => `Variation: ${value} bps`}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="actual" 
-                  name="Prix réel"
-                  stroke="#ea384c" 
-                  dot={false} 
-                  strokeWidth={2}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="linear" 
-                  name="Approx. linéaire (duration)"
-                  stroke="#4A89DC" 
-                  dot={false} 
-                  strokeWidth={2}
-                  strokeDasharray="5 5"
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="quadratic" 
-                  name="Approx. quadratique (avec convexité)"
-                  stroke="#37BC9B" 
-                  dot={false} 
-                  strokeWidth={2}
-                  strokeDasharray="3 3"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          
-          <p className="text-finance-lightgray text-sm mt-4">
-            Ce graphique montre comment le prix de l'obligation varie avec les changements de taux d'intérêt. 
-            La courbe rouge représente le prix réel, tandis que les courbes bleue et verte montrent les approximations
-            basées sur la duration et la convexité. Notez comment la convexité capture mieux le comportement non-linéaire
-            du prix pour les grands mouvements de taux.
-          </p>
-        </div>
-      )}
+      <div className="bg-finance-charcoal/50 p-4 rounded-lg border border-finance-steel/20">
+        <p className="text-finance-lightgray text-sm">
+          {t('tools.bond.priceYieldChart')}
+        </p>
+      </div>
     </div>
   );
 };

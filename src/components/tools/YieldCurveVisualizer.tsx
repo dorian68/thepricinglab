@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Info } from "lucide-react";
 
@@ -34,6 +35,7 @@ const dates = [
 ];
 
 const YieldCurveVisualizer = () => {
+  const { t } = useTranslation();
   const [currency, setCurrency] = useState<string>("EUR");
   const [date, setDate] = useState<string>("2025-04-15");
   const [showSpot, setShowSpot] = useState<boolean>(true);

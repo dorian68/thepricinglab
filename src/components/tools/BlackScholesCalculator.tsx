@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Calculator } from "lucide-react";
 
 const BlackScholesCalculator = () => {
+  const { t } = useTranslation();
   const [spot, setSpot] = useState<number>(100);
   const [strike, setStrike] = useState<number>(100);
   const [interestRate, setInterestRate] = useState<number>(0.05);

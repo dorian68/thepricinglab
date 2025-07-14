@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { useTranslation } from 'react-i18next';
 import { Slider } from "@/components/ui/slider";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Info } from "lucide-react";
@@ -27,6 +28,7 @@ type OptionGreeks = Record<Greek, number>;
 type SimulationPoint = { x: number; delta: number; gamma: number; vega: number; theta: number; rho: number; };
 
 const GreeksSimulator = () => {
+  const { t } = useTranslation();
   // State for option parameters
   const [spot, setSpot] = useState<number>(parameterRanges.spot.initialValue);
   const [strike, setStrike] = useState<number>(parameterRanges.strike.initialValue);

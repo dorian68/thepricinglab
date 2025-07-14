@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { Info } from "lucide-react";
 import Tree from "react-d3-tree";
 
@@ -45,6 +46,7 @@ const CustomNode = ({ nodeDatum }: { nodeDatum: any }) => {
 };
 
 const BinomialCalculator = () => {
+  const { t } = useTranslation();
   const [spotPrice, setSpotPrice] = useState<number>(100);
   const [strike, setStrike] = useState<number>(100);
   const [volatility, setVolatility] = useState<number>(20);
@@ -141,7 +143,7 @@ const BinomialCalculator = () => {
 
   return (
     <div className="finance-card p-6">
-      <h3 className="text-xl font-medium mb-6">Calculateur Binomial</h3>
+      <h3 className="text-xl font-medium mb-6">{t('tools.binomial.title')}</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div>
