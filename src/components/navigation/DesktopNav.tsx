@@ -47,7 +47,7 @@ const DesktopNav = () => {
   }
 
   return (
-    <div className="hidden md:flex items-center justify-between w-full">
+    <div className="hidden md:flex items-center justify-between w-full bg-transparent">
       <div className="flex items-center">
         <Link to="/" className="flex-shrink-0 flex items-center">
           <span className="terminal-text text-finance-accent text-xl font-bold">THE PRICING LAB</span>
