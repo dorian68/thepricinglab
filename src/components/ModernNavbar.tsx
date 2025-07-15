@@ -36,7 +36,7 @@ const ModernNavbar = () => {
 
   return (
     <nav 
-      className="sticky top-0 z-50 bg-black/90 backdrop-blur-sm border-b border-gray-800/50" 
+      className="sticky top-0 z-50 bg-finance-dark/95 backdrop-blur-sm border-b border-finance-steel/20" 
       aria-label={st('navigation.main', 'Main navigation')}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
