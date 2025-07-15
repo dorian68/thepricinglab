@@ -95,12 +95,12 @@ const DesktopNav = () => {
                 <CommunityMenu />
               </NavItem>
               
-              {/* Pricing */}
-              <NavItem 
+              {/* Pricing - temporairement caché */}
+              {/* <NavItem 
                 to="/pricing" 
                 icon={CreditCard} 
                 label={st('navbar.pricing', 'Tarifs')} 
-              />
+              /> */}
               
               {/* Blog */}
               <NavItem 
