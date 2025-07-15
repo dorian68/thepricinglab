@@ -75,7 +75,7 @@ const OptionLegForm: React.FC<OptionLegFormProps> = ({
               onValueChange={(value: PositionType) => handleChange('position', value)}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder={st('common.selectPosition', 'Sélectionner une position')} />
+                <SelectValue placeholder="Sélectionner une position" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="long">Long</SelectItem>
@@ -91,7 +91,7 @@ const OptionLegForm: React.FC<OptionLegFormProps> = ({
               onValueChange={(value: OptionType) => handleChange('type', value)}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder={st('common.selectOptionType', 'Sélectionner un type d\'option')} />
+                <SelectValue placeholder="Sélectionner un type d'option" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="call">Call</SelectItem>

@@ -91,7 +91,7 @@ const AssetSelector: React.FC<AssetSelectorProps> = ({
           <Label>{st('common.assetType', 'Type d\'actif')}</Label>
           <Select value={selectedType} onValueChange={(value: AssetType) => setSelectedType(value)}>
             <SelectTrigger>
-              <SelectValue placeholder={st('common.selectAssetType', 'Sélectionner un type')} />
+              <SelectValue placeholder="Sélectionner un type" />
             </SelectTrigger>
             <SelectContent>
               {ASSET_TYPES.map((type) => (
@@ -105,7 +105,7 @@ const AssetSelector: React.FC<AssetSelectorProps> = ({
           <Label>{st('common.instrument', 'Instrument')}</Label>
           <Select value={selectedAssetId} onValueChange={handleAssetSelection}>
             <SelectTrigger>
-              <SelectValue placeholder={st('common.addInstrument', 'Ajouter un instrument')} />
+              <SelectValue placeholder="Ajouter un instrument" />
             </SelectTrigger>
             <SelectContent>
               {SAMPLE_ASSETS[selectedType].map((asset) => (

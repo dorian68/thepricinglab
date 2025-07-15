@@ -291,7 +291,7 @@ const ModelCalibration: React.FC = () => {
               <label className="block text-sm font-medium mb-1">Modèle à calibrer</label>
               <Select value={selectedModel} onValueChange={setSelectedModel}>
                 <SelectTrigger>
-                  <SelectValue placeholder={st('common.selectModel', 'Choisir un modèle')} />
+                  <SelectValue placeholder="Choisir un modèle" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="black">Black</SelectItem>
@@ -352,7 +352,7 @@ const ModelCalibration: React.FC = () => {
                   onValueChange={(val) => setSelectedMaturity(parseFloat(val))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={st('common.chooseMaturity', 'Choisir une maturité')} />
+                    <SelectValue placeholder="Choisir une maturité" />
                   </SelectTrigger>
                   <SelectContent>
                     {getUniqueValues('maturity').map((mat) => (
@@ -371,7 +371,7 @@ const ModelCalibration: React.FC = () => {
                   onValueChange={(val) => setSelectedStrike(parseFloat(val))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={st('common.chooseStrike', 'Choisir un strike')} />
+                    <SelectValue placeholder="Choisir un strike" />
                   </SelectTrigger>
                   <SelectContent>
                     {getUniqueValues('strike').map((strike) => (

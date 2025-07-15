@@ -174,7 +174,7 @@ const Backtest = () => {
                 </label>
                 <Select value={selectedAsset} onValueChange={setSelectedAsset}>
                   <SelectTrigger className="w-full bg-finance-dark">
-                    <SelectValue placeholder={safeTranslate(t, 'backtest.selectAsset', 'Sélectionner un actif')} />
+                    <SelectValue placeholder="Sélectionner un actif" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="BTC/USD">BTC/USD</SelectItem>
@@ -191,7 +191,7 @@ const Backtest = () => {
                 </label>
                 <Select value={selectedStrategy} onValueChange={setSelectedStrategy}>
                   <SelectTrigger className="w-full bg-finance-dark">
-                    <SelectValue placeholder={safeTranslate(t, 'backtest.selectStrategy', 'Sélectionner une stratégie')} />
+                    <SelectValue placeholder="Sélectionner une stratégie" />
                   </SelectTrigger>
                   <SelectContent>
                     {defaultStrategies.map(strategy => (
