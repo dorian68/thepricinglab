@@ -150,7 +150,7 @@ const VolatilityCalculator: React.FC = () => {
               <label className="block text-sm font-medium mb-1">{t('tools.volatility.asset')}</label>
               <Select value={selectedAsset} onValueChange={handleAssetChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t('tools.volatility.chooseAsset') || 'Choisir un actif'} />
+                  <SelectValue placeholder="Choisir un actif" />
                 </SelectTrigger>
                 <SelectContent>
                   {assets.map(asset => (
@@ -181,7 +181,7 @@ const VolatilityCalculator: React.FC = () => {
               <label className="block text-sm font-medium mb-1">{t('tools.volatility.period')}</label>
               <Select value={period} onValueChange={handlePeriodChange}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t('tools.volatility.choosePeriod') || 'Choisir une période'} />
+                  <SelectValue placeholder="Choisir une période" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="1m">{t('tools.volatility.periods.1m')}</SelectItem>
