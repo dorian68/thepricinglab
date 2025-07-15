@@ -65,28 +65,13 @@ const DesktopNav = () => {
                 <CoursesMenu />
               </NavItem>
 
-              {/* Trading Lab */}
+              {/* Labo Trading */}
               <NavItem 
                 to="/labo-trading" 
                 icon={BarChart3} 
-                label={st('navbar.laboTrading', 'Trading Lab')}
+                label={st('navbar.laboTrading', 'Labo de Trading')}
               />
 
-              {/* Community */}
-              <NavItem 
-                icon={Users} 
-                label={st('navbar.community', 'Communauté')}
-              >
-                <CommunityMenu />
-              </NavItem>
-
-              {/* Pricing - temporairement caché */}
-              <NavItem 
-                to="/pricing" 
-                icon={CreditCard} 
-                label={st('navbar.pricing', 'Tarifs')} 
-              />
-              
               {/* Outils */}
               <NavItem 
                 icon={Wrench} 
@@ -94,6 +79,28 @@ const DesktopNav = () => {
               >
                 <ToolsMenu />
               </NavItem>
+
+              {/* Exercices */}
+              <NavItem 
+                to="/exercices" 
+                icon={Dumbbell} 
+                label={st('navbar.exercices', 'Exercices')} 
+              />
+              
+              {/* Community */}
+              <NavItem 
+                icon={Users} 
+                label={st('navbar.community', 'Communauté')}
+              >
+                <CommunityMenu />
+              </NavItem>
+              
+              {/* Pricing - temporairement caché */}
+              {/* <NavItem 
+                to="/pricing" 
+                icon={CreditCard} 
+                label={st('navbar.pricing', 'Tarifs')} 
+              /> */}
               
               {/* Blog */}
               <NavItem 
