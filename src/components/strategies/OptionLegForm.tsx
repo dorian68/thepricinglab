@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,6 +10,7 @@ import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
 import { Trash2 } from "lucide-react";
 import { OptionType, PositionType, OptionLeg } from '@/types/strategies';
 import { Badge } from '@/components/ui/badge';
+import { safeTranslate } from '@/utils/translationUtils';
 
 interface OptionLegFormProps {
   leg: OptionLeg;
@@ -25,6 +27,8 @@ const OptionLegForm: React.FC<OptionLegFormProps> = ({
   spotPrice,
   index
 }) => {
+  const { t } = useTranslation();
+  const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
   const handleChange = (field: keyof OptionLeg, value: any) => {
     onUpdate({
       ...leg,
@@ -65,13 +69,13 @@ const OptionLegForm: React.FC<OptionLegFormProps> = ({
       <CardContent className="p-4 pt-0 space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor={`position-${index}`}>Position</Label>
+            <Label htmlFor={`position-${index}`}>{st('common.position', 'Position')}</Label>
             <Select 
               value={leg.position} 
               onValueChange={(value: PositionType) => handleChange('position', value)}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Position" />
+                <SelectValue placeholder={st('common.selectPosition', 'Sélectionner une position')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="long">Long</SelectItem>
@@ -81,13 +85,13 @@ const OptionLegForm: React.FC<OptionLegFormProps> = ({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor={`type-${index}`}>Type d'option</Label>
+            <Label htmlFor={`type-${index}`}>{st('common.type', 'Type d\'option')}</Label>
             <Select 
               value={leg.type} 
               onValueChange={(value: OptionType) => handleChange('type', value)}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Type" />
+                <SelectValue placeholder={st('common.selectOptionType', 'Sélectionner un type d\'option')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="call">Call</SelectItem>
@@ -99,7 +103,7 @@ const OptionLegForm: React.FC<OptionLegFormProps> = ({
         
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor={`strike-${index}`}>Strike (K)</Label>
+            <Label htmlFor={`strike-${index}`}>{st('common.strike', 'Strike')} (K)</Label>
             <div className="text-sm text-finance-lightgray">
               Spot: {spotPrice.toFixed(2)}
             </div>
@@ -124,7 +128,7 @@ const OptionLegForm: React.FC<OptionLegFormProps> = ({
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor={`quantity-${index}`}>Quantité</Label>
+          <Label htmlFor={`quantity-${index}`}>{st('common.quantity', 'Quantité')}</Label>
           <div className="flex items-center gap-4">
             <Slider 
               value={[leg.quantity]} 

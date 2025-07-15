@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from '@/contexts/AuthContext';
 import { Separator } from '@/components/ui/separator';
 import UserModelsSection from './UserModelsSection';
+import { safeTranslate } from '@/utils/translationUtils';
 
 // Génération d'une surface de volatilité fictive
 const generateVolSurface = () => {
@@ -137,6 +139,9 @@ const calibrateModel = (model: string, volSurface: any[]) => {
 };
 
 const ModelCalibration: React.FC = () => {
+  const { t } = useTranslation();
+  const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
+  
   // États
   const [selectedModel, setSelectedModel] = useState<string>('black');
   const [volSurface, setVolSurface] = useState<any[]>([]);
@@ -286,7 +291,7 @@ const ModelCalibration: React.FC = () => {
               <label className="block text-sm font-medium mb-1">Modèle à calibrer</label>
               <Select value={selectedModel} onValueChange={setSelectedModel}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Choisir un modèle" />
+                  <SelectValue placeholder={st('common.selectModel', 'Choisir un modèle')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="black">Black</SelectItem>
@@ -347,7 +352,7 @@ const ModelCalibration: React.FC = () => {
                   onValueChange={(val) => setSelectedMaturity(parseFloat(val))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Choisir une maturité" />
+                    <SelectValue placeholder={st('common.chooseMaturity', 'Choisir une maturité')} />
                   </SelectTrigger>
                   <SelectContent>
                     {getUniqueValues('maturity').map((mat) => (
@@ -366,7 +371,7 @@ const ModelCalibration: React.FC = () => {
                   onValueChange={(val) => setSelectedStrike(parseFloat(val))}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Choisir un strike" />
+                    <SelectValue placeholder={st('common.chooseStrike', 'Choisir un strike')} />
                   </SelectTrigger>
                   <SelectContent>
                     {getUniqueValues('strike').map((strike) => (

@@ -250,7 +250,7 @@ const AdminContent = () => {
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Sélectionner un niveau" />
+                              <SelectValue placeholder={safeTranslate(t, 'common.selectLevel', 'Sélectionner un niveau')} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>

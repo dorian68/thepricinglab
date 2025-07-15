@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { UnderlyingAsset, AssetType } from '@/types/strategies';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { safeTranslate } from '@/utils/translationUtils';
 
 const ASSET_TYPES: { value: AssetType; label: string }[] = [
   { value: 'stock', label: 'Action' },
@@ -60,6 +62,8 @@ const AssetSelector: React.FC<AssetSelectorProps> = ({
   onAssetRemoved,
   onAssetUpdated
 }) => {
+  const { t } = useTranslation();
+  const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
   const [selectedType, setSelectedType] = React.useState<AssetType>('stock');
   const [selectedAssetId, setSelectedAssetId] = React.useState<string>('');
 
@@ -84,10 +88,10 @@ const AssetSelector: React.FC<AssetSelectorProps> = ({
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row md:items-end gap-3">
         <div className="flex-1 space-y-2">
-          <Label>Type d'actif</Label>
+          <Label>{st('common.assetType', 'Type d\'actif')}</Label>
           <Select value={selectedType} onValueChange={(value: AssetType) => setSelectedType(value)}>
             <SelectTrigger>
-              <SelectValue placeholder="Sélectionner un type" />
+              <SelectValue placeholder={st('common.selectAssetType', 'Sélectionner un type')} />
             </SelectTrigger>
             <SelectContent>
               {ASSET_TYPES.map((type) => (
@@ -98,10 +102,10 @@ const AssetSelector: React.FC<AssetSelectorProps> = ({
         </div>
         
         <div className="flex-1 space-y-2">
-          <Label>Instrument</Label>
+          <Label>{st('common.instrument', 'Instrument')}</Label>
           <Select value={selectedAssetId} onValueChange={handleAssetSelection}>
             <SelectTrigger>
-              <SelectValue placeholder="Ajouter un instrument" />
+              <SelectValue placeholder={st('common.addInstrument', 'Ajouter un instrument')} />
             </SelectTrigger>
             <SelectContent>
               {SAMPLE_ASSETS[selectedType].map((asset) => (
@@ -128,7 +132,7 @@ const AssetSelector: React.FC<AssetSelectorProps> = ({
           disabled={!selectedAssetId || assets.some(a => a.id === selectedAssetId)}
         >
           <Plus className="h-4 w-4" />
-          Ajouter
+          {st('common.add', 'Ajouter')}
         </Button>
       </div>
 
@@ -157,7 +161,7 @@ const AssetSelector: React.FC<AssetSelectorProps> = ({
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
                   <div className="space-y-2">
-                    <Label htmlFor={`price-${asset.id}`}>Prix</Label>
+                    <Label htmlFor={`price-${asset.id}`}>{st('common.price', 'Prix')}</Label>
                     <div className="flex items-center space-x-2">
                       <Input 
                         id={`price-${asset.id}`}
@@ -173,7 +177,7 @@ const AssetSelector: React.FC<AssetSelectorProps> = ({
                   
                   <div className="space-y-2">
                     <Label htmlFor={`volatility-${asset.id}`} className="flex justify-between">
-                      <span>Volatilité</span>
+                      <span>{st('common.volatility', 'Volatilité')}</span>
                       <span className="text-finance-lightgray">
                         {(asset.volatility * 100).toFixed(1)}%
                       </span>
@@ -190,7 +194,7 @@ const AssetSelector: React.FC<AssetSelectorProps> = ({
                   
                   <div className="space-y-2">
                     <Label htmlFor={`dividend-${asset.id}`} className="flex justify-between">
-                      <span>Dividende</span>
+                      <span>{st('common.dividend', 'Dividende')}</span>
                       <span className="text-finance-lightgray">
                         {((asset.dividendYield || 0) * 100).toFixed(2)}%
                       </span>
@@ -207,7 +211,7 @@ const AssetSelector: React.FC<AssetSelectorProps> = ({
                   
                   <div className="space-y-2">
                     <Label htmlFor={`interest-${asset.id}`} className="flex justify-between">
-                      <span>Taux d'intérêt</span>
+                      <span>{st('common.interestRate', 'Taux d\'intérêt')}</span>
                       <span className="text-finance-lightgray">
                         {((asset.interestRate || 0.05) * 100).toFixed(2)}%
                       </span>
