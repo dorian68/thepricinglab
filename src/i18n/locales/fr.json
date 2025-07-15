@@ -852,5 +852,75 @@
       "maturity": "Maturité",
       "rate": "Taux (%)"
     }
+  },
+  "navbar": {
+    "home": "Accueil",
+    "courses": "Cours",
+    "exercises": "Exercices",
+    "community": "Communauté",
+    "tradingLab": "Trading Lab",
+    "trainingLab": "Training Lab",
+    "pricing": "Tarifs",
+    "tools": "Outils",
+    "blog": "Blog",
+    "login": "Connexion",
+    "signup": "S'inscrire",
+    "logout": "Déconnexion",
+    "profile": "Profil",
+    "settings": "Paramètres",
+    "mentoring": "Mentorat",
+    "bugs": "Signaler un Bug",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "greeting": "Bonjour",
+    "community": {
+      "forum": {
+        "title": "Forum",
+        "desc": "Échangez avec la communauté"
+      },
+      "contribute": {
+        "title": "Contribuer",
+        "desc": "Partagez vos connaissances"
+      },
+      "pair": {
+        "title": "Pair Programming",
+        "desc": "Codez en collaboration"
+      },
+      "challenge": {
+        "title": "Défi Hebdomadaire",
+        "desc": "Relevez le défi hebdomadaire"
+      },
+      "notebook": {
+        "title": "Notebook Playground",
+        "desc": "Explorez et testez des notebooks"
+      },
+      "jobs": {
+        "title": "Offres d'emploi",
+        "desc": "Carrières en finance quantitative"
+      }
+    },
+    "tradingLab": {
+      "subtitle": "Testez, validez et surveillez vos stratégies de trading",
+      "exercises": "Exercices",
+      "exercisesDesc": "Pratiquez avec des exercices interactifs",
+      "backtest": "Backtest",
+      "backtestDesc": "Évaluez les stratégies sur des données historiques",
+      "scenarios": "Scénarios",
+      "scenariosDesc": "Testez les scénarios et hypothèses de marché",
+      "strategies": "Stratégies",
+      "strategiesDesc": "Construisez et testez des stratégies de trading",
+      "performance": "Performance",
+      "performanceDesc": "Suivez et analysez vos résultats"
+    },
+    "trainingLab": {
+      "subtitle": "Améliorez vos compétences avec nos outils d'apprentissage interactifs",
+      "exercises": "Exercices Interactifs",
+      "survivalMode": "Mode Survie",
+      "quizzes": "Quiz Progressifs",
+      "progress": "Suivez vos progrès",
+      "practice": "Pratique",
+      "performance": "Surveillez votre performance",
+      "leaderboard": "Classements"
+    }
   }
 }

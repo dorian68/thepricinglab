@@ -176,6 +176,29 @@
         "title": "Job Opportunities",
         "desc": "Careers in quantitative finance"
       }
+    },
+    "tradingLab": {
+      "subtitle": "Test, validate and monitor your trading strategies",
+      "exercises": "Exercises",
+      "exercisesDesc": "Practice with interactive exercises",
+      "backtest": "Backtest",
+      "backtestDesc": "Evaluate strategies on historical data",
+      "scenarios": "Scenarios",
+      "scenariosDesc": "Test market scenarios and assumptions",
+      "strategies": "Strategies",
+      "strategiesDesc": "Build and test trading strategies",
+      "performance": "Performance",
+      "performanceDesc": "Track and analyze your results"
+    },
+    "trainingLab": {
+      "subtitle": "Improve your skills with our interactive learning tools",
+      "exercises": "Interactive Exercises",
+      "survivalMode": "Survival Mode",
+      "quizzes": "Progressive Quizzes",
+      "progress": "Track your progress",
+      "practice": "Practice",
+      "performance": "Monitor your performance",
+      "leaderboard": "Leaderboards"
     }
   },
   "auth": {
