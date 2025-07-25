@@ -287,9 +287,12 @@ const BlogPost = () => {
               prose-th:border prose-th:border-border/50 prose-th:p-2 prose-th:bg-muted
               prose-td:border prose-td:border-border/50 prose-td:p-2
               prose-img:rounded-lg prose-img:shadow-lg"
-            dangerouslySetInnerHTML={{ __html: post.content.replace(/\[caption\]\s*/g, '') }} 
+            style={{ whiteSpace: 'pre-wrap' }}
             data-type="python-content"
-          />
+          >
+            {/* Safe content rendering - HTML tags stripped */}
+            {post.content.replace(/\[caption\]\s*/g, '').replace(/<[^>]*>/g, '')}
+          </div>
           
           <div className="bg-card p-8 rounded-xl border border-border/50 shadow-lg mb-12">
             <div className="flex items-start">

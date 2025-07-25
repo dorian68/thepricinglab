@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instanciate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
@@ -372,6 +372,7 @@ export type Database = {
           nom: string | null
           plan: Database["public"]["Enums"]["user_plan"]
           prenom: string | null
+          role: Database["public"]["Enums"]["app_role"] | null
         }
         Insert: {
           date_inscription?: string
@@ -380,6 +381,7 @@ export type Database = {
           nom?: string | null
           plan?: Database["public"]["Enums"]["user_plan"]
           prenom?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
         }
         Update: {
           date_inscription?: string
@@ -388,6 +390,7 @@ export type Database = {
           nom?: string | null
           plan?: Database["public"]["Enums"]["user_plan"]
           prenom?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
         }
         Relationships: []
       }
@@ -539,6 +542,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -547,6 +571,10 @@ export type Database = {
       binary_quantize: {
         Args: { "": string } | { "": unknown }
         Returns: unknown
+      }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: Database["public"]["Enums"]["app_role"]
       }
       halfvec_avg: {
         Args: { "": number[] }
@@ -563,6 +591,13 @@ export type Database = {
       halfvec_typmod_in: {
         Args: { "": unknown[] }
         Returns: number
+      }
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
       }
       hnsw_bit_support: {
         Args: { "": unknown }
@@ -644,6 +679,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       user_plan: "freemium" | "basic" | "pro" | "admin"
     }
     CompositeTypes: {
@@ -772,6 +808,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       user_plan: ["freemium", "basic", "pro", "admin"],
     },
   },

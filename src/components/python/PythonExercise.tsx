@@ -108,7 +108,7 @@ const PythonExercise: React.FC<PythonExerciseProps> = ({
       <div className="bg-slate-100 dark:bg-slate-800 p-4 border-b border-slate-200 dark:border-slate-700">
         <h3 className="text-lg font-semibold mb-2">{cleanedTitle}</h3>
         <div className="prose prose-sm dark:prose-invert max-w-none">
-          <div dangerouslySetInnerHTML={{ __html: problem.replace(/\[caption\]\s*/g, '') }} />
+          <div>{problem.replace(/\[caption\]\s*/g, '').replace(/<[^>]*>/g, '')}</div>
         </div>
       </div>
       

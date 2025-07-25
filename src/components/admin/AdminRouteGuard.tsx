@@ -11,20 +11,19 @@ interface AdminRouteGuardProps {
 
 const AdminRouteGuard = ({ children }: AdminRouteGuardProps) => {
   const location = useLocation();
-  const { user, isLoading } = useAuth();
+  const { user, profile, isLoading } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
 
   useEffect(() => {
-    if (!isLoading && user) {
-      // Check if user has admin role in metadata
-      const userRole = user.user_metadata?.role;
-      setIsAdmin(userRole === 'admin');
+    if (!isLoading && user && profile) {
+      // Check if user has admin role in database
+      setIsAdmin(profile.role === 'admin');
       setIsCheckingAdmin(false);
     } else if (!isLoading && !user) {
       setIsCheckingAdmin(false);
     }
-  }, [user, isLoading]);
+  }, [user, profile, isLoading]);
 
   // Show loading while checking auth state
   if (isLoading || isCheckingAdmin) {

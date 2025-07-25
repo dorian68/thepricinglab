@@ -10,7 +10,7 @@ export interface UserProfile {
   prenom: string | null
   nom: string | null
   plan: UserPlan
-  role?: UserRole
+  role: UserRole
   date_inscription: string
 }
 

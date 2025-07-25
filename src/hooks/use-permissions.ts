@@ -35,15 +35,14 @@ export const usePermissions = () => {
   const hasPermission = useCallback((feature: Feature): boolean => {
     if (!profile) return false
     
-    // Check by role (from user metadata)
-    const userRole = user?.user_metadata?.role as UserRole
-    if (userRole && ROLE_FEATURES[userRole]?.includes(feature)) {
+    // Check by role (from database profile)
+    if (profile.role && ROLE_FEATURES[profile.role]?.includes(feature)) {
       return true
     }
     
     // Fallback to plan-based permissions
     return PLAN_FEATURES[profile.plan].includes(feature)
-  }, [profile, user])
+  }, [profile])
 
   const requirePermission = useCallback((feature: Feature): boolean => {
     const hasAccess = hasPermission(feature)
@@ -55,14 +54,12 @@ export const usePermissions = () => {
   }, [hasPermission])
 
   const isProUser = useCallback((): boolean => {
-    const userRole = user?.user_metadata?.role as UserRole
-    return userRole === 'pro' || userRole === 'admin' || profile?.plan === 'pro' || profile?.plan === 'admin'
-  }, [user, profile])
+    return profile?.role === 'pro' || profile?.role === 'admin' || profile?.plan === 'pro' || profile?.plan === 'admin'
+  }, [profile])
 
   const isAdminUser = useCallback((): boolean => {
-    const userRole = user?.user_metadata?.role as UserRole
-    return userRole === 'admin'
-  }, [user])
+    return profile?.role === 'admin'
+  }, [profile])
 
   return {
     hasPermission,

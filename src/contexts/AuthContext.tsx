@@ -152,7 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Helper function to check if user is admin
   const isAdmin = () => {
-    return user?.user_metadata?.role === 'admin';
+    return profile?.role === 'admin';
   }
 
   const value = {
