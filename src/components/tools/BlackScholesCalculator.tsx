@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Calculator, Info } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { safeTranslate } from "@/utils/translationUtils";
 
 // Types for Greeks and simulation
 type Greek = 'delta' | 'gamma' | 'vega' | 'theta' | 'rho';
@@ -31,6 +32,7 @@ const greekColors: Record<Greek, string> = {
 
 const BlackScholesCalculator = () => {
   const { t } = useTranslation();
+  const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
   const [spot, setSpot] = useState<number>(100);
   const [strike, setStrike] = useState<number>(100);
   const [interestRate, setInterestRate] = useState<number>(0.05);
@@ -150,8 +152,8 @@ const BlackScholesCalculator = () => {
   return (
     <div className="container mx-auto py-6 px-4 md:px-6 lg:px-8 max-w-7xl">
       <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-finance-accent mb-2">Calculatrice Black-Scholes</h1>
-        <p className="text-finance-lightgray">Pricing d'options européennes et calcul des Greeks</p>
+        <h1 className="text-2xl md:text-3xl font-bold text-finance-accent mb-2">{st('tools.blackScholes.title', 'Calculateur Black-Scholes')}</h1>
+        <p className="text-finance-lightgray">{st('tools.blackScholes.description', 'Pricing d\'options européennes et calcul des Greeks')}</p>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -159,13 +161,13 @@ const BlackScholesCalculator = () => {
           <CardHeader>
             <CardTitle className="flex items-center text-finance-accent">
               <Calculator className="mr-2 h-5 w-5" />
-              Paramètres d'entrée
+              {st('tools.blackScholes.inputParameters', 'Paramètres d\'entrée')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="spot">Prix spot</Label>
+                <Label htmlFor="spot">{st('tools.blackScholes.spotPrice', 'Prix spot')}</Label>
                 <Input
                   id="spot"
                   type="number"
@@ -176,7 +178,7 @@ const BlackScholesCalculator = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="strike">Prix d'exercice</Label>
+                <Label htmlFor="strike">{st('tools.blackScholes.strikePrice', 'Prix d\'exercice')}</Label>
                 <Input
                   id="strike"
                   type="number"
@@ -187,7 +189,7 @@ const BlackScholesCalculator = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="interestRate">Taux d'intérêt (décimal)</Label>
+                <Label htmlFor="interestRate">{st('tools.blackScholes.interestRate', 'Taux d\'intérêt (décimal)')}</Label>
                 <Input
                   id="interestRate"
                   type="number"
@@ -199,7 +201,7 @@ const BlackScholesCalculator = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="volatility">Volatilité (décimal)</Label>
+                <Label htmlFor="volatility">{st('tools.blackScholes.volatility', 'Volatilité (décimal)')}</Label>
                 <Input
                   id="volatility"
                   type="number"
@@ -211,7 +213,7 @@ const BlackScholesCalculator = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="timeToMaturity">Temps jusqu'à maturité (années)</Label>
+                <Label htmlFor="timeToMaturity">{st('tools.blackScholes.timeToMaturity', 'Temps jusqu\'à maturité (années)')}</Label>
                 <Input
                   id="timeToMaturity"
                   type="number"
@@ -228,7 +230,7 @@ const BlackScholesCalculator = () => {
                 className="w-full mt-4"
               >
                 <Calculator className="mr-2 h-4 w-4" />
-                Calculer
+                {st('tools.blackScholes.calculate', 'Calculer')}
               </Button>
             </div>
           </CardContent>
@@ -237,17 +239,17 @@ const BlackScholesCalculator = () => {
         <div className="space-y-6">
           <Card className="bg-finance-charcoal border-finance-steel/30">
             <CardHeader>
-              <CardTitle className="text-finance-accent">Résultats</CardTitle>
+              <CardTitle className="text-finance-accent">{st('tools.blackScholes.results', 'Résultats')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-finance-dark p-4 rounded-md">
-                  <p className="text-finance-lightgray text-sm mb-1">Prix Call</p>
+                  <p className="text-finance-lightgray text-sm mb-1">{st('tools.blackScholes.callPrice', 'Prix Call')}</p>
                   <p className="text-2xl font-medium text-finance-offwhite">{callPrice}</p>
                 </div>
                 
                 <div className="bg-finance-dark p-4 rounded-md">
-                  <p className="text-finance-lightgray text-sm mb-1">Prix Put</p>
+                  <p className="text-finance-lightgray text-sm mb-1">{st('tools.blackScholes.putPrice', 'Prix Put')}</p>
                   <p className="text-2xl font-medium text-finance-offwhite">{putPrice}</p>
                 </div>
               </div>
@@ -256,32 +258,32 @@ const BlackScholesCalculator = () => {
           
           <Card className="bg-finance-charcoal border-finance-steel/30">
             <CardHeader>
-              <CardTitle className="text-finance-accent">Greeks</CardTitle>
+              <CardTitle className="text-finance-accent">{st('tools.blackScholes.greeks', 'Greeks')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-finance-dark p-4 rounded-md">
-                  <p className="text-finance-lightgray text-sm mb-1">Delta</p>
+                  <p className="text-finance-lightgray text-sm mb-1">{st('tools.blackScholes.delta', 'Delta')}</p>
                   <p className="text-xl font-medium text-finance-offwhite">{delta}</p>
                 </div>
                 
                 <div className="bg-finance-dark p-4 rounded-md">
-                  <p className="text-finance-lightgray text-sm mb-1">Gamma</p>
+                  <p className="text-finance-lightgray text-sm mb-1">{st('tools.blackScholes.gamma', 'Gamma')}</p>
                   <p className="text-xl font-medium text-finance-offwhite">{gamma}</p>
                 </div>
                 
                 <div className="bg-finance-dark p-4 rounded-md">
-                  <p className="text-finance-lightgray text-sm mb-1">Vega</p>
+                  <p className="text-finance-lightgray text-sm mb-1">{st('tools.blackScholes.vega', 'Vega')}</p>
                   <p className="text-xl font-medium text-finance-offwhite">{vega}</p>
                 </div>
                 
                 <div className="bg-finance-dark p-4 rounded-md">
-                  <p className="text-finance-lightgray text-sm mb-1">Theta</p>
+                  <p className="text-finance-lightgray text-sm mb-1">{st('tools.blackScholes.theta', 'Theta')}</p>
                   <p className="text-xl font-medium text-finance-offwhite">{theta}</p>
                 </div>
 
                 <div className="bg-finance-dark p-4 rounded-md">
-                  <p className="text-finance-lightgray text-sm mb-1">Rho</p>
+                  <p className="text-finance-lightgray text-sm mb-1">{st('tools.blackScholes.rho', 'Rho')}</p>
                   <p className="text-xl font-medium text-finance-offwhite">{rho}</p>
                 </div>
               </div>
@@ -296,24 +298,24 @@ const BlackScholesCalculator = () => {
         <div className="lg:col-span-1">
           <Card className="bg-finance-charcoal border-finance-steel/30">
             <CardHeader>
-              <CardTitle className="text-finance-accent">Paramètres du Graphique</CardTitle>
+              <CardTitle className="text-finance-accent">{st('tools.blackScholes.chartParameters', 'Paramètres du Graphique')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <Label className="text-finance-lightgray text-sm mb-2 block">Variable de simulation</Label>
+                <Label className="text-finance-lightgray text-sm mb-2 block">{st('tools.blackScholes.simulationVariable', 'Variable de simulation')}</Label>
                 <select 
                   value={simulationVariable}
                   onChange={(e) => setSimulationVariable(e.target.value)}
                   className="w-full p-2 bg-finance-dark border border-finance-steel/30 rounded text-finance-offwhite"
                 >
-                  <option value="spot">Prix Spot</option>
-                  <option value="volatility">Volatilité</option>
-                  <option value="timeToMaturity">Temps jusqu'à maturité</option>
+                  <option value="spot">{st('tools.blackScholes.spot', 'Prix Spot')}</option>
+                  <option value="volatility">{st('tools.blackScholes.volatility', 'Volatilité')}</option>
+                  <option value="timeToMaturity">{st('tools.blackScholes.timeToMaturity', 'Temps jusqu\'à maturité')}</option>
                 </select>
               </div>
               
               <div>
-                <Label className="text-finance-lightgray text-sm mb-2 block">Greeks à afficher</Label>
+                <Label className="text-finance-lightgray text-sm mb-2 block">{st('tools.blackScholes.greeksToDisplay', 'Greeks à afficher')}</Label>
                 <div className="grid grid-cols-1 gap-2">
                   {(Object.keys(greekColors) as Greek[]).map(greek => (
                     <label 
@@ -349,7 +351,7 @@ const BlackScholesCalculator = () => {
           <Card className="bg-finance-charcoal border-finance-steel/30">
             <CardHeader>
               <CardTitle className="text-finance-accent">
-                Évolution des Greeks - {simulationVariable === 'spot' ? 'Prix Spot' : simulationVariable === 'volatility' ? 'Volatilité' : 'Temps jusqu\'à maturité'}
+                {st('tools.blackScholes.greeksEvolution', 'Évolution des Greeks')} - {simulationVariable === 'spot' ? st('tools.blackScholes.spot', 'Prix Spot') : simulationVariable === 'volatility' ? st('tools.blackScholes.volatility', 'Volatilité') : st('tools.blackScholes.timeToMaturity', 'Temps jusqu\'à maturité')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -365,7 +367,7 @@ const BlackScholesCalculator = () => {
                       tick={{ fill: '#B4B4B4' }} 
                       axisLine={{ stroke: '#444' }}
                       label={{ 
-                        value: simulationVariable === 'spot' ? 'Prix Spot' : simulationVariable === 'volatility' ? 'Volatilité' : 'Temps (années)', 
+                        value: simulationVariable === 'spot' ? st('tools.blackScholes.spot', 'Prix Spot') : simulationVariable === 'volatility' ? st('tools.blackScholes.volatility', 'Volatilité') : st('tools.blackScholes.timeToMaturity', 'Temps (années)'), 
                         position: 'insideBottomRight', 
                         offset: -10, 
                         fill: '#B4B4B4' 
@@ -401,14 +403,14 @@ const BlackScholesCalculator = () => {
               <div className="bg-finance-charcoal/50 p-4 rounded-lg border border-finance-steel/20 flex items-start">
                 <Info className="h-5 w-5 text-finance-accent flex-shrink-0 mt-0.5 mr-3" />
                 <div>
-                  <h4 className="text-finance-offwhite font-medium mb-1">À propos des Greeks</h4>
+                  <h4 className="text-finance-offwhite font-medium mb-1">{st('tools.blackScholes.aboutGreeks', 'À propos des Greeks')}</h4>
                   <p className="text-finance-lightgray text-sm">
-                    Les Greeks mesurent la sensibilité du prix d'une option aux changements des paramètres du marché:
-                    <br />- <span style={{ color: greekColors.delta }}>Delta</span>: Sensibilité au prix du sous-jacent
-                    <br />- <span style={{ color: greekColors.gamma }}>Gamma</span>: Taux de changement du delta
-                    <br />- <span style={{ color: greekColors.vega }}>Vega</span>: Sensibilité à la volatilité
-                    <br />- <span style={{ color: greekColors.theta }}>Theta</span>: Sensibilité au passage du temps
-                    <br />- <span style={{ color: greekColors.rho }}>Rho</span>: Sensibilité au taux d'intérêt
+                    {st('tools.blackScholes.greeksDescription', 'Les Greeks mesurent la sensibilité du prix d\'une option aux changements des paramètres du marché:')}
+                    <br />- <span style={{ color: greekColors.delta }}>{st('tools.blackScholes.delta', 'Delta')}</span>: {st('tools.blackScholes.deltaDescription', 'Sensibilité au prix du sous-jacent')}
+                    <br />- <span style={{ color: greekColors.gamma }}>{st('tools.blackScholes.gamma', 'Gamma')}</span>: {st('tools.blackScholes.gammaDescription', 'Taux de changement du delta')}
+                    <br />- <span style={{ color: greekColors.vega }}>{st('tools.blackScholes.vega', 'Vega')}</span>: {st('tools.blackScholes.vegaDescription', 'Sensibilité à la volatilité')}
+                    <br />- <span style={{ color: greekColors.theta }}>{st('tools.blackScholes.theta', 'Theta')}</span>: {st('tools.blackScholes.thetaDescription', 'Sensibilité à la décroissance temporelle')}  
+                    <br />- <span style={{ color: greekColors.rho }}>{st('tools.blackScholes.rho', 'Rho')}</span>: {st('tools.blackScholes.rhoDescription', 'Sensibilité au taux d\'intérêt')}
                   </p>
                 </div>
               </div>

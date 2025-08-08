@@ -816,6 +816,8 @@
     },
     "blackScholes": {
       "title": "Black-Scholes Calculator",
+      "description": "European option pricing and Greeks calculation",
+      "inputParameters": "Input Parameters",
       "spotPrice": "Spot Price",
       "strikePrice": "Strike Price",
       "interestRate": "Interest Rate (decimal)",
@@ -829,7 +831,21 @@
       "delta": "Delta",
       "gamma": "Gamma",
       "vega": "Vega",
-      "theta": "Theta"
+      "theta": "Theta",
+      "rho": "Rho",
+      "chartParameters": "Chart Parameters",
+      "simulationVariable": "Simulation Variable",
+      "greeksToDisplay": "Greeks to Display",
+      "greeksEvolution": "Greeks Evolution",
+      "spot": "Spot Price",
+      "timeToMaturity": "Time to Maturity",
+      "aboutGreeks": "About Greeks",
+      "greeksDescription": "Greeks measure the sensitivity of an option's price to changes in market parameters:",
+      "deltaDescription": "Delta: Sensitivity to underlying price",
+      "gammaDescription": "Gamma: Rate of change of delta",
+      "vegaDescription": "Vega: Sensitivity to volatility",
+      "thetaDescription": "Theta: Time decay sensitivity",
+      "rhoDescription": "Rho: Sensitivity to interest rate"
     },
     "bond": {
       "title": "Bond Calculator",

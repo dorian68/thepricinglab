@@ -798,6 +798,8 @@
     },
     "blackScholes": {
       "title": "Calculateur Black-Scholes",
+      "description": "Pricing d'options européennes et calcul des Greeks",
+      "inputParameters": "Paramètres d'entrée",
       "spotPrice": "Prix spot",
       "strikePrice": "Prix d'exercice",
       "interestRate": "Taux d'intérêt (décimal)",
@@ -811,7 +813,21 @@
       "delta": "Delta",
       "gamma": "Gamma",
       "vega": "Vega",
-      "theta": "Theta"
+      "theta": "Theta",
+      "rho": "Rho",
+      "chartParameters": "Paramètres du Graphique",
+      "simulationVariable": "Variable de simulation",
+      "greeksToDisplay": "Greeks à afficher",
+      "greeksEvolution": "Évolution des Greeks",
+      "spot": "Prix Spot",
+      "timeToMaturity": "Temps jusqu'à maturité",
+      "aboutGreeks": "À propos des Greeks",
+      "greeksDescription": "Les Greeks mesurent la sensibilité du prix d'une option aux changements des paramètres du marché:",
+      "deltaDescription": "Delta: Sensibilité au prix du sous-jacent",
+      "gammaDescription": "Gamma: Taux de changement du delta",
+      "vegaDescription": "Vega: Sensibilité à la volatilité",
+      "thetaDescription": "Theta: Sensibilité à la décroissance temporelle",
+      "rhoDescription": "Rho: Sensibilité au taux d'intérêt"
     },
     "bond": {
       "title": "Calculateur d'obligations",
