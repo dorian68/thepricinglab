@@ -67,10 +67,11 @@ const DesktopNav = () => {
 
               {/* Labo Trading */}
               <NavItem 
-                to="/labo-trading" 
                 icon={BarChart3} 
                 label={st('navbar.laboTrading', 'Labo de Trading')}
-              />
+              >
+                <TradingLabMenu />
+              </NavItem>
 
               {/* Outils */}
               <NavItem 

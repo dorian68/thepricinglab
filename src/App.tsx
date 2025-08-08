@@ -155,7 +155,6 @@ function App() {
                   <Route path="/survival-mode/legendary" element={<LegendaryWave />} />
                   <Route path="/bug-report" element={<BugReport />} />
                   
-                  <Route path="/labo-trading" element={<LaboTrading />} />
                   <Route path="/trading/exercises" element={<TradingExercises />} />
                   <Route path="/trading/backtest" element={<Backtest />} />
                   <Route path="/trading/scenarios" element={<Scenarios />} />
