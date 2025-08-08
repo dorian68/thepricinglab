@@ -756,6 +756,12 @@
     "monteCarlo": "Monte Carlo",
     "modelCalibration": "Model Calibration",
     "payoffVisualizer": "Payoff Visualizer",
+    "payoff": {
+      "title": "Payoff Visualizer",
+      "description": "Build and analyze complex option strategies with real-time visualization.",
+      "infoTitle": "How to use the visualizer",
+      "infoDescription": "Add option positions (calls and puts) using the + button in the Positions tab. Modify market parameters to see their impact on price and Greeks. The payoff chart shows profit/loss at maturity as a function of the underlying price."
+    },
     "volatility": {
       "title": "Volatility Calculator",
       "inputParameters": "Input Parameters",

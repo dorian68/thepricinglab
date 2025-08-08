@@ -1,11 +1,33 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from 'react-i18next';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Calculator } from "lucide-react";
+import { Calculator, Info } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+
+// Types for Greeks and simulation
+type Greek = 'delta' | 'gamma' | 'vega' | 'theta' | 'rho';
+type OptionGreeks = Record<Greek, number>;
+type SimulationPoint = { x: number; delta: number; gamma: number; vega: number; theta: number; rho: number; };
+
+// Parameter ranges for Greeks charts
+const parameterRanges = {
+  spot: { min: 80, max: 120, step: 1 },
+  volatility: { min: 0.1, max: 0.5, step: 0.01 },
+  timeToMaturity: { min: 0.1, max: 2, step: 0.1 }
+};
+
+// Colors for each Greek - restored from previous version
+const greekColors: Record<Greek, string> = {
+  delta: '#ea384c',
+  gamma: '#4A89DC', 
+  vega: '#37BC9B',
+  theta: '#F6BB42',
+  rho: '#967ADC'
+};
 
 const BlackScholesCalculator = () => {
   const { t } = useTranslation();
@@ -20,38 +42,110 @@ const BlackScholesCalculator = () => {
   const [gamma, setGamma] = useState<number>(0);
   const [vega, setVega] = useState<number>(0);
   const [theta, setTheta] = useState<number>(0);
+  const [rho, setRho] = useState<number>(0);
   
-  const calculate = () => {
-    // This is just a placeholder for the actual Black-Scholes calculation
-    // In a real implementation, this would calculate the option prices and Greeks
-    
-    // Simple Black-Scholes formula approximation for demonstration
-    const d1 = (Math.log(spot / strike) + (interestRate + volatility * volatility / 2) * timeToMaturity) / (volatility * Math.sqrt(timeToMaturity));
-    const d2 = d1 - volatility * Math.sqrt(timeToMaturity);
-    
-    // Standard normal CDF approximation
-    const normCDF = (x: number) => {
+  // Greeks chart state - restored functionality from previous version
+  const [simulationVariable, setSimulationVariable] = useState<string>("spot");
+  const [simulationPoints, setSimulationPoints] = useState<SimulationPoint[]>([]);
+  const [selectedGreeks, setSelectedGreeks] = useState<Greek[]>(['delta', 'gamma']);
+  
+  // Enhanced Black-Scholes calculation - restored from previous version  
+  const calculateBlackScholes = (s: number, k: number, v: number, r: number, t: number): OptionGreeks & { callPrice: number; putPrice: number } => {
+    // Standard normal CDF and PDF
+    const normCDF = (x: number): number => {
       const t = 1 / (1 + 0.2316419 * Math.abs(x));
       const d = 0.3989423 * Math.exp(-x * x / 2);
       const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
       return x > 0 ? 1 - p : p;
     };
     
-    // Call price
-    const calculatedCallPrice = spot * normCDF(d1) - strike * Math.exp(-interestRate * timeToMaturity) * normCDF(d2);
-    setCallPrice(parseFloat(calculatedCallPrice.toFixed(2)));
+    const normPDF = (x: number): number => {
+      return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x);
+    };
+
+    // d1 and d2 for Black-Scholes
+    const d1 = (Math.log(s / k) + (r + v * v / 2) * t) / (v * Math.sqrt(t));
+    const d2 = d1 - v * Math.sqrt(t);
     
-    // Put price
-    const calculatedPutPrice = strike * Math.exp(-interestRate * timeToMaturity) * normCDF(-d2) - spot * normCDF(-d1);
-    setPutPrice(parseFloat(calculatedPutPrice.toFixed(2)));
+    // Option prices
+    const callPrice = s * normCDF(d1) - k * Math.exp(-r * t) * normCDF(d2);
+    const putPrice = k * Math.exp(-r * t) * normCDF(-d2) - s * normCDF(-d1);
     
-    // Greeks
-    setDelta(parseFloat(normCDF(d1).toFixed(4)));
-    setGamma(parseFloat((Math.exp(-d1 * d1 / 2) / (spot * volatility * Math.sqrt(timeToMaturity) * Math.sqrt(2 * Math.PI))).toFixed(4)));
-    setVega(parseFloat((spot * Math.sqrt(timeToMaturity) * Math.exp(-d1 * d1 / 2) / Math.sqrt(2 * Math.PI) / 100).toFixed(4)));
-    const thetaValue = (-(spot * volatility * Math.exp(-d1 * d1 / 2)) / (2 * Math.sqrt(timeToMaturity) * Math.sqrt(2 * Math.PI)) - interestRate * strike * Math.exp(-interestRate * timeToMaturity) * normCDF(d2)) / 365;
-    setTheta(parseFloat(thetaValue.toFixed(4)));
+    // Calculate Greeks
+    const delta = normCDF(d1);
+    const gamma = normPDF(d1) / (s * v * Math.sqrt(t));
+    const vega = s * Math.sqrt(t) * normPDF(d1) / 100; // Divided by 100 for scaling
+    const theta = (-s * v * normPDF(d1)) / (2 * Math.sqrt(t)) - r * k * Math.exp(-r * t) * normCDF(d2);
+    const rho = k * t * Math.exp(-r * t) * normCDF(d2) / 100; // Divided by 100 for scaling
+    
+    return { delta, gamma, vega, theta, rho, callPrice, putPrice };
   };
+
+  const calculate = () => {
+    const result = calculateBlackScholes(spot, strike, volatility, interestRate, timeToMaturity);
+    
+    setCallPrice(parseFloat(result.callPrice.toFixed(2)));
+    setPutPrice(parseFloat(result.putPrice.toFixed(2)));
+    setDelta(parseFloat(result.delta.toFixed(4)));
+    setGamma(parseFloat(result.gamma.toFixed(4)));
+    setVega(parseFloat(result.vega.toFixed(4)));
+    setTheta(parseFloat(result.theta.toFixed(4)));
+    setRho(parseFloat(result.rho.toFixed(4)));
+  };
+
+  // Greeks simulation - restored functionality from previous version
+  const runSimulation = () => {
+    const range = parameterRanges[simulationVariable as keyof typeof parameterRanges];
+    const points: SimulationPoint[] = [];
+    
+    // Generate points for the simulation
+    const steps = 50;
+    const stepSize = (range.max - range.min) / steps;
+    
+    for (let i = 0; i <= steps; i++) {
+      const x = range.min + i * stepSize;
+      
+      // Set the proper variable for this simulation point
+      let s = spot, k = strike, v = volatility, r = interestRate, t = timeToMaturity;
+      
+      if (simulationVariable === 'spot') s = x;
+      else if (simulationVariable === 'volatility') v = x;
+      else if (simulationVariable === 'timeToMaturity') t = x;
+      
+      // Calculate greeks
+      const greeks = calculateBlackScholes(s, k, v, r, t);
+      
+      // Add to simulation points
+      points.push({
+        x,
+        delta: greeks.delta,
+        gamma: greeks.gamma,
+        vega: greeks.vega,
+        theta: greeks.theta,
+        rho: greeks.rho
+      });
+    }
+    
+    setSimulationPoints(points);
+  };
+
+  // Toggle Greek selection for chart display
+  const toggleGreek = (greek: Greek) => {
+    if (selectedGreeks.includes(greek)) {
+      if (selectedGreeks.length > 1) {
+        setSelectedGreeks(selectedGreeks.filter(g => g !== greek));
+      }
+    } else {
+      setSelectedGreeks([...selectedGreeks, greek]);
+    }
+  };
+
+  // Run simulation when parameters change - restored functionality
+  useEffect(() => {
+    runSimulation();
+    calculate(); // Also update current values
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [spot, strike, volatility, interestRate, timeToMaturity, simulationVariable]);
 
   return (
     <div className="container mx-auto py-6 px-4 md:px-6 lg:px-8 max-w-7xl">
@@ -184,6 +278,138 @@ const BlackScholesCalculator = () => {
                 <div className="bg-finance-dark p-4 rounded-md">
                   <p className="text-finance-lightgray text-sm mb-1">Theta</p>
                   <p className="text-xl font-medium text-finance-offwhite">{theta}</p>
+                </div>
+
+                <div className="bg-finance-dark p-4 rounded-md">
+                  <p className="text-finance-lightgray text-sm mb-1">Rho</p>
+                  <p className="text-xl font-medium text-finance-offwhite">{rho}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Greeks Evolution Charts - restored functionality from previous version */}
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Chart Controls */}
+        <div className="lg:col-span-1">
+          <Card className="bg-finance-charcoal border-finance-steel/30">
+            <CardHeader>
+              <CardTitle className="text-finance-accent">Paramètres du Graphique</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <Label className="text-finance-lightgray text-sm mb-2 block">Variable de simulation</Label>
+                <select 
+                  value={simulationVariable}
+                  onChange={(e) => setSimulationVariable(e.target.value)}
+                  className="w-full p-2 bg-finance-dark border border-finance-steel/30 rounded text-finance-offwhite"
+                >
+                  <option value="spot">Prix Spot</option>
+                  <option value="volatility">Volatilité</option>
+                  <option value="timeToMaturity">Temps jusqu'à maturité</option>
+                </select>
+              </div>
+              
+              <div>
+                <Label className="text-finance-lightgray text-sm mb-2 block">Greeks à afficher</Label>
+                <div className="grid grid-cols-1 gap-2">
+                  {(Object.keys(greekColors) as Greek[]).map(greek => (
+                    <label 
+                      key={greek} 
+                      className={`flex items-center p-3 rounded border cursor-pointer transition-all ${
+                        selectedGreeks.includes(greek) 
+                          ? 'border-finance-accent bg-finance-charcoal/50' 
+                          : 'border-finance-steel/30 bg-finance-dark hover:border-finance-steel/50'
+                      }`}
+                    >
+                      <input 
+                        type="checkbox" 
+                        checked={selectedGreeks.includes(greek)} 
+                        onChange={() => toggleGreek(greek)} 
+                        className="mr-3"
+                      />
+                      <span 
+                        className="text-sm capitalize font-medium"
+                        style={{ color: selectedGreeks.includes(greek) ? greekColors[greek] : '#B4B4B4' }}
+                      >
+                        {greek}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Chart Display */}
+        <div className="lg:col-span-2">
+          <Card className="bg-finance-charcoal border-finance-steel/30">
+            <CardHeader>
+              <CardTitle className="text-finance-accent">
+                Évolution des Greeks - {simulationVariable === 'spot' ? 'Prix Spot' : simulationVariable === 'volatility' ? 'Volatilité' : 'Temps jusqu\'à maturité'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-80 mb-6">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={simulationPoints}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                    <XAxis 
+                      dataKey="x" 
+                      tick={{ fill: '#B4B4B4' }} 
+                      axisLine={{ stroke: '#444' }}
+                      label={{ 
+                        value: simulationVariable === 'spot' ? 'Prix Spot' : simulationVariable === 'volatility' ? 'Volatilité' : 'Temps (années)', 
+                        position: 'insideBottomRight', 
+                        offset: -10, 
+                        fill: '#B4B4B4' 
+                      }}
+                    />
+                    <YAxis 
+                      tick={{ fill: '#B4B4B4' }} 
+                      axisLine={{ stroke: '#444' }}
+                    />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#1F2023', borderColor: '#333', color: '#E5E5E5' }}
+                    />
+                    <Legend />
+                    
+                    {/* Render lines for selected Greeks */}
+                    {selectedGreeks.map(greek => (
+                      <Line 
+                        key={greek}
+                        type="monotone" 
+                        dataKey={greek} 
+                        name={greek.charAt(0).toUpperCase() + greek.slice(1)} 
+                        stroke={greekColors[greek]} 
+                        strokeWidth={2}
+                        dot={false}
+                        activeDot={{ r: 6 }}
+                      />
+                    ))}
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Greeks Information Panel - restored from previous version */}
+              <div className="bg-finance-charcoal/50 p-4 rounded-lg border border-finance-steel/20 flex items-start">
+                <Info className="h-5 w-5 text-finance-accent flex-shrink-0 mt-0.5 mr-3" />
+                <div>
+                  <h4 className="text-finance-offwhite font-medium mb-1">À propos des Greeks</h4>
+                  <p className="text-finance-lightgray text-sm">
+                    Les Greeks mesurent la sensibilité du prix d'une option aux changements des paramètres du marché:
+                    <br />- <span style={{ color: greekColors.delta }}>Delta</span>: Sensibilité au prix du sous-jacent
+                    <br />- <span style={{ color: greekColors.gamma }}>Gamma</span>: Taux de changement du delta
+                    <br />- <span style={{ color: greekColors.vega }}>Vega</span>: Sensibilité à la volatilité
+                    <br />- <span style={{ color: greekColors.theta }}>Theta</span>: Sensibilité au passage du temps
+                    <br />- <span style={{ color: greekColors.rho }}>Rho</span>: Sensibilité au taux d'intérêt
+                  </p>
                 </div>
               </div>
             </CardContent>
