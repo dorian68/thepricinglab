@@ -25,35 +25,40 @@ const PayoffChart: React.FC<PayoffChartProps> = ({ strategy, results, interactiv
     );
   }
 
-  // Transform the data into the format expected by LineChart
+  // Transform and validate data to prevent infinite expansion
   const chartData = React.useMemo(() => {
     if (!results) return [];
     
+    let rawData: Array<{x: number, y: number}> = [];
+    
     // Check if results has payoff points in the correct format
     if (results.payoffPoints && Array.isArray(results.payoffPoints)) {
-      return results.payoffPoints.filter(point => 
+      rawData = results.payoffPoints;
+    }
+    // Fallback for old format
+    else if (results.payoff && Array.isArray(results.payoff)) {
+      rawData = results.payoff.map((value: number, index: number) => ({
+        x: index,
+        y: value,
+      }));
+    }
+    
+    // Robust data validation and filtering
+    const validData = rawData
+      .filter(point => 
         point && 
         typeof point.x === 'number' && 
         typeof point.y === 'number' &&
         isFinite(point.x) && 
-        isFinite(point.y)
-      );
-    }
+        isFinite(point.y) &&
+        !isNaN(point.x) &&
+        !isNaN(point.y) &&
+        Math.abs(point.y) < 1000000 && // Limit extreme values
+        Math.abs(point.x) < 1000000
+      )
+      .slice(0, 1000); // Limit number of points to prevent infinite data
     
-    // Fallback for old format
-    if (results.payoff && Array.isArray(results.payoff)) {
-      return results.payoff
-        .map((value: number, index: number) => ({
-          x: index,
-          y: value,
-        }))
-        .filter(point => 
-          typeof point.y === 'number' && 
-          isFinite(point.y)
-        );
-    }
-    
-    return [];
+    return validData;
   }, [results]);
 
   // Handle edge cases where the data might be incomplete
@@ -138,8 +143,10 @@ const PayoffChart: React.FC<PayoffChartProps> = ({ strategy, results, interactiv
   };
 
   return (
-    <div ref={chartRef} className="h-full relative">
-      <LineChart {...chartProps} />
+    <div ref={chartRef} className="h-full relative overflow-hidden" style={{ minHeight: '400px', maxHeight: '500px' }}>
+      <div className="w-full h-full">
+        <LineChart {...chartProps} />
+      </div>
       {breakEvenOverlay}
     </div>
   );
