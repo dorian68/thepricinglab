@@ -13,39 +13,39 @@ const CommunityMenu: React.FC = () => {
       <NavMenuSection
         items={[
           {
-            title: "Forum",
+            title: safeTranslate(t, 'navbar.community.forum.title', 'Forum'),
             href: "/community/forum",
-            description: "Échangez avec la communauté",
+            description: safeTranslate(t, 'navbar.community.forum.desc', 'Exchange with the community'),
             icon: <MessageCircle className="h-5 w-5" />,
           },
           {
-            title: "Contribuer",
+            title: safeTranslate(t, 'navbar.community.contribute.title', 'Contribute'),
             href: "/community/contribute",
-            description: "Partagez vos connaissances",
+            description: safeTranslate(t, 'navbar.community.contribute.desc', 'Share your knowledge'),
             icon: <ScrollText className="h-5 w-5" />,
           },
           {
-            title: "Pair Programming",
+            title: safeTranslate(t, 'navbar.community.pair.title', 'Pair Programming'),
             href: "/community/pair-programming",
-            description: "Codez en collaboration",
+            description: safeTranslate(t, 'navbar.community.pair.desc', 'Code in collaboration'),
             icon: <Code2 className="h-5 w-5" />,
           },
           {
-            title: "Weekly Challenge",
+            title: safeTranslate(t, 'navbar.community.challenge.title', 'Weekly Challenge'),
             href: "/community/weekly-challenge",
-            description: "Relevez le défi hebdomadaire",
+            description: safeTranslate(t, 'navbar.community.challenge.desc', 'Take on the weekly challenge'),
             icon: <Trophy className="h-5 w-5" />,
           },
           {
-            title: "Notebook Playground",
+            title: safeTranslate(t, 'navbar.community.notebook.title', 'Notebook Playground'),
             href: "/community/playground",
-            description: "Explorez et testez des notebooks",
+            description: safeTranslate(t, 'navbar.community.notebook.desc', 'Explore and test notebooks'),
             icon: <BookOpen className="h-5 w-5" />,
           },
           {
-            title: "Offres d'emploi",
+            title: safeTranslate(t, 'navbar.community.jobs.title', 'Job Opportunities'),
             href: "/jobs",
-            description: "Carrières en finance quantitative",
+            description: safeTranslate(t, 'navbar.community.jobs.desc', 'Careers in quantitative finance'),
             icon: <Briefcase className="h-5 w-5" />,
           },
         ]}

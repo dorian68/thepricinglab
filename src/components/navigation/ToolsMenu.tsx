@@ -12,38 +12,38 @@ const ToolsMenu = () => {
   return (
     <div className="p-4 w-[380px]">
       <p className="text-sm text-finance-accent mb-4 font-medium">
-        Outils de calcul et simulateurs pour votre analyse quantitative
+        {st('tools.subtitle', 'Calculation tools and simulators for your quantitative analysis')}
       </p>
       <ul className="space-y-3">
         <NavMenuLink 
           to="/tools/volatility-calculator" 
           icon={<Gauge className="h-4 w-4" />} 
-          title="Calculateur de Volatilité" 
-          description="Calcul de volatilité historique" 
+          title={st('tools.volatilityCalculator', 'Volatility Calculator')} 
+          description={st('tools.volatilityCalculatorDesc', 'Historical volatility calculation')} 
         />
         <NavMenuLink 
           to="/tools/black-scholes" 
           icon={<Calculator className="h-4 w-4" />} 
-          title="Calculateur Black-Scholes" 
-          description="Pricing d'options" 
+          title={st('tools.blackScholesCalculator', 'Black-Scholes Calculator')} 
+          description={st('tools.blackScholesCalculatorDesc', 'Options pricing')} 
         />
         <NavMenuLink 
           to="/tools/monte-carlo" 
           icon={<Waves className="h-4 w-4" />} 
-          title="Simulateur Monte Carlo" 
-          description="Simulation de trajectoires" 
+          title={st('tools.monteCarloSimulator', 'Monte Carlo Simulator')} 
+          description={st('tools.monteCarloSimulatorDesc', 'Trajectories simulation')} 
         />
         <NavMenuLink 
           to="/tools/model-calibration" 
           icon={<Sigma className="h-4 w-4" />} 
-          title="Calibration de Modèles" 
-          description="Calibration et optimisation" 
+          title={st('tools.modelCalibration', 'Model Calibration')} 
+          description={st('tools.modelCalibrationDesc', 'Calibration and optimization')} 
         />
         <NavMenuLink 
           to="/tools/payoff-visualizer" 
           icon={<LineChart className="h-4 w-4" />} 
-          title="Visualiseur de Payoff" 
-          description="Construction de stratégies d'options"
+          title={st('tools.payoffVisualizer', 'Payoff Visualizer')} 
+          description={st('tools.payoffVisualizerDesc', 'Options strategies construction')}
         />
       </ul>
     </div>
