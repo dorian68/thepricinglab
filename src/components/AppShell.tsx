@@ -3,6 +3,7 @@ import React, { Suspense, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import ModernNavbar from './ModernNavbar';
 import Footer from './Footer';
+import NewsletterBanner from './NewsletterBanner';
 import { useTranslation } from 'react-i18next';
 import ChatBubble from './chat/ChatBubble';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,6 +32,7 @@ const AppShell: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen bg-finance-dark text-finance-offwhite overflow-x-hidden">
       <ModernNavbar />
+      <NewsletterBanner />
       <div className="flex-1">
         <Suspense fallback={<div className="h-screen w-full flex items-center justify-center">{t('common.loading', 'Loading...')}</div>}>
           <Outlet />
