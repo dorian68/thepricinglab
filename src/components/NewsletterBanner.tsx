@@ -76,16 +76,15 @@ const NewsletterBanner: React.FC = () => {
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
           {/* Content Section */}
           <div className="flex items-start gap-3 flex-1 min-w-0">
-            <div className="text-2xl flex-shrink-0 mt-1">📈</div>
             <div className="min-w-0 flex-1">
               <h3 className="text-base font-semibold text-foreground mb-1">
                 {t('newsletter.title', 'Rejoignez The Pricing Letter')}
               </h3>
               <p className="text-sm text-muted-foreground mb-2">
-                {t('newsletter.description', 'Recevez chaque semaine des analyses, stratégies et outils sur les produits structurés et dérivés — directement dans votre boîte mail.')}
+                {t('newsletter.description', 'Chaque semaine, recevez des analyses, stratégies et outils sur les produits structurés et dérivés — directement dans votre boîte mail.')}
               </p>
               <p className="text-xs text-muted-foreground/80">
-                {t('newsletter.privacy', 'Pas de spam, vous pouvez vous désinscrire à tout moment.')}
+                {t('newsletter.privacy', 'Pas de spam, désinscription à tout moment.')}
               </p>
             </div>
           </div>
@@ -114,7 +113,7 @@ const NewsletterBanner: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    📩 {t('newsletter.subscribe', "Je m'inscris gratuitement")}
+                    {t('newsletter.subscribe', "Je m'inscris gratuitement")}
                   </>
                 )}
               </Button>
