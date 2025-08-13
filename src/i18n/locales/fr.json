@@ -1,14 +1,14 @@
 {
     "newsletter": {
-      "Title": "Rejoignez The Pricing Letter",
-      "Description": "Chaque semaine, recevez des analyses, stratégies et outils sur les produits structurés et dérivés — directement dans votre boîte mail.",
+      "title": "Rejoignez The Pricing Letter",
+      "description": "Chaque semaine, recevez des analyses, stratégies et outils sur les produits structurés et dérivés — directement dans votre boîte mail.",
       "emailPlaceholder": "Votre email",
       "subscribe": "Je m'inscris gratuitement",
       "success": "Merci de vous être inscrit à The Pricing Letter !",
       "successAlready": "Vous êtes déjà inscrit à The Pricing Letter !",
       "error": "Une erreur s'est produite. Veuillez réessayer.",
       "invalidEmail": "Veuillez entrer une adresse email valide",
-      "Privacy": "Pas de spam, désinscription à tout moment.",
+      "privacy": "Pas de spam, désinscription à tout moment.",
       "close": "Fermer"
     },
   "app": {
