@@ -1,4 +1,16 @@
 {
+    "newsletter": {
+      "title": "Join The Pricing Letter",
+      "description": "Weekly insights, strategies, and tools on structured products and derivatives — straight to your inbox.",
+      "emailPlaceholder": "Your email",
+      "subscribe": "Sign up for free",
+      "success": "Thank you for subscribing to The Pricing Letter!",
+      "successAlready": "You're already subscribed to The Pricing Letter!",
+      "error": "An error occurred. Please try again.",
+      "invalidEmail": "Please enter a valid email address",
+      "privacy": "No spam, unsubscribe anytime.",
+      "close": "Close"
+    },
   "app": {
     "title": "The Pricing Library",
     "subtitle": "Master Quantitative Finance with Interactive Learning"
