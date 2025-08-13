@@ -511,10 +511,16 @@
     "shareOnLinkedIn": "Share on LinkedIn",
     "shareOnFacebook": "Share on Facebook",
     "newsletter": {
-      "title": "Subscribe to Our Newsletter",
-      "description": "Get the latest articles and resources delivered straight to your inbox",
-      "placeholder": "Enter your email",
-      "subscribe": "Subscribe"
+      "title": "📈 Join The Pricing Letter",
+      "description": "Receive weekly analysis, strategies and tools on structured products and derivatives — directly in your inbox.",
+      "emailPlaceholder": "Your email",
+      "subscribe": "📩 Subscribe for free",
+      "success": "Thank you for subscribing to The Pricing Letter!",
+      "successAlready": "You're already subscribed to The Pricing Letter!",
+      "error": "An error occurred. Please try again.",
+      "invalidEmail": "Please enter a valid email address",
+      "privacy": "No spam, you can unsubscribe at any time.",
+      "close": "Close"
     }
   },
   "pricing": {
@@ -914,10 +920,16 @@
     "blog": "Blog",
     "community": "Community",
     "newsletter": {
-      "title": "Subscribe to our newsletter",
-      "description": "Get the latest news and updates directly in your inbox.",
-      "emailPlaceholder": "Enter your email address",
-      "subscribeButton": "Subscribe"
+      "title": "📈 Join The Pricing Letter",
+      "description": "Receive weekly analysis, strategies and tools on structured products and derivatives — directly in your inbox.",
+      "emailPlaceholder": "Your email address",
+      "subscribeButton": "📩 Subscribe for free",
+      "success": "Thank you for subscribing to The Pricing Letter!",
+      "successAlready": "You're already subscribed to The Pricing Letter!",
+      "error": "An error occurred. Please try again.",
+      "invalidEmail": "Please enter a valid email address",
+      "privacy": "No spam, you can unsubscribe at any time.",
+      "close": "Close"
     },
     "subscribe": "Subscribe",
     "followUs": "Follow Us",

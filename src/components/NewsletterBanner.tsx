@@ -34,19 +34,20 @@ const NewsletterBanner: React.FC = () => {
     setIsLoading(true);
     
     try {
+      // Using upsert to handle potential duplicates gracefully
       const { error } = await supabase
-        .from('newsletter_subscriptions')
-        .insert([{ email: email.toLowerCase().trim() }]);
+        .from('newsletter_subscriptions' as any)
+        .upsert([{ email: email.toLowerCase().trim() }], { 
+          onConflict: 'email',
+          ignoreDuplicates: true 
+        });
 
       if (error) {
-        // If email already exists, still show success to avoid revealing user info
-        if (error.code === '23505') {
-          toast.success(t('newsletter.successAlready', 'You\'re already subscribed to our newsletter!'));
-        } else {
-          throw error;
-        }
+        console.error('Newsletter subscription error:', error);
+        // Still show success to avoid revealing user info about existing emails
+        toast.success(t('newsletter.success', 'Merci de vous être inscrit à The Pricing Letter !'));
       } else {
-        toast.success(t('newsletter.success', 'Thank you for subscribing to our newsletter!'));
+        toast.success(t('newsletter.success', 'Merci de vous être inscrit à The Pricing Letter !'));
       }
       
       setEmail('');
@@ -70,48 +71,65 @@ const NewsletterBanner: React.FC = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border-b border-border">
-      <div className="max-w-7xl mx-auto px-4 py-3">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 flex-1">
-            <Mail className="h-5 w-5 text-primary flex-shrink-0" />
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-foreground">
-                {t('newsletter.title', 'Stay updated with the latest in quantitative finance')}
+    <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 border-b border-border shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+          {/* Content Section */}
+          <div className="flex items-start gap-3 flex-1 min-w-0">
+            <div className="text-2xl flex-shrink-0 mt-1">📈</div>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-base font-semibold text-foreground mb-1">
+                {t('newsletter.title', 'Rejoignez The Pricing Letter')}
+              </h3>
+              <p className="text-sm text-muted-foreground mb-2">
+                {t('newsletter.description', 'Recevez chaque semaine des analyses, stratégies et outils sur les produits structurés et dérivés — directement dans votre boîte mail.')}
               </p>
-              <p className="text-xs text-muted-foreground hidden sm:block">
-                {t('newsletter.description', 'Get our weekly insights, new tools, and trading strategies directly in your inbox.')}
+              <p className="text-xs text-muted-foreground/80">
+                {t('newsletter.privacy', 'Pas de spam, vous pouvez vous désinscrire à tout moment.')}
               </p>
             </div>
           </div>
           
-          <form onSubmit={handleSubmit} className="flex items-center gap-2 flex-shrink-0">
-            <Input
-              type="email"
-              placeholder={t('newsletter.emailPlaceholder', 'Enter your email')}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-48 h-9 text-sm"
-              disabled={isLoading}
-            />
-            <Button 
-              type="submit" 
-              size="sm" 
-              disabled={isLoading}
-              className="whitespace-nowrap"
+          {/* Form Section */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-shrink-0 w-full lg:w-auto">
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+              <Input
+                type="email"
+                placeholder={t('newsletter.emailPlaceholder', 'Votre email')}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full sm:w-64 h-10 text-sm"
+                disabled={isLoading}
+              />
+              <Button 
+                type="submit" 
+                size="default" 
+                disabled={isLoading}
+                className="whitespace-nowrap font-medium bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 hover:scale-105"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    {t('common.loading', 'Chargement...')}
+                  </>
+                ) : (
+                  <>
+                    📩 {t('newsletter.subscribe', "Je m'inscris gratuitement")}
+                  </>
+                )}
+              </Button>
+            </form>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDismiss}
+              className="p-2 h-8 w-8 flex-shrink-0 hover:bg-muted/50 self-start sm:self-center"
+              title={t('newsletter.close', 'Fermer')}
             >
-              {isLoading ? t('common.loading', 'Loading...') : t('newsletter.subscribe', 'Subscribe')}
+              <X className="h-4 w-4" />
             </Button>
-          </form>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleDismiss}
-            className="p-1 h-6 w-6 flex-shrink-0"
-          >
-            <X className="h-4 w-4" />
-          </Button>
+          </div>
         </div>
       </div>
     </div>

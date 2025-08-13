@@ -419,10 +419,16 @@
     "shareOnLinkedIn": "Partager sur LinkedIn",
     "shareOnFacebook": "Partager sur Facebook",
     "newsletter": {
-      "title": "Abonnez-vous à notre newsletter",
-      "description": "Recevez les derniers articles et ressources directement dans votre boîte de réception",
-      "placeholder": "Entrez votre email",
-      "subscribe": "S'abonner"
+      "title": "📈 Rejoignez The Pricing Letter",
+      "description": "Recevez chaque semaine des analyses, stratégies et outils sur les produits structurés et dérivés — directement dans votre boîte mail.",
+      "emailPlaceholder": "Votre email",
+      "subscribe": "📩 Je m'inscris gratuitement",
+      "success": "Merci de vous être inscrit à The Pricing Letter !",
+      "successAlready": "Vous êtes déjà inscrit à The Pricing Letter !",
+      "error": "Une erreur s'est produite. Veuillez réessayer.",
+      "invalidEmail": "Veuillez entrer une adresse email valide",
+      "privacy": "Pas de spam, vous pouvez vous désinscrire à tout moment.",
+      "close": "Fermer"
     }
   },
   "pricing": {
@@ -724,10 +730,16 @@
     "blog": "Blog",
     "community": "Communauté",
     "newsletter": {
-      "title": "Abonnez-vous à notre newsletter",
-      "description": "Recevez les dernières nouvelles et mises à jour directement dans votre boîte de réception.",
-      "emailPlaceholder": "Entrez votre adresse e-mail",
-      "subscribeButton": "S'abonner"
+      "title": "📈 Rejoignez The Pricing Letter",
+      "description": "Recevez chaque semaine des analyses, stratégies et outils sur les produits structurés et dérivés — directement dans votre boîte mail.",
+      "emailPlaceholder": "Votre email",
+      "subscribeButton": "📩 Je m'inscris gratuitement",
+      "success": "Merci de vous être inscrit à The Pricing Letter !",
+      "successAlready": "Vous êtes déjà inscrit à The Pricing Letter !",
+      "error": "Une erreur s'est produite. Veuillez réessayer.",
+      "invalidEmail": "Veuillez entrer une adresse email valide",
+      "privacy": "Pas de spam, vous pouvez vous désinscrire à tout moment.",
+      "close": "Fermer"
     }
   },
   "tools": {
