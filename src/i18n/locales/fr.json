@@ -1,4 +1,9 @@
 {
+  "newsletter": {
+    "Title": "azertyuiop",
+    "Description": "qwerty",
+    "Privacy": "wxcvbn"
+  },
   "app": {
     "title": "The Pricing Library",
     "subtitle": "Maîtrisez la finance quantitative grâce à l'apprentissage interactif"
