@@ -13,14 +13,8 @@ const NewsletterBanner: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Always show banner initially for lead generation
+    // Force banner to be always visible for maximum lead generation
     setIsVisible(true);
-    
-    // Optional: Check if banner was dismissed recently (within 24 hours)
-    const lastDismissed = localStorage.getItem('newsletter-banner-last-dismissed');
-    if (lastDismissed && Date.now() - parseInt(lastDismissed) < 24 * 60 * 60 * 1000) {
-      setIsVisible(false);
-    }
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
