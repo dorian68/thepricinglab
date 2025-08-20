@@ -7,18 +7,6 @@ import { ArrowRight, BarChart, BookOpen, Users, Award, LucideIcon } from "lucide
 import { useTranslation } from "react-i18next";
 import { safeTranslate } from "../utils/translationUtils";
 
-// Testimonial Component
-const Testimonial = ({ quote, author, position }: { quote: string, author: string, position: string }) => (
-  <div className="finance-card p-6 flex flex-col justify-between h-full">
-    <div>
-      <p className="text-finance-lightgray italic mb-4">{quote}</p>
-    </div>
-    <div>
-      <p className="text-finance-offwhite font-medium">{author}</p>
-      <p className="text-finance-lightgray text-sm">{position}</p>
-    </div>
-  </div>
-);
 
 // Feature Component
 const Feature = ({ 
@@ -209,44 +197,6 @@ const Home = () => {
         </div>
       </section>
       
-      {/* Testimonials Section */}
-      <section className="py-16 md:py-24 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4 terminal-text">
-              {st('home.testimonials.title', 'What Our Users Say')}
-            </h2>
-            <p className="text-finance-lightgray max-w-2xl mx-auto">
-              {st('home.testimonials.description', 'Hear from professionals and students who have transformed their quantitative finance skills with our platform.')}
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Testimonial 
-              quote={st('home.testimonials.alexandre.quote', 'The practical approach to option pricing models helped me ace my interviews for a quant role at a major investment bank.')}
-              author={st('home.testimonials.alexandre.author', 'Alexandre D.')}
-              position={st('home.testimonials.alexandre.position', 'Derivatives Trader, Paris')}
-            />
-            <Testimonial 
-              quote={st('home.testimonials.sarah.quote', 'Finally a platform that explains volatility surfaces in a way that made sense to me. The interactive tools are game-changing.')}
-              author={st('home.testimonials.sarah.author', 'Sarah M.')}
-              position={st('home.testimonials.sarah.position', 'Risk Manager, London')}
-            />
-            <Testimonial 
-              quote={st('home.testimonials.thomas.quote', 'As someone transitioning from academia to finance, this platform bridged the gap between mathematical theory and actual implementation.')}
-              author={st('home.testimonials.thomas.author', 'Thomas K.')}
-              position={st('home.testimonials.thomas.position', 'PhD Student, ETH Zurich')}
-            />
-          </div>
-          
-          <div className="mt-12 text-center">
-            <Link to="/signup" className="finance-button inline-flex items-center">
-              {st('home.testimonials.joinCta', 'Join Our Community')} 
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
       
       {/* Subscription CTA */}
       <section className="py-16 px-6 bg-finance-charcoal/50 border-y border-finance-steel/10">
