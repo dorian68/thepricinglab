@@ -2,7 +2,6 @@
 import React from "react";
 import { NavMenuSection } from "./NavMenuSection";
 import { UsersRound, MessageCircle, ScrollText, Code2, Trophy, Briefcase, BookOpen } from "lucide-react";
-import { safeTranslate } from "../../utils/translationUtils";
 import { useTranslation } from "react-i18next";
 
 const CommunityMenu: React.FC = () => {
@@ -13,39 +12,39 @@ const CommunityMenu: React.FC = () => {
       <NavMenuSection
         items={[
           {
-            title: safeTranslate(t, 'navbar.community.forum.title', 'Forum'),
+            title: t('navbar.community.forum.title'),
             href: "/community/forum",
-            description: safeTranslate(t, 'navbar.community.forum.desc', 'Exchange with the community'),
+            description: t('navbar.community.forum.desc'),
             icon: <MessageCircle className="h-5 w-5" />,
           },
           {
-            title: safeTranslate(t, 'navbar.community.contribute.title', 'Contribute'),
+            title: t('navbar.community.contribute.title'),
             href: "/community/contribute",
-            description: safeTranslate(t, 'navbar.community.contribute.desc', 'Share your knowledge'),
+            description: t('navbar.community.contribute.desc'),
             icon: <ScrollText className="h-5 w-5" />,
           },
           {
-            title: safeTranslate(t, 'navbar.community.pair.title', 'Pair Programming'),
+            title: t('navbar.community.pair.title'),
             href: "/community/pair-programming",
-            description: safeTranslate(t, 'navbar.community.pair.desc', 'Code in collaboration'),
+            description: t('navbar.community.pair.desc'),
             icon: <Code2 className="h-5 w-5" />,
           },
           {
-            title: safeTranslate(t, 'navbar.community.challenge.title', 'Weekly Challenge'),
+            title: t('navbar.community.challenge.title'),
             href: "/community/weekly-challenge",
-            description: safeTranslate(t, 'navbar.community.challenge.desc', 'Take on the weekly challenge'),
+            description: t('navbar.community.challenge.desc'),
             icon: <Trophy className="h-5 w-5" />,
           },
           {
-            title: safeTranslate(t, 'navbar.community.notebook.title', 'Notebook Playground'),
+            title: t('navbar.community.notebook.title'),
             href: "/community/playground",
-            description: safeTranslate(t, 'navbar.community.notebook.desc', 'Explore and test notebooks'),
+            description: t('navbar.community.notebook.desc'),
             icon: <BookOpen className="h-5 w-5" />,
           },
           {
-            title: safeTranslate(t, 'navbar.community.jobs.title', 'Job Opportunities'),
+            title: t('navbar.community.jobs.title'),
             href: "/jobs",
-            description: safeTranslate(t, 'navbar.community.jobs.desc', 'Careers in quantitative finance'),
+            description: t('navbar.community.jobs.desc'),
             icon: <Briefcase className="h-5 w-5" />,
           },
         ]}
