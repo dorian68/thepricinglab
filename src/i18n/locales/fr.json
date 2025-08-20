@@ -660,7 +660,6 @@
   "navbar": {
     "home": "Accueil",
     "courses": "Cours",
-    "community": "Communauté",
     "tradingLab": "Labo de Trading",
     "trainingLab": "Labo d'Entraînement",
     "pricing": "Tarifs",
@@ -910,7 +909,6 @@
     "home": "Accueil",
     "courses": "Cours",
     "exercises": "Exercices",
-    "community": "Communauté",
     "tradingLab": "Trading Lab",
     "trainingLab": "Training Lab",
     "laboTrading": "Labo de Trading",
