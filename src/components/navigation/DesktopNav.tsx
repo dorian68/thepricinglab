@@ -91,7 +91,7 @@ const DesktopNav = () => {
               {/* Community */}
               <NavItem 
                 icon={Users} 
-                label={st('navbar.community', 'Communauté')}
+                label={st('navbar.community.label', 'Communauté')}
               >
                 <CommunityMenu />
               </NavItem>
