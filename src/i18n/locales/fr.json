@@ -164,6 +164,7 @@
     "closeMenu": "Fermer le menu",
     "greeting": "Bonjour",
     "community": {
+      "label": "Communauté",
       "forum": {
         "title": "Forum",
         "desc": "Échanger avec la communauté"

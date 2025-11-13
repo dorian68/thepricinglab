@@ -18,7 +18,7 @@ const additionalEnTranslations = {
     courses: "Courses",
     exercices: "Exercises",
     tools: "Tools",
-    community: "Community"
+    community: { label: "Community" }
   },
   contact: "Contact",
   footer: {
@@ -196,7 +196,7 @@ const additionalFrTranslations = {
     courses: "Cours",
     exercices: "Exercices",
     tools: "Outils",
-    community: "Communauté"
+    community: { label: "Communauté" }
   },
   contact: "Contact",
   footer: {
@@ -365,17 +365,32 @@ const additionalFrTranslations = {
   }
 };
 
+// Deep merge function to properly merge nested objects
+function deepMerge(target: any, ...sources: any[]): any {
+  if (!sources.length) return target;
+  const source = sources.shift();
 
-// Merge additional translations
-const mergedEnTranslation = { 
-  ...enTranslation, 
-  ...additionalEnTranslations 
-};
+  if (isObject(target) && isObject(source)) {
+    for (const key in source) {
+      if (isObject(source[key])) {
+        if (!target[key]) Object.assign(target, { [key]: {} });
+        deepMerge(target[key], source[key]);
+      } else {
+        Object.assign(target, { [key]: source[key] });
+      }
+    }
+  }
 
-const mergedFrTranslation = { 
-  ...frTranslation, 
-  ...additionalFrTranslations 
-};
+  return deepMerge(target, ...sources);
+}
+
+function isObject(item: any): boolean {
+  return item && typeof item === 'object' && !Array.isArray(item);
+}
+
+// Merge additional translations using deep merge
+const mergedEnTranslation = deepMerge({}, enTranslation, additionalEnTranslations);
+const mergedFrTranslation = deepMerge({}, frTranslation, additionalFrTranslations);
 
 // Process translation files to remove any [caption] markers
 const cleanedEnTranslation = cleanTranslationObject(mergedEnTranslation);
