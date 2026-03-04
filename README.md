@@ -1,6 +1,6 @@
 # 🏦 The Pricing Lab
 
-**Plateforme éducative interactive dédiée à la finance quantitative, au pricing de produits dérivés et à l'ingénierie financière.**
+**Interactive educational platform dedicated to quantitative finance, derivatives pricing and financial engineering.**
 
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)](https://www.typescriptlang.org)
@@ -10,89 +10,89 @@
 
 ---
 
-## 📌 À propos
+## 📌 About
 
-**The Pricing Lab** est une application web conçue pour les étudiants, professionnels et passionnés de **finance quantitative**. Elle combine cours interactifs, outils de calcul avancés et exercices pratiques autour des thématiques clés du pricing et de la gestion des risques.
-
----
-
-## 🎯 Domaines métier couverts
-
-### Valorisation d'options (Option Pricing)
-- **Modèle de Black-Scholes** — pricing analytique d'options européennes (calls & puts)
-- **Modèle Binomial (CRR)** — arbre binomial pour options européennes et américaines
-- **Simulation Monte Carlo** — pricing par simulation stochastique, convergence, intervalles de confiance
-- **Options exotiques** — barrières (knock-in/knock-out), options asiatiques, lookback, digitales
-
-### Les Grecques (Greeks)
-- **Delta, Gamma, Vega, Theta, Rho** — calcul et interprétation
-- **Simulateur interactif** — visualisation de la sensibilité des options aux paramètres de marché
-- **Surface de Greeks** — analyse multidimensionnelle
-
-### Volatilité
-- **Volatilité implicite** — extraction via inversion du modèle Black-Scholes
-- **Surface de volatilité** — construction et visualisation de la vol surface (strike × maturité)
-- **Smile & Skew** — analyse des formes de la courbe de volatilité
-- **Produits de volatilité** — VIX, variance swaps, volatility trading
-
-### Courbes de taux (Yield Curves)
-- **Construction de courbes** — bootstrapping, interpolation
-- **Pricing obligataire** — calcul de prix, yield-to-maturity, duration, convexité
-- **Analyse de la structure par terme** — taux spot, taux forward
-
-### Stratégies d'options
-- **Stratégies vanille** — straddle, strangle, spread (bull/bear), butterfly, condor
-- **Stratégies avancées** — iron condor, ratio spreads, calendar spreads
-- **Produits structurés** — autocalls, reverse convertibles, barrières avec coupons
-- **Diagramme de payoff** — visualisation interactive P&L à maturité
-- **Analyse des Greeks agrégés** — Greeks combinés de la stratégie complète
-
-### Gestion des risques
-- **Value at Risk (VaR)** — mesure de risque paramétrique
-- **Conditional VaR (CVaR / Expected Shortfall)** — risque de queue de distribution
-- **Stress testing** — scénarios de choc (volatilité, taux, spot)
-- **Calibration de modèles** — ajustement de paramètres sur données de marché
+**The Pricing Lab** is a web application designed for students, professionals and enthusiasts in **quantitative finance**. It combines interactive courses, advanced calculation tools and hands-on exercises around key topics in pricing and risk management.
 
 ---
 
-## 🛠 Fonctionnalités techniques
+## 🎯 Business Domains Covered
 
-| Fonctionnalité | Description |
+### Option Pricing
+- **Black-Scholes Model** — analytical pricing of European options (calls & puts)
+- **Binomial Model (CRR)** — binomial tree for European and American options
+- **Monte Carlo Simulation** — stochastic simulation pricing, convergence, confidence intervals
+- **Exotic Options** — barriers (knock-in/knock-out), Asian options, lookback, digitals
+
+### Greeks
+- **Delta, Gamma, Vega, Theta, Rho** — calculation and interpretation
+- **Interactive Simulator** — visualization of option sensitivity to market parameters
+- **Greeks Surface** — multidimensional analysis
+
+### Volatility
+- **Implied Volatility** — extraction via Black-Scholes model inversion
+- **Volatility Surface** — construction and visualization of the vol surface (strike × maturity)
+- **Smile & Skew** — analysis of volatility curve shapes
+- **Volatility Products** — VIX, variance swaps, volatility trading
+
+### Yield Curves
+- **Curve Construction** — bootstrapping, interpolation
+- **Bond Pricing** — price calculation, yield-to-maturity, duration, convexity
+- **Term Structure Analysis** — spot rates, forward rates
+
+### Option Strategies
+- **Vanilla Strategies** — straddle, strangle, spread (bull/bear), butterfly, condor
+- **Advanced Strategies** — iron condor, ratio spreads, calendar spreads
+- **Structured Products** — autocalls, reverse convertibles, barriers with coupons
+- **Payoff Diagram** — interactive P&L visualization at maturity
+- **Aggregated Greeks Analysis** — combined Greeks for the full strategy
+
+### Risk Management
+- **Value at Risk (VaR)** — parametric risk measure
+- **Conditional VaR (CVaR / Expected Shortfall)** — tail risk measure
+- **Stress Testing** — shock scenarios (volatility, rates, spot)
+- **Model Calibration** — parameter fitting to market data
+
+---
+
+## 🛠 Technical Features
+
+| Feature | Description |
 |---|---|
-| 🧮 **Calculateurs financiers** | Black-Scholes, Binomial, Monte Carlo, Greeks, Bond pricing, Yield curves |
-| 📊 **Visualisation interactive** | Payoff diagrams, surfaces de volatilité, courbes de taux (Recharts) |
-| 🐍 **Éditeur Python in-browser** | Exécution de code Python directement dans le navigateur via Pyodide (NumPy, SciPy, Matplotlib) |
-| 📓 **Notebooks interactifs** | Recherche, visualisation et exécution de notebooks Jupyter depuis GitHub |
-| 🏗 **Strategy Builder** | Construction visuelle de stratégies d'options multi-legs avec pricing en temps réel |
-| 🎮 **Mode Survival** | Quiz progressifs par vagues de difficulté croissante (Beginner → Legendary) |
-| 📚 **Cours structurés** | Black-Scholes, Greeks, Monte Carlo, Options exotiques, Vol products, Yield curves |
-| 🌐 **Bilingue FR/EN** | Interface entièrement traduite avec i18next |
-| 🔐 **Authentification** | Gestion des utilisateurs et rôles (admin/moderator/user) via Supabase Auth |
-| 📈 **Dashboard utilisateur** | Suivi de progression, achievements, résultats de quiz |
-| 💬 **Chat widget** | Assistant intégré pour l'aide contextuelle |
-| 📝 **Blog technique** | Articles sur les Greeks, Monte Carlo vs Binomial, volatilité implicite, options exotiques |
+| 🧮 **Financial Calculators** | Black-Scholes, Binomial, Monte Carlo, Greeks, Bond pricing, Yield curves |
+| 📊 **Interactive Visualization** | Payoff diagrams, volatility surfaces, yield curves (Recharts) |
+| 🐍 **In-Browser Python Editor** | Run Python code directly in the browser via Pyodide (NumPy, SciPy, Matplotlib) |
+| 📓 **Interactive Notebooks** | Search, view and execute Jupyter notebooks from GitHub |
+| 🏗 **Strategy Builder** | Visual construction of multi-leg option strategies with real-time pricing |
+| 🎮 **Survival Mode** | Progressive quizzes with increasing difficulty waves (Beginner → Legendary) |
+| 📚 **Structured Courses** | Black-Scholes, Greeks, Monte Carlo, Exotic Options, Vol Products, Yield Curves |
+| 🌐 **Bilingual FR/EN** | Fully translated interface with i18next |
+| 🔐 **Authentication** | User and role management (admin/moderator/user) via Supabase Auth |
+| 📈 **User Dashboard** | Progress tracking, achievements, quiz results |
+| 💬 **Chat Widget** | Built-in assistant for contextual help |
+| 📝 **Technical Blog** | Articles on Greeks, Monte Carlo vs Binomial, implied volatility, exotic options |
 
 ---
 
-## 🧰 Stack technique
+## 🧰 Tech Stack
 
-| Catégorie | Technologies |
+| Category | Technologies |
 |---|---|
 | **Frontend** | React 18, TypeScript, Vite |
 | **Styling** | Tailwind CSS, shadcn/ui, Radix UI |
 | **Backend** | Supabase (Auth, Database, Edge Functions, RLS) |
-| **Python** | Pyodide (NumPy, SciPy, Matplotlib exécutés côté client) |
-| **Graphiques** | Recharts, react-d3-tree |
-| **Rendu scientifique** | KaTeX (formules mathématiques), Mermaid (diagrammes) |
-| **Internationalisation** | i18next, react-i18next |
+| **Python** | Pyodide (NumPy, SciPy, Matplotlib running client-side) |
+| **Charts** | Recharts, react-d3-tree |
+| **Scientific Rendering** | KaTeX (math formulas), Mermaid (diagrams) |
+| **Internationalization** | i18next, react-i18next |
 | **Routing** | React Router v6 |
-| **State management** | TanStack React Query, React Context |
+| **State Management** | TanStack React Query, React Context |
 | **Markdown** | react-markdown, rehype-katex, remark-math, rehype-raw |
-| **Formulaires** | React Hook Form, Zod validation |
+| **Forms** | React Hook Form, Zod validation |
 
 ---
 
-## 📐 Modèles mathématiques implémentés
+## 📐 Mathematical Models Implemented
 
 ```
 Black-Scholes:  C = S·e^(-qT)·N(d₁) - K·e^(-rT)·N(d₂)
@@ -111,7 +111,7 @@ Binomial:       u = e^(σ√Δt)    d = 1/u
 
 ---
 
-## 🚀 Lancement local
+## 🚀 Getting Started
 
 ```sh
 git clone <REPO_URL>
@@ -120,42 +120,42 @@ npm install
 npm run dev
 ```
 
-Prérequis : Node.js 18+ (voir `.node-version`)
+Prerequisites: Node.js 18+ (see `.node-version`)
 
 ---
 
-## 📂 Architecture du projet
+## 📂 Project Architecture
 
 ```
 src/
-├── components/          # Composants React (UI, strategies, tools, navigation...)
+├── components/          # React components (UI, strategies, tools, navigation...)
 │   ├── strategies/      # Strategy Builder, PayoffChart, Greeks
-│   ├── tools/           # Calculateurs (Black-Scholes, Monte Carlo, Bonds...)
-│   ├── python/          # Éditeur Python, Pyodide loader, exercices
+│   ├── tools/           # Calculators (Black-Scholes, Monte Carlo, Bonds...)
+│   ├── python/          # Python editor, Pyodide loader, exercises
 │   ├── navigation/      # Navbar, menus (Courses, Tools, Community...)
 │   └── ui/              # shadcn/ui components
-├── pages/               # Pages de l'application
-│   ├── courses/         # Cours (Black-Scholes, Greeks, Monte Carlo...)
-│   ├── trading/         # Trading Lab (Strategies, Backtest, Exercices)
-│   ├── survival/        # Quiz Survival Mode (6 niveaux)
+├── pages/               # Application pages
+│   ├── courses/         # Courses (Black-Scholes, Greeks, Monte Carlo...)
+│   ├── trading/         # Trading Lab (Strategies, Backtest, Exercises)
+│   ├── survival/        # Survival Mode quizzes (6 levels)
 │   └── community/       # Forum, Playground, Challenges
-├── utils/options/       # Logique métier (Black-Scholes, calcul de payoff, templates)
+├── utils/options/       # Business logic (Black-Scholes, payoff calculation, templates)
 ├── services/            # Services (GitHub, Notebooks, Pyodide)
 ├── hooks/               # Custom hooks
-├── i18n/                # Traductions FR/EN
-├── types/               # Types TypeScript (strategies, auth, blog...)
-└── data/                # Données statiques (blog posts, survival waves)
+├── i18n/                # FR/EN translations
+├── types/               # TypeScript types (strategies, auth, blog...)
+└── data/                # Static data (blog posts, survival waves)
 ```
 
 ---
 
-## 🔗 Liens
+## 🔗 Links
 
-- **Preview** : [the-pricing-lab.lovable.app](https://market-whispers-academy.lovable.app)
-- **Lovable Project** : [lovable.dev/projects/70aefe57-b3fa-4664-aaf6-86e47d3ce99d](https://lovable.dev/projects/70aefe57-b3fa-4664-aaf6-86e47d3ce99d)
+- **Preview**: [the-pricing-lab.lovable.app](https://market-whispers-academy.lovable.app)
+- **Lovable Project**: [lovable.dev/projects/70aefe57-b3fa-4664-aaf6-86e47d3ce99d](https://lovable.dev/projects/70aefe57-b3fa-4664-aaf6-86e47d3ce99d)
 
 ---
 
-## 📄 Licence
+## 📄 License
 
-Projet privé — Tous droits réservés.
+Private project — All rights reserved.
