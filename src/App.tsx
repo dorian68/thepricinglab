@@ -95,7 +95,7 @@ function App() {
               <title>The Pricing Library - Plateforme d'apprentissage avancé pour les options financières</title>
               <meta name="description" content="Apprenez à maitriser les options financières avec des cours interactifs, des simulateurs et des outils d'analyse avancés. Black-Scholes, Monte Carlo, Volatilité et plus." />
               <meta name="keywords" content="pricing financier, options, black-scholes, monte carlo, volatilité, finance quantitative, simulateurs financiers" />
-              <link rel="canonical" href="https://thepricinglab.com" />
+              <link rel="canonical" href="https://thepricinglibrary.com" />
             </Helmet>
             <Toaster position="top-right" />
             <Router>
