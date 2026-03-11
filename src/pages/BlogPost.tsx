@@ -112,7 +112,6 @@ const BlogPost = () => {
 
   useEffect(() => {
     if (contentRef.current && post) {
-      console.log("BlogPost: Activation de la transformation des blocs Python");
       const timeoutId = setTimeout(() => {
         transformCodeBlocks(contentRef.current!);
       }, 100);
@@ -133,7 +132,7 @@ const BlogPost = () => {
         <meta property="og:url" content={window.location.href} />
         <meta property="og:type" content="article" />
         <meta name="twitter:card" content="summary_large_image" />
-        <link rel="canonical" href={`https://thepricinglab.com/blog/${post?.slug}`} />
+        <link rel="canonical" href={`https://thepricinglibrary.com/blog/${post?.slug}`} />
       </Helmet>
       
       <Navbar />

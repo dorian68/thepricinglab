@@ -32,7 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .select('*')
         .eq('id', userId)
         .single()
-      console.log("Supabase profile fetch result:", { data, error });
+      
       if (error) {
         console.error('Erreur lors de la récupération du profil:', error)
         return null
@@ -47,19 +47,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Initialiser la session et configurer les listeners d'auth
   useEffect(() => {
-    console.log("AuthContext: Initializing auth state")
-    
-    // Configuration du listener d'état d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, currentSession) => {
-        console.log("AuthContext: Auth state changed", _event)
         setSession(currentSession)
         setUser(currentSession?.user ?? null)
         
         // Utilisation de setTimeout pour éviter le deadlock avec Supabase
         if (currentSession?.user) {
           setTimeout(async () => {
-            console.log("AuthContext: Fetching profile for user", currentSession.user.id)
             const profile = await fetchProfile(currentSession.user.id)
             setProfile(profile)
             setIsLoading(false)
@@ -73,14 +68,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Vérification initiale de la session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      console.log("AuthContext: Initial session check", currentSession ? "session found" : "no session")
       setSession(currentSession)
       setUser(currentSession?.user ?? null)
       
       if (currentSession?.user) {
         fetchProfile(currentSession.user.id).then(profile => {
           setProfile(profile)
-          console.log("AuthContext: Profile loaded", profile)
           setIsLoading(false)
         })
       } else {
@@ -116,12 +109,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     toast("Inscription réussie! Bienvenue sur The Pricing Library !")
-    console.log("Inscription réussie");
   }
 
   const signIn = async (email: string, password: string) => {
     try {
-      console.log("AuthContext: Signing in", email)
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,

@@ -40,7 +40,7 @@ const Courses = () => {
     description: st('coursesPage.description', "Interactive courses on quantitative finance, options pricing, and trading strategies"),
     fundamentals: [
       {
-        title: st('coursesPage.fundamentals.blackScholes.title', "----choles Model"),
+        title: st('coursesPage.fundamentals.blackScholes.title', "Black-Scholes Model"),
         description: st('coursesPage.fundamentals.blackScholes.description', "Master the foundational option pricing model"),
         image: "https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?q=80&w=1740&auto=format&fit=crop",
         url: "/courses/fundamentals/black-scholes",
@@ -146,6 +146,7 @@ const Courses = () => {
           <img 
             src={course.image} 
             alt={course.title}
+            loading="lazy"
             className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
           />
           <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/30 to-transparent"></div>

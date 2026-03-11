@@ -86,13 +86,6 @@ const Contribute = () => {
     
     try {
       // In a real app, we'd save the strategy to the database here
-      console.log("Strategy submitted:", {
-        strategy,
-        isDraft,
-        author,
-        date: new Date().toISOString(),
-        tags: formData.tags
-      });
       
       toast({
         title: isDraft ? "Brouillon sauvegardé" : "Stratégie publiée",
@@ -121,12 +114,6 @@ const Contribute = () => {
     
     try {
       // In a real app, we'd save the article to the database here
-      console.log("Article created:", {
-        ...formData,
-        author,
-        date: new Date().toISOString(),
-        published: true
-      });
       
       toast({
         title: "Article publié",

@@ -88,7 +88,7 @@ const StrategyDetail = () => {
       if (foundStrategy) {
         setStrategy(foundStrategy);
       } else {
-        console.log(`Strategy with id ${id} not found`);
+        
       }
     }
   }, [id]);
