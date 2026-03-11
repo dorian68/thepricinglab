@@ -205,7 +205,7 @@ const Courses = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>{st('coursesPage.title', "Courses")} | The Pricing Lab</title>
+        <title>{st('coursesPage.title', "Courses")} | The Pricing Library</title>
         <meta name="description" content={st('coursesPage.description', "Interactive courses on quantitative finance, options pricing, and trading strategies")} />
       </Helmet>
       
