@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -45,6 +45,7 @@ import NotFound from './pages/NotFound';
 import AppShell from './components/AppShell';
 import SignUp from './pages/SignUp';
 import Jobs from './pages/Jobs';
+import Exercices from './pages/Exercices';
 
 // Pages de la communauté
 import Forum from './pages/community/Forum';
@@ -55,14 +56,11 @@ import Explore from './pages/community/Explore';
 import Contribute from './pages/community/Contribute';
 import ArticleDetail from './pages/community/ArticleDetail';
 import StrategyDetail from './pages/community/StrategyDetail';
-import StrategyBuilder from './pages/community/StrategyBuilder';
-import Playground from './pages/community/Playground';
 import SharedNotebook from './pages/community/SharedNotebook';
 import NotebookWorkspace from './pages/community/NotebookWorkspace';
 
 import VolatilityCalculator from './components/tools/VolatilityCalculator';
 import BlackScholesCalculator from './components/tools/BlackScholesCalculator';
-import MonteCarloSimulator from './components/tools/MonteCarloSimulator';
 import ModelCalibration from './components/tools/ModelCalibration';
 import PayoffVisualizer from './pages/tools/PayoffVisualizer';
 
@@ -73,15 +71,25 @@ import Strategies from './pages/trading/Strategies';
 import Performance from './pages/trading/Performance';
 
 import AdminLogin from './pages/admin/AdminLogin';
-import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminRouteGuard from './components/admin/AdminRouteGuard';
 import CourseAdvanced from './pages/CourseAdvanced';
 import LaboTrading from './pages/LaboTrading';
-import Exercices from './pages/Exercices';
-import VolSurface from './pages/VolSurface';
 import QuantProTools from './pages/QuantProTools';
 import Rapports from './pages/Rapports';
 import ApiDocs from './pages/ApiDocs';
+
+// Lazy-loaded heavy pages
+const MonteCarloSimulator = React.lazy(() => import('./components/tools/MonteCarloSimulator'));
+const VolSurface = React.lazy(() => import('./pages/VolSurface'));
+const StrategyBuilder = React.lazy(() => import('./pages/community/StrategyBuilder'));
+const Playground = React.lazy(() => import('./pages/community/Playground'));
+const AdminDashboard = React.lazy(() => import('./pages/admin/AdminDashboard'));
+
+const LazyFallback = () => (
+  <div className="flex items-center justify-center min-h-[60vh]">
+    <div className="animate-pulse text-muted-foreground">Loading…</div>
+  </div>
+);
 
 const queryClient = new QueryClient();
 
@@ -99,80 +107,83 @@ function App() {
             </Helmet>
             <Toaster position="top-right" />
             <Router>
-              <Routes>
-                <Route element={<AppShell />}>
-                  <Route index element={<Home />} />
-                  <Route path="/signup" element={<SignUp />} />
-                  <Route path="/login" element={<Login />} />
-                  
-                  <Route path="/courses" element={<Courses />} />
-                  <Route path="/courses/fundamentals/black-scholes" element={<BlackScholes />} />
-                  <Route path="/courses/complex/exotic-options" element={<ExoticOptions />} />
-                  <Route path="/courses/fundamentals/greeks" element={<Greeks />} />
-                  <Route path="/courses/advanced/implied-vol" element={<ImpliedVol />} />
-                  <Route path="/courses/complex/monte-carlo" element={<MonteCarlo />} />
-                  <Route path="/courses/advanced/vol-products" element={<VolProducts />} />
-                  <Route path="/courses/fundamentals/yield-curves" element={<YieldCurves />} />
-                  <Route path="/courses/advanced" element={<CourseAdvanced />} />
-                  <Route path="/practice" element={<Practice />} />
-                  <Route path="/exercises" element={<Exercises />} />
-                  <Route path="/exercises/:id" element={<ExerciseDetail />} />
-                  <Route path="/quizzes" element={<Quizzes />} />
-                  <Route path="/tools" element={<Tools />} />
-                  <Route path="/tools/volatility-calculator" element={<VolatilityCalculator />} />
-                  <Route path="/tools/black-scholes" element={<BlackScholesCalculator />} />
-                  <Route path="/tools/monte-carlo" element={<MonteCarloSimulator />} />
-                  <Route path="/tools/model-calibration" element={<ModelCalibration />} />
-                  <Route path="/tools/payoff-visualizer" element={<PayoffVisualizer />} />
-                  <Route path="/community" element={<Community />} />
-                  <Route path="/community/chat" element={<Chat />} />
-                  <Route path="/community/forum" element={<Forum />} />
-                  <Route path="/community/contribute" element={<Contribute />} />
-                  <Route path="/community/explore" element={<Explore />} />
-                  <Route path="/community/playground" element={<Playground />} />
-                  <Route path="/community/playground/shared" element={<SharedNotebook />} />
-                  <Route path="/community/strategy-builder" element={<StrategyBuilder />} />
-                  <Route path="/community/strategy/:id" element={<StrategyDetail />} />
-                  <Route path="/community/article/:id" element={<ArticleDetail />} />
-                  <Route path="/community/pair-programming" element={<PairProgramming />} />
-                  <Route path="/community/weekly-challenge" element={<WeeklyChallenge />} />
-                  
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/blog/:slug" element={<BlogPost />} />
-                  <Route path="/pricing" element={<Pricing />} />
-                  <Route path="/notebooks" element={<Notebooks />} />
-                  <Route path="/projects" element={<Projects />} />
-                  <Route path="/mentoring" element={<Mentoring />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/leaderboard" element={<Leaderboard />} />
-                  <Route path="/survival-mode" element={<SurvivalMode />} />
-                  <Route path="/survival-mode/wave/:id" element={<SurvivalWaveDetail />} />
-                  <Route path="/survival-mode/beginner" element={<BeginnerWave />} />
-                  <Route path="/survival-mode/intermediate" element={<IntermediateWave />} />
-                  <Route path="/survival-mode/advanced" element={<AdvancedWave />} />
-                  <Route path="/survival-mode/expert" element={<ExpertWave />} />
-                  <Route path="/survival-mode/master" element={<MasterWave />} />
-                  <Route path="/survival-mode/legendary" element={<LegendaryWave />} />
-                  <Route path="/bug-report" element={<BugReport />} />
-                  
-                  <Route path="/trading/exercises" element={<TradingExercises />} />
-                  <Route path="/trading/backtest" element={<Backtest />} />
-                  <Route path="/trading/scenarios" element={<Scenarios />} />
-                  <Route path="/trading/strategies" element={<Strategies />} />
-                  <Route path="/trading/performance" element={<Performance />} />
-                  
-                  <Route path="/admin-login" element={<AdminLogin />} />
-                  <Route path="/admin-dashboard" element={
-                    <AdminRouteGuard>
-                      <AdminDashboard />
-                    </AdminRouteGuard>
-                  } />
-                  
-                  <Route path="/community/notebook-workspace" element={<NotebookWorkspace />} />
-                  
-                  <Route path="*" element={<NotFound />} />
-                </Route>
-              </Routes>
+              <Suspense fallback={<LazyFallback />}>
+                <Routes>
+                  <Route element={<AppShell />}>
+                    <Route index element={<Home />} />
+                    <Route path="/signup" element={<SignUp />} />
+                    <Route path="/login" element={<Login />} />
+                    
+                    <Route path="/courses" element={<Courses />} />
+                    <Route path="/courses/fundamentals/black-scholes" element={<BlackScholes />} />
+                    <Route path="/courses/complex/exotic-options" element={<ExoticOptions />} />
+                    <Route path="/courses/fundamentals/greeks" element={<Greeks />} />
+                    <Route path="/courses/advanced/implied-vol" element={<ImpliedVol />} />
+                    <Route path="/courses/complex/monte-carlo" element={<MonteCarlo />} />
+                    <Route path="/courses/advanced/vol-products" element={<VolProducts />} />
+                    <Route path="/courses/fundamentals/yield-curves" element={<YieldCurves />} />
+                    <Route path="/courses/advanced" element={<CourseAdvanced />} />
+                    <Route path="/practice" element={<Practice />} />
+                    <Route path="/exercises" element={<Exercises />} />
+                    <Route path="/exercices" element={<Exercices />} />
+                    <Route path="/exercises/:id" element={<ExerciseDetail />} />
+                    <Route path="/quizzes" element={<Quizzes />} />
+                    <Route path="/tools" element={<Tools />} />
+                    <Route path="/tools/volatility-calculator" element={<VolatilityCalculator />} />
+                    <Route path="/tools/black-scholes" element={<BlackScholesCalculator />} />
+                    <Route path="/tools/monte-carlo" element={<MonteCarloSimulator />} />
+                    <Route path="/tools/model-calibration" element={<ModelCalibration />} />
+                    <Route path="/tools/payoff-visualizer" element={<PayoffVisualizer />} />
+                    <Route path="/community" element={<Community />} />
+                    <Route path="/community/chat" element={<Chat />} />
+                    <Route path="/community/forum" element={<Forum />} />
+                    <Route path="/community/contribute" element={<Contribute />} />
+                    <Route path="/community/explore" element={<Explore />} />
+                    <Route path="/community/playground" element={<Playground />} />
+                    <Route path="/community/playground/shared" element={<SharedNotebook />} />
+                    <Route path="/community/strategy-builder" element={<StrategyBuilder />} />
+                    <Route path="/community/strategy/:id" element={<StrategyDetail />} />
+                    <Route path="/community/article/:id" element={<ArticleDetail />} />
+                    <Route path="/community/pair-programming" element={<PairProgramming />} />
+                    <Route path="/community/weekly-challenge" element={<WeeklyChallenge />} />
+                    
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog/:slug" element={<BlogPost />} />
+                    <Route path="/pricing" element={<Pricing />} />
+                    <Route path="/notebooks" element={<Notebooks />} />
+                    <Route path="/projects" element={<Projects />} />
+                    <Route path="/mentoring" element={<Mentoring />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/leaderboard" element={<Leaderboard />} />
+                    <Route path="/survival-mode" element={<SurvivalMode />} />
+                    <Route path="/survival-mode/wave/:id" element={<SurvivalWaveDetail />} />
+                    <Route path="/survival-mode/beginner" element={<BeginnerWave />} />
+                    <Route path="/survival-mode/intermediate" element={<IntermediateWave />} />
+                    <Route path="/survival-mode/advanced" element={<AdvancedWave />} />
+                    <Route path="/survival-mode/expert" element={<ExpertWave />} />
+                    <Route path="/survival-mode/master" element={<MasterWave />} />
+                    <Route path="/survival-mode/legendary" element={<LegendaryWave />} />
+                    <Route path="/bug-report" element={<BugReport />} />
+                    
+                    <Route path="/trading/exercises" element={<TradingExercises />} />
+                    <Route path="/trading/backtest" element={<Backtest />} />
+                    <Route path="/trading/scenarios" element={<Scenarios />} />
+                    <Route path="/trading/strategies" element={<Strategies />} />
+                    <Route path="/trading/performance" element={<Performance />} />
+                    
+                    <Route path="/admin-login" element={<AdminLogin />} />
+                    <Route path="/admin-dashboard" element={
+                      <AdminRouteGuard>
+                        <AdminDashboard />
+                      </AdminRouteGuard>
+                    } />
+                    
+                    <Route path="/community/notebook-workspace" element={<NotebookWorkspace />} />
+                    
+                    <Route path="*" element={<NotFound />} />
+                  </Route>
+                </Routes>
+              </Suspense>
             </Router>
           </AuthProvider>
         </QueryClientProvider>
