@@ -208,7 +208,7 @@ const Courses = () => {
         <meta name="description" content={st('coursesPage.description', "Interactive courses on quantitative finance, options pricing, and trading strategies")} />
       </Helmet>
       
-      <Navbar />
+      
       
       <main className="container mx-auto px-4 py-10">
         <div className="text-center mb-12">
