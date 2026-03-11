@@ -74,7 +74,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (currentSession?.user) {
         fetchProfile(currentSession.user.id).then(profile => {
           setProfile(profile)
-          console.log("AuthContext: Profile loaded", profile)
           setIsLoading(false)
         })
       } else {
