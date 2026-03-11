@@ -2,18 +2,8 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { 
-  Calculator, 
-  LineChart, 
-  ArrowRight, 
-  ChevronRight,
-  ChevronDown,
-  Info,
-  CandlestickChart,
-  Activity,
-  Dices,
-  Database,
-  Gauge,
-  BarChart // Adding BarChart icon for the Payoff Visualizer
+  Calculator, LineChart, ArrowRight, ChevronDown, CandlestickChart,
+  Activity, Dices, Database, Gauge, BarChart
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -21,65 +11,22 @@ import { safeTranslate } from "../utils/translationUtils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-// Tool card component with improved design
-const ToolCard = ({ 
-  icon: Icon, 
-  title, 
-  description, 
-  locked = false,
-  path,
-  onClick
-}: { 
-  icon: React.ElementType; 
-  title: string; 
-  description: string; 
-  locked?: boolean;
-  path?: string;
-  onClick?: () => void;
-}) => {
+const ToolCard = ({ icon: Icon, title, description, locked = false, path, onClick }: { icon: React.ElementType; title: string; description: string; locked?: boolean; path?: string; onClick?: () => void; }) => {
   const navigate = useNavigate();
-  
-  const handleClick = () => {
-    if (locked) return;
-    
-    if (onClick) {
-      onClick();
-    } else if (path) {
-      navigate(path);
-    }
-  };
-  
+  const handleClick = () => { if (locked) return; onClick ? onClick() : path && navigate(path); };
   return (
-    <Card className={`bg-finance-charcoal border-finance-steel/30 ${locked ? 'opacity-60' : 'hover:border-finance-accent transition-colors duration-300'}`}>
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div className="bg-finance-burgundy/20 rounded-full p-3">
-            <Icon className="h-6 w-6 text-finance-accent" />
-          </div>
-          
-          {locked && (
-            <span className="terminal-text text-xs px-2 py-1 bg-finance-steel/30 rounded text-finance-lightgray">
-              PRO
-            </span>
-          )}
+    <Card className={`bg-card border-border ${locked ? 'opacity-60' : 'hover:border-primary/40 transition-colors duration-300'}`}>
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between mb-3">
+          <div className="bg-primary/10 rounded-full p-2.5"><Icon className="h-5 w-5 text-primary" /></div>
+          {locked && <span className="terminal-text text-xs px-2 py-1 bg-secondary rounded text-muted-foreground border border-border">PRO</span>}
         </div>
-        
-        <h3 className="text-lg font-medium text-finance-offwhite mb-2">{title}</h3>
-        <p className="text-finance-lightgray text-sm mb-4">{description}</p>
-        
-        <Button 
-          onClick={handleClick}
-          variant={locked ? "outline" : "finance"}
-          className={`flex justify-between items-center w-full ${
-            locked 
-              ? 'bg-finance-steel/10 text-finance-lightgray cursor-not-allowed border-finance-steel/30' 
-              : ''
-          }`}
-        >
-          <span className="text-sm font-medium">
-            {locked ? "Débloquer" : "Utiliser l'outil"}
-          </span>
+        <h3 className="text-base font-semibold text-foreground mb-1.5">{title}</h3>
+        <p className="text-muted-foreground text-sm mb-4 leading-relaxed">{description}</p>
+        <Button onClick={handleClick} variant={locked ? "outline" : "finance"} className={`flex justify-between items-center w-full ${locked ? 'cursor-not-allowed' : ''}`}>
+          <span className="text-sm font-medium">{locked ? "Unlock with PRO" : "Launch Tool"}</span>
           <ArrowRight className="h-4 w-4" />
         </Button>
       </CardContent>
@@ -87,298 +34,117 @@ const ToolCard = ({
   );
 };
 
+const faqItems = [
+  { q: 'How are Black-Scholes prices computed?', a: 'We implement the standard Black-Scholes-Merton closed-form solution for European options. Greeks are computed analytically from partial derivatives. All computation runs in your browser — no data is sent to any server.' },
+  { q: 'Is market data real-time?', a: 'No. Tools use synthetic data or user-provided inputs. For production-grade market data feeds, integrate with your own data provider. This ensures transparency and avoids data licensing constraints.' },
+  { q: 'Can I export results?', a: 'Export functionality (CSV, PNG) is available for PRO subscribers. Free-tier users can screenshot or manually record outputs.' },
+];
+
 const Tools = () => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("all");
   const navigate = useNavigate();
-  
+
+  const allTools = [
+    { icon: BarChart, title: 'Payoff Visualizer', description: 'Build multi-leg option strategies and analyze payoff diagrams, breakevens, and Greeks at expiry.', path: '/tools/payoff-visualizer' },
+    { icon: Gauge, title: 'Volatility Calculator', description: 'Measure realized volatility with configurable rolling windows across multiple asset classes.', path: '/tools/volatility-calculator' },
+    { icon: Calculator, title: 'Black-Scholes Pricer', description: 'Price European options and compute all first-order Greeks with interactive sensitivity analysis.', path: '/tools/black-scholes' },
+    { icon: Dices, title: 'Monte Carlo Simulator', description: 'Simulate price paths under GBM and jump-diffusion. Compute VaR and expected shortfall.', path: '/tools/monte-carlo' },
+    { icon: Database, title: 'Model Calibration', description: 'Calibrate Black, SABR, and Heston models to implied volatility surfaces via RMSE optimization.', path: '/tools/model-calibration' },
+    { icon: Calculator, title: 'Binomial Model', description: 'Price American and European options with a configurable CRR binomial tree.', locked: true },
+    { icon: LineChart, title: 'Vol Surface Explorer', description: 'Visualize and interpolate implied volatility surfaces across strikes and maturities.', locked: true },
+    { icon: Calculator, title: 'Bond Calculator', description: 'Compute bond prices, yields, duration, and convexity for fixed-income analysis.', locked: true },
+    { icon: LineChart, title: 'Yield Curve Builder', description: 'Construct and manipulate zero-coupon and forward rate curves from market data.', locked: true },
+  ];
+
+  const filterTools = (category: string) => {
+    if (category === 'all') return allTools;
+    if (category === 'calculators') return allTools.filter((_, i) => [1, 2, 5, 7].includes(i));
+    if (category === 'visualizers') return allTools.filter((_, i) => [0, 4, 6, 8].includes(i));
+    if (category === 'simulators') return allTools.filter((_, i) => [3].concat([]).includes(i));
+    return allTools;
+  };
+
   return (
     <>
       <Helmet>
-        <title>{safeTranslate(t, 'tools.title', 'Outils')} | The Trading Lab</title>
+        <title>Quantitative Tools | The Pricing Library</title>
+        <meta name="description" content="Professional-grade quantitative finance tools: Black-Scholes pricer, Monte Carlo simulator, volatility calculator, model calibration, and payoff analysis." />
+        <link rel="canonical" href="https://thepricinglibrary.com/tools" />
       </Helmet>
-      
-      {/* Tools Header with improved spacing and design */}
-      <header className="py-12 px-6 border-b border-finance-steel/10">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 terminal-text">{safeTranslate(t, 'tools.header', 'Outils de pricing')}</h1>
-            <p className="text-finance-lightgray text-lg max-w-3xl mx-auto">
-              {safeTranslate(t, 'tools.description', 'Une suite d\'outils conçus pour les professionnels des marchés financiers, permettant d\'évaluer et d\'analyser rapidement différents instruments.')}
-            </p>
+
+      <header className="py-12 px-6 border-b border-border">
+        <div className="max-w-5xl mx-auto text-center">
+          <h1 className="text-3xl md:text-4xl font-bold mb-3 terminal-text">Quantitative Tools</h1>
+          <p className="text-muted-foreground text-base md:text-lg max-w-3xl mx-auto leading-relaxed">
+            A suite of browser-based pricing, simulation, and calibration tools built for derivatives analysis, risk assessment, and quantitative research. No server round-trips — all computation runs locally.
+          </p>
+          <div className="flex flex-wrap justify-center gap-3 mt-5">
+            {['Analytical pricing', 'Stochastic simulation', 'Model calibration', 'Sensitivity analysis', 'Browser-based'].map(s => (
+              <span key={s} className="text-xs px-3 py-1.5 rounded-full bg-secondary text-muted-foreground border border-border font-medium">{s}</span>
+            ))}
           </div>
         </div>
       </header>
-      
-      {/* Tools Tabs with improved styling */}
-      <div className="border-b border-finance-steel/10">
+
+      <div className="border-b border-border">
         <div className="max-w-7xl mx-auto">
           <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="overflow-x-auto scrollbar-none">
-              <TabsList className="bg-transparent h-14 w-full justify-start border-b border-finance-steel/10">
-                <TabsTrigger 
-                  value="calculators" 
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-finance-accent data-[state=active]:shadow-none h-14 rounded-none"
-                >
-                  {safeTranslate(t, 'tools.tabs.calculators', 'Calculatrices')}
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="visualizers" 
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-finance-accent data-[state=active]:shadow-none h-14 rounded-none"
-                >
-                  {safeTranslate(t, 'tools.tabs.visualizers', 'Visualiseurs')}
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="simulators" 
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-finance-accent data-[state=active]:shadow-none h-14 rounded-none"
-                >
-                  {safeTranslate(t, 'tools.tabs.simulators', 'Simulateurs')}
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="all" 
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-finance-accent data-[state=active]:shadow-none h-14 rounded-none"
-                >
-                  {safeTranslate(t, 'tools.tabs.all', 'Tous les outils')}
-                </TabsTrigger>
+              <TabsList className="bg-transparent h-14 w-full justify-start border-b border-border">
+                {['all', 'calculators', 'visualizers', 'simulators'].map(tab => (
+                  <TabsTrigger key={tab} value={tab} className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none h-14 rounded-none capitalize">
+                    {tab === 'all' ? 'All Tools' : tab}
+                  </TabsTrigger>
+                ))}
               </TabsList>
             </div>
-            
-            {/* Tools Content with improved design */}
+
             <div className="py-8 px-6">
-              <TabsContent value="all" className="mt-0">
-                <div>
-                  <h2 className="text-xl font-medium mb-6">{safeTranslate(t, 'tools.allTools', 'Tous les outils')}</h2>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <ToolCard 
-                      icon={BarChart} 
-                      title={safeTranslate(t, 'tools.payoff.title', 'Visualiseur de Payoff')}
-                      description={safeTranslate(t, 'tools.payoff.description', 'Construisez et analysez des stratégies optionnelles complexes avec visualisation en temps réel.')}
-                      path="/tools/payoff-visualizer"
-                    />
-                    <ToolCard 
-                      icon={Gauge} 
-                      title={safeTranslate(t, 'tools.volatility.title', 'Calculatrice de Volatilité')}
-                      description={safeTranslate(t, 'tools.volatility.description', 'Mesurez la volatilité historique et analysez ses variations dans le temps.')}
-                      path="/tools/volatility-calculator"
-                    />
-                    <ToolCard 
-                      icon={Calculator} 
-                      title={safeTranslate(t, 'tools.blackScholes.title', 'Black-Scholes Calculator')}
-                      description={safeTranslate(t, 'tools.blackScholes.description', 'Évaluez rapidement les options vanilles et obtenez les Greeks correspondants.')}
-                      path="/tools/black-scholes"
-                    />
-                    <ToolCard 
-                      icon={Dices} 
-                      title={safeTranslate(t, 'tools.monteCarlo.title', 'Simulateur Monte Carlo')}
-                      description={safeTranslate(t, 'tools.monteCarlo.description', "Simulez l'évolution des prix et calculez les métriques de risque comme la VaR.")}
-                      path="/tools/monte-carlo"
-                    />
-                    <ToolCard 
-                      icon={Database} 
-                      title={safeTranslate(t, 'tools.modelCalibration.title', 'Calibration de Modèles')}
-                      description={safeTranslate(t, 'tools.modelCalibration.description', 'Calibrez différents modèles de pricing sur des données de marché.')}
-                      path="/tools/model-calibration"
-                    />
-                    <ToolCard 
-                      icon={Calculator} 
-                      title={safeTranslate(t, 'tools.binomial.title', 'Modèle binomial')}
-                      description={safeTranslate(t, 'tools.binomial.description', 'Évaluez les options avec un modèle binomial personnalisable.')}
-                      locked={true}
-                    />
-                    <ToolCard 
-                      icon={LineChart} 
-                      title={safeTranslate(t, 'tools.volSurface.title', 'Visualiseur de surface de vol')}
-                      description={safeTranslate(t, 'tools.volSurface.description', 'Explorez les surfaces de volatilité implicite pour différents sous-jacents.')}
-                      locked={true}
-                    />
-                    <ToolCard 
-                      icon={Calculator} 
-                      title={safeTranslate(t, 'tools.bonds.title', "Calculateur d'obligations")}
-                      description={safeTranslate(t, 'tools.bonds.description', 'Évaluez les obligations et analysez leur sensibilité aux variations de taux.')}
-                      locked={true}
-                    />
-                    <ToolCard 
-                      icon={LineChart} 
-                      title={safeTranslate(t, 'tools.yieldCurve.title', 'Visualiseur de courbe de taux')}
-                      description={safeTranslate(t, 'tools.yieldCurve.description', 'Affichez et manipulez les courbes de taux zéro-coupon et forward.')}
-                      locked={true}
-                    />
+              {['all', 'calculators', 'visualizers', 'simulators'].map(tab => (
+                <TabsContent key={tab} value={tab} className="mt-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {filterTools(tab).map(tool => <ToolCard key={tool.title} {...tool} />)}
                   </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="calculators" className="mt-0">
-                <div>
-                  <h2 className="text-xl font-medium mb-6">{safeTranslate(t, 'tools.calculatorsTitle', 'Calculatrices')}</h2>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <ToolCard 
-                      icon={Gauge} 
-                      title={safeTranslate(t, 'tools.volatility.title', 'Calculatrice de Volatilité')}
-                      description={safeTranslate(t, 'tools.volatility.description', 'Mesurez la volatilité historique et analysez ses variations dans le temps.')}
-                      path="/tools/volatility-calculator"
-                    />
-                    <ToolCard 
-                      icon={Calculator} 
-                      title={safeTranslate(t, 'tools.blackScholes.title', 'Black-Scholes Calculator')}
-                      description={safeTranslate(t, 'tools.blackScholes.description', 'Évaluez rapidement les options vanilles et obtenez les Greeks correspondants.')}
-                      path="/tools/black-scholes"
-                    />
-                    <ToolCard 
-                      icon={Calculator} 
-                      title={safeTranslate(t, 'tools.binomial.title', 'Modèle binomial')}
-                      description={safeTranslate(t, 'tools.binomial.description', 'Évaluez les options avec un modèle binomial personnalisable.')}
-                      locked={true}
-                    />
-                    <ToolCard 
-                      icon={Calculator} 
-                      title={safeTranslate(t, 'tools.bonds.title', "Calculateur d'obligations")}
-                      description={safeTranslate(t, 'tools.bonds.description', 'Évaluez les obligations et analysez leur sensibilité aux variations de taux.')}
-                      locked={true}
-                    />
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="visualizers" className="mt-0">
-                <div>
-                  <h2 className="text-xl font-medium mb-6">{safeTranslate(t, 'tools.visualizersTitle', 'Visualiseurs')}</h2>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <ToolCard 
-                      icon={BarChart} 
-                      title={safeTranslate(t, 'tools.payoff.title', 'Visualiseur de Payoff')}
-                      description={safeTranslate(t, 'tools.payoff.description', 'Construisez et analysez des stratégies optionnelles complexes avec visualisation en temps réel.')}
-                      path="/tools/payoff-visualizer"
-                    />
-                    <ToolCard 
-                      icon={Database} 
-                      title={safeTranslate(t, 'tools.modelCalibration.title', 'Calibration de Modèles')}
-                      description={safeTranslate(t, 'tools.modelCalibration.description', 'Calibrez différents modèles de pricing sur des données de marché.')}
-                      path="/tools/model-calibration"
-                    />
-                    <ToolCard 
-                      icon={LineChart} 
-                      title={safeTranslate(t, 'tools.volSurface.title', 'Visualiseur de surface de vol')}
-                      description={safeTranslate(t, 'tools.volSurface.description', 'Explorez les surfaces de volatilité implicite pour différents sous-jacents.')}
-                      locked={true}
-                    />
-                    <ToolCard 
-                      icon={LineChart} 
-                      title={safeTranslate(t, 'tools.yieldCurve.title', 'Visualiseur de courbe de taux')}
-                      description={safeTranslate(t, 'tools.yieldCurve.description', 'Affichez et manipulez les courbes de taux zéro-coupon et forward.')}
-                      locked={true}
-                    />
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="simulators" className="mt-0">
-                <div>
-                  <h2 className="text-xl font-medium mb-6">{safeTranslate(t, 'tools.simulatorsTitle', 'Simulateurs')}</h2>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <ToolCard 
-                      icon={Dices} 
-                      title={safeTranslate(t, 'tools.monteCarlo.title', 'Simulateur Monte Carlo')}
-                      description={safeTranslate(t, 'tools.monteCarlo.description', "Simulez l'évolution des prix et calculez les métriques de risque comme la VaR.")}
-                      path="/tools/monte-carlo"
-                    />
-                    <ToolCard 
-                      icon={Activity} 
-                      title={safeTranslate(t, 'tools.stressTest.title', 'Simulateur de Stress Test')}
-                      description={safeTranslate(t, 'tools.stressTest.description', 'Analyser la résistance de vos portefeuilles dans des scénarios extrêmes.')}
-                      locked={true}
-                    />
-                    <ToolCard 
-                      icon={CandlestickChart} 
-                      title={safeTranslate(t, 'tools.exoticOptions.title', "Simulateur d'Options Exotiques")}
-                      description={safeTranslate(t, 'tools.exoticOptions.description', 'Evaluez et comprenez les options à barrière, lookback, asiatiques et autres.')}
-                      locked={true}
-                    />
-                  </div>
-                </div>
-              </TabsContent>
+                </TabsContent>
+              ))}
             </div>
           </Tabs>
         </div>
       </div>
-      
-      {/* FAQ Section with improved styling */}
-      <section className="py-12 px-6 bg-finance-charcoal/20 border-t border-finance-steel/10">
+
+      {/* FAQ */}
+      <section className="py-12 px-6 border-t border-border">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold mb-6 text-center terminal-text">{safeTranslate(t, 'tools.faq.title', 'Questions fréquentes')}</h2>
-          
-          <div className="space-y-4">
-            <Card className="bg-finance-charcoal border-finance-steel/30">
-              <CardContent className="p-0">
-                <button 
-                  className="flex justify-between items-center w-full p-4 text-left"
-                  onClick={() => {}}
-                >
-                  <span className="font-medium">{safeTranslate(t, 'tools.faq.blackScholes.question', 'Comment sont calculés les prix dans la calculatrice Black-Scholes?')}</span>
-                  <ChevronDown className="h-5 w-5 text-finance-accent" />
-                </button>
-                <div className="p-4 bg-finance-steel/5 border-t border-finance-steel/10">
-                  <p className="text-finance-lightgray text-sm">
-                    {safeTranslate(t, 'tools.faq.blackScholes.answer', 'Notre calculatrice implémente la formule Black-Scholes standard pour le pricing d\'options européennes. Les Greeks sont calculés analytiquement à partir des dérivées partielles de la formule.')}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-finance-charcoal border-finance-steel/30">
-              <CardContent className="p-0">
-                <button 
-                  className="flex justify-between items-center w-full p-4 text-left"
-                  onClick={() => {}}
-                >
-                  <span className="font-medium">{safeTranslate(t, 'tools.faq.marketData.question', 'Les données de marchés utilisées sont-elles en temps réel?')}</span>
-                  <ChevronDown className="h-5 w-5 text-finance-accent" />
-                </button>
-                <div className="p-4 bg-finance-steel/5 border-t border-finance-steel/10">
-                  <p className="text-finance-lightgray text-sm">
-                    {safeTranslate(t, 'tools.faq.marketData.answer', 'Non, les visualiseurs utilisent des données de marché en différé (15 minutes) ou des données historiques de clôture. Pour des données en temps réel, consultez notre offre premium.')}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-finance-charcoal border-finance-steel/30">
-              <CardContent className="p-0">
-                <button 
-                  className="flex justify-between items-center w-full p-4 text-left"
-                  onClick={() => {}}
-                >
-                  <span className="font-medium">{safeTranslate(t, 'tools.faq.export.question', 'Comment puis-je exporter les résultats?')}</span>
-                  <ChevronDown className="h-5 w-5 text-finance-accent" />
-                </button>
-                <div className="p-4 bg-finance-steel/5 border-t border-finance-steel/10">
-                  <p className="text-finance-lightgray text-sm">
-                    {safeTranslate(t, 'tools.faq.export.answer', 'Tous nos outils proposent des fonctionnalités d\'export en CSV, Excel ou format image (PNG/SVG pour les graphiques). Ces fonctionnalités sont disponibles pour les utilisateurs premium.')}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+          <h2 className="text-xl font-bold mb-6 text-center terminal-text">Frequently Asked Questions</h2>
+          <div className="space-y-3">
+            {faqItems.map(({ q, a }, i) => (
+              <Collapsible key={i}>
+                <Card className="bg-card border-border">
+                  <CardContent className="p-0">
+                    <CollapsibleTrigger className="flex justify-between items-center w-full p-4 text-left">
+                      <span className="font-medium text-sm text-foreground">{q}</span>
+                      <ChevronDown className="h-4 w-4 text-primary shrink-0 ml-2" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="px-4 pb-4"><p className="text-muted-foreground text-sm leading-relaxed">{a}</p></div>
+                    </CollapsibleContent>
+                  </CardContent>
+                </Card>
+              </Collapsible>
+            ))}
           </div>
         </div>
       </section>
-      
-      {/* Subscription CTA with improved styling */}
-      <section className="py-12 px-6 bg-finance-charcoal/50 border-t border-finance-steel/10">
+
+      {/* CTA */}
+      <section className="py-12 px-6 bg-secondary/30 border-t border-border">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl font-bold mb-4 terminal-text">{safeTranslate(t, 'tools.cta.title', 'Accès illimité à tous les outils')}</h2>
-          <p className="text-finance-lightgray mb-8">
-            {safeTranslate(t, 'tools.cta.description', 'Les abonnés premium bénéficient d\'un accès complet à tous nos outils de pricing et d\'analyse, y compris les exports de données et les fonctionnalités avancées.')}
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="finance" size="lg">
-              {safeTranslate(t, 'tools.cta.subscribe', 'S\'abonner pour 19€/mois')}
-            </Button>
-            <Button variant="outline" size="lg" className="border-finance-accent text-finance-accent hover:bg-finance-accent/10">
-              {safeTranslate(t, 'tools.cta.discover', 'Découvrir la formation')}
-            </Button>
+          <h2 className="text-xl font-bold mb-3 terminal-text">Unlock the full toolkit</h2>
+          <p className="text-muted-foreground mb-6">PRO subscribers get access to all tools, CSV export, advanced models, and priority feature requests.</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button variant="finance" size="lg" onClick={() => navigate('/pricing')}>View Plans <ArrowRight className="ml-2 h-4 w-4" /></Button>
+            <Button variant="outline" size="lg" className="border-primary text-primary hover:bg-primary/10" onClick={() => navigate('/courses')}>Explore Courses</Button>
           </div>
         </div>
       </section>

@@ -1,21 +1,16 @@
 
 import React, { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { safeTranslate } from '@/utils/translationUtils';
-import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { StrategyParameters, OptionLeg } from '@/types/strategies';
+import { StrategyParameters } from '@/types/strategies';
 import StrategyBuilder from '@/components/strategies/StrategyBuilder';
 import StrategyResults from '@/components/strategies/StrategyResults';
 import usePayoffCalculator from '@/hooks/usePayoffCalculator';
-import { Info } from 'lucide-react';
+import ToolPageLayout from '@/components/tools/ToolPageLayout';
 
 const PayoffVisualizer: React.FC = () => {
   const { t } = useTranslation();
-  
-  // Initialize strategy parameters
+
   const [parameters, setParameters] = useState<StrategyParameters>({
     spotPrice: 100,
     volatility: 0.2,
@@ -24,75 +19,51 @@ const PayoffVisualizer: React.FC = () => {
     dividendYield: 0.01,
     legs: []
   });
-  
-  // Use the payoff calculator hook
+
   const { result, isCalculating } = usePayoffCalculator(parameters);
-  
+
   return (
-    <>
-      <Helmet>
-        <title>{safeTranslate(t, 'tools.payoff.title', 'Visualiseur de Payoff')} | The Pricing Library</title>
-      </Helmet>
-      
-      {/* Header */}
-      <div className="py-8 px-6 border-b border-finance-steel/10">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold terminal-text">
-                {safeTranslate(t, 'tools.payoff.title', 'Visualiseur de Payoff')}
-              </h1>
-              <p className="text-finance-lightgray mt-2 max-w-3xl">
-                {safeTranslate(t, 'tools.payoff.description', 'Construisez et analysez des stratégies optionnelles complexes avec visualisation en temps réel.')}
-              </p>
-            </div>
-          </div>
+    <ToolPageLayout
+      title="Option Payoff Visualizer"
+      metaDescription="Build multi-leg option strategies and analyze payoff diagrams, P&L profiles, and Greeks exposure at expiry. Interactive strategy construction with real-time visualization."
+      headline="Option Payoff Visualizer"
+      valueProp="Build multi-leg strategies and analyze payoff diagrams in real time."
+      supportingText="Construct calls, puts, and spreads with configurable strikes, quantities, and premiums. Visualize the aggregate payoff at expiry, identify breakeven points, and assess maximum profit/loss — essential for structuring, hedging, and pre-trade analysis."
+      trustSignals={[
+        'Multi-leg construction',
+        'Real-time payoff chart',
+        'Greeks via BS model',
+        'Breakeven analysis',
+        'No data leaves browser',
+      ]}
+      methodology={[
+        { label: 'Payoff Computation', content: 'At expiry, call payoff = max(S_T − K, 0) and put payoff = max(K − S_T, 0). The net P&L for each leg includes the premium paid/received. The aggregate strategy P&L is the sum across all legs, accounting for position direction (long/short) and quantity.' },
+        { label: 'Greeks Estimation', content: 'Greeks are computed using the Black-Scholes-Merton analytical formulas for each individual leg. Portfolio Greeks are the linear sum of individual leg Greeks, weighted by position size and direction.' },
+        { label: 'Limitations', content: 'Payoff diagrams show intrinsic value at expiry only — they do not account for early exercise (American options), time value during the life of the option, transaction costs, or margin requirements. Greeks assume constant volatility across strikes (no smile adjustment).' },
+      ]}
+      relatedResources={[
+        { title: 'Greeks Deep Dive', description: 'Understand how Delta, Gamma, Vega, and Theta interact in complex strategies.', path: '/courses/fundamentals/greeks', type: 'course' },
+        { title: 'Black-Scholes Calculator', description: 'Price individual legs with the analytical BSM model.', path: '/tools/black-scholes', type: 'tool' },
+        { title: 'Exotic Options', description: 'Explore barrier, Asian, and lookback payoffs beyond vanilla structures.', path: '/courses/complex/exotic-options', type: 'course' },
+      ]}
+      bottomCta={{
+        headline: 'Master options strategy construction',
+        description: 'From covered calls to iron condors — learn to build, analyze, and hedge multi-leg structures.',
+        primaryLabel: 'Greeks Course',
+        primaryPath: '/courses/fundamentals/greeks',
+        secondaryLabel: 'Try BS Calculator',
+        secondaryPath: '/tools/black-scholes',
+      }}
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div>
+          <StrategyBuilder parameters={parameters} onParametersChange={setParameters} />
+        </div>
+        <div>
+          <StrategyResults result={result} isCalculating={isCalculating} />
         </div>
       </div>
-      
-      {/* Main Content */}
-      <div className="py-8 px-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Info Card */}
-          <Card className="p-4 mb-6 bg-finance-burgundy/20 border border-finance-burgundy/30">
-            <div className="flex items-start gap-3">
-              <Info className="h-5 w-5 text-finance-accent mt-0.5 flex-shrink-0" />
-              <div>
-                <h3 className="text-sm font-medium text-finance-offwhite mb-1">
-                  {safeTranslate(t, 'tools.payoff.infoTitle', 'Comment utiliser le visualiseur')}
-                </h3>
-                <p className="text-xs text-finance-lightgray">
-                  {safeTranslate(t, 'tools.payoff.infoDescription', 
-                    "Ajoutez des positions d'options (calls et puts) avec le bouton + dans l'onglet Positions. " +
-                    "Modifiez les paramètres de marché pour voir leur impact sur le prix et les Greeks. " +
-                    "Le graphique de payoff montre le profit/perte à maturité en fonction du prix du sous-jacent."
-                  )}
-                </p>
-              </div>
-            </div>
-          </Card>
-          
-          {/* Main Layout - Two Columns on Larger Screens */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left Column - Strategy Builder */}
-            <div>
-              <StrategyBuilder 
-                parameters={parameters}
-                onParametersChange={setParameters}
-              />
-            </div>
-            
-            {/* Right Column - Results */}
-            <div>
-              <StrategyResults 
-                result={result}
-                isCalculating={isCalculating}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
+    </ToolPageLayout>
   );
 };
 
