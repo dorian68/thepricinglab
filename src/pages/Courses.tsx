@@ -19,7 +19,7 @@ const Courses = () => {
   const [selectedTab, setSelectedTab] = useState("fundamentals");
   const { profile } = useAuth();
   const userPlan = (profile?.plan ?? "freemium") as SubscriptionPlan;
-  console.log(" ------------------------------------- Courses: User plan ------------------------------------- ", userPlan);
+  
 
 
 
