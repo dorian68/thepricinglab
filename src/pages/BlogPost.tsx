@@ -72,7 +72,7 @@ const BlogPost = () => {
 
   const shareOnTwitter = () => {
     if (!post) return;
-    const text = encodeURIComponent(`${post.title} | The Pricing Lab Blog`);
+    const text = encodeURIComponent(`${post.title} | The Pricing Library Blog`);
     const url = encodeURIComponent(window.location.href);
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
     toast({
