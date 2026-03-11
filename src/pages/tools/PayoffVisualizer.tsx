@@ -31,7 +31,7 @@ const PayoffVisualizer: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>{safeTranslate(t, 'tools.payoff.title', 'Visualiseur de Payoff')} | The Trading Lab</title>
+        <title>{safeTranslate(t, 'tools.payoff.title', 'Visualiseur de Payoff')} | The Pricing Library</title>
       </Helmet>
       
       {/* Header */}

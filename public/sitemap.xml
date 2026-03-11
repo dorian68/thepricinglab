@@ -1,210 +1,262 @@
-
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-                            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd
-                            http://www.google.com/schemas/sitemap-image/1.1
-                            http://www.google.com/schemas/sitemap-image/1.1/sitemap-image.xsd">
+                            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
-  <!-- Page d'accueil -->
+  <!-- Homepage -->
   <url>
     <loc>https://thepricinglibrary.com/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
 
-  <!-- Pages principales -->
+  <!-- Main pages -->
   <url>
     <loc>https://thepricinglibrary.com/courses</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
     <loc>https://thepricinglibrary.com/exercises</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
     <loc>https://thepricinglibrary.com/blog</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
     <loc>https://thepricinglibrary.com/pricing</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
+  </url>
+  <url>
+    <loc>https://thepricinglibrary.com/jobs</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-03-11</lastmod>
+  </url>
+  <url>
+    <loc>https://thepricinglibrary.com/mentoring</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <lastmod>2026-03-11</lastmod>
+  </url>
+  <url>
+    <loc>https://thepricinglibrary.com/notebooks</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <lastmod>2026-03-11</lastmod>
+  </url>
+  <url>
+    <loc>https://thepricinglibrary.com/leaderboard</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+    <lastmod>2026-03-11</lastmod>
   </url>
 
-  <!-- Pages d'outils -->
+  <!-- Tools -->
   <url>
     <loc>https://thepricinglibrary.com/tools</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
     <loc>https://thepricinglibrary.com/tools/black-scholes</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
     <loc>https://thepricinglibrary.com/tools/monte-carlo</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
     <loc>https://thepricinglibrary.com/tools/volatility-calculator</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
     <loc>https://thepricinglibrary.com/tools/model-calibration</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
+  </url>
+  <url>
+    <loc>https://thepricinglibrary.com/tools/payoff-visualizer</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-03-11</lastmod>
   </url>
 
-  <!-- Pages de cours -->
+  <!-- Courses (matching actual routes) -->
   <url>
-    <loc>https://thepricinglibrary.com/courses/black-scholes</loc>
+    <loc>https://thepricinglibrary.com/courses/fundamentals/black-scholes</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglibrary.com/courses/exotic-options</loc>
+    <loc>https://thepricinglibrary.com/courses/fundamentals/yield-curves</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglibrary.com/courses/greeks</loc>
+    <loc>https://thepricinglibrary.com/courses/fundamentals/greeks</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglibrary.com/courses/implied-vol</loc>
+    <loc>https://thepricinglibrary.com/courses/advanced/implied-vol</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglibrary.com/courses/monte-carlo</loc>
+    <loc>https://thepricinglibrary.com/courses/advanced/vol-products</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglibrary.com/courses/vol-products</loc>
+    <loc>https://thepricinglibrary.com/courses/complex/exotic-options</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
-    <loc>https://thepricinglibrary.com/courses/yield-curves</loc>
+    <loc>https://thepricinglibrary.com/courses/complex/monte-carlo</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
 
-  <!-- Articles de blog -->
+  <!-- Blog posts -->
   <url>
     <loc>https://thepricinglibrary.com/blog/understanding-black-scholes-model</loc>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
     <loc>https://thepricinglibrary.com/blog/monte-carlo-vs-binomial-trees</loc>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
     <loc>https://thepricinglibrary.com/blog/quant-interview-questions</loc>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
     <loc>https://thepricinglibrary.com/blog/exotic-options-guide</loc>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
     <loc>https://thepricinglibrary.com/blog/implied-volatility-options-trading</loc>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
     <loc>https://thepricinglibrary.com/blog/yield-curves-guide</loc>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
     <loc>https://thepricinglibrary.com/blog/greeks-explained</loc>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
     <loc>https://thepricinglibrary.com/blog/vol-products</loc>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
 
-  <!-- Pages communauté -->
+  <!-- Community -->
   <url>
     <loc>https://thepricinglibrary.com/community</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
     <loc>https://thepricinglibrary.com/community/playground</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
     <loc>https://thepricinglibrary.com/community/forum</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
 
-  <!-- Autres pages importantes -->
+  <!-- Trading Lab -->
+  <url>
+    <loc>https://thepricinglibrary.com/trading/exercises</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-03-11</lastmod>
+  </url>
+  <url>
+    <loc>https://thepricinglibrary.com/trading/backtest</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-03-11</lastmod>
+  </url>
+  <url>
+    <loc>https://thepricinglibrary.com/trading/scenarios</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-03-11</lastmod>
+  </url>
+  <url>
+    <loc>https://thepricinglibrary.com/trading/strategies</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <lastmod>2026-03-11</lastmod>
+  </url>
+
+  <!-- Other pages -->
   <url>
     <loc>https://thepricinglibrary.com/survival-mode</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
     <loc>https://thepricinglibrary.com/projects</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
   <url>
     <loc>https://thepricinglibrary.com/quizzes</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
-    <lastmod>2024-12-05</lastmod>
+    <lastmod>2026-03-11</lastmod>
   </url>
 </urlset>

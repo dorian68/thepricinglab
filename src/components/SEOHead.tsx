@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useTranslation } from 'react-i18next';
 
 interface SEOHeadProps {
   title: string;
@@ -10,52 +11,80 @@ interface SEOHeadProps {
   ogImage?: string;
   ogType?: string;
   noIndex?: boolean;
+  jsonLd?: Record<string, unknown>;
 }
+
+const BASE_URL = 'https://thepricinglibrary.com';
 
 const SEOHead: React.FC<SEOHeadProps> = ({
   title,
-  description = "Plateforme interactive pour maîtriser les fondamentaux du pricing financier. Exercices pratiques, challenges, et simulateurs pour apprendre par la pratique.",
-  keywords = "finance quantitative, option pricing, black-scholes, produits dérivés, formation finance, trading, volatilité, greeks",
+  description = "Interactive platform to master option pricing, Black-Scholes, Monte Carlo, Greeks, and volatility. Hands-on exercises, simulators, and real-world quant skills.",
+  keywords = "quantitative finance, option pricing, black-scholes, derivatives, financial training, trading, volatility, greeks",
   canonical,
-  ogImage = "https://thepricinglibrary.com/og-image.jpg",
+  ogImage = `${BASE_URL}/og-image.png`,
   ogType = "website",
-  noIndex = false
+  noIndex = false,
+  jsonLd
 }) => {
+  const { i18n } = useTranslation();
+  const lang = i18n.language || 'en';
   const fullTitle = title.includes('The Pricing Library') ? title : `${title} | The Pricing Library`;
-  const currentUrl = canonical || (typeof window !== 'undefined' ? window.location.href : 'https://thepricinglibrary.com');
+  const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/';
+  const canonicalUrl = canonical || `${BASE_URL}${currentPath}`;
+
+  // Default WebSite structured data
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "The Pricing Library",
+    "url": BASE_URL,
+    "description": "Interactive platform to master quantitative finance and option pricing",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": `${BASE_URL}/blog?q={search_term_string}`,
+      "query-input": "required name=search_term_string"
+    }
+  };
+
+  const orgSchema = {
+    "@context": "https://schema.org",
+    "@type": "EducationalOrganization",
+    "name": "The Pricing Library",
+    "description": "Interactive platform to master quantitative finance and option pricing",
+    "url": BASE_URL,
+    "logo": `${BASE_URL}/lovable-uploads/307d6f9a-03ee-4ecb-bd38-79c3d9752036.png`,
+    "sameAs": [
+      "https://github.com/thepricinglibrary",
+      "https://linkedin.com/company/thepricinglibrary"
+    ]
+  };
 
   return (
     <Helmet>
-      {/* Title */}
       <title>{fullTitle}</title>
-      
-      {/* Meta tags */}
       <meta name="description" content={description} />
       <meta name="keywords" content={keywords} />
       <meta name="author" content="The Pricing Library" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       
-      {/* Canonical URL */}
-      {canonical && <link rel="canonical" href={canonical} />}
+      <link rel="canonical" href={canonicalUrl} />
       
-      {/* Open Graph / Facebook */}
+      {/* Open Graph */}
       <meta property="og:type" content={ogType} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={ogImage} />
-      <meta property="og:url" content={currentUrl} />
+      <meta property="og:url" content={canonicalUrl} />
       <meta property="og:site_name" content="The Pricing Library" />
+      <meta property="og:locale" content={lang === 'fr' ? 'fr_FR' : 'en_US'} />
       
-      {/* Twitter Card */}
+      {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={ogImage} />
       
       {/* Language */}
-      <meta httpEquiv="content-language" content="fr-FR" />
-      <link rel="alternate" hrefLang="fr" href={currentUrl} />
-      <link rel="alternate" hrefLang="en" href={currentUrl.replace('fr/', 'en/')} />
+      <html lang={lang} />
       
       {/* Robots */}
       {noIndex ? (
@@ -64,41 +93,22 @@ const SEOHead: React.FC<SEOHeadProps> = ({
         <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
       )}
       
-      {/* Google Analytics 4 */}
-      <script async src="https://www.googletagmanager.com/gtag/js?id=G-P1XNR9H40B"></script>
-      <script>
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-P1XNR9H40B');
-        `}
+      {/* Structured data: WebSite */}
+      <script type="application/ld+json">
+        {JSON.stringify(websiteSchema)}
       </script>
       
-      {/* Schema.org structured data for Educational Organization */}
+      {/* Structured data: Organization */}
       <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "EducationalOrganization",
-          "name": "The Pricing Library",
-          "description": "Plateforme interactive pour maîtriser les fondamentaux du pricing financier",
-          "url": "https://thepricinglibrary.com",
-          "logo": "https://thepricinglibrary.com/logo.png",
-          "sameAs": [
-            "https://github.com/thepricinglibrary",
-            "https://linkedin.com/company/thepricinglibrary"
-          ],
-          "offers": {
-            "@type": "Course",
-            "name": "Formation Finance Quantitative",
-            "description": "Cours interactifs de finance quantitative et pricing d'options",
-            "provider": {
-              "@type": "Organization",
-              "name": "The Pricing Library"
-            }
-          }
-        })}
+        {JSON.stringify(orgSchema)}
       </script>
+      
+      {/* Custom JSON-LD */}
+      {jsonLd && (
+        <script type="application/ld+json">
+          {JSON.stringify(jsonLd)}
+        </script>
+      )}
     </Helmet>
   );
 };

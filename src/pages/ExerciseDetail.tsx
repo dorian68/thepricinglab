@@ -16,7 +16,7 @@ const ExerciseDetail = () => {
   
   // Créer un titre sécurisé pour Helmet
   const safeExerciseId = cleanCaptions(id || 'Exercise');
-  const pageTitle = `${safeExerciseId} | ${safeTranslate(t, 'common.exercises', 'Exercises')} | The Pricing Lab`;
+  const pageTitle = `${safeExerciseId} | ${safeTranslate(t, 'common.exercises', 'Exercises')} | The Pricing Library`;
   
   useEffect(() => {
     setIsLoaded(true);

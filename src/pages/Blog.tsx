@@ -62,7 +62,7 @@ const Blog = () => {
   return (
     <>
       <Helmet>
-        <title>{st('blog.title', 'Blog')} | The Pricing Lab</title>
+        <title>{st('blog.title', 'Blog')} | The Pricing Library</title>
         <meta name="description" content={st('blog.description', 'Articles on Quantitative Finance and Options Pricing')} />
         <meta name="keywords" content="quantitative finance, options pricing, Black-Scholes, Monte Carlo, volatility surface, quant interview" />
         <link rel="canonical" href="https://thepricinglibrary.com/blog" />
