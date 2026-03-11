@@ -9,38 +9,75 @@ const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-finance-charcoal border-t border-border py-8">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-          <div>
-            <h3 className="text-lg font-medium text-finance-accent mb-4">{safeTranslate(t, 'app.title', 'The Pricing Library')}</h3>
-            <p className="text-muted-foreground">
-              {safeTranslate(t, 'app.subtitle', 'The reference for options theory and quantitative pricing.')}
+    <footer className="bg-card border-t border-border">
+      {/* Main footer */}
+      <div className="max-w-7xl mx-auto px-6 py-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+          {/* Brand */}
+          <div className="sm:col-span-2 md:col-span-1">
+            <h3 className="terminal-text text-sm font-bold tracking-wider mb-3">THE PRICING LIBRARY</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
+              {safeTranslate(t, 'app.subtitle', 'The open platform for quantitative finance education and tooling.')}
             </p>
           </div>
           
+          {/* Platform */}
           <div>
-            <h4 className="text-sm font-medium text-foreground mb-3">{safeTranslate(t, 'footer.products', 'Platform')}</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link to="/courses" className="text-muted-foreground hover:text-finance-accent transition-colors">{safeTranslate(t, 'navbar.courses', 'Courses')}</Link></li>
-              <li><Link to="/exercices" className="text-muted-foreground hover:text-finance-accent transition-colors">{safeTranslate(t, 'navbar.exercises', 'Exercises')}</Link></li>
-              <li><Link to="/tools" className="text-muted-foreground hover:text-finance-accent transition-colors">{safeTranslate(t, 'navbar.tools', 'Tools')}</Link></li>
-              <li><Link to="/community" className="text-muted-foreground hover:text-finance-accent transition-colors">{safeTranslate(t, 'navbar.community', 'Community')}</Link></li>
+            <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider mb-3">{safeTranslate(t, 'footer.products', 'Platform')}</h4>
+            <ul className="space-y-2">
+              {[
+                { to: '/courses', label: safeTranslate(t, 'navbar.courses', 'Courses') },
+                { to: '/exercices', label: safeTranslate(t, 'navbar.exercises', 'Exercises') },
+                { to: '/tools', label: safeTranslate(t, 'navbar.tools', 'Tools') },
+                { to: '/community', label: safeTranslate(t, 'navbar.community', 'Community') },
+              ].map(({ to, label }) => (
+                <li key={to}>
+                  <Link to={to} className="text-sm text-muted-foreground hover:text-primary transition-colors">{label}</Link>
+                </li>
+              ))}
             </ul>
           </div>
           
+          {/* Resources */}
           <div>
-            <h4 className="text-sm font-medium text-foreground mb-3">{safeTranslate(t, 'footer.resources', 'Resources')}</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link to="/blog" className="text-muted-foreground hover:text-finance-accent transition-colors">{safeTranslate(t, 'navbar.blog', 'Blog')}</Link></li>
-              <li><Link to="/mentoring" className="text-muted-foreground hover:text-finance-accent transition-colors">{safeTranslate(t, 'navbar.mentoring', 'Mentoring')}</Link></li>
-              <li><Link to="/bug-report" className="text-muted-foreground hover:text-finance-accent transition-colors">{safeTranslate(t, 'footer.bugReport', 'Bug Report')}</Link></li>
+            <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider mb-3">{safeTranslate(t, 'footer.resources', 'Resources')}</h4>
+            <ul className="space-y-2">
+              {[
+                { to: '/blog', label: safeTranslate(t, 'navbar.blog', 'Blog') },
+                { to: '/mentoring', label: safeTranslate(t, 'navbar.mentoring', 'Mentoring') },
+                { to: '/bug-report', label: safeTranslate(t, 'footer.bugReport', 'Bug Report') },
+              ].map(({ to, label }) => (
+                <li key={to}>
+                  <Link to={to} className="text-sm text-muted-foreground hover:text-primary transition-colors">{label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Tools */}
+          <div>
+            <h4 className="text-xs font-semibold text-foreground uppercase tracking-wider mb-3">Tools</h4>
+            <ul className="space-y-2">
+              {[
+                { to: '/tools/black-scholes', label: 'Black-Scholes' },
+                { to: '/tools/volatility-calculator', label: 'Volatility' },
+                { to: '/tools/payoff-visualizer', label: 'Payoff' },
+                { to: '/tools/model-calibration', label: 'Calibration' },
+              ].map(({ to, label }) => (
+                <li key={to}>
+                  <Link to={to} className="text-sm text-muted-foreground hover:text-primary transition-colors">{label}</Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
-        
-        <div className="border-t border-border mt-8 pt-6 text-center text-muted-foreground text-sm">
-          <p>© {currentYear} The Pricing Library.</p>
+      </div>
+
+      {/* Bottom bar */}
+      <div className="border-t border-border">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground">© {currentYear} The Pricing Library. All rights reserved.</p>
+          <p className="text-xs text-muted-foreground">Built for quantitative finance professionals and learners.</p>
         </div>
       </div>
     </footer>

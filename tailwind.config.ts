@@ -19,16 +19,16 @@ export default {
 		},
 		extend: {
 			colors: {
-        finance: {
-          dark: '#1A1F2C',
-          charcoal: '#403E43',
-          offwhite: '#eee',
-          burgundy: '#8B0000',
-          steel: '#555',
-          darkgray: '#333333',
-          lightgray: '#aaadb0',
-          accent: '#ea384c',
-        },
+				finance: {
+					dark: '#141720',
+					charcoal: '#1c2030',
+					offwhite: '#e8eaed',
+					burgundy: '#7a1a1a',
+					steel: '#3a3f50',
+					darkgray: '#262a38',
+					lightgray: '#8b90a0',
+					accent: '#e03e4e',
+				},
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
@@ -78,22 +78,26 @@ export default {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
+			fontSize: {
+				'xs': ['0.75rem', { lineHeight: '1.5' }],
+				'sm': ['0.8125rem', { lineHeight: '1.5' }],
+				'base': ['0.9375rem', { lineHeight: '1.6' }],
+				'lg': ['1.0625rem', { lineHeight: '1.5' }],
+				'xl': ['1.25rem', { lineHeight: '1.4' }],
+				'2xl': ['1.5rem', { lineHeight: '1.3' }],
+				'3xl': ['1.875rem', { lineHeight: '1.25' }],
+				'4xl': ['2.25rem', { lineHeight: '1.2' }],
+				'5xl': ['3rem', { lineHeight: '1.15' }],
+				'6xl': ['3.75rem', { lineHeight: '1.1' }],
+			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' }
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' }
 				}
 			},
 			animation: {
