@@ -25,8 +25,6 @@ const Login = () => {
     e.preventDefault()
     setIsLoading(true)
     try {
-      console.log("Login: Attempting to sign in with email:", formData.email)
-      console.log("Login: Attempting to sign in with password", formData.password)
       await signIn(formData.email, formData.password)
       toast.success(t('auth.login.success', 'Connexion réussie'))
       console.log("Login: User signed in successfully")
