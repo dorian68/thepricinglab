@@ -1,5 +1,6 @@
 
 import React from "react";
+import { Helmet } from "react-helmet-async";
 import PricingTiers from "../components/pricing/PricingTiers";
 import FeatureComparisonTable from "../components/pricing/FeatureComparisonTable";
 import PricingFAQ from "../components/pricing/PricingFAQ";
