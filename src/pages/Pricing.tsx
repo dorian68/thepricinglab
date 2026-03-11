@@ -12,8 +12,53 @@ const PricingPage = () => {
   const { t } = useTranslation();
   const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
 
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": st('pricing.faq.question1', 'What happens after I subscribe?'),
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": st('pricing.faq.answer1', "After subscribing, you'll get immediate access to all the content included in your plan.")
+        }
+      },
+      {
+        "@type": "Question",
+        "name": st('pricing.faq.question2', 'Can I switch plans later?'),
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": st('pricing.faq.answer2', "Yes, you can upgrade or downgrade your plan at any time.")
+        }
+      },
+      {
+        "@type": "Question",
+        "name": st('pricing.faq.question3', 'Is there a free trial?'),
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": st('pricing.faq.answer3', 'Yes, our Free plan gives you access to core content so you can experience our platform before subscribing.')
+        }
+      },
+      {
+        "@type": "Question",
+        "name": st('pricing.faq.question4', 'How do refunds work?'),
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": st('pricing.faq.answer4', "If you're not satisfied with your subscription, contact us within 14 days of purchase for a full refund.")
+        }
+      }
+    ]
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
+      <Helmet>
+        <title>{st('pricing.hero.title', 'Plans & Pricing')} | The Pricing Library</title>
+        <meta name="description" content={st('pricing.hero.description', 'Choose the plan that fits your learning journey. All plans include access to our core platform features.')} />
+        <link rel="canonical" href="https://thepricinglibrary.com/pricing" />
+        <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
+      </Helmet>
       <section className="py-20 px-6">
         <div className="max-w-[1400px] mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">

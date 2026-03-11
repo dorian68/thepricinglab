@@ -207,6 +207,50 @@ const Courses = () => {
       <Helmet>
         <title>{st('coursesPage.title', "Courses")} | The Pricing Library</title>
         <meta name="description" content={st('coursesPage.description', "Interactive courses on quantitative finance, options pricing, and trading strategies")} />
+        <link rel="canonical" href="https://thepricinglibrary.com/courses" />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "name": "Quantitative Finance Courses",
+            "description": "Interactive courses on option pricing, volatility, and quantitative methods",
+            "itemListElement": [
+              ...courses.fundamentals.map((c, i) => ({
+                "@type": "ListItem",
+                "position": i + 1,
+                "item": {
+                  "@type": "Course",
+                  "name": c.title,
+                  "description": c.description,
+                  "provider": { "@type": "Organization", "name": "The Pricing Library" },
+                  "url": `https://thepricinglibrary.com${c.url}`
+                }
+              })),
+              ...courses.advanced.map((c, i) => ({
+                "@type": "ListItem",
+                "position": i + 4,
+                "item": {
+                  "@type": "Course",
+                  "name": c.title,
+                  "description": c.description,
+                  "provider": { "@type": "Organization", "name": "The Pricing Library" },
+                  "url": `https://thepricinglibrary.com${c.url}`
+                }
+              })),
+              ...courses.complex.map((c, i) => ({
+                "@type": "ListItem",
+                "position": i + 7,
+                "item": {
+                  "@type": "Course",
+                  "name": c.title,
+                  "description": c.description,
+                  "provider": { "@type": "Organization", "name": "The Pricing Library" },
+                  "url": `https://thepricinglibrary.com${c.url}`
+                }
+              }))
+            ]
+          })}
+        </script>
       </Helmet>
       
       

@@ -163,7 +163,7 @@ const BlogPost = () => {
         )}
       </Helmet>
       
-      <Navbar />
+      
       
       {/* PythonActivator retiré d'ici - il sera intégré directement à chaque bloc de code */}
       
