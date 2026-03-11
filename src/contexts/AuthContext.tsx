@@ -47,12 +47,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Initialiser la session et configurer les listeners d'auth
   useEffect(() => {
-    console.log("AuthContext: Initializing auth state")
-    
-    // Configuration du listener d'état d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, currentSession) => {
-        console.log("AuthContext: Auth state changed", _event)
         setSession(currentSession)
         setUser(currentSession?.user ?? null)
         
