@@ -133,7 +133,7 @@ const BlogPost = () => {
         <meta property="og:url" content={window.location.href} />
         <meta property="og:type" content="article" />
         <meta name="twitter:card" content="summary_large_image" />
-        <link rel="canonical" href={`https://thepricinglab.com/blog/${post?.slug}`} />
+        <link rel="canonical" href={`https://thepricinglibrary.com/blog/${post?.slug}`} />
       </Helmet>
       
       <Navbar />
