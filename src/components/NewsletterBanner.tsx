@@ -13,7 +13,13 @@ const NewsletterBanner: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Force banner to be always visible for maximum lead generation
+    const dismissed = localStorage.getItem('newsletter-banner-dismissed');
+    const lastDismissed = localStorage.getItem('newsletter-banner-last-dismissed');
+    // Re-show after 7 days
+    if (dismissed && lastDismissed) {
+      const daysSince = (Date.now() - parseInt(lastDismissed)) / (1000 * 60 * 60 * 24);
+      if (daysSince < 7) return;
+    }
     setIsVisible(true);
   }, []);
 

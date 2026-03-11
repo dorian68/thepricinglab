@@ -223,15 +223,15 @@ const Courses = () => {
             <TabsList className="grid grid-cols-3 w-full max-w-md">
               <TabsTrigger value="fundamentals" className="flex items-center gap-2">
                 <Star className="h-4 w-4" />
-                <span className="hidden sm:inline">{st('coursesPage.fundamentals.tab', "Fundamentals")}</span>
+                <span className="sm:inline">{st('coursesPage.fundamentals.tab', "Fundamentals")}</span>
               </TabsTrigger>
               <TabsTrigger value="advanced" className="flex items-center gap-2">
                 <Award className="h-4 w-4" />
-                <span className="hidden sm:inline">{st('coursesPage.advanced.tab', "Advanced")}</span>
+                <span className="sm:inline">{st('coursesPage.advanced.tab', "Advanced")}</span>
               </TabsTrigger>
               <TabsTrigger value="complex" className="flex items-center gap-2">
                 <Zap className="h-4 w-4" />
-                <span className="hidden sm:inline">{st('coursesPage.complex.tab', "Complex")}</span>
+                <span className="sm:inline">{st('coursesPage.complex.tab', "Complex")}</span>
               </TabsTrigger>
             </TabsList>
           </div>

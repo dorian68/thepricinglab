@@ -30,7 +30,7 @@ const AppShell: React.FC = () => {
       </a>
       <ModernNavbar />
       <NewsletterBanner />
-      <div className="flex-1">
+      <div className="flex-1" id="main-content">
         <Suspense fallback={<div className="h-screen w-full flex items-center justify-center">{t('common.loading', 'Loading...')}</div>}>
           <Outlet />
         </Suspense>

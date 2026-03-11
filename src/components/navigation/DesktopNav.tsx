@@ -28,7 +28,7 @@ const DesktopNav = () => {
   const { isProUser, isAdminUser } = usePermissions()
   const navigate = useNavigate()
 
-  console.log("DesktopNav: Auth state", { isAuthenticated, profile })
+  
 
   const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
 
