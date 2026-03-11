@@ -42,7 +42,7 @@ import {
 } from "@/components/ui/tooltip";
 import { blogPosts } from "@/data/blog-posts";
 import { useToast } from "@/hooks/use-toast";
-import Navbar from "@/components/Navbar";
+// Navbar removed - handled by AppShell
 import { transformCodeBlocks } from "@/utils/codeBlockTransformer";
 
 const BlogPost = () => {
