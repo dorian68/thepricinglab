@@ -114,12 +114,6 @@ const Contribute = () => {
     
     try {
       // In a real app, we'd save the article to the database here
-      console.log("Article created:", {
-        ...formData,
-        author,
-        date: new Date().toISOString(),
-        published: true
-      });
       
       toast({
         title: "Article publié",

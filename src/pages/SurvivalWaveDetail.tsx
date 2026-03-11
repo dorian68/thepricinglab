@@ -168,7 +168,7 @@ const SurvivalWaveDetail = () => {
       //const difficulty = getDifficultyByWaveId(wave.id);
       //const questionCount = Math.min(10, Math.max(5, wave.id + 4));
       const loadedQuestions = generateQuestions();
-      console.log("Loaded questions:", loadedQuestions); // Debugging line
+      
       setQuestions(loadedQuestions);
     }
     

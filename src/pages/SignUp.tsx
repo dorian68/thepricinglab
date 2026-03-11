@@ -21,7 +21,6 @@ const SignUp = () => {
   })
 
   if (isAuthenticated) {
-    console.log(" ----------------------- SignUp: User is authenticated, redirecting to dashboard ----------------------- ")
     return <Navigate to="/" replace />
   }
 

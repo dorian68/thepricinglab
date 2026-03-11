@@ -92,8 +92,8 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <Helmet>
-              <title>The Pricing Library - Plateforme d'apprentissage avancé pour les options financières</title>
-              <meta name="description" content="Apprenez à maitriser les options financières avec des cours interactifs, des simulateurs et des outils d'analyse avancés. Black-Scholes, Monte Carlo, Volatilité et plus." />
+              <title>The Pricing Library — Learn Quantitative Finance & Options Pricing</title>
+              <meta name="description" content="Master options pricing with interactive courses, simulators and advanced tools. Black-Scholes, Monte Carlo, Volatility and more." />
               <meta name="keywords" content="pricing financier, options, black-scholes, monte carlo, volatilité, finance quantitative, simulateurs financiers" />
               <link rel="canonical" href="https://thepricinglibrary.com" />
             </Helmet>

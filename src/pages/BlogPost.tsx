@@ -112,7 +112,6 @@ const BlogPost = () => {
 
   useEffect(() => {
     if (contentRef.current && post) {
-      console.log("BlogPost: Activation de la transformation des blocs Python");
       const timeoutId = setTimeout(() => {
         transformCodeBlocks(contentRef.current!);
       }, 100);
