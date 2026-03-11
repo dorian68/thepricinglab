@@ -4,48 +4,37 @@ import { ArrowRight, BarChart, BookOpen, Users, Award, LucideIcon, TrendingUp, C
 import { useTranslation } from "react-i18next";
 import { safeTranslate } from "../utils/translationUtils";
 
-// Feature Component
-const Feature = ({ 
-  icon: Icon, 
-  title, 
-  description 
-}: { 
-  icon: LucideIcon, 
-  title: string, 
-  description: string 
-}) => (
-  <div className="flex flex-col items-start p-4 md:p-6 finance-card">
-    <div className="bg-finance-burgundy/20 rounded-full p-3 mb-4">
-      <Icon className="h-6 w-6 text-finance-accent" />
+const Feature = ({ icon: Icon, title, description }: { icon: LucideIcon, title: string, description: string }) => (
+  <div className="flex flex-col items-start p-5 md:p-6 finance-card group">
+    <div className="rounded-md p-2.5 mb-4 bg-primary/8 border border-primary/10 group-hover:border-primary/25 transition-colors">
+      <Icon className="h-5 w-5 text-primary" />
     </div>
-    <h3 className="text-lg font-medium text-finance-offwhite mb-2">{title}</h3>
-    <p className="text-muted-foreground text-sm">{description}</p>
+    <h3 className="text-base font-semibold text-foreground mb-2">{title}</h3>
+    <p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
   </div>
 );
 
-// Module Preview Component — now a real link
 const ModulePreview = ({ title, level, description, to }: { title: string, level: string, description: string, to: string }) => (
-  <Link to={to} className="finance-card p-4 md:p-6 hover:border-finance-accent transition-colors duration-300 group block focus:outline-none focus:ring-2 focus:ring-ring">
-    <div className="flex justify-between items-start mb-4">
-      <h3 className="text-base md:text-lg font-medium text-finance-offwhite">{title}</h3>
-      <span className="text-xs px-2 py-1 bg-secondary rounded text-muted-foreground terminal-text ml-2 flex-shrink-0">
+  <Link to={to} className="finance-card p-5 md:p-6 group block focus:outline-none focus:ring-2 focus:ring-ring">
+    <div className="flex justify-between items-start mb-3">
+      <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors">{title}</h3>
+      <span className="text-[10px] px-2 py-0.5 bg-secondary rounded text-muted-foreground terminal-text ml-2 flex-shrink-0 uppercase tracking-wider font-medium">
         {level}
       </span>
     </div>
-    <p className="text-muted-foreground text-sm mb-4">{description}</p>
+    <p className="text-muted-foreground text-sm mb-4 leading-relaxed">{description}</p>
     <div className="flex justify-end">
-      <span className="text-finance-accent flex items-center text-sm font-medium group-hover:translate-x-1 transition-transform duration-300">
-        Explore <ArrowRight className="ml-1 h-4 w-4" />
+      <span className="text-primary flex items-center text-xs font-medium group-hover:translate-x-1 transition-transform duration-200">
+        Explore <ArrowRight className="ml-1 h-3.5 w-3.5" />
       </span>
     </div>
   </Link>
 );
 
-// Social proof stat
 const StatItem = ({ value, label }: { value: string; label: string }) => (
   <div className="text-center">
-    <div className="text-xl sm:text-2xl md:text-3xl font-bold text-finance-accent terminal-text">{value}</div>
-    <div className="text-xs sm:text-sm text-muted-foreground mt-1">{label}</div>
+    <div className="text-xl sm:text-2xl md:text-3xl font-bold text-primary terminal-text">{value}</div>
+    <div className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">{label}</div>
   </div>
 );
 
@@ -54,7 +43,7 @@ const Home = () => {
   const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
   
   return (
-    <div className="flex flex-col min-h-screen bg-finance-dark text-finance-offwhite">
+    <div className="flex flex-col min-h-screen">
       <SEOHead
         title="The Pricing Library – Learn Quantitative Finance & Option Pricing"
         description="Interactive platform to master option pricing, Black-Scholes, Monte Carlo, Greeks, and volatility. Hands-on exercises, simulators, and real-world quant skills."
@@ -62,29 +51,29 @@ const Home = () => {
         canonical="https://thepricinglibrary.com"
       />
       
-      {/* Hero Section */}
-      <section className="relative py-12 sm:py-16 md:py-28 px-4 sm:px-6 border-b border-border">
-        <div className="max-w-7xl mx-auto">
+      {/* Hero */}
+      <section className="relative py-14 sm:py-20 md:py-28 px-4 sm:px-6 border-b border-border">
+        <div className="max-w-6xl mx-auto">
           <div className="max-w-3xl">
-            <p className="terminal-text text-xs sm:text-sm tracking-widest uppercase mb-3 sm:mb-4 text-finance-accent">
+            <p className="terminal-text text-xs tracking-[0.2em] uppercase mb-4 font-medium">
               {st('home.hero.tagline', 'The open platform for quant finance')}
             </p>
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 leading-tight text-finance-offwhite terminal-text">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-5 leading-[1.1] text-foreground terminal-text">
               {st('home.hero.title1', 'Master Option Pricing')}<br />
               <span className="finance-gradient text-transparent bg-clip-text">
                 {st('home.hero.title2', 'From Theory to Code')}
               </span>
             </h1>
             
-            <p className="text-muted-foreground text-base sm:text-lg md:text-xl mb-6 sm:mb-8 max-w-2xl">
+            <p className="text-muted-foreground text-base sm:text-lg md:text-xl mb-8 max-w-2xl leading-relaxed">
               {st('home.hero.description', 'Learn to price derivatives, simulate risk, and build quant models — with interactive courses, Python exercises, and professional-grade tools.')}
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <Link to="/courses" className="finance-button text-center text-base sm:text-lg px-6 sm:px-8 py-3 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link to="/courses" className="finance-button text-center text-sm sm:text-base px-6 py-3 w-full sm:w-auto">
                 {st('home.hero.startCourse', 'Start Learning — Free')}
               </Link>
-              <Link to="/tools" className="finance-button-outline text-center text-base sm:text-lg px-6 sm:px-8 py-3 w-full sm:w-auto">
+              <Link to="/tools" className="finance-button-outline text-center text-sm sm:text-base px-6 py-3 w-full sm:w-auto">
                 {st('home.hero.exploreTools', 'Explore Tools')}
               </Link>
             </div>
@@ -92,9 +81,9 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Social Proof Stats Bar */}
-      <section className="py-8 sm:py-10 px-4 sm:px-6 border-b border-border bg-finance-charcoal/40">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
+      {/* Stats */}
+      <section className="py-8 sm:py-10 px-4 sm:px-6 border-b border-border bg-card/50">
+        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
           <StatItem value="7+" label={st('home.stats.courses', 'In-depth courses')} />
           <StatItem value="50+" label={st('home.stats.exercises', 'Hands-on exercises')} />
           <StatItem value="6" label={st('home.stats.tools', 'Professional tools')} />
@@ -102,19 +91,19 @@ const Home = () => {
         </div>
       </section>
       
-      {/* Features Section */}
-      <section className="py-10 sm:py-16 md:py-24 px-4 sm:px-6 border-b border-border">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-10 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 terminal-text">
+      {/* Features */}
+      <section className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 border-b border-border">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3 terminal-text">
               {st('home.approach.title', 'Built for Aspiring Quants')}
             </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-sm sm:text-base">
+            <p className="text-muted-foreground max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
               {st('home.approach.description', 'Bridge the gap between textbook theory and real-world quant skills with hands-on tools and exercises.')}
             </p>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Feature 
               icon={BookOpen} 
               title={st('home.features.pragmatic.title', 'Interactive Courses')} 
@@ -139,25 +128,25 @@ const Home = () => {
         </div>
       </section>
       
-      {/* Modules Preview Section */}
-      <section className="py-10 sm:py-16 md:py-24 px-4 sm:px-6 border-b border-border">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 sm:mb-12 gap-4">
+      {/* Curriculum */}
+      <section className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 border-b border-border">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 terminal-text">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-3 terminal-text">
                 {st('home.curriculum.title', 'Comprehensive Curriculum')}
               </h2>
-              <p className="text-muted-foreground max-w-2xl text-sm sm:text-base">
+              <p className="text-muted-foreground max-w-xl text-sm sm:text-base leading-relaxed">
                 {st('home.curriculum.description', 'From foundational models to advanced simulation techniques — everything you need to think like a quant.')}
               </p>
             </div>
-            <Link to="/courses" className="finance-button flex items-center flex-shrink-0">
+            <Link to="/courses" className="finance-button flex items-center flex-shrink-0 text-sm">
               {st('home.curriculum.allModules', 'All Courses')} 
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <ModulePreview 
               to="/courses/fundamentals/black-scholes"
               title={st('home.modules.blackScholes.title', 'Black-Scholes Model')} 
@@ -199,15 +188,15 @@ const Home = () => {
       </section>
       
       {/* CTA */}
-      <section className="py-10 sm:py-16 px-4 sm:px-6 bg-finance-charcoal/50 border-y border-border">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 terminal-text">
+      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-card/50 border-y border-border">
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-xl sm:text-2xl font-bold mb-3 terminal-text">
             {st('home.cta.title', 'Start Building Your Quant Skills Today')}
           </h2>
-          <p className="text-muted-foreground mb-6 sm:mb-8 text-sm sm:text-base">
+          <p className="text-muted-foreground mb-6 text-sm sm:text-base leading-relaxed">
             {st('home.cta.description', 'Free courses, professional tools, and a growing community of quant finance learners.')}
           </p>
-          <Link to="/courses" className="finance-button text-center inline-block text-base sm:text-lg px-8 sm:px-10 py-3">
+          <Link to="/courses" className="finance-button text-center inline-block text-sm sm:text-base px-8 py-3">
             {st('home.cta.subscribe', 'Get Started — Free')}
           </Link>
         </div>

@@ -3,7 +3,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { 
-  Home, BookOpen, Dumbbell, Users, CreditCard, Wrench, FileText, Bug, BarChart3, LogOut
+  BookOpen, Dumbbell, Users, Wrench, FileText, BarChart3, LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,8 +28,6 @@ const DesktopNav = () => {
   const { isProUser, isAdminUser } = usePermissions()
   const navigate = useNavigate()
 
-  
-
   const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
 
   const handleSignOut = async () => {
@@ -50,105 +48,53 @@ const DesktopNav = () => {
     <div className="hidden lg:flex items-center justify-between w-full bg-transparent">
       <div className="flex items-center">
         <Link to="/" className="flex-shrink-0 flex items-center">
-          <span className="terminal-text text-finance-accent text-xl font-bold">THE PRICING LIBRARY</span>
+          <span className="terminal-text text-sm font-bold tracking-wider">THE PRICING LIBRARY</span>
         </Link>
         
-        <div className="ml-10">
+        <div className="ml-8">
           <NavigationMenu>
-            <NavigationMenuList>
-              
-              {/* Courses */}
-              <NavItem 
-                icon={BookOpen} 
-                label={st('navbar.courses', 'Cours')}
-              >
-                <CoursesMenu />
-              </NavItem>
-
-              {/* Labo Trading */}
-              <NavItem 
-                icon={BarChart3} 
-                label={st('navbar.laboTrading', 'Labo de Trading')}
-              >
-                <TradingLabMenu />
-              </NavItem>
-
-              {/* Outils */}
-              <NavItem 
-                icon={Wrench} 
-                label={st('navbar.tools', 'Outils')}
-              >
-                <ToolsMenu />
-              </NavItem>
-
-              {/* Exercices */}
-              <NavItem 
-                to="/exercices" 
-                icon={Dumbbell} 
-                label={st('navbar.exercices', 'Exercices')} 
-              />
-              
-              {/* Community */}
-              <NavItem 
-                icon={Users} 
-                label={st('navbar.community.label', 'Communauté')}
-              >
-                <CommunityMenu />
-              </NavItem>
-              
-              {/* Pricing - temporairement caché */}
-              {/* <NavItem 
-                to="/pricing" 
-                icon={CreditCard} 
-                label={st('navbar.pricing', 'Tarifs')} 
-              /> */}
-              
-              {/* Blog */}
-              <NavItem 
-                to="/blog" 
-                icon={FileText} 
-                label={st('navbar.blog', 'Blog')} 
-              />
-              
+            <NavigationMenuList className="gap-0">
+              <NavItem icon={BookOpen} label={st('navbar.courses', 'Cours')}><CoursesMenu /></NavItem>
+              <NavItem icon={BarChart3} label={st('navbar.laboTrading', 'Labo de Trading')}><TradingLabMenu /></NavItem>
+              <NavItem icon={Wrench} label={st('navbar.tools', 'Outils')}><ToolsMenu /></NavItem>
+              <NavItem to="/exercices" icon={Dumbbell} label={st('navbar.exercices', 'Exercices')} />
+              <NavItem icon={Users} label={st('navbar.community.label', 'Communauté')}><CommunityMenu /></NavItem>
+              <NavItem to="/blog" icon={FileText} label={st('navbar.blog', 'Blog')} />
             </NavigationMenuList>
           </NavigationMenu>
         </div>
       </div>
       
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center gap-3">
         <LanguageSwitcher />
-        <div className="ml-4 flex items-center md:ml-6">
+        <div className="flex items-center gap-2">
           {isAuthenticated && profile ? (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <Link 
                 to="/dashboard" 
-                className="text-finance-offwhite hover:text-finance-accent transition-colors"
+                className="text-sm text-foreground hover:text-primary transition-colors"
               >
                 {profile.prenom 
                   ? `${st('navbar.greeting', 'Bonjour')}, ${profile.prenom}` 
                   : st('navigation.profile', 'Mon compte')}
               </Link>
               <Button 
-                variant="financeOutline" 
+                variant="outline" 
                 size="sm" 
                 onClick={handleSignOut}
-                className="flex items-center gap-2"
+                className="flex items-center gap-1.5 text-xs"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-3.5 w-3.5" />
                 {st('auth.signout.button', 'Déconnexion')}
               </Button>
             </div>
           ) : (
             <>
-              <Button variant="financeOutline" size="sm" className="mr-2" asChild>
-                <Link to="/login">
-                  {st('auth.signin.button', 'Se connecter')}
-                </Link>
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/login">{st('auth.signin.button', 'Se connecter')}</Link>
               </Button>
               <Button variant="finance" size="sm" asChild>
-                <Link to="/signup">
-                  {st('auth.signup.button', "S'inscrire")}
-                </Link>
+                <Link to="/signup">{st('auth.signup.button', "S'inscrire")}</Link>
               </Button>
             </>
           )}
