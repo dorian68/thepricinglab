@@ -27,7 +27,7 @@ type QuizQuestion = {
 const generateQuestions = (): QuizQuestion[] => {
   try {
     const stored = sessionStorage.getItem('survival-questions');
-    console.log("Stored questions:", stored); // Debugging line
+    
     const parsed = stored ? JSON.parse(stored) : [];
 
     if (!Array.isArray(parsed)) throw new Error("Format de question invalide");
