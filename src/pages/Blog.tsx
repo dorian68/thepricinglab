@@ -68,7 +68,7 @@ const Blog = () => {
         <link rel="canonical" href="https://thepricinglab.com/blog" />
       </Helmet>
       
-      <Navbar />
+      
       
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Breadcrumbs */}
