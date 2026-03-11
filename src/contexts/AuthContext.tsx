@@ -55,7 +55,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Utilisation de setTimeout pour éviter le deadlock avec Supabase
         if (currentSession?.user) {
           setTimeout(async () => {
-            console.log("AuthContext: Fetching profile for user", currentSession.user.id)
             const profile = await fetchProfile(currentSession.user.id)
             setProfile(profile)
             setIsLoading(false)
