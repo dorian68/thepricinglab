@@ -283,21 +283,21 @@ const Courses = () => {
           
           <TabsContent value="fundamentals">
             <h2 className="text-2xl font-bold mb-6">{st('coursesPage.fundamentals.title', "Fundamental Concepts")}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {courses.fundamentals.map(renderCourseCard)}
             </div>
           </TabsContent>
           
           <TabsContent value="advanced">
-            <h2 className="text-2xl font-bold mb-6">{st('coursesPage.advanced.title', "Advanced Techniques")}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">{st('coursesPage.advanced.title', "Advanced Techniques")}</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {courses.advanced.map(renderCourseCard)}
             </div>
           </TabsContent>
           
           <TabsContent value="complex">
-            <h2 className="text-2xl font-bold mb-6">{st('coursesPage.complex.title', "Complex Methods")}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">{st('coursesPage.complex.title', "Complex Methods")}</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {courses.complex.map(renderCourseCard)}
             </div>
           </TabsContent>

@@ -43,7 +43,7 @@ const ModernNavbar = () => {
         <div className="flex items-center justify-between h-16">
           <Link 
             to="/" 
-            className="flex-shrink-0 flex items-center md:hidden"
+            className="flex-shrink-0 flex items-center lg:hidden"
             aria-label={st('navigation.homeLink', 'The Pricing Library Home')}
           >
             <span className="terminal-text text-finance-accent text-xl font-bold">TPL</span>
@@ -51,10 +51,10 @@ const ModernNavbar = () => {
           
           <DesktopNav />
           
-          <div className="-mr-2 flex md:hidden">
+          <div className="flex lg:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-finance-offwhite hover:text-finance-accent focus:outline-none focus:ring-2 focus:ring-inset focus:ring-finance-accent"
+              className="inline-flex items-center justify-center p-3 min-w-[44px] min-h-[44px] rounded-md text-finance-offwhite hover:text-finance-accent focus:outline-none focus:ring-2 focus:ring-inset focus:ring-finance-accent"
               aria-expanded={isOpen}
               aria-controls="mobile-menu"
               aria-label={isOpen ? st('navbar.closeMenu', 'Close navigation menu') : st('navbar.openMenu', 'Open navigation menu')}
