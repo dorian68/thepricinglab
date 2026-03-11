@@ -123,16 +123,44 @@ const BlogPost = () => {
   return (
     <>
       <Helmet>
-        <title>{post?.title || 'Blog Post'} | The Pricing Lab Blog</title>
+        <title>{post?.title || 'Blog Post'} | The Pricing Library Blog</title>
         <meta name="description" content={post?.excerpt} />
         <meta name="keywords" content={post?.tags?.join(", ")} />
         <meta property="og:title" content={post?.title} />
         <meta property="og:description" content={post?.excerpt} />
         <meta property="og:image" content={post?.coverImage} />
-        <meta property="og:url" content={window.location.href} />
+        <meta property="og:url" content={`https://thepricinglibrary.com/blog/${post?.slug}`} />
         <meta property="og:type" content="article" />
         <meta name="twitter:card" content="summary_large_image" />
         <link rel="canonical" href={`https://thepricinglibrary.com/blog/${post?.slug}`} />
+        {post && (
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Article",
+              "headline": post.title,
+              "description": post.excerpt,
+              "image": post.coverImage,
+              "datePublished": post.date,
+              "author": {
+                "@type": "Person",
+                "name": post.author.name
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "The Pricing Library",
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": "https://thepricinglibrary.com/lovable-uploads/307d6f9a-03ee-4ecb-bd38-79c3d9752036.png"
+                }
+              },
+              "mainEntityOfPage": {
+                "@type": "WebPage",
+                "@id": `https://thepricinglibrary.com/blog/${post.slug}`
+              }
+            })}
+          </script>
+        )}
       </Helmet>
       
       <Navbar />
