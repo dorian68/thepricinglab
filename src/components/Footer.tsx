@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-finance-charcoal border-t border-border py-8">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-lg font-medium text-finance-accent mb-4">{safeTranslate(t, 'app.title', 'The Pricing Library')}</h3>
             <p className="text-muted-foreground">

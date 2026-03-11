@@ -153,7 +153,7 @@ const ChatBubble: React.FC = () => {
             <Button 
               variant="default" 
               size="icon" 
-              className="fixed bottom-5 right-5 h-14 w-14 bg-finance-accent shadow-lg hover:bg-finance-accent/80 text-white rounded-full flex items-center justify-center z-50"
+              className="fixed bottom-20 right-4 sm:bottom-5 sm:right-5 h-12 w-12 sm:h-14 sm:w-14 bg-finance-accent shadow-lg hover:bg-finance-accent/80 text-white rounded-full flex items-center justify-center z-50"
             >
               <MessageCircle className="h-6 w-6" />
             </Button>
