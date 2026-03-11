@@ -4,8 +4,6 @@ import { useAuth } from "../contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet-async";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +19,7 @@ const Courses = () => {
   const [selectedTab, setSelectedTab] = useState("fundamentals");
   const { profile } = useAuth();
   const userPlan = (profile?.plan ?? "freemium") as SubscriptionPlan;
-  console.log(" ------------------------------------- Courses: User plan ------------------------------------- ", userPlan);
+  
 
 
 
@@ -210,7 +208,7 @@ const Courses = () => {
         <meta name="description" content={st('coursesPage.description', "Interactive courses on quantitative finance, options pricing, and trading strategies")} />
       </Helmet>
       
-      <Navbar />
+      
       
       <main className="container mx-auto px-4 py-10">
         <div className="text-center mb-12">
@@ -225,15 +223,15 @@ const Courses = () => {
             <TabsList className="grid grid-cols-3 w-full max-w-md">
               <TabsTrigger value="fundamentals" className="flex items-center gap-2">
                 <Star className="h-4 w-4" />
-                <span className="hidden sm:inline">{st('coursesPage.fundamentals.tab', "Fundamentals")}</span>
+                <span className="sm:inline">{st('coursesPage.fundamentals.tab', "Fundamentals")}</span>
               </TabsTrigger>
               <TabsTrigger value="advanced" className="flex items-center gap-2">
                 <Award className="h-4 w-4" />
-                <span className="hidden sm:inline">{st('coursesPage.advanced.tab', "Advanced")}</span>
+                <span className="sm:inline">{st('coursesPage.advanced.tab', "Advanced")}</span>
               </TabsTrigger>
               <TabsTrigger value="complex" className="flex items-center gap-2">
                 <Zap className="h-4 w-4" />
-                <span className="hidden sm:inline">{st('coursesPage.complex.tab', "Complex")}</span>
+                <span className="sm:inline">{st('coursesPage.complex.tab', "Complex")}</span>
               </TabsTrigger>
             </TabsList>
           </div>

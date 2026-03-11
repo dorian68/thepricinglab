@@ -4,57 +4,43 @@ import { useTranslation } from 'react-i18next';
 import { safeTranslate } from '../utils/translationUtils';
 import { Link } from 'react-router-dom';
 
-/**
- * Footer component for the application
- */
 const Footer: React.FC = () => {
   const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-finance-charcoal border-t border-finance-steel/20 py-8">
+    <footer className="bg-finance-charcoal border-t border-border py-8">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-lg font-medium text-finance-accent mb-4">{safeTranslate(t, 'app.title', 'The Pricing Library')}</h3>
-            <p className="text-finance-lightgray">
-              {safeTranslate(t, 'app.subtitle', 'La référence pour la théorie des options et le pricing quantitatif.')}
+            <p className="text-muted-foreground">
+              {safeTranslate(t, 'app.subtitle', 'The reference for options theory and quantitative pricing.')}
             </p>
           </div>
           
           <div>
-            <h4 className="text-sm font-medium text-finance-offwhite mb-3">{safeTranslate(t, 'footer.products', 'Produits')}</h4>
+            <h4 className="text-sm font-medium text-foreground mb-3">{safeTranslate(t, 'footer.products', 'Platform')}</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/courses" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.courses', 'Cours')}</Link></li>
-              <li><Link to="/exercises" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.exercises', 'Exercices')}</Link></li>
-              <li><Link to="/tools" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.tools', 'Outils')}</Link></li>
-              <li><Link to="/community" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.community', 'Communauté')}</Link></li>
+              <li><Link to="/courses" className="text-muted-foreground hover:text-finance-accent transition-colors">{safeTranslate(t, 'navbar.courses', 'Courses')}</Link></li>
+              <li><Link to="/exercices" className="text-muted-foreground hover:text-finance-accent transition-colors">{safeTranslate(t, 'navbar.exercises', 'Exercises')}</Link></li>
+              <li><Link to="/tools" className="text-muted-foreground hover:text-finance-accent transition-colors">{safeTranslate(t, 'navbar.tools', 'Tools')}</Link></li>
+              <li><Link to="/community" className="text-muted-foreground hover:text-finance-accent transition-colors">{safeTranslate(t, 'navbar.community', 'Community')}</Link></li>
             </ul>
           </div>
           
           <div>
-            <h4 className="text-sm font-medium text-finance-offwhite mb-3">{safeTranslate(t, 'footer.company', 'Entreprise')}</h4>
+            <h4 className="text-sm font-medium text-foreground mb-3">{safeTranslate(t, 'footer.resources', 'Resources')}</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/about" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'footer.about', 'À propos')}</Link></li>
-              <li><Link to="/blog" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.blog', 'Blog')}</Link></li>
-              <li><Link to="/mentoring" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'navbar.mentoring', 'Mentorat')}</Link></li>
-              <li><Link to="/contact" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'contact', 'Contact')}</Link></li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="text-sm font-medium text-finance-offwhite mb-3">{safeTranslate(t, 'footer.legal', 'Légal')}</h4>
-            <ul className="space-y-2 text-sm">
-              <li><Link to="/terms" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'footer.terms', 'CGU')}</Link></li>
-              <li><Link to="/privacy" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'footer.privacy', 'Confidentialité')}</Link></li>
-              <li><Link to="/cookies" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'footer.cookies', 'Cookies')}</Link></li>
-              <li><Link to="/help" className="text-finance-lightgray hover:text-finance-accent">{safeTranslate(t, 'footer.help', 'Aide')}</Link></li>
+              <li><Link to="/blog" className="text-muted-foreground hover:text-finance-accent transition-colors">{safeTranslate(t, 'navbar.blog', 'Blog')}</Link></li>
+              <li><Link to="/mentoring" className="text-muted-foreground hover:text-finance-accent transition-colors">{safeTranslate(t, 'navbar.mentoring', 'Mentoring')}</Link></li>
+              <li><Link to="/bug-report" className="text-muted-foreground hover:text-finance-accent transition-colors">{safeTranslate(t, 'footer.bugReport', 'Bug Report')}</Link></li>
             </ul>
           </div>
         </div>
         
-        <div className="border-t border-finance-steel/10 mt-8 pt-6 text-center text-finance-lightgray text-sm">
-          <p>© {currentYear} The Pricing Lab.</p>
+        <div className="border-t border-border mt-8 pt-6 text-center text-muted-foreground text-sm">
+          <p>© {currentYear} The Pricing Library.</p>
         </div>
       </div>
     </footer>

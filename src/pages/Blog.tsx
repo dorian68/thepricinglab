@@ -17,8 +17,6 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { blogPosts } from "@/data/blog-posts";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { safeTranslate } from "../utils/translationUtils";
 
 const featuredTags = ["Options", "Black-Scholes", "Monte Carlo", "Volatility", "Quant Interview", "Python"];
@@ -70,7 +68,7 @@ const Blog = () => {
         <link rel="canonical" href="https://thepricinglab.com/blog" />
       </Helmet>
       
-      <Navbar />
+      
       
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Breadcrumbs */}
@@ -272,7 +270,7 @@ const Blog = () => {
         </div>
       </main>
       
-      <Footer />
+      
     </>
   );
 };

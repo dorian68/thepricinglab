@@ -16,24 +16,21 @@ const AppShell: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("AppShell: Auth state", { isAuthenticated, profile, isLoading });
-    
-    // Check that i18n has been properly initialized
     if (i18n && !i18n.isInitialized) {
-      console.error("i18n has not been properly initialized");
       toast.error(t("common.error", "Error"), {
         description: t("i18n.initError", "Translation problem. Reload may be required."),
       });
-    } else {
-      console.log("i18n initialized successfully in AppShell");
     }
-  }, [isAuthenticated, profile, isLoading, i18n, t]);
+  }, [i18n, t]);
   
   return (
     <div className="flex flex-col min-h-screen bg-finance-dark text-finance-offwhite overflow-x-hidden">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded">
+        Skip to content
+      </a>
       <ModernNavbar />
       <NewsletterBanner />
-      <div className="flex-1">
+      <div className="flex-1" id="main-content">
         <Suspense fallback={<div className="h-screen w-full flex items-center justify-center">{t('common.loading', 'Loading...')}</div>}>
           <Outlet />
         </Suspense>
