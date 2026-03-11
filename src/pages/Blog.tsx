@@ -17,8 +17,6 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { blogPosts } from "@/data/blog-posts";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { safeTranslate } from "../utils/translationUtils";
 
 const featuredTags = ["Options", "Black-Scholes", "Monte Carlo", "Volatility", "Quant Interview", "Python"];
