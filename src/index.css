@@ -106,7 +106,7 @@
   }
 
   .finance-button-outline {
-    @apply border border-primary/50 text-primary hover:bg-primary/8 font-medium py-2.5 px-5 rounded-md transition-all duration-200;
+    @apply border border-primary/50 text-primary hover:bg-primary/[0.08] font-medium py-2.5 px-5 rounded-md transition-all duration-200;
   }
 
   .terminal-text {
