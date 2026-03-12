@@ -97,6 +97,7 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <I18nextProvider i18n={i18n}>
+      <SplashScreen />
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
