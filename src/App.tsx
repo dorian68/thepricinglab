@@ -6,6 +6,7 @@ import { I18nextProvider } from 'react-i18next';
 import { Toaster } from 'sonner';
 import ChatBubble from './components/chat/ChatBubble';
 import { AuthProvider } from './contexts/AuthContext';
+import SplashScreen from './components/SplashScreen';
 
 import i18n from './i18n';
 import Home from './pages/Home';
