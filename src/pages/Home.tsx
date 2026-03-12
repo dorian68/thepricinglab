@@ -54,28 +54,43 @@ const Home = () => {
       {/* Hero */}
       <section className="relative py-14 sm:py-20 md:py-28 px-4 sm:px-6 border-b border-border">
         <div className="max-w-6xl mx-auto">
-          <div className="max-w-3xl">
-            <p className="terminal-text text-xs tracking-[0.2em] uppercase mb-4 font-medium">
-              {st('home.hero.tagline', 'The open platform for quant finance')}
-            </p>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-5 leading-[1.1] text-foreground terminal-text">
-              {st('home.hero.title1', 'Master Option Pricing')}<br />
-              <span className="finance-gradient text-transparent bg-clip-text">
-                {st('home.hero.title2', 'From Theory to Code')}
-              </span>
-            </h1>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div className="flex flex-col">
+              <p className="terminal-text text-xs tracking-[0.2em] uppercase mb-4 font-medium">
+                {st('home.hero.tagline', 'The open platform for quant finance')}
+              </p>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-5 leading-[1.1] text-foreground terminal-text">
+                {st('home.hero.title1', 'Master Option Pricing')}<br />
+                <span className="finance-gradient text-transparent bg-clip-text">
+                  {st('home.hero.title2', 'From Theory to Code')}
+                </span>
+              </h1>
+              
+              <p className="text-muted-foreground text-base sm:text-lg md:text-xl mb-8 max-w-2xl leading-relaxed">
+                {st('home.hero.description', 'Learn to price derivatives, simulate risk, and build quant models — with interactive courses, Python exercises, and professional-grade tools.')}
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link to="/courses" className="finance-button text-center text-sm sm:text-base px-6 py-3 w-full sm:w-auto">
+                  {st('home.hero.startCourse', 'Start Learning — Free')}
+                </Link>
+                <Link to="/tools" className="finance-button-outline text-center text-sm sm:text-base px-6 py-3 w-full sm:w-auto">
+                  {st('home.hero.exploreTools', 'Explore Tools')}
+                </Link>
+              </div>
+            </div>
             
-            <p className="text-muted-foreground text-base sm:text-lg md:text-xl mb-8 max-w-2xl leading-relaxed">
-              {st('home.hero.description', 'Learn to price derivatives, simulate risk, and build quant models — with interactive courses, Python exercises, and professional-grade tools.')}
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Link to="/courses" className="finance-button text-center text-sm sm:text-base px-6 py-3 w-full sm:w-auto">
-                {st('home.hero.startCourse', 'Start Learning — Free')}
-              </Link>
-              <Link to="/tools" className="finance-button-outline text-center text-sm sm:text-base px-6 py-3 w-full sm:w-auto">
-                {st('home.hero.exploreTools', 'Explore Tools')}
-              </Link>
+            <div className="relative aspect-[4/3] bg-background/60 rounded-lg overflow-hidden border border-border">
+              <div 
+                className="bg-[url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3')] 
+                bg-cover bg-center w-full h-full 
+                opacity-80 filter brightness-75 contrast-125"
+              ></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="bg-background/70 px-6 py-3 rounded-lg border border-primary/30 tracking-wider uppercase text-sm terminal-text text-primary shadow-lg">
+                  TRADING TERMINAL ACTIVATED
+                </div>
+              </div>
             </div>
           </div>
         </div>
