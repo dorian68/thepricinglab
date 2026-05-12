@@ -7,6 +7,7 @@ import { Toaster } from 'sonner';
 import ChatBubble from './components/chat/ChatBubble';
 import { AuthProvider } from './contexts/AuthContext';
 import SplashScreen from './components/SplashScreen';
+import ScrollToTop from './components/ScrollToTop';
 
 import i18n from './i18n';
 import Home from './pages/Home';
@@ -109,6 +110,7 @@ function App() {
             </Helmet>
             <Toaster position="top-right" />
             <Router>
+              <ScrollToTop />
               <Suspense fallback={<LazyFallback />}>
                 <Routes>
                   <Route element={<AppShell />}>
