@@ -9,19 +9,20 @@ import { supabase } from '@/integrations/supabase/client';
 const NewsletterBanner: React.FC = () => {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
-  const [isVisible, setIsVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const dismissed = localStorage.getItem('newsletter-banner-dismissed');
-    const lastDismissed = localStorage.getItem('newsletter-banner-last-dismissed');
-    // Re-show after 7 days
-    if (dismissed && lastDismissed) {
-      const daysSince = (Date.now() - parseInt(lastDismissed)) / (1000 * 60 * 60 * 24);
-      if (daysSince < 7) return;
+  const [isVisible, setIsVisible] = useState(() => {
+    try {
+      const dismissed = localStorage.getItem('newsletter-banner-dismissed');
+      const lastDismissed = localStorage.getItem('newsletter-banner-last-dismissed');
+      if (dismissed && lastDismissed) {
+        const daysSince = (Date.now() - parseInt(lastDismissed)) / (1000 * 60 * 60 * 24);
+        if (daysSince < 7) return false;
+      }
+      return true;
+    } catch {
+      return true;
     }
-    setIsVisible(true);
-  }, []);
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,11 +105,11 @@ const NewsletterBanner: React.FC = () => {
                 type="submit" 
                 size="default" 
                 disabled={isLoading}
-                className="whitespace-nowrap font-medium bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 hover:scale-105"
+                className="whitespace-nowrap font-medium bg-primary hover:bg-primary/90 text-primary-foreground transition-shadow duration-200 hover:shadow-md"
               >
                 {isLoading ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground mr-2"></div>
                     {t('common.loading', 'Chargement...')}
                   </>
                 ) : (
