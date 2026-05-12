@@ -35,12 +35,14 @@ const SplashScreen: React.FC = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center cursor-pointer select-none"
+      className="fixed inset-0 z-[9999] flex items-center justify-center cursor-pointer select-none"
       onClick={dismiss}
       role="presentation"
+      aria-hidden={exiting}
       style={{
         background: '#0d0f14',
         opacity: exiting ? 0 : 1,
+        pointerEvents: exiting ? 'none' : 'auto',
         transition: `opacity ${EXIT_DURATION_MS}ms ease-out`,
       }}
     >

@@ -5,6 +5,24 @@
 
 /* Fonts loaded via <link> in index.html for non-blocking rendering */
 
+/* Size-adjusted local fallbacks to prevent FOUT layout shifts */
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial');
+  size-adjust: 107%;
+  ascent-override: 90%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'JetBrains Mono Fallback';
+  src: local('Menlo'), local('Consolas'), local('Courier New');
+  size-adjust: 100%;
+  ascent-override: 95%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}
+
 @layer base {
   :root {
     --background: 220 12% 10%;
@@ -59,14 +77,14 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Inter', 'Inter Fallback', -apple-system, BlinkMacSystemFont, sans-serif;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'JetBrains Mono', 'Roboto Mono', monospace;
+    font-family: 'JetBrains Mono', 'JetBrains Mono Fallback', 'Roboto Mono', monospace;
     letter-spacing: -0.01em;
   }
 

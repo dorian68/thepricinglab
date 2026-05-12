@@ -43,7 +43,7 @@ const Home = () => {
   const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
   
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col">
       <SEOHead
         title="The Pricing Library – Learn Quantitative Finance & Option Pricing"
         description="Interactive platform to master option pricing, Black-Scholes, Monte Carlo, Greeks, and volatility. Hands-on exercises, simulators, and real-world quant skills."
@@ -80,7 +80,7 @@ const Home = () => {
               </div>
             </div>
             
-            <div className="relative aspect-[4/3] bg-background/60 rounded-lg overflow-hidden border border-border">
+            <div className="relative aspect-[4/3] bg-gradient-to-br from-card via-secondary/40 to-card rounded-lg overflow-hidden border border-border">
               <div 
                 className="bg-[url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3')] 
                 bg-cover bg-center w-full h-full 
