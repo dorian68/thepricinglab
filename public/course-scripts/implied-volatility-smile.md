@@ -9,137 +9,125 @@ source_count: 10
 
 # Module pratique - Implied volatility smile and quote cleaning
 
-> Légende de provenance du contenu:
+> Legende de provenance du contenu:
 > - **[extrait]** texte issu directement des sources RAG (marque [Sx]).
-> - **[reformule]** réécriture pédagogique d'un passage source.
-> - **[genere]** exemple/exercice/quiz construit à partir des concepts; calculs vérifiés par le moteur déterministe, non extraits d'une source.
+> - **[reformule]** reecriture pedagogique d'un passage source.
+> - **[genere]** exemple/exercice/quiz construit a partir des concepts; calculs verifies par le moteur deterministe, non extraits d'une source.
 
 ## Promesse du module
-Apprendre l'Implied volatility smile et le nettoyage des quotes par la pratique : manipuler, calculer, comparer, décider, puis seulement formaliser la théorie nécessaire.
+Apprendre Implied volatility smile and quote cleaning par la pratique: manipuler, calculer, comparer,
+decider, puis seulement formaliser la theorie necessaire.
 
 ## Niveau cible et public
-- Niveau : intermédiaire
-- Public visé : junior quant, analyste market risk, sales/structuring junior
-- Durée estimée : 130 minutes
-- Produit : equity index options
-- Concepts : implied volatility, smile, skew, SVI
+- Niveau: intermediate
+- Public vise: junior quant, analyste market risk, sales/structuring junior
+- Duree estimee: 130 minutes
+- Produit: equity index options
+- Concepts: implied volatility, smile, skew, SVI
 
 ## Prerequis
-- Prix d'option vanilla
-- Volatilité implicite
-- Inversion de Black-Scholes
+- prix d'option vanilla
+- volatilite implicite
+- inversion de Black-Scholes
 
 ## Objectifs d'apprentissage
-À la fin de ce module, vous saurez :
-- Expliquer l'intuition du sujet avant toute formule ;
-- Identifier les inputs, les risques et les hypothèses clés ;
-- Dérouler un calcul chiffré et l'interpréter en langage de desk ;
-- Répondre à un mini-quiz et résoudre un exercice corrigé ;
-- Nommer les limites du modèle et la décision opérationnelle associée.
+A la fin de ce module, vous saurez:
+- expliquer l'intuition du sujet avant toute formule;
+- identifier les inputs, les risques et les hypotheses cles;
+- derouler un calcul chiffre et l'interpreter en langage de desk;
+- repondre a un mini-quiz et resoudre un exercice corrige;
+- nommer les limites du modele et la decision operationnelle associee.
 
 ## Positionnement bibliotheque
-- Track : Derivatives & Volatility
-- Type d'asset : module réutilisable de cours.
-- Sorties attendues : fiche apprenant, cas pratique, corrigé, quiz, notes instructeur.
-- Intégration SaaS : ce module doit pouvoir être découpé en leçons, exercices et checkpoints.
+- Track: Derivatives & Volatility
+- Type d'asset: module reutilisable de cours.
+- Sorties attendues: fiche apprenant, cas pratique, corrige, quiz, notes instructeur.
+- Integration SaaS: ce module doit pouvoir etre decoupe en lecons, exercices et checkpoints.
 
 ## Deroule pratique
 ### Module 1 - Lire la chaine d'options
-- Objectif pratique : Nettoyer les quotes avant tout fit.
-- Situation de desk : Les bids/asks contiennent des quotes obsolètes et croisées.
-- Notion utile : Bounds, moneyness, bid/ask mid.
-- Activité : Filtrer la chaîne et documenter les rejets.
-- Livrable apprenant : Clean option chain.
-
+- Objectif pratique: Nettoyer les quotes avant tout fit.
+- Situation de desk: Les bids/asks contiennent des quotes stale et croisees.
+- Notion utile: Bounds, moneyness, bid/ask mid.
+- Activite: Filtrer la chaine et documenter les rejets.
+- Livrable apprenant: Clean option chain.
 ### Module 2 - Inversion en IV
-- Objectif pratique : Transformer les prix en volatilités implicites comparables.
-- Situation de desk : Le trader raisonne en vol, pas en premium brut.
-- Notion utile : Black-Scholes inversion, vega, convergence.
-- Activité : Calculer IV par strike.
-- Livrable apprenant : Slice IV.
-
+- Objectif pratique: Transformer les prix en volatilites implicites comparables.
+- Situation de desk: Le trader raisonne en vol, pas en premium brut.
+- Notion utile: Black-Scholes inversion, vega, convergence.
+- Activite: Calculer IV par strike.
+- Livrable apprenant: Slice IV.
 ### Module 3 - Smile et skew
-- Objectif pratique : Interpréter la forme de smile comme signal de risque.
-- Situation de desk : Le put wing s'enrichit avant un événement macro.
-- Notion utile : Skew, term structure, convexité.
-- Activité : Tracer smile et commenter le risque.
-- Livrable apprenant : Vol note.
-
+- Objectif pratique: Interpreter la forme de smile comme signal de risque.
+- Situation de desk: Le put wing s'enrichit avant un evenement macro.
+- Notion utile: Skew, term structure, convexite.
+- Activite: Tracer smile et commenter le risque.
+- Livrable apprenant: Vol note.
 ### Module 4 - Fit utilisable
-- Objectif pratique : Produire une courbe lisse sans cacher les contrôles.
-- Situation de desk : Le pricer a besoin d'une surface stable.
-- Notion utile : SVI ou fit quadratique, no-arbitrage checks.
-- Activité : Fit, résidus, contrôles.
-- Livrable apprenant : Fit report.
+- Objectif pratique: Produire une courbe lisse sans cacher les controles.
+- Situation de desk: Le pricer a besoin d'une surface stable.
+- Notion utile: SVI ou fit quadratique, no-arbitrage checks.
+- Activite: Fit, residus, controles.
+- Livrable apprenant: Fit report.
 
 ## Cours redige
 ### Lecon 1 - Lire la chaine d'options
 
-**Intuition _[reformule]_.** Les bids/asks contiennent des quotes obsolètes et croisées. L'objectif de cette leçon est précisément : Nettoyer les quotes avant tout fit.
+Dans le monde du trading d'options, la lecture de la chaîne d'options est cruciale pour prendre des décisions éclairées. Lorsqu'un trader consulte cette chaîne, il doit être conscient que les bids et asks peuvent contenir des quotes obsolètes ou croisées, ce qui peut fausser l'analyse. Par exemple, si un bid est supérieur à un ask pour le même strike, cela indique une incohérence qui doit être corrigée avant d'effectuer toute opération. En nettoyant ces quotes, on s'assure que les décisions reposent sur des données fiables, ce qui est essentiel pour éviter des pertes inutiles.
 
-**Ce que disent les sources** _[extrait]_. « REFERENCES AND BIBLIOGRAPHY Carr, Peter, and Liuren Wu. “A New Simple Approach for Constructing Implied Volatility Surfaces.” Working paper, New York University and Baruch College. Derman, Emanuel. “Introduction to the Volatility Smile.” Lecture notes, Columbia University. Gatheral, Jim. » [S1]
+Le concept de "moneyness" joue un rôle clé dans ce processus. Il s'agit de la position d'un option par rapport au prix d'exercice par rapport au prix actuel de l'actif sous-jacent. Comprendre si une option est "in the money", "at the money" ou "out of the money" permet d'évaluer la pertinence des quotes. Par ailleurs, le calcul du bid/ask mid, qui représente le prix moyen entre le bid et l'ask, offre une référence utile pour déterminer une valeur juste des options. Comme le soulignent Carr et Wu, une approche rigoureuse dans la construction des surfaces de volatilité implicite est essentielle pour une analyse précise [S1].
 
-**Le point clé : Bounds, moneyness, bid/ask mid.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
+Dans un environnement de desk, le nettoyage des quotes ne se limite pas à un simple exercice technique ; c'est une compétence qui peut faire la différence entre un trade réussi et un échec. Les traders doivent filtrer les quotes en documentant les rejets, ce qui permet d'identifier les anomalies et de maintenir une base de données propre. Cela nécessite une attention méticuleuse aux détails et une compréhension des limites de chaque quote, car une quote "stale" peut entraîner des erreurs significatives dans l'évaluation des options.
 
-**Mise en pratique _[genere]_.** Filtrer la chaîne et documenter les rejets. Livrable attendu : Clean option chain - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Confondre une sensibilité 'par 1%' avec 'par 0.01' : respecter strictement les unités.
+Un piège fréquent pour un junior est de négliger l'importance des quotes "stale". En supposant que toutes les quotes sont à jour, un trader peut prendre des décisions basées sur des données erronées, ce qui peut compromettre l'intégrité de sa stratégie de trading. Il est donc impératif de toujours vérifier la fraîcheur des quotes avant de procéder à des analyses ou à des transactions.
 
 ### Lecon 2 - Inversion en IV
 
-**Intuition _[reformule]_.** Le trader raisonne en vol, pas en premium brut. L'objectif de cette leçon est précisément : Transformer les prix en volatilités implicites comparables.
+Dans le monde du trading, la volatilité implicite (IV) est souvent perçue comme un indicateur clé de la perception du risque par le marché. Imaginez un trader qui observe une option à un strike de 100 sur un actif dont le prix spot est également de 100. Si la volatilité implicite pour ce strike est significativement différente de celle des strikes adjacents, cela peut signaler une opportunité de trading ou un déséquilibre dans la valorisation des options. En effet, les traders doivent être capables de convertir les prix des options en volatilités implicites comparables pour évaluer correctement le risque et le potentiel de profit.
 
-**Ce que disent les sources** _[extrait]_. « Implied volatilities beyond the 10 delta strikes must either be controlled using extrapolation or generated automatically using a model like Stochastic Volatility Inspired (SVI) - see Gatheral’s book in Further Reading for more information. » [S2]
+L'inversion en IV, qui repose sur le modèle de Black-Scholes, est essentielle pour effectuer cette transformation. En utilisant les prix des options, le trader peut estimer la volatilité implicite associée à chaque strike. Cela permet de comprendre comment le marché valorise le risque à différents niveaux de prix. Par exemple, si la volatilité implicite pour un strike à 90 est plus élevée que celle pour un strike à 110, cela peut indiquer une anticipation d'un mouvement baissier plus prononcé. En effet, comme le souligne l'extrait [S2], les volatilités implicites au-delà des strikes à 10 delta doivent être gérées avec soin, souvent par extrapolation ou en utilisant des modèles comme le SVI pour obtenir une courbe de volatilité cohérente.
 
-**Le point clé : Black-Scholes inversion, vega, convergence.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
+Sur un desk de trading, cette capacité à inverser les prix en volatilités implicites et à analyser la structure de la volatilité est cruciale. Les traders doivent non seulement comprendre le vega, qui mesure la sensibilité du prix de l'option à la volatilité, mais aussi être attentifs à la convergence des volatilités implicites. Une mauvaise interprétation de ces valeurs peut mener à des décisions de trading erronées, par exemple, en surévaluant ou sous-évaluant le risque associé à une position.
 
-**Mise en pratique _[genere]_.** Calculer IV par strike. Livrable attendu : Slice IV - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Oublier le signe de la position (long/short, payer/receiver) dans l'interprétation du P&L.
+Un piège courant pour les juniors est de supposer que les volatilités implicites doivent toujours être croissantes avec les strikes. En réalité, des anomalies peuvent survenir, et des volatilités plus élevées à des strikes plus bas peuvent indiquer une anticipation de mouvements de marché plus importants. Ignorer ces nuances peut conduire à des évaluations biaisées et à des positions désavantageuses.
 
 ### Lecon 3 - Smile et skew
 
-**Intuition _[reformule]_.** Le put wing s'enrichit avant un événement macro. L'objectif de cette leçon est précisément : Interpréter la forme de smile comme signal de risque.
+Dans le monde des options, la forme de la courbe de volatilité implicite, souvent appelée "smile" ou "skew", peut révéler des informations cruciales sur le sentiment du marché et les anticipations de risque. Par exemple, lorsque l'on observe que les options de vente (puts) sur les ailes (wings) s'enrichissent avant un événement macroéconomique, cela peut indiquer une aversion au risque croissante parmi les investisseurs. Cette dynamique est particulièrement pertinente dans un contexte où les acteurs du marché se préparent à une volatilité accrue, souvent associée à des annonces économiques majeures ou à des événements géopolitiques.
 
-**Ce que disent les sources** _[extrait]_. « “Riding on a Smile.” Risk, 7(2): 32–39. Figlewski, S. “The Adaptive Mesh Model: A New Approach to Efficient Option Pricing.” Journal of Financial Economics, 53: 313–51. Figlewski, S., Gao, B., & Ahn, D. “Pricing Discrete Barrier Options with an Adaptive Mesh Model,” Working Paper, 1999. Complete Guide to Option Pricing Formulas. McGraw-Hill. Options, Futures, & Other Derivatives. Prentice Hall. » [S3]
+Le mécanisme sous-jacent à cette observation réside dans la manière dont les traders évaluent le risque. Un "skew" positif, où les options de vente à des prix d'exercice plus bas affichent une volatilité implicite plus élevée, peut signaler une protection accrue contre une baisse potentielle des marchés. Cela est dû à l'anticipation que les mouvements à la baisse peuvent être plus prononcés que ceux à la hausse, ce qui pousse les traders à payer plus cher pour ces protections. Sur un desk de trading, comprendre cette dynamique est essentiel, car elle influence non seulement les stratégies de couverture, mais également la manière dont les positions sont gérées en période d'incertitude.
 
-**Le point clé : Skew, term structure, convexité.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
+En traçant la courbe de volatilité implicite, il est crucial de commenter non seulement sa forme, mais aussi son évolution dans le temps. Par exemple, si l'on observe un changement dans le "term structure" de la volatilité, cela peut indiquer une modification des attentes de risque à court et à long terme. Une convexité accrue dans la courbe peut également signaler une réaction disproportionnée aux mouvements de prix sous-jacents, ce qui est un signal fort pour les traders cherchant à ajuster leurs positions. En analysant ces éléments, on peut mieux anticiper les mouvements futurs du marché et ajuster les stratégies en conséquence.
 
-**Mise en pratique _[genere]_.** Tracer smile et commenter le risque. Livrable attendu : Vol note - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Appliquer une approximation locale (Taylor) à un choc trop large sans vérifier sa validité.
+Un piège courant pour un junior est de supposer que la forme de la smile est statique. En réalité, elle peut évoluer rapidement en réponse à des événements de marché ou à des changements dans le sentiment des investisseurs. Ignorer cette dynamique peut entraîner des décisions de trading mal informées, notamment en négligeant d'ajuster les couvertures ou les positions en fonction des nouvelles informations disponibles.
 
 ### Lecon 4 - Fit utilisable
 
-**Intuition _[reformule]_.** Le pricer a besoin d'une surface stable. L'objectif de cette leçon est précisément : Produire une courbe lisse sans cacher les contrôles.
+Dans le monde des dérivés, la notion de sourire de volatilité (volatility smile) est essentielle pour comprendre comment les marchés évaluent le risque. Par exemple, dans le cadre des options sur actions, il est courant d'observer que les options avec des strikes plus bas affichent une volatilité implicite plus élevée que celles avec des strikes plus élevés. Cela s'explique par le comportement des actions qui tendent à augmenter lentement, ce qui crée une demande accrue pour les options de protection à bas prix. Cette dynamique se reflète dans les contrats de risk reversal, qui mesurent l'inclinaison du sourire de volatilité, et qui sont souvent cotés avec des maturités similaires à celles de la courbe ATM [S4].
 
-**Ce que disent les sources** _[extrait]_. « ■The risk reversal contract describes the skew of the volatility smile (i.e., how tilted the volatility smile is). Butterfly and risk reversal contracts are quoted at market tenors like the ATM curve. In equity derivatives, lower strikes tend to have higher implied volatility than higher strikes at a given maturity because equities tend to rally slowly and » [S4]
+Pour un desk de trading, avoir une surface de volatilité stable est crucial. Cela permet de mieux évaluer les risques et de prendre des décisions éclairées concernant les positions à prendre. En utilisant des méthodes de fit, telles que le SVI (Stochastic Volatility Inspired) ou un fit quadratique, les traders peuvent ajuster les courbes de volatilité pour qu'elles soient lisses tout en respectant les contrôles de non-arbitrage. Cela signifie que les prix des options doivent être cohérents entre eux, empêchant ainsi des opportunités de profit sans risque. En pratique, cela implique de vérifier les résidus du fit pour s'assurer qu'ils ne présentent pas de schémas systématiques, ce qui pourrait indiquer un problème dans l'ajustement.
 
-**Le point clé : SVI ou fit quadratique, no-arbitrage checks.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
-
-**Mise en pratique _[genere]_.** Fit, résidus, contrôles. Livrable attendu : Fit report - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Présenter un chiffre sans unité ni ordre de grandeur de contrôle.
+Un piège courant pour un junior est de se concentrer uniquement sur la minimisation des résidus sans prêter attention aux contrôles de non-arbitrage. Par exemple, un junior pourrait ajuster la courbe de volatilité de manière à obtenir un fit parfait avec les données historiques, mais cela pourrait conduire à des incohérences dans les prix des options, rendant la surface instable. Il est donc impératif de garder à l'esprit que la qualité du fit ne doit pas compromettre l'intégrité des prix sur le marché.
 
 ## Labs pratiques a inclure
-1. Quote cleaning : filtrer quotes impossibles/stale.
-2. IV inversion : calculer vol implicite par strike.
-3. Smile view : expliquer skew et risque de hedge.
-4. Fit report : ajuster une courbe et contrôler les résidus.
+1. Quote cleaning: filtrer quotes impossibles/stale.
+2. IV inversion: calculer vol implicite par strike.
+3. Smile view: expliquer skew et risque de hedge.
+4. Fit report: ajuster une courbe et controler les residus.
 
 ## Script enseignant
 1. Ouvrir par un cas concret.
 2. Demander aux apprenants de formuler l'intuition.
 3. Introduire la notation minimale.
-4. Faire résoudre une micro-tâche.
-5. Debrief : erreurs courantes, limites, interprétation marché.
+4. Faire resoudre une micro-tache.
+5. Debrief: erreurs courantes, limites, interpretation marche.
 
 ## Supports a produire
 - Fiche apprenant d'une page.
-- Slides courtes orientées cas.
-- Notebook ou tableur de calcul si le sujet s'y prête.
-- Corrigé détaillé.
-- Quiz de vérification rapide.
+- Slides courtes orientees cas.
+- Notebook ou tableur de calcul si le sujet s'y prete.
+- Corrige detaille.
+- Quiz de verification rapide.
 
 ## Exemple numerique resolu
 _[genere - calcul verifie]_ On price un call europeen a la monnaie et on lit prix, d1, d2 et greeks.

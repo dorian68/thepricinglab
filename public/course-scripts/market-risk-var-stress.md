@@ -7,139 +7,123 @@ concepts: parametric VaR, expected shortfall, stress test, risk limit
 source_count: 10
 ---
 
-# Module pratique - Risque de marche, VaR, stress testing et escalade
+# Module pratique - Market risk VaR, stress testing and escalation
 
-> Légende de provenance du contenu:
+> Legende de provenance du contenu:
 > - **[extrait]** texte issu directement des sources RAG (marque [Sx]).
-> - **[reformule]** réécriture pédagogique d'un passage source.
-> - **[genere]** exemple/exercice/quiz construit à partir des concepts; calculs vérifiés par le moteur déterministe, non extraits d'une source.
+> - **[reformule]** reecriture pedagogique d'un passage source.
+> - **[genere]** exemple/exercice/quiz construit a partir des concepts; calculs verifies par le moteur deterministe, non extraits d'une source.
 
 ## Promesse du module
-Apprendre le risque de marché, la VaR, le stress testing et l'escalade par la pratique : manipuler, calculer, comparer, décider, puis seulement formaliser la théorie nécessaire.
+Apprendre Market risk VaR, stress testing and escalation par la pratique: manipuler, calculer, comparer,
+decider, puis seulement formaliser la theorie necessaire.
 
 ## Niveau cible et public
-- Niveau : intermédiaire
-- Public visé : junior quant, analyste risque de marché, sales/structuring junior
-- Durée estimée : 120 minutes
-- Produit : portefeuille multi-actifs
-- Concepts : VaR paramétrique, expected shortfall, stress test, limite de risque
+- Niveau: intermediate
+- Public vise: junior quant, analyste market risk, sales/structuring junior
+- Duree estimee: 120 minutes
+- Produit: multi-asset portfolio
+- Concepts: parametric VaR, expected shortfall, stress test, risk limit
 
 ## Prerequis
-- Distribution normale
-- Quantile
-- Volatilité
+- distribution normale
+- quantile
+- volatilite
 
 ## Objectifs d'apprentissage
-À la fin de ce module, vous saurez :
-- Expliquer l'intuition du sujet avant toute formule ;
-- Identifier les inputs, les risques et les hypothèses clés ;
-- Dérouler un calcul chiffré et l'interpréter en langage de desk ;
-- Répondre à un mini-quiz et résoudre un exercice corrigé ;
-- Nommer les limites du modèle et la décision opérationnelle associée.
+A la fin de ce module, vous saurez:
+- expliquer l'intuition du sujet avant toute formule;
+- identifier les inputs, les risques et les hypotheses cles;
+- derouler un calcul chiffre et l'interpreter en langage de desk;
+- repondre a un mini-quiz et resoudre un exercice corrige;
+- nommer les limites du modele et la decision operationnelle associee.
 
 ## Positionnement bibliotheque
-- Track : Gestion des risques
-- Type d'asset : module réutilisable de cours.
-- Sorties attendues : fiche apprenant, cas pratique, corrigé, quiz, notes instructeur.
-- Intégration SaaS : ce module doit pouvoir être découpé en leçons, exercices et checkpoints.
+- Track: Risk Management
+- Type d'asset: module reutilisable de cours.
+- Sorties attendues: fiche apprenant, cas pratique, corrige, quiz, notes instructeur.
+- Integration SaaS: ce module doit pouvoir etre decoupe en lecons, exercices et checkpoints.
 
 ## Deroule pratique
 ### Module 1 - Definir la question de risque
-- Objectif pratique : Clarifier horizon, confiance, exposition et limite.
-- Situation de desk : Un portefeuille approche son seuil de VaR intraday.
-- Notion utile : VaR unilatérale, horizon, volatilité.
-- Activité : Construire la fiche inputs du risk report.
-- Livrable apprenant : Risk ticket.
-
+- Objectif pratique: Clarifier horizon, confiance, exposition et limite.
+- Situation de desk: Un portefeuille approche son seuil de VaR intraday.
+- Notion utile: VaR one-sided, horizon, volatility.
+- Activite: Construire la fiche inputs du risk report.
+- Livrable apprenant: Risk ticket.
 ### Module 2 - Calcul VaR
-- Objectif pratique : Calculer une VaR paramétrique simple avec les bonnes unités.
-- Situation de desk : Le CRO demande une estimation rapide avant la clôture.
-- Notion utile : VaR = notional * vol * quantile.
-- Activité : Calculer et comparer à la limite.
-- Livrable apprenant : VaR + statut de limite.
-
+- Objectif pratique: Calculer une VaR parametrique simple avec les bonnes unites.
+- Situation de desk: Le CRO demande une estimation rapide avant la cloture.
+- Notion utile: VaR = notional * vol * quantile.
+- Activite: Calculer et comparer a la limite.
+- Livrable apprenant: VaR + statut de limite.
 ### Module 3 - Stress overlay
-- Objectif pratique : Montrer ce que la VaR ne capture pas.
-- Situation de desk : Un scénario historique dépasse le mouvement normal.
-- Notion utile : Stress test, perte de queue, expected shortfall.
-- Activité : Ajouter un choc sévère et comparer.
-- Livrable apprenant : Table VaR/stress.
-
-### Module 4 - Escalade
-- Objectif pratique : Transformer le chiffre en décision de gestion.
-- Situation de desk : La limite est franchie mais le desk propose d'attendre.
-- Notion utile : Réduire, couvrir, surveiller, escalader.
-- Activité : Écrire une note décisionnelle.
-- Livrable apprenant : Escalation memo.
+- Objectif pratique: Montrer ce que la VaR ne capture pas.
+- Situation de desk: Un scenario historique depasse le mouvement normal.
+- Notion utile: Stress test, tail loss, expected shortfall.
+- Activite: Ajouter un choc severe et comparer.
+- Livrable apprenant: Table VaR/stress.
+### Module 4 - Escalation
+- Objectif pratique: Transformer le chiffre en decision de gestion.
+- Situation de desk: La limite est franchie mais le desk propose d'attendre.
+- Notion utile: Reduce, hedge, monitor, escalate.
+- Activite: Ecrire une note decisionnelle.
+- Livrable apprenant: Escalation memo.
 
 ## Cours redige
 ### Lecon 1 - Definir la question de risque
 
-**Intuition _[reformule]_.** Un portefeuille approche son seuil de VaR intraday. L'objectif de cette leçon est précisément : Clarifier horizon, confiance, exposition et limite.
+Dans un environnement de marché, chaque décision de trading est empreinte d'incertitude. Prenons l'exemple d'un desk qui gère un portefeuille d'actions. Si ce portefeuille approche son seuil de VaR intraday, cela signifie que la perte potentielle sur une journée donnée pourrait dépasser un certain montant, disons 1 million d'euros. Cette situation nécessite une attention particulière, car elle implique que le desk est exposé à un risque de perte significatif. La notion de VaR one-sided devient alors cruciale : elle évalue la perte maximale attendue sur un horizon donné, ici intraday, avec un certain niveau de confiance, souvent fixé à 95% ou 99%. Cela signifie que, dans 95% des cas, la perte ne dépassera pas ce montant, mais dans 5% des cas, elle pourrait être bien plus importante.
 
-**Ce que disent les sources** _[extrait]_. « Banks assume market risk because they trade as principals, risking their own capital, and hold positions in financial instruments. Failure to manage market risk can have significant direct effects on a bank’s profitability and reputation. » [S2]
+La volatilité joue un rôle central dans cette évaluation. En période de forte volatilité, les mouvements de prix peuvent être plus importants, ce qui augmente la VaR et, par conséquent, l'exposition au risque. Sur un desk de trading, cette dynamique est essentielle à comprendre, car elle influence non seulement les décisions de positionnement, mais aussi la gestion des limites de risque. Comme le souligne l'extrait, "les banques assument le risque de marché parce qu'elles négocient en tant que principaux, risquant leur propre capital" [S2]. Cela signifie qu'une mauvaise gestion de cette exposition peut avoir des conséquences directes sur la rentabilité et la réputation de l'institution.
 
-**Le point clé : VaR unilatérale, horizon, volatilité.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
-
-**Mise en pratique _[genere]_.** Construire la fiche inputs du risk report. Livrable attendu : Risk ticket - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Confondre une sensibilité 'par 1%' avec 'par 0.01' : respecter strictement les unités.
+Un piège fréquent pour un junior est de négliger l'importance de l'horizon temporel dans l'évaluation de la VaR. Par exemple, un trader peut se concentrer uniquement sur la VaR intraday sans prendre en compte les fluctuations potentielles qui pourraient survenir sur des horizons plus longs, comme une semaine ou un mois. Cette vision à court terme peut conduire à une sous-estimation des risques réels et à des décisions de trading précipitées, mettant ainsi en péril la santé financière du desk.
 
 ### Lecon 2 - Calcul VaR
 
-**Intuition _[reformule]_.** Le CRO demande une estimation rapide avant la clôture. L'objectif de cette leçon est précisément : Calculer une VaR paramétrique simple avec les bonnes unités.
+Dans le monde du trading, la gestion des risques est cruciale pour assurer la pérennité des opérations. Imaginons un desk qui gère un portefeuille d'actions. À la fin de la journée, le Chief Risk Officer (CRO) demande une estimation rapide de la Value at Risk (VaR) pour évaluer le risque potentiel avant la clôture du marché. La VaR est un indicateur clé qui permet de quantifier la perte maximale attendue sur un portefeuille dans un scénario de marché donné, sur une période spécifique et avec un certain niveau de confiance. En d'autres termes, elle aide à répondre à la question : "Quelle est la pire perte que nous pourrions subir dans un avenir proche, avec une probabilité donnée ?"
 
-**Ce que disent les sources** _[extrait]_. « Risk management activity focuses on every level of transaction processing from pre-trade analysis through the deal capture and from confirmation through the settlement in order to control the operational risk. Market Risk Management Systems capture trade valuations of all portfolios and calculate various market risk measures, such as value at risk (VaR), at different levels. » [S3]
+Le calcul de la VaR repose sur trois éléments fondamentaux : le montant notionnel du portefeuille, la volatilité des actifs et le quantile correspondant à notre niveau de confiance. Par exemple, si nous avons un portefeuille d'actions d'une valeur notionnelle de 1 million d'euros, avec une volatilité estimée de 20 % sur une période d'un jour, et que nous cherchons une VaR à 95 % (ce qui signifie que nous nous attendons à ne pas dépasser cette perte dans 95 % des cas), nous pouvons rapidement estimer notre risque. Ce calcul est essentiel pour le desk, car il permet de prendre des décisions éclairées sur les positions à maintenir ou à réduire, en fonction de l'appétit pour le risque de l'entreprise. Comme mentionné dans l'extrait, les systèmes de gestion des risques de marché (MRMS) jouent un rôle clé dans la capture des valorisations des transactions et le calcul des mesures de risque, y compris la VaR [S3].
 
-**Le point clé : VaR = notional * vol * quantile.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
-
-**Mise en pratique _[genere]_.** Calculer et comparer à la limite. Livrable attendu : VaR + statut de limite - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Oublier le signe de la position (long/short, payer/receiver) dans l'interprétation du P&L.
+Cependant, un piège courant pour les juniors est de négliger l'importance des unités dans le calcul de la VaR. Par exemple, un junior pourrait se concentrer sur le calcul de la volatilité en pourcentage sans considérer comment cela se traduit en termes de valeur monétaire sur le portefeuille. Cela peut entraîner des erreurs significatives dans l'estimation du risque, car une mauvaise interprétation des unités peut fausser la perception du risque global. Il est donc crucial de toujours garder à l'esprit que la VaR doit être exprimée dans la même unité que le montant notionnel pour être pertinente et utile dans le contexte de la gestion des risques.
 
 ### Lecon 3 - Stress overlay
 
-**Intuition _[reformule]_.** Un scénario historique dépasse le mouvement normal. L'objectif de cette leçon est précisément : Montrer ce que la VaR ne capture pas.
+Dans le monde du trading, il est crucial de comprendre que la Value at Risk (VaR) ne capture pas toujours les événements extrêmes, souvent appelés "tail events". Prenons un exemple concret : imaginez que vous gérez un portefeuille d'options sur actions, et que vous anticipez un mouvement normal des prix. Cependant, un événement imprévu, comme une annonce gouvernementale majeure, pourrait provoquer un choc sévère sur le marché, dépassant les fluctuations habituelles. C'est ici qu'intervient le stress test, une méthode qui permet d'évaluer la résilience d'un portefeuille face à des scénarios extrêmes, en simulant des conditions de marché défavorables.
 
-**Ce que disent les sources** _[extrait]_. « Stress testing considers instances for particular value changes, such as a rapid change in interest rates or equity indices. » [S1]
+Le stress test permet de quantifier les pertes potentielles dans des situations extrêmes, en allant au-delà des limites de la VaR. Par exemple, si vous avez un portefeuille avec une VaR de 1 million d'euros sur un horizon de 10 jours, cela signifie que vous vous attendez à ne pas perdre plus de cette somme dans des conditions normales de marché. Cependant, un événement comme une crise financière pourrait entraîner des pertes bien plus importantes. En utilisant des scénarios historiques, comme ceux observés lors de la crise de 2008, vous pouvez simuler des chocs qui révèlent des pertes de queue (tail loss) significatives, ce que la VaR ne pourrait pas anticiper. En effet, comme le souligne l'extrait [S4], la stratégie adoptée par Nuñes doit prendre en compte des mouvements inattendus des prix, ce qui est essentiel pour une gestion proactive des risques.
 
-**Le point clé : Stress test, perte de queue, expected shortfall.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
+Dans un desk de trading, la compréhension de l'expected shortfall, qui mesure la perte moyenne au-delà de la VaR, devient essentielle. Cela permet aux traders de se préparer à des scénarios où les pertes dépassent les attentes normales, leur offrant ainsi une vision plus complète des risques auxquels ils sont exposés. En intégrant des chocs sévères dans vos simulations, vous pouvez comparer les résultats obtenus avec ceux de la VaR, et ainsi mieux appréhender la vulnérabilité de votre portefeuille.
 
-**Mise en pratique _[genere]_.** Ajouter un choc sévère et comparer. Livrable attendu : Table VaR/stress - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
+Un piège courant pour un junior est de se fier uniquement à la VaR sans considérer les scénarios de stress. Ils pourraient penser que la VaR est suffisante pour évaluer les risques, alors qu'en réalité, elle ne prend pas en compte les événements extrêmes qui pourraient avoir un impact dévastateur sur le portefeuille. Cette méprise peut mener à des décisions de trading mal informées, augmentant ainsi le risque global de l'entreprise.
 
-**Piège fréquent.** Appliquer une approximation locale (Taylor) à un choc trop large sans vérifier sa validité.
+### Lecon 4 - Escalation
 
-### Lecon 4 - Escalade
+Dans un environnement de trading, la gestion des risques de marché est cruciale, notamment lorsque les limites de risque sont franchies. Imaginons un desk qui, après une journée volatile, constate que sa position en actions a dépassé la limite de perte acceptable. Au lieu de réagir immédiatement, le desk propose d'attendre, espérant un retournement de marché. Cette attitude peut sembler rationnelle à court terme, mais elle expose l'entreprise à des pertes accrues. C'est ici qu'intervient la notion d'escalation, qui consiste à transformer des chiffres alarmants en décisions de gestion concrètes.
 
-**Intuition _[reformule]_.** La limite est franchie mais le desk propose d'attendre. L'objectif de cette leçon est précisément : Transformer le chiffre en décision de gestion.
+Lorsqu'une limite est franchie, il est essentiel de suivre un processus en quatre étapes : réduire, couvrir, surveiller et escalader. Réduire implique de diminuer l'exposition en liquidant une partie des positions risquées. Couvrir consiste à utiliser des instruments dérivés pour protéger les positions existantes. Surveiller, c'est garder un œil sur l'évolution du marché et l'impact potentiel sur le portefeuille. Enfin, escalader signifie alerter les niveaux supérieurs de la direction sur la situation, afin qu'ils puissent prendre des décisions éclairées. Comme le souligne l'extrait, "la variation des prix des actifs peut provenir de divers facteurs", et il est impératif de réagir rapidement pour éviter que ces variations n'affectent négativement les positions de la banque [S6].
 
-**Ce que disent les sources** _[extrait]_. « Market risk arises from the trading activities of banks and is a consequence of movements in market prices. » [S6]
-
-**Le point clé : Réduire, couvrir, surveiller, escalader.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
-
-**Mise en pratique _[genere]_.** Écrire une note décisionnelle. Livrable attendu : Escalation memo - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Présenter un chiffre sans unité ni ordre de grandeur de contrôle.
+Sur un desk de trading, la rapidité de la décision est essentielle. Ignorer une limite franchie peut entraîner des conséquences désastreuses. Un junior pourrait être tenté de minimiser l'importance de l'escalation, pensant que la situation peut se résoudre d'elle-même. Ce piège réside dans l'idée que le marché va toujours se redresser, ce qui peut mener à une inaction fatale. En réalité, la proactivité dans la gestion des risques est ce qui permet de préserver la santé financière de l'organisation et d'éviter des pertes catastrophiques.
 
 ## Labs pratiques a inclure
-1. VaR ticket : horizon, confiance, volatilité et exposition.
-2. Calcul VaR : comparer à une limite imposée.
-3. Stress overlay : ajouter un scénario extrême et commenter l'écart.
-4. Escalation memo : décision et suivi.
+1. VaR ticket: horizon, confiance, volatilite et exposition.
+2. Calcul VaR: comparer a une limite imposee.
+3. Stress overlay: ajouter un scenario extreme et commenter l'ecart.
+4. Escalation memo: decision et suivi.
 
 ## Script enseignant
 1. Ouvrir par un cas concret.
 2. Demander aux apprenants de formuler l'intuition.
 3. Introduire la notation minimale.
-4. Faire résoudre une micro-tâche.
-5. Débrief : erreurs courantes, limites, interprétation marché.
+4. Faire resoudre une micro-tache.
+5. Debrief: erreurs courantes, limites, interpretation marche.
 
 ## Supports a produire
 - Fiche apprenant d'une page.
-- Slides courtes orientées cas.
-- Notebook ou tableur de calcul si le sujet s'y prête.
-- Corrigé détaillé.
-- Quiz de vérification rapide.
+- Slides courtes orientees cas.
+- Notebook ou tableur de calcul si le sujet s'y prete.
+- Corrige detaille.
+- Quiz de verification rapide.
 
 ## Exemple numerique resolu
 _[genere - calcul verifie]_ On calcule une VaR parametrique simple et on la compare a une limite.

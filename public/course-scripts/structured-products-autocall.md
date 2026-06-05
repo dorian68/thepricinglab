@@ -7,163 +7,138 @@ concepts: coupon barrier, autocall, protection barrier, redemption
 source_count: 10
 ---
 
-# Module pratique - Produits structures autocallables de la fiche produit a la table de scenarios
+# Module pratique - Autocallable structured products from term sheet to scenario table
 
-> Légende de provenance du contenu:
+> Legende de provenance du contenu:
 > - **[extrait]** texte issu directement des sources RAG (marque [Sx]).
-> - **[reformule]** réécriture pédagogique d'un passage source.
-> - **[genere]** exemple/exercice/quiz construit à partir des concepts; calculs vérifiés par le moteur déterministe, non extraits d'une source.
+> - **[reformule]** reecriture pedagogique d'un passage source.
+> - **[genere]** exemple/exercice/quiz construit a partir des concepts; calculs verifies par le moteur deterministe, non extraits d'une source.
 
 ## Promesse du module
-Apprendre à manipuler, calculer, comparer et décider sur les produits structurés autocallables par la pratique, puis seulement formaliser la théorie nécessaire.
+Apprendre Autocallable structured products from term sheet to scenario table par la pratique: manipuler, calculer, comparer,
+decider, puis seulement formaliser la theorie necessaire.
 
 ## Niveau cible et public
-- Niveau: avancé
-- Public visé: quant confirmé, trader junior, structureur
-- Durée estimée: 150 minutes
-- Produit: note autocallable
-- Concepts: barrière de coupon, autocall, barrière de protection, remboursement
+- Niveau: advanced
+- Public vise: quant confirme, trader junior, structureur
+- Duree estimee: 150 minutes
+- Produit: autocallable note
+- Concepts: coupon barrier, autocall, protection barrier, redemption
 
 ## Prerequis
-- Options vanilla
-- Delta/gamma
-- Notion de dépendance au chemin
+- option vanilla
+- delta/gamma
+- notion de path-dependence
 
 ## Objectifs d'apprentissage
-À la fin de ce module, vous saurez:
-- Expliquer l'intuition du sujet avant toute formule;
-- Identifier les inputs, les risques et les hypothèses clés;
-- Dérouler un calcul chiffré et l'interpréter en langage de desk;
-- Répondre à un mini-quiz et résoudre un exercice corrigé;
-- Nommer les limites du modèle et la décision opérationnelle associée.
+A la fin de ce module, vous saurez:
+- expliquer l'intuition du sujet avant toute formule;
+- identifier les inputs, les risques et les hypotheses cles;
+- derouler un calcul chiffre et l'interpreter en langage de desk;
+- repondre a un mini-quiz et resoudre un exercice corrige;
+- nommer les limites du modele et la decision operationnelle associee.
 
 ## Positionnement bibliotheque
-- Track: Core Finance de Marché
-- Type d'asset: module réutilisable de cours.
-- Sorties attendues: fiche apprenant, cas pratique, corrigé, quiz, notes instructeur.
-- Intégration SaaS: ce module doit pouvoir être découpé en leçons, exercices et checkpoints.
+- Track: Market Finance Core
+- Type d'asset: module reutilisable de cours.
+- Sorties attendues: fiche apprenant, cas pratique, corrige, quiz, notes instructeur.
+- Integration SaaS: ce module doit pouvoir etre decoupe en lecons, exercices et checkpoints.
 
 ## Deroule pratique
 ### Module 1 - Extraire le term sheet
-- **Objectif pratique:** Transformer la fiche produit en conditions calculables.
-- **Situation de desk:** Sales envoie un autocall à expliquer avant un appel client.
-- **Notion utile:** Dates d'observation, barrière de coupon, niveau d'autocall.
-- **Activité:** Construire la table des conditions.
-- **Livrable apprenant:** Carte de term-sheet.
-
+- Objectif pratique: Transformer la fiche produit en conditions calculables.
+- Situation de desk: Sales envoie un autocall a expliquer avant client call.
+- Notion utile: Observation dates, coupon barrier, autocall level.
+- Activite: Construire la table des conditions.
+- Livrable apprenant: Term-sheet map.
 ### Module 2 - Coupon et autocall
-- **Objectif pratique:** Calculer les coupons et l'événement de remboursement anticipé.
-- **Situation de desk:** Le sous-jacent finit au-dessus du niveau d'autocall à une date d'observation.
-- **Notion utile:** Fonctions indicatrices, coupon mémoire, remboursement anticipé.
-- **Activité:** Remplir la logique date par date.
-- **Livrable apprenant:** Grille coupon/autocall.
-
+- Objectif pratique: Calculer les coupons et l'evenement de remboursement anticipe.
+- Situation de desk: Le sous-jacent finit au-dessus du niveau autocall a une date d'observation.
+- Notion utile: Indicator functions, memory coupon, early redemption.
+- Activite: Remplir la logique date par date.
+- Livrable apprenant: Coupon/autocall grid.
 ### Module 3 - Protection barrier
-- **Objectif pratique:** Expliquer la perte conditionnelle en fin de vie.
-- **Situation de desk:** Le sous-jacent finit sous la barrière.
-- **Notion utile:** Protection du capital, participation à la baisse.
-- **Activité:** Calculer le remboursement final.
-- **Livrable apprenant:** Explication de la perte.
-
+- Objectif pratique: Expliquer la perte conditionnelle en fin de vie.
+- Situation de desk: Le sous-jacent finit sous la barriere.
+- Notion utile: Capital protection, downside participation.
+- Activite: Calculer redemption finale.
+- Livrable apprenant: Downside explanation.
 ### Module 4 - Scenario table client
-- **Objectif pratique:** Comparer les scénarios haussier, stable, modérément baissier et de crash.
-- **Situation de desk:** Le client veut comprendre le coupon vs le capital à risque.
-- **Notion utile:** Dépendance des flux de trésorerie, remboursement, participation aux pertes.
-- **Activité:** Produire une table de scénarios lisible par sales.
-- **Livrable apprenant:** Table de scénarios client.
-
+- Objectif pratique: Comparer upside, flat, moderate down et crash scenario.
+- Situation de desk: Le client veut comprendre coupon vs capital at risk.
+- Notion utile: Cash-flow path dependency, redemption, loss participation.
+- Activite: Produire une table de scenarios lisible par sales.
+- Livrable apprenant: Client scenario table.
 ### Module 5 - Desk risk
-- **Objectif pratique:** Relier l'attrait client et les risques de couverture.
-- **Situation de desk:** La structure vend du coupon mais concentre du risque extrême.
-- **Notion utile:** Risque de barrière/gamma/vega/liquidité.
-- **Activité:** Écrire un mémo sales + risque.
-- **Livrable apprenant:** Mémo client/risque.
+- Objectif pratique: Relier attrait client et risques de couverture.
+- Situation de desk: La structure vend du coupon mais concentre du tail risk.
+- Notion utile: Barrier/gamma/vega/liquidity risk.
+- Activite: Ecrire memo sales + risk.
+- Livrable apprenant: Client/risk memo.
 
 ## Cours redige
 ### Lecon 1 - Extraire le term sheet
 
-**Intuition _[reformule]_.** Sales envoie un autocall à expliquer avant un appel client. L'objectif de cette leçon est précisément de transformer la fiche produit en conditions calculables.
+Dans le cadre d'une vente d'un produit structuré autocallable, il est crucial de bien comprendre les éléments clés du term sheet afin de les transformer en conditions calculables. Imaginons un scénario où le sous-jacent est un indice boursier, et que le produit offre un coupon conditionnel. Les dates d'observation, la barrière de coupon et le niveau d'autocall sont des paramètres fondamentaux qui détermineront le rendement et le risque associé à l'investissement. Par exemple, si le produit stipule que le coupon est versé uniquement si l'indice reste au-dessus d'une certaine barrière lors des dates d'observation, cela signifie que tout mouvement en dessous de ce seuil pourrait entraîner une perte de rendement pour l'investisseur.
 
-**Ce que disent les sources** _[extrait]_. « Dans ce cas, l'acheteur prend un risque important à la baisse et peut être surpris que dans un retournement du marché boursier, le produit entraîne des pertes. Ainsi, les investisseurs devraient comparer attentivement le rendement offert par le produit structuré aux taux du marché monétaire. » [S1]
+Sur un desk de trading, la capacité à extraire ces informations et à les traduire en conditions calculables est essentielle pour anticiper les réactions des clients et les mouvements de marché. Les dates d'observation permettent de déterminer à quel moment l'indice doit être évalué, tandis que le niveau d'autocall indique à quel seuil de performance le produit sera remboursé par anticipation. Cette dynamique est particulièrement importante dans un contexte de volatilité accrue, où les investisseurs pourraient être surpris par des pertes inattendues, comme le souligne l'extrait : "Thus, investors should carefully compare the yield offered by the" [S1]. Une bonne compréhension de ces mécanismes permet de mieux gérer les attentes des clients et de positionner le produit de manière stratégique.
 
-**Le point clé: Dates d'observation, barrière de coupon, niveau d'autocall.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
-
-**Mise en pratique _[genere]_.** Construire la table des conditions. Livrable attendu: Carte de term-sheet - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Confondre une sensibilité 'par 1%' avec 'par 0.01': respecter strictement les unités.
+Un piège courant pour un junior réside dans la confusion entre le niveau d'autocall et la barrière de coupon. Il peut être tentant de penser que ces deux éléments sont interchangeables, alors qu'ils jouent des rôles distincts dans la structure du produit. Le niveau d'autocall détermine si le produit sera remboursé avant son échéance, tandis que la barrière de coupon conditionne le versement des intérêts. Ignorer cette distinction peut mener à des erreurs dans la présentation du produit aux clients, entraînant des malentendus et potentiellement des pertes de confiance.
 
 ### Lecon 2 - Coupon et autocall
 
-**Intuition _[reformule]_.** Le sous-jacent finit au-dessus du niveau d'autocall à une date d'observation. L'objectif de cette leçon est précisément de calculer les coupons et l'événement de remboursement anticipé.
+Dans le monde des produits structurés autocallables, la compréhension des coupons et des événements de remboursement anticipé est cruciale pour optimiser la gestion des risques et des rendements. Imaginez un scénario où le sous-jacent, par exemple l'or, termine au-dessus du niveau d'autocall à une date d'observation. Cela signifie que le produit est susceptible d'être remboursé avant son échéance, ce qui peut avoir un impact significatif sur la stratégie de trading. Les coupons, souvent conditionnels, sont des éléments clés qui déterminent le rendement pour l'investisseur.
 
-**Ce que disent les sources** _[extrait]_. « À la date d'échéance prévue, en supposant qu'aucun événement de remboursement anticipé n'ait eu lieu :
-∙ Si GoldFinal ≥ GoldInitial, le remboursement est égal à (100% + Coupon conditionnel) × Notional;
-∙ Si GoldFinal < Put Strike, le détenteur de la note est exposé au risque de baisse découlant de la position de put courte et le remboursement sera égal à Notional × GoldFinal/GoldInitial. » [S2]
+Le mécanisme de calcul des coupons repose sur des fonctions indicatrices qui activent ou désactivent le paiement en fonction de la performance du sous-jacent. Par exemple, si l'or final est supérieur à l'or initial, le remboursement inclura un coupon conditionnel, augmentant ainsi le montant total remboursé. Ce point est essentiel pour un desk de trading, car il influence non seulement la valorisation du produit, mais également les décisions d'arbitrage et de couverture. Comme mentionné dans l'extrait, "si GoldFinal ≥ GoldInitial, redemption is equal to (100% + Conditional Coupon) × Notional" [S2]. Cela souligne l'importance d'une évaluation précise des niveaux d'observation pour anticiper les flux de trésorerie.
 
-**Le point clé: Fonctions indicatrices, coupon mémoire, remboursement anticipé.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
-
-**Mise en pratique _[genere]_.** Remplir la logique date par date. Livrable attendu: Grille coupon/autocall - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Oublier le signe de la position (long/short, payer/receiver) dans l'interprétation du P&L.
+Un piège fréquent pour un junior réside dans la confusion entre le coupon et le remboursement anticipé. Il est crucial de ne pas supposer que le simple fait d'atteindre le niveau d'autocall garantit le paiement du coupon. Parfois, des conditions spécifiques doivent être remplies, et un manque de vigilance sur ces détails peut entraîner des erreurs de calcul dans les prévisions de flux de trésorerie. Ainsi, une attention particulière à la logique de chaque date d'observation est indispensable pour éviter des surprises désagréables dans la gestion des produits structurés.
 
 ### Lecon 3 - Protection barrier
 
-**Intuition _[reformule]_.** Le sous-jacent finit sous la barrière. L'objectif de cette leçon est précisément d'expliquer la perte conditionnelle en fin de vie.
+Dans le cadre des produits structurés autocallables, la notion de barrière de protection est cruciale pour comprendre comment le capital est affecté en fin de vie. Imaginons un scénario où le sous-jacent, disons l'or, finit sous la barrière de protection. Cela signifie que le prix final de l'actif est inférieur à un certain seuil, souvent désigné comme le "Put Strike". Dans cette situation, le détenteur de la note subit une perte conditionnelle, car il est exposé à un risque de baisse qui découle de la position courte sur le put.
 
-**Ce que disent les sources** _[extrait]_. « À la date d'échéance prévue, en supposant qu'aucun événement de remboursement anticipé n'ait eu lieu :
-∙ Si GoldFinal ≥ GoldInitial, le remboursement est égal à (100% + Coupon conditionnel) × Notional;
-∙ Si GoldFinal < Put Strike, le détenteur de la note est exposé au risque de baisse découlant de la position de put courte et le remboursement sera égal à Notional × GoldFinal/GoldInitial. » [S3]
+Le mécanisme de cette protection est essentiel sur un desk de trading. Si à la date d'échéance programmée, le prix de l'or est inférieur à son niveau initial, la récupération du capital se fait sur la base d'un ratio qui compare le prix final au prix initial. En d'autres termes, le remboursement sera proportionnel à la performance de l'actif sous-jacent, ce qui peut entraîner une perte significative pour l'investisseur. Pour illustrer, si l'or se termine à 80 alors qu'il était à 100 au départ, le remboursement ne sera que de 80% du nominal, ce qui implique une perte de 20% du capital investi. Comme indiqué dans l'extrait, "la note-holder est exposé à la downside risk arising from the short put position" [S3].
 
-**Le point clé: Protection du capital, participation à la baisse.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
+Cette dynamique est d'une importance capitale pour les traders, car elle influence non seulement la stratégie de couverture, mais aussi la gestion des risques. Un desk doit être en mesure de prévoir ces scénarios et d'évaluer l'impact potentiel sur le portefeuille. La compréhension de la barrière de protection permet également de mieux communiquer avec les clients sur les risques associés à ces produits.
 
-**Mise en pratique _[genere]_.** Calculer le remboursement final. Livrable attendu: Explication de la perte - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Appliquer une approximation locale (Taylor) à un choc trop large sans vérifier sa validité.
+Un piège fréquent pour les juniors est de supposer que la barrière de protection garantit toujours le capital. Ils peuvent négliger le fait que, si le sous-jacent finit sous cette barrière, la protection ne s'applique pas et que le capital peut être considérablement réduit. Cette méprise peut conduire à des attentes irréalistes et à une mauvaise gestion des risques.
 
 ### Lecon 4 - Scenario table client
 
-**Intuition _[reformule]_.** Le client veut comprendre le coupon vs le capital à risque. L'objectif de cette leçon est précisément de comparer les scénarios haussier, stable, modérément baissier et de crash.
+Dans le cadre de l'évaluation des produits structurés autocallables, il est crucial de comprendre comment les scénarios de marché influencent les flux de trésorerie et le risque de capital. Imaginons un produit structuré qui offre un coupon conditionnel basé sur la performance d'un indice boursier. Dans un scénario haussier, où l'indice dépasse un certain seuil, le client peut recevoir un coupon attractif tout en préservant son capital. En revanche, dans un scénario de crash, où l'indice chute de manière significative, le risque de perte de capital devient réel, et le client pourrait ne pas récupérer son investissement initial. Cette dynamique de dépendance des flux de trésorerie est essentielle pour comprendre le fonctionnement des produits structurés sur un desk de trading.
 
-**Ce que disent les sources** _[extrait]_. « Bien sûr, si l'obligation zéro-coupon était celle d'un émetteur non gouvernemental, il y a un risque non négligeable de défaut. Clairement, les notes structurées "protégées du principal" émises par Lehman n'ont pas remboursé le principal lorsque Lehman Brothers a fait défaut, à la grande consternation des investisseurs qui ont mal compris l'idée. Cependant, une véritable protection du principal est toujours possible si un bon du Trésor zéro-coupon est acheté. » [S4]
+La notion de participation aux pertes est également centrale dans cette analyse. Dans un scénario modéré à la baisse, même si le capital est partiellement protégé, le coupon peut être réduit, ce qui impacte directement le rendement global du produit. Les traders doivent donc être capables d'expliquer à leurs clients comment ces différents scénarios affectent non seulement le coupon, mais aussi le capital à risque. Comme le souligne l'extrait, "il y a un risque non négligeable de défaut" dans les produits structurés, ce qui rappelle que la protection du capital n'est pas toujours garantie, surtout si l'émetteur est en difficulté [S4].
 
-**Le point clé: Dépendance des flux de trésorerie, remboursement, participation aux pertes.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
-
-**Mise en pratique _[genere]_.** Produire une table de scénarios lisible par sales. Livrable attendu: Table de scénarios client - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Présenter un chiffre sans unité ni ordre de grandeur de contrôle.
+Un piège courant pour un junior est de supposer que le coupon est toujours garanti, indépendamment de la performance du sous-jacent. Cela peut conduire à des attentes irréalistes chez le client, qui pourrait croire que son capital est entièrement protégé alors qu'il est en réalité soumis à des conditions de marché spécifiques. Une compréhension approfondie des scénarios de cash-flow et de la participation aux pertes est donc indispensable pour éviter de telles confusions et pour fournir des conseils éclairés aux clients.
 
 ### Lecon 5 - Desk risk
 
-**Intuition _[reformule]_.** La structure vend du coupon mais concentre du risque extrême. L'objectif de cette leçon est précisément de relier l'attrait client et les risques de couverture.
+Lorsqu'un desk de trading propose des produits structurés autocallables, il attire souvent les clients par la promesse d'un coupon attractif, tout en prenant en compte des risques sous-jacents significatifs. L'un des aspects cruciaux à considérer est le tail risk, qui se manifeste lorsque des événements extrêmes, bien que peu probables, peuvent entraîner des pertes considérables. En effet, ces structures, tout en offrant une protection du capital ou des améliorations de crédit, peuvent exposer le desk à des risques de barrière, gamma, vega et de liquidité qui ne sont pas toujours évidents pour les investisseurs [S5].
 
-**Ce que disent les sources** _[extrait]_. « L'ingénierie financière fournit des moyens de construire toute structure de paiement souhaitée par un investisseur. Cependant, souvent ces paiements impliquent des positions d'options complexes, et les clients peuvent ne pas avoir les connaissances, ou simplement les moyens, pour gérer de tels risques. Les praticiens du marché peuvent le faire mieux. Par exemple, de nombreux produits structurés offrent une protection du principal ou des améliorations de crédit aux investisseurs. » [S5]
+Le mécanisme de ces risques est intimement lié à la nature des options complexes qui composent ces produits. Par exemple, lorsque le sous-jacent approche une barrière, la sensibilité du prix du produit à de petites variations du sous-jacent (gamma) peut augmenter de manière exponentielle. Cela signifie qu'un léger mouvement du marché peut engendrer des fluctuations de prix importantes, rendant la couverture du risque plus difficile. De plus, le risque de liquidité peut se manifester si le desk doit liquider rapidement des positions pour couvrir ces risques, ce qui pourrait entraîner des coûts supplémentaires et des pertes. La gestion de ces risques est donc essentielle pour maintenir la rentabilité et la réputation du desk.
 
-**Le point clé: Risque de barrière/gamma/vega/liquidité.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
-
-**Mise en pratique _[genere]_.** Écrire un mémo sales + risque. Livrable attendu: Mémo client/risque - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Traiter un risque discontinu (barrière, défaut) comme un Greek lisse.
+Un piège courant pour un junior est de sous-estimer l'impact du risque de vega, qui est la sensibilité du prix d'une option par rapport à la volatilité implicite. En se concentrant uniquement sur le rendement promis, un junior peut négliger comment une variation de la volatilité peut affecter la valorisation du produit structuré. Cela peut conduire à des décisions de couverture inappropriées, augmentant ainsi l'exposition au risque de marché. Il est donc impératif de comprendre non seulement le produit vendu, mais également les dynamiques de risque qui l'accompagnent pour éviter des erreurs coûteuses.
 
 ## Labs pratiques a inclure
-1. Carte de term-sheet: dates, barrière de coupon, niveau d'autocall, barrière de protection.
-2. Grille coupon/autocall: calculer le coupon et la date de remboursement anticipé date par date.
-3. Downside: calculer le remboursement final sous la barrière de protection.
-4. Table de scénarios: scénarios haussier, stable, modérément baissier et de crash.
-5. Mémo sales/risque: bénéfice client, risque de couverture et risque extrême.
+1. Term-sheet map: dates, coupon barrier, autocall level, protection barrier.
+2. Coupon/autocall grid: calculer coupon et early redemption date par date.
+3. Downside: calculer redemption finale sous la barriere de protection.
+4. Scenario table: upside, flat, moderate down et crash scenario.
+5. Sales/risk memo: benefice client, risque de couverture et tail risk.
 
 ## Script enseignant
 1. Ouvrir par un cas concret.
 2. Demander aux apprenants de formuler l'intuition.
 3. Introduire la notation minimale.
-4. Faire résoudre une micro-tâche.
-5. Débrief: erreurs courantes, limites, interprétation marché.
+4. Faire resoudre une micro-tache.
+5. Debrief: erreurs courantes, limites, interpretation marche.
 
 ## Supports a produire
 - Fiche apprenant d'une page.
-- Slides courtes orientées cas.
-- Notebook ou tableur de calcul si le sujet s'y prête.
-- Corrigé détaillé.
-- Quiz de
+- Slides courtes orientees cas.
+- Notebook ou tableur de calcul si le sujet s'y prete.
+- Corrige detaille.
+- Quiz de verification rapide.
 
 ## Exemple numerique resolu
 _[genere - calcul verifie]_ On calcule le payoff conditionnel et on discute le gap risk.

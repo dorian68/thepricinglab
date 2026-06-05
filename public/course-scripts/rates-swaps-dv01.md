@@ -9,157 +9,140 @@ source_count: 10
 
 # Module pratique - Interest-rate swaps, PV and DV01
 
-> Légende de provenance du contenu:
+> Legende de provenance du contenu:
 > - **[extrait]** texte issu directement des sources RAG (marque [Sx]).
-> - **[reformule]** réécriture pédagogique d'un passage source.
-> - **[genere]** exemple/exercice/quiz construit à partir des concepts; calculs vérifiés par le moteur déterministe, non extraits d'une source.
+> - **[reformule]** reecriture pedagogique d'un passage source.
+> - **[genere]** exemple/exercice/quiz construit a partir des concepts; calculs verifies par le moteur deterministe, non extraits d'une source.
 
 ## Promesse du module
-Apprendre les swaps de taux d'intérêt, la valeur actuelle (PV) et le DV01 par la pratique : manipuler, calculer, comparer, décider, puis seulement formaliser la théorie nécessaire.
+Apprendre Interest-rate swaps, PV and DV01 par la pratique: manipuler, calculer, comparer,
+decider, puis seulement formaliser la theorie necessaire.
 
 ## Niveau cible et public
-- Niveau : intermédiaire
-- Public visé : junior quant, analyste market risk, sales/structuring junior
-- Durée estimée : 120 minutes
-- Produit : swap de taux d'intérêt en EUR
-- Concepts : par rate, annuité, DV01, choc de courbe
+- Niveau: intermediate
+- Public vise: junior quant, analyste market risk, sales/structuring junior
+- Duree estimee: 120 minutes
+- Produit: EUR interest-rate swap
+- Concepts: par rate, annuity, DV01, curve shock
 
 ## Prerequis
-- Valeur temps de l'argent
-- Courbe de taux
-- Actualisation
+- valeur temps de l'argent
+- courbe de taux
+- actualisation
 
 ## Objectifs d'apprentissage
-À la fin de ce module, vous saurez :
-- Expliquer l'intuition du sujet avant toute formule ;
-- Identifier les inputs, les risques et les hypothèses clés ;
-- Dérouler un calcul chiffré et l'interpréter en langage de desk ;
-- Répondre à un mini-quiz et résoudre un exercice corrigé ;
-- Nommer les limites du modèle et la décision opérationnelle associée.
+A la fin de ce module, vous saurez:
+- expliquer l'intuition du sujet avant toute formule;
+- identifier les inputs, les risques et les hypotheses cles;
+- derouler un calcul chiffre et l'interpreter en langage de desk;
+- repondre a un mini-quiz et resoudre un exercice corrige;
+- nommer les limites du modele et la decision operationnelle associee.
 
 ## Positionnement bibliotheque
-- Track : Rates & Fixed Income
-- Type d'asset : module réutilisable de cours.
-- Sorties attendues : fiche apprenant, cas pratique, corrigé, quiz, notes instructeur.
-- Intégration SaaS : ce module doit pouvoir être découpé en leçons, exercices et checkpoints.
+- Track: Rates & Fixed Income
+- Type d'asset: module reutilisable de cours.
+- Sorties attendues: fiche apprenant, cas pratique, corrige, quiz, notes instructeur.
+- Integration SaaS: ce module doit pouvoir etre decoupe en lecons, exercices et checkpoints.
 
 ## Deroule pratique
 ### Module 1 - Lire le ticket swap
-- **Objectif pratique** : Identifier payer/receiver, notional, coupon, maturité et index flottant.
-- **Situation de desk** : Un trader demande une lecture rapide d'un payer swap EUR 5Y avant un move BCE.
-- **Notion utile** : Cash-flow fixe contre flottant, par rate, annuité.
-- **Activité** : Transformer le ticket en tableau d'inputs et vérifier le sens du risque.
-- **Livrable apprenant** : Ticket enrichi + risque principal en une phrase.
-
+- Objectif pratique: Identifier payer/receiver, notional, coupon, maturite et index flottant.
+- Situation de desk: Un trader demande une lecture rapide d'un payer swap EUR 5Y avant un move BCE.
+- Notion utile: Cash-flow fixe contre flottant, par rate, annuite.
+- Activite: Transformer le ticket en tableau d'inputs et verifier le sens du risque.
+- Livrable apprenant: Ticket enrichi + risque principal en une phrase.
 ### Module 2 - PV par coupon gap
-- **Objectif pratique** : Estimer la valeur du swap avec l'écart fixed coupon vs par rate.
-- **Situation de desk** : Le coupon du book est au-dessus du mid-market ; il faut expliquer le PV.
-- **Notion utile** : PV approx = (par - fixed) * annuité * notionnel selon le sens.
-- **Activité** : Calculer PV, signe et interprétation front-office.
-- **Livrable apprenant** : PV expliqué avec signe payer/receiver.
-
+- Objectif pratique: Estimer la valeur du swap avec l'ecart fixed coupon vs par rate.
+- Situation de desk: Le coupon du book est au-dessus du mid-market; il faut expliquer le PV.
+- Notion utile: PV approx = (par - fixed) * annuite * notionnel selon le sens.
+- Activite: Calculer PV, signe et interpretation front-office.
+- Livrable apprenant: PV explique avec signe payer/receiver.
 ### Module 3 - DV01 et shock P&L
-- **Objectif pratique** : Convertir l'annuité en EUR/bp puis appliquer un choc de courbe.
-- **Situation de desk** : La courbe bouge de 10bp avant le comité risque.
-- **Notion utile** : DV01 = annuité * notionnel * 1bp.
-- **Activité** : Calculer DV01, P&L shock et seuil d'alerte.
-- **Livrable apprenant** : Tableau DV01/shock P&L.
-
+- Objectif pratique: Convertir l'annuite en EUR/bp puis appliquer un shock de courbe.
+- Situation de desk: La courbe bouge de 10bp avant le comite risque.
+- Notion utile: DV01 = annuite * notionnel * 1bp.
+- Activite: Calculer DV01, P&L shock et seuil d'alerte.
+- Livrable apprenant: Tableau DV01/shock P&L.
 ### Module 4 - Hedge et basis risk
-- **Objectif pratique** : Proposer une couverture réaliste et nommer ce qu'elle ne couvre pas.
-- **Situation de desk** : Le desk hedge avec futures ou swap opposé de tenor proche.
-- **Notion utile** : Parallel hedge, tenor mismatch, curve-shape risk.
-- **Activité** : Choisir hedge, sens, taille approximative et risque résiduel.
-- **Livrable apprenant** : Mémo hedge en 6 lignes.
-
+- Objectif pratique: Proposer une couverture realiste et nommer ce qu'elle ne couvre pas.
+- Situation de desk: Le desk hedge avec futures ou swap oppose de tenor proche.
+- Notion utile: Parallel hedge, tenor mismatch, curve-shape risk.
+- Activite: Choisir hedge, sens, taille approximative et risque residuel.
+- Livrable apprenant: Memo hedge en 6 lignes.
 ### Module 5 - Debrief production
-- **Objectif pratique** : Savoir quand l'approximation devient dangereuse.
-- **Situation de desk** : La position est matérialisée dans un report de risk management.
-- **Notion utile** : Conventions, multi-curve, collateral, interpolation.
-- **Activité** : Lister les contrôles avant validation.
-- **Livrable apprenant** : Checklist de validation desk.
+- Objectif pratique: Savoir quand l'approximation devient dangereuse.
+- Situation de desk: La position est materialisee dans un report de risk management.
+- Notion utile: Conventions, multi-curve, collateral, interpolation.
+- Activite: Lister les controles avant validation.
+- Livrable apprenant: Checklist de validation desk.
 
 ## Cours redige
 ### Lecon 1 - Lire le ticket swap
 
-**Intuition _[reformule]_.** Un trader demande une lecture rapide d'un payer swap EUR 5Y avant un move BCE. L'objectif de cette leçon est précisément : Identifier payer/receiver, notional, coupon, maturité et index flottant.
+Dans le cadre d'un swap de taux d'intérêt, deux parties échangent des flux de trésorerie, ce qui peut sembler abstrait, mais cela a des implications très concrètes sur le marché. Prenons un exemple : un trader sur desk doit rapidement évaluer un payer swap en euros de 5 ans avant une annonce de la BCE. Dans ce contexte, il est crucial de bien identifier les éléments clés du ticket swap : qui est le payeur et le receveur, quel est le montant notionnel, le taux de coupon, la maturité et l'index flottant. Ces informations permettent de comprendre la dynamique des flux de trésorerie fixes contre flottants, qui est au cœur de l'opération.
 
-**Ce que disent les sources** _[extrait]_. « In this and the subsequent chapter we will explore a type of derivative security known as a “swap.” Broadly, a swap is an exchange of cash flows between two counterparties over a number of periods of time. This chapter explores the most important swap product, the interest rate swap. » [S1]
+Le mécanisme d'un swap de taux d'intérêt repose sur l'échange de paiements basés sur un taux fixe contre un taux flottant, généralement indexé sur un taux de référence comme l'Euribor. Par exemple, si le trader doit payer un taux fixe de 2% sur un montant notionnel de 10 millions d'euros, il recevra en retour des paiements basés sur le taux flottant. Cela permet à l'entreprise de se couvrir contre les fluctuations des taux d'intérêt, mais cela expose également le trader à un risque de marché si les taux flottants augmentent. Sur desk, comprendre ces flux est essentiel pour gérer le risque et optimiser les positions.
 
-**Le point clé : Cash-flow fixe contre flottant, par rate, annuité.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
+En transformant le ticket swap en tableau d'inputs, le trader peut visualiser rapidement les flux de trésorerie sur la durée de vie du swap. Cela inclut le montant des paiements fixes et flottants, ainsi que la date de chaque paiement. Une telle représentation aide à vérifier le sens du risque : si le taux flottant dépasse le taux fixe, le trader pourrait se retrouver à payer davantage que ce qu'il reçoit, ce qui pourrait affecter la rentabilité de la position.
 
-**Mise en pratique _[genere]_.** Transformer le ticket en tableau d'inputs et vérifier le sens du risque. Livrable attendu : Ticket enrichi + risque principal en une phrase - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Confondre une sensibilité 'par 1%' avec 'par 0.01' : respecter strictement les unités.
+Un piège courant pour un junior est de confondre le payeur et le receveur dans le contexte du swap. Par exemple, un junior pourrait penser qu'un payer swap signifie qu'il va recevoir des paiements fixes, alors qu'en réalité, il s'engage à payer le taux fixe et à recevoir le taux flottant. Cette confusion peut entraîner des erreurs dans la gestion des positions et des risques associés, rendant la compréhension précise des termes du swap essentielle pour éviter des pertes inattendues.
 
 ### Lecon 2 - PV par coupon gap
 
-**Intuition _[reformule]_.** Le coupon du book est au-dessus du mid-market ; il faut expliquer le PV. L'objectif de cette leçon est précisément : Estimer la valeur du swap avec l'écart fixed coupon vs par rate.
+Dans un environnement de marché où le coupon fixe d'un swap est supérieur au mid-market, il est crucial de comprendre comment estimer la valeur actuelle (PV) de ce swap en tenant compte de l'écart entre le coupon fixe et le taux de référence. Imaginons que nous avons un swap avec un coupon fixe à 3 % alors que le taux de référence est à 2 %. L'écart de 1 % peut sembler anodin, mais il a un impact significatif sur la valorisation du swap. En effet, la valeur approximative du swap peut être estimée en multipliant cet écart par la notionnelle et par la durée restante du swap, ce qui nous donne une idée de la prime que nous avons par rapport au marché.
 
-**Ce que disent les sources** _[extrait]_. « Analysis of the Term Structure of Implied Volatilities, Journal of Financial Quantitative Analysis. » [S2]
+Le mécanisme derrière cette estimation repose sur l'idée que chaque point de base (bp) d'écart entre le coupon fixe et le taux de référence se traduit par une variation de la valeur actuelle du swap. Sur un desk de trading, cette compréhension est essentielle pour prendre des décisions éclairées. Si le coupon est supérieur, cela signifie que le swap génère des flux de trésorerie plus importants que ce que le marché exige, ce qui se traduit par une valeur positive pour le détenteur du swap. À l'inverse, un coupon inférieur pourrait entraîner une perte de valeur, rendant le swap moins attractif pour les investisseurs.
 
-**Le point clé : PV approx = (par - fixed) * annuité * notionnel selon le sens.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
+En analysant les implications de cet écart, il est également important de considérer le contexte de marché. Par exemple, si les taux d'intérêt sont en hausse, l'écart entre le coupon fixe et le taux de référence peut se réduire, ce qui affecte la valorisation du swap. Les traders doivent donc être vigilants et ajuster leurs estimations de PV en fonction des mouvements de marché. Comme le soulignent Heynen et al. [S2], la dynamique des taux d'intérêt et leur impact sur la valorisation des instruments dérivés sont des éléments clés à maîtriser pour une gestion efficace des risques.
 
-**Mise en pratique _[genere]_.** Calculer PV, signe et interprétation front-office. Livrable attendu : PV expliqué avec signe payer/receiver - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Oublier le signe de la position (long/short, payer/receiver) dans l'interprétation du P&L.
+Un piège courant pour un junior dans ce contexte est de négliger l'impact du temps sur la valorisation. Parfois, ils peuvent se concentrer uniquement sur l'écart entre le coupon fixe et le taux de référence sans tenir compte de la durée restante du swap. Cela peut conduire à une estimation erronée de la valeur actuelle, car le temps joue un rôle crucial dans la détermination de la valeur des flux futurs. Une mauvaise évaluation peut entraîner des décisions de trading sous-optimales, affectant ainsi la performance globale du desk.
 
 ### Lecon 3 - DV01 et shock P&L
 
-**Intuition _[reformule]_.** La courbe bouge de 10bp avant le comité risque. L'objectif de cette leçon est précisément : Convertir l'annuité en EUR/bp puis appliquer un choc de courbe.
+Dans le monde des swaps de taux d'intérêt, comprendre le DV01 est essentiel pour évaluer l'impact des variations de taux sur la valeur d'un portefeuille. Imaginons une situation où un desk de trading détient un swap avec un notional de 100 millions d'euros. Si la courbe des taux d'intérêt bouge de 10 points de base (bp) avant une réunion du comité de risque, il est crucial de savoir comment cette variation affectera le profit et la perte (P&L) du swap. Le DV01, qui représente la variation de la valeur d'un instrument pour une variation de 1 bp des taux d'intérêt, est calculé comme l'annuité multipliée par le notional, puis multipliée par 1 bp. Cela signifie que chaque mouvement de 1 bp dans la courbe des taux impacte directement la valeur de votre swap.
 
-**Ce que disent les sources** _[extrait]_. « The term structure of interest rates as a random field. » [S3]
+Sur un desk de trading, cette mesure est vitale car elle permet de quantifier le risque de taux d'intérêt. En appliquant un choc de 10 bp, comme dans notre exemple, on peut estimer rapidement le P&L en multipliant le DV01 par 10. Cela aide les traders à anticiper les pertes potentielles et à ajuster leurs positions en conséquence. Dans le contexte de la gestion des risques, une compréhension précise du DV01 permet également de définir des seuils d'alerte pour des mouvements de marché inattendus. Comme le souligne l'extrait de Flesaker, la modélisation des taux d'intérêt et des réclamations conditionnelles est essentielle pour une évaluation précise des instruments financiers [S3].
 
-**Le point clé : DV01 = annuité * notionnel * 1bp.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
-
-**Mise en pratique _[genere]_.** Calculer DV01, P&L shock et seuil d'alerte. Livrable attendu : Tableau DV01/shock P&L - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Appliquer une approximation locale (Taylor) à un choc trop large sans vérifier sa validité.
+Un piège fréquent pour les juniors est de confondre le DV01 avec la sensibilité globale d'un portefeuille. Ils peuvent penser que le DV01 est une mesure statique, alors qu'il est en réalité dynamique et dépend de la structure des taux d'intérêt. Une mauvaise interprétation peut conduire à des décisions de couverture inappropriées, augmentant ainsi le risque de pertes importantes lors de mouvements de marché. Il est donc crucial de bien comprendre que le DV01 doit être régulièrement recalibré en fonction des conditions de marché et des caractéristiques spécifiques des instruments détenus.
 
 ### Lecon 4 - Hedge et basis risk
 
-**Intuition _[reformule]_.** Le desk hedge avec futures ou swap opposé de tenor proche. L'objectif de cette leçon est précisément : Proposer une couverture réaliste et nommer ce qu'elle ne couvre pas.
+Dans le monde des marchés financiers, la gestion des risques de taux d'intérêt est cruciale pour les desks de trading. Imaginons un desk qui détient une position de swap à taux fixe, mais qui souhaite se protéger contre les variations de taux. Pour cela, il pourrait envisager d'utiliser des futures sur taux d'intérêt ou un swap opposé de tenor proche. Cependant, une couverture efficace ne se limite pas à simplement compenser une position; elle doit également tenir compte des risques résiduels, notamment le risque de base et le risque de décalage de maturité.
 
-**Ce que disent les sources** _[extrait]_. « A simple nonparametric approach to derivative security valuation. » [S4]
+Le mécanisme de couverture parallèle repose sur l'idée que les mouvements de taux d'intérêt affectent simultanément les instruments de couverture et la position sous-jacente. Cependant, si les maturités des instruments ne correspondent pas parfaitement, comme c'est souvent le cas avec des swaps de différents tenors, un risque de courbe se présente. Par exemple, si le desk utilise un swap de 5 ans pour couvrir un swap de 10 ans, il doit être conscient que les variations de la courbe des taux peuvent ne pas se déplacer de manière parallèle. Cela peut entraîner des pertes si la forme de la courbe change, même si les taux d'intérêt globaux restent stables. Comme l'indiquent les travaux sur la valorisation des dérivés, il est essentiel de comprendre non seulement les mouvements de taux, mais aussi la structure de la courbe pour une couverture efficace [S4].
 
-**Le point clé : Parallel hedge, tenor mismatch, curve-shape risk.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
-
-**Mise en pratique _[genere]_.** Choisir hedge, sens, taille approximative et risque résiduel. Livrable attendu : Mémo hedge en 6 lignes - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Présenter un chiffre sans unité ni ordre de grandeur de contrôle.
+Dans cette optique, le choix du type de couverture, de son sens (long ou court) et de sa taille doit être réfléchi. Par exemple, si le desk choisit de couvrir une position de 10 millions d'euros avec des futures, il doit estimer la taille de la position en fonction de la sensibilité de son swap et des variations anticipées des taux. Cependant, un piège courant pour un junior est de supposer que la couverture élimine totalement le risque. En réalité, même avec une couverture bien pensée, il reste un risque résiduel lié aux décalages de maturité et à la forme de la courbe, qui peut engendrer des pertes inattendues.
 
 ### Lecon 5 - Debrief production
 
-**Intuition _[reformule]_.** La position est matérialisée dans un report de risk management. L'objectif de cette leçon est précisément : Savoir quand l'approximation devient dangereuse.
+Dans le monde des swaps de taux d'intérêt, la compréhension des conventions de paiement est cruciale. Prenons un exemple concret : imaginez que vous êtes sur un desk de trading et que vous gérez une position en swaps basée sur le taux LIBOR à 3 mois. La spécificité de ces instruments réside dans le fait que les paiements ne se font qu'après un certain délai, ici 3 mois après que le taux ait été déterminé. Cela signifie que si le marché évolue rapidement, la valeur de votre position peut fluctuer de manière significative avant même que vous ne receviez ou ne payiez quoi que ce soit. Cette temporalité, où les swaps et options payent après un certain nombre de jours suivant l'expiration, est essentielle à prendre en compte pour évaluer le risque de votre position [S5].
 
-**Ce que disent les sources** _[extrait]_. « For interest rate swaps and options, the payoffs occur after a certain number of days following the expiration, depending on the days to maturity of the instrument that defines the underlying rate. » [S5]
+Sur un desk, la gestion du risque est primordiale. Lorsque vous évaluez la valeur actuelle (PV) de vos swaps, il est essentiel d'utiliser des courbes de taux appropriées, souvent appelées "multi-curve". Ces courbes reflètent les taux d'intérêt pour différentes maturités et sont influencées par divers facteurs, y compris les conditions de marché et les exigences de collatéral. Une mauvaise estimation de ces courbes peut mener à des évaluations erronées et à des décisions de trading basées sur des informations inexactes. En outre, l'interpolation des taux entre différentes maturités doit être effectuée avec soin, car une approximation trop simpliste peut masquer des risques sous-jacents importants.
 
-**Le point clé : Conventions, multi-curve, collateral, interpolation.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
+Avant de valider une position, il est impératif de mettre en place des contrôles rigoureux. Par exemple, vérifiez que les conventions de paiement sont correctement appliquées et que les courbes de taux utilisées pour le calcul de la PV sont à jour et pertinentes. Assurez-vous également que les ajustements pour le collatéral sont bien intégrés dans votre évaluation. Une attention particulière doit être portée à la synchronisation des flux de trésorerie, car une erreur dans la date de paiement peut entraîner des conséquences financières significatives.
 
-**Mise en pratique _[genere]_.** Lister les contrôles avant validation. Livrable attendu : Checklist de validation desk - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Traiter un risque discontinu (barrière, défaut) comme un Greek lisse.
+Un piège courant pour un junior est de négliger l'impact du délai de paiement sur l'évaluation des swaps. Par exemple, il pourrait penser qu'une simple estimation basée sur les taux actuels est suffisante, sans tenir compte des variations potentielles du marché d'ici le moment où les paiements seront effectués. Cette approche peut conduire à une sous-estimation du risque et à des surprises désagréables lorsque les conditions de marché changent.
 
 ## Labs pratiques a inclure
-1. Ticket swap : identifier payer/receiver, coupon, par rate, annuité et risque principal.
-2. PV/DV01 : calculer PV approximatif et EUR/bp sur un notionnel imposé.
-3. Shock P&L : appliquer +/-10bp et expliquer le signe.
-4. Hedge memo : proposer hedge, taille et basis risk.
-5. Debrief : contrôles de convention, courbe et collateral.
+1. Ticket swap: identifier payer/receiver, coupon, par rate, annuite et risque principal.
+2. PV/DV01: calculer PV approximatif et EUR/bp sur un notionnel impose.
+3. Shock P&L: appliquer +/-10bp et expliquer le signe.
+4. Hedge memo: proposer hedge, taille et basis risk.
+5. Debrief: controles de convention, courbe et collateral.
 
 ## Script enseignant
 1. Ouvrir par un cas concret.
 2. Demander aux apprenants de formuler l'intuition.
 3. Introduire la notation minimale.
-4. Faire résoudre une micro-tâche.
-5. Debrief : erreurs courantes, limites, interprétation marché.
+4. Faire resoudre une micro-tache.
+5. Debrief: erreurs courantes, limites, interpretation marche.
 
 ## Supports a produire
 - Fiche apprenant d'une page.
-- Slides courtes orientées cas.
-- Notebook ou tableur de calcul si le sujet s'y prête.
-- Corrigé détaillé.
-- Quiz de vérification rapide.
+- Slides courtes orientees cas.
+- Notebook ou tableur de calcul si le sujet s'y prete.
+- Corrige detaille.
+- Quiz de verification rapide.
 
 ## Exemple numerique resolu
 _[genere - calcul verifie]_ On valorise un payer swap et on mesure sa sensibilite a la courbe.

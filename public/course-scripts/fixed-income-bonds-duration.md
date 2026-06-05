@@ -7,140 +7,126 @@ concepts: clean price, YTM, duration, convexity, DV01
 source_count: 10
 ---
 
-# Module pratique - Evaluation des obligations, duration et P&L en cas de choc des taux
+# Module pratique - Bond pricing, duration and rate-shock P&L
 
-> Légende de provenance du contenu:
+> Legende de provenance du contenu:
 > - **[extrait]** texte issu directement des sources RAG (marque [Sx]).
-> - **[reformule]** réécriture pédagogique d'un passage source.
-> - **[genere]** exemple/exercice/quiz construit à partir des concepts; calculs vérifiés par le moteur déterministe, non extraits d'une source.
+> - **[reformule]** reecriture pedagogique d'un passage source.
+> - **[genere]** exemple/exercice/quiz construit a partir des concepts; calculs verifies par le moteur deterministe, non extraits d'une source.
 
 ## Promesse du module
-Apprendre l'évaluation des obligations, la duration et le P&L en cas de choc des taux par la pratique : manipuler, calculer, comparer, décider, puis seulement formaliser la théorie nécessaire.
+Apprendre Bond pricing, duration and rate-shock P&L par la pratique: manipuler, calculer, comparer,
+decider, puis seulement formaliser la theorie necessaire.
 
 ## Niveau cible et public
-- Niveau : débutant
-- Public visé : étudiant L3/M1, candidat en finance de marché, développeur front-office débutant
-- Durée estimée : 100 minutes
-- Produit : obligation à revenu fixe
-- Concepts : prix net, YTM, duration, convexité, DV01
+- Niveau: beginner
+- Public vise: etudiant L3/M1, candidat en finance de marche, developpeur front-office debutant
+- Duree estimee: 100 minutes
+- Produit: fixed-income bond
+- Concepts: clean price, YTM, duration, convexity, DV01
 
 ## Prerequis
-- Valeur temps de l'argent
-- Courbe de taux
-- Actualisation
+- valeur temps de l'argent
+- courbe de taux
+- actualisation
 
 ## Objectifs d'apprentissage
-À la fin de ce module, vous saurez :
-- Expliquer l'intuition du sujet avant toute formule ;
-- Identifier les inputs, les risques et les hypothèses clés ;
-- Dérouler un calcul chiffré et l'interpréter en langage de desk ;
-- Répondre à un mini-quiz et résoudre un exercice corrigé ;
-- Nommer les limites du modèle et la décision opérationnelle associée.
+A la fin de ce module, vous saurez:
+- expliquer l'intuition du sujet avant toute formule;
+- identifier les inputs, les risques et les hypotheses cles;
+- derouler un calcul chiffre et l'interpreter en langage de desk;
+- repondre a un mini-quiz et resoudre un exercice corrige;
+- nommer les limites du modele et la decision operationnelle associee.
 
 ## Positionnement bibliotheque
-- Track : Taux & Revenu Fixe
-- Type d'asset : module réutilisable de cours.
-- Sorties attendues : fiche apprenant, cas pratique, corrigé, quiz, notes instructeur.
-- Intégration SaaS : ce module doit pouvoir être découpé en leçons, exercices et checkpoints.
+- Track: Rates & Fixed Income
+- Type d'asset: module reutilisable de cours.
+- Sorties attendues: fiche apprenant, cas pratique, corrige, quiz, notes instructeur.
+- Integration SaaS: ce module doit pouvoir etre decoupe en lecons, exercices et checkpoints.
 
 ## Deroule pratique
-### Module 1 - Carte des flux de tresorerie
-- Objectif pratique : Lire coupon, maturité, rendement et principal.
-- Situation de desk : Un portefeuille obligataire doit expliquer son P&L en matière de taux.
-- Notion utile : Coupon, prix net/prix brut, intérêts courus.
-- Activité : Construire le tableau des flux de trésorerie.
-- Livrable apprenant : Calendrier des flux de trésorerie.
-
-### Module 2 - Prix et rendement
-- Objectif pratique : Relier prix et rendement sans perdre les conventions.
-- Situation de desk : Le rendement moyen bouge et le prix doit être estimé.
-- Notion utile : YTM, facteurs d'actualisation, intérêts courus.
-- Activité : Calculer un prix approximatif et vérifier le sens prix/rendement.
-- Livrable apprenant : Tableau de prix.
-
+### Module 1 - Cash-flow map
+- Objectif pratique: Lire coupon, maturite, yield et principal.
+- Situation de desk: Un bond book doit expliquer son P&L rates.
+- Notion utile: Coupon, clean/dirty price, accrued interest.
+- Activite: Construire le tableau de cash-flows.
+- Livrable apprenant: Cash-flow schedule.
+### Module 2 - Prix et yield
+- Objectif pratique: Relier prix et rendement sans perdre les conventions.
+- Situation de desk: Le yield mid bouge et le prix doit etre estime.
+- Notion utile: YTM, discount factors, accrued interest.
+- Activite: Calculer un prix approximatif et verifier le sens prix/yield.
+- Livrable apprenant: Pricing table.
 ### Module 3 - Duration et DV01
-- Objectif pratique : Convertir une position en sensibilité EUR/bp.
-- Situation de desk : Le risque demande l'impact d'un +25bp.
-- Notion utile : Duration modifiée, DV01.
-- Activité : Calculer DV01 et P&L en cas de choc.
-- Livrable apprenant : Rapport sur la duration.
-
-### Module 4 - Convexite et limites
-- Objectif pratique : Savoir quand la duration linéaire ne suffit plus.
-- Situation de desk : Un mouvement de taux large rend l'approximation fragile.
-- Notion utile : Correction de convexité.
-- Activité : Comparer approximation linéaire et corrigée.
-- Livrable apprenant : Avertissement sur le risque.
+- Objectif pratique: Convertir une position en sensibilite EUR/bp.
+- Situation de desk: Risk demande l'impact d'un +25bp.
+- Notion utile: Modified duration, DV01.
+- Activite: Calculer DV01 et shock P&L.
+- Livrable apprenant: Duration report.
+### Module 4 - Convexity et limites
+- Objectif pratique: Savoir quand la duration lineaire ne suffit plus.
+- Situation de desk: Un mouvement de taux large rend l'approximation fragile.
+- Notion utile: Convexity correction.
+- Activite: Comparer approximation lineaire et corrigee.
+- Livrable apprenant: Risk caveat.
 
 ## Cours redige
-### Lecon 1 - Carte des flux de tresorerie
+### Lecon 1 - Cash-flow map
 
-**Intuition _[reformule]_.** Un portefeuille obligataire doit expliquer son P&L en matière de taux. L'objectif de cette leçon est précisément : Lire coupon, maturité, rendement et principal.
+Dans le monde des marchés financiers, comprendre le cash-flow d'une obligation est essentiel pour évaluer sa valeur et son impact sur le P&L d'un desk de trading. Prenons l'exemple d'une obligation qui verse un coupon semestriel. Chaque paiement de coupon représente un flux de trésorerie que l'investisseur reçoit à des moments précis, et la maturité de l'obligation indique quand le principal sera remboursé. Cette structure de cash-flows permet aux traders de prévoir les revenus futurs et d'évaluer la sensibilité du prix de l'obligation aux variations des taux d'intérêt.
 
-**Ce que disent les sources** _[extrait]_. « Because the strategy is designed for interest rate futures, we will illustrate it with reference to a bond and a bond futures contract. In order to understand the price sensitivity formula, we must first review the concept of a bond’s duration. Duration has several specific definitions, but generally is used as a measure of price sensitivity. » [S2]
+Le prix d'une obligation peut être divisé en deux composantes : le prix "clean" et le prix "dirty". Le prix clean est le montant que l'on paie pour l'obligation sans tenir compte des intérêts courus, tandis que le prix dirty inclut ces intérêts accumulés depuis le dernier paiement de coupon. Cette distinction est cruciale pour les desks de trading, car elle affecte directement la valorisation des positions. En effet, lorsque l'on évalue le P&L, il est impératif de savoir si l'on considère le prix clean ou dirty, car cela peut changer la perception de la performance d'une position.
 
-**Le point clé : Coupon, prix net/prix brut, intérêts courus.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
+Pour illustrer cela, construisons un tableau de cash-flows pour une obligation hypothétique. Imaginons une obligation à 10 ans avec un coupon de 5 % payé semestriellement. Chaque six mois, l'investisseur recevra un paiement de coupon, et à la fin de la période, le principal sera remboursé. Ce tableau permettra aux traders de visualiser clairement les flux de trésorerie à venir, facilitant ainsi la gestion des risques et la prise de décision sur le desk.
 
-**Mise en pratique _[genere]_.** Construire le tableau des flux de trésorerie. Livrable attendu : Calendrier des flux de trésorerie - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
+Un piège courant pour un junior est de confondre le montant du coupon avec le prix de l'obligation. Il est facile de penser que le coupon représente la valeur totale de l'obligation, alors qu'il ne s'agit que d'une partie de la rentabilité. En réalité, le prix de l'obligation fluctue en fonction des taux d'intérêt et d'autres facteurs de marché, ce qui peut entraîner des surprises dans le P&L si l'on ne prend pas en compte ces éléments.
 
-**Piège fréquent.** Confondre une sensibilité 'par 1%' avec 'par 0.01' : respecter strictement les unités.
+### Lecon 2 - Prix et yield
 
-### Lecon 2 - Prix et rendement
+Dans le monde des marchés financiers, comprendre la relation entre le prix d'une obligation et son rendement est essentiel pour toute opération sur desk. Imaginons qu'une obligation se négocie à 100. Si le rendement à l'échéance (YTM) de cette obligation augmente, le prix de l'obligation doit nécessairement diminuer pour que le rendement reflète le nouveau taux de marché. Cela s'explique par le fait que le rendement est la compensation que les investisseurs exigent pour le risque de détenir l'obligation, et lorsque les taux augmentent, les obligations existantes, avec des coupons fixes, deviennent moins attractives.
 
-**Intuition _[reformule]_.** Le rendement moyen bouge et le prix doit être estimé. L'objectif de cette leçon est précisément : Relier prix et rendement sans perdre les conventions.
+Pour un trader, cette dynamique est cruciale. Lorsqu'un yield mid bouge, il est impératif d'estimer rapidement le nouveau prix de l'obligation. Cela implique d'utiliser des facteurs d'actualisation qui tiennent compte des flux de trésorerie futurs de l'obligation. Par exemple, si l'on considère que le rendement a augmenté, les flux de trésorerie futurs doivent être actualisés à un taux plus élevé, ce qui réduit leur valeur présente, et par conséquent, le prix de l'obligation. En outre, il est essentiel de ne pas oublier l'intérêt couru, qui doit être ajouté au prix de l'obligation pour obtenir le prix de règlement correct.
 
-**Ce que disent les sources** _[extrait]_. « Summary OVERVIEW This reading on forward commitment pricing and valuation provides a foundation for understanding how forwards, futures, and swaps are both priced and valued. Key points include the following: The arbitrageur would rather have more money than less and abides by two fundamental rules: Do not use your own money, and do not take any price risk. » [S5]
-
-**Le point clé : YTM, facteurs d'actualisation, intérêts courus.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
-
-**Mise en pratique _[genere]_.** Calculer un prix approximatif et vérifier le sens prix/rendement. Livrable attendu : Tableau de prix - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Oublier le signe de la position (long/short, payer/receiver) dans l'interprétation du P&L.
+Un piège courant pour un junior dans ce contexte est de négliger l'impact de l'intérêt couru lors de l'évaluation du prix. Parfois, un trader peut se concentrer uniquement sur le prix théorique calculé à partir du YTM sans prendre en compte l'intérêt couru accumulé depuis le dernier paiement de coupon. Cela peut entraîner une estimation incorrecte du prix à payer ou à recevoir, affectant ainsi la rentabilité de la transaction. En gardant à l'esprit ces conventions, un trader peut naviguer plus efficacement dans le monde complexe des obligations.
 
 ### Lecon 3 - Duration et DV01
 
-**Intuition _[reformule]_.** Le risque demande l'impact d'un +25bp. L'objectif de cette leçon est précisément : Convertir une position en sensibilité EUR/bp.
+Dans le monde des marchés financiers, comprendre la sensibilité d'une position de taux d'intérêt est crucial pour gérer le risque. Prenons un exemple concret : imaginez que vous détenez une obligation qui pourrait voir son prix fluctuer en fonction des variations des taux d'intérêt. Ici, la notion de **duration** et de **DV01** (dollar value of 01) devient essentielle. La duration modifiée, en particulier, mesure la sensibilité du prix d'une obligation à un changement de 1 point de base (bp) dans les taux d'intérêt. Cela signifie qu'une obligation avec une duration modifiée de 5 ans verra son prix changer d'environ 5 % si les taux augmentent de 100 points de base.
 
-**Ce que disent les sources** _[extrait]_. « One important variation of Macaulay’s duration is called modified duration, which measures the bond price change, adjusted for the level of yield (the yield per compounding period). Specifically, modified duration is expressed as MDB = DURB / (1 + yB) * (ΔB/B) / (ΔyB). » [S2]
+Sur un desk de trading, le calcul du DV01 permet de quantifier ce risque de manière plus tangible. En effet, le DV01 représente la variation en dollars du prix d'une obligation pour un mouvement de 1 point de base. Cela devient particulièrement pertinent lorsque le risk manager demande l'impact d'une variation de 25 points de base. Par exemple, si votre DV01 est de 50 €, une hausse de 25 bp entraînera une perte théorique de 12,50 € sur votre position. Ce mécanisme est fondamental pour les traders, car il leur permet d'évaluer rapidement l'impact potentiel d'un changement de taux sur leur portefeuille, en respectant les règles d'arbitrage qui stipulent qu'il est préférable d'éviter le risque de prix [S5].
 
-**Le point clé : Duration modifiée, DV01.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
+Cependant, un piège courant pour les juniors est de confondre la duration modifiée avec la duration classique. La première ajuste la sensibilité en tenant compte de la variation des taux, tandis que la seconde ne le fait pas. Cela peut mener à des estimations erronées du risque de taux, et donc à des décisions de trading mal informées. Il est donc crucial de bien saisir ces distinctions pour naviguer efficacement dans le monde complexe des obligations et des taux d'intérêt.
 
-**Mise en pratique _[genere]_.** Calculer DV01 et P&L en cas de choc. Livrable attendu : Rapport sur la duration - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
+### Lecon 4 - Convexity et limites
 
-**Piège fréquent.** Appliquer une approximation locale (Taylor) à un choc trop large sans vérifier sa validité.
+Dans un environnement de marché, la gestion des obligations exige une compréhension fine des variations de prix en fonction des mouvements des taux d'intérêt. Imaginons qu'un trader observe une forte hausse des taux, ce qui pourrait initialement sembler gérable grâce à la duration. Cependant, lorsque les taux changent de manière significative, la simple approximation par la duration linéaire devient insuffisante. C'est ici qu'intervient la notion de convexité, qui permet de mieux anticiper l'impact des variations de taux sur le prix des obligations.
 
-### Lecon 4 - Convexite et limites
+La convexité mesure la sensibilité du prix d'une obligation à des changements de taux d'intérêt, en tenant compte non seulement de la direction de ces changements, mais aussi de leur ampleur. En pratique, cela signifie que lorsque les taux augmentent ou diminuent de manière significative, le prix d'une obligation ne varie pas simplement selon une relation linéaire. Au lieu de cela, la convexité offre une correction qui ajuste cette approximation, rendant ainsi le modèle de tarification plus précis. Sur un desk de trading, cette précision est cruciale, car une mauvaise évaluation des risques peut mener à des pertes substantielles, surtout dans un contexte de volatilité accrue.
 
-**Intuition _[reformule]_.** Un mouvement de taux large rend l'approximation fragile. L'objectif de cette leçon est précisément : Savoir quand la duration linéaire ne suffit plus.
+En utilisant l'extrait mentionné, on peut comprendre que la fixation finale des prix sur les marchés, comme celle établie par Eurex, repose sur des mécanismes de volume qui peuvent également être influencés par des mouvements de taux importants. Si un trader ne prend pas en compte la convexité, il pourrait sous-estimer le risque de perte lors de la liquidation de positions, surtout si le prix final est basé sur des trades effectués dans un environnement de taux instable [S7].
 
-**Ce que disent les sources** _[extrait]_. « Final Settlement Price The Final Settlement Price is established by Eurex on the Final Settlement Day at 12:30 CET based on the volume-weighted average price of all trades during the final minute of trading provided that more than 10 trades occurred during this minute; otherwise the volume-weighted average price of the last 10 trades of the day, provided that these are. » [S7]
-
-**Le point clé : Correction de convexité.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
-
-**Mise en pratique _[genere]_.** Comparer approximation linéaire et corrigée. Livrable attendu : Avertissement sur le risque - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Présenter un chiffre sans unité ni ordre de grandeur de contrôle.
+Un piège courant pour un junior est de croire que la convexité n'est pertinente que pour des mouvements de taux extrêmes. En réalité, même des variations modérées peuvent rendre la duration linéaire inexacte. Ignorer cette nuance peut entraîner des erreurs dans la gestion des positions, car la convexité doit être intégrée dans toute analyse de sensibilité, quel que soit le contexte de taux.
 
 ## Labs pratiques a inclure
-1. Calendrier des flux de trésorerie : coupons, principal, intérêts courus et maturité.
-2. Prix net/YTM : calculer un prix approximatif et vérifier le sens prix-rendement.
-3. DV01 : convertir duration et prix en EUR/bp sur notionnel imposé.
-4. Choc des taux : appliquer +25bp puis comparer duration seule vs convexité.
-5. Note de risque : limites de l'approximation et contrôles de convention.
+1. Cash-flow schedule: coupons, principal, accrued interest et maturite.
+2. Clean price/YTM: calculer prix approximatif et verifier le sens prix-yield.
+3. DV01: convertir duration et prix en EUR/bp sur notionnel impose.
+4. Rate shock: appliquer +25bp puis comparer duration seule vs convexity.
+5. Risk note: limites de l'approximation et controles de convention.
 
 ## Script enseignant
 1. Ouvrir par un cas concret.
 2. Demander aux apprenants de formuler l'intuition.
 3. Introduire la notation minimale.
-4. Faire résoudre une micro-tâche.
-5. Débrief : erreurs courantes, limites, interprétation marché.
+4. Faire resoudre une micro-tache.
+5. Debrief: erreurs courantes, limites, interpretation marche.
 
 ## Supports a produire
 - Fiche apprenant d'une page.
-- Slides courtes orientées cas.
-- Notebook ou tableur de calcul si le sujet s'y prête.
-- Corrigé détaillé.
-- Quiz de vérification rapide.
+- Slides courtes orientees cas.
+- Notebook ou tableur de calcul si le sujet s'y prete.
+- Corrige detaille.
+- Quiz de verification rapide.
 
 ## Exemple numerique resolu
 _[genere - calcul verifie]_ On valorise un payer swap et on mesure sa sensibilite a la courbe.

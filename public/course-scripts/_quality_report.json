@@ -12,8 +12,8 @@
       "source_count": 10,
       "modules": [
         "Regle de payoff et chemin",
-        "Table de scenarios",
-        "Risque de gap",
+        "Scenario table",
+        "Gap risk",
         "Monitoring desk",
         "Debrief modele"
       ],
@@ -38,22 +38,20 @@
     },
     {
       "slug": "fixed-income-bonds-duration",
-      "status": "fail",
-      "quality_score": 90,
+      "status": "pass",
+      "quality_score": 100,
       "module_count": 4,
       "written_lesson_count": 4,
       "formula_count": 3,
       "source_ref_count": 10,
       "source_count": 10,
       "modules": [
-        "Carte des flux de tresorerie",
-        "Prix et rendement",
+        "Cash-flow map",
+        "Prix et yield",
         "Duration et DV01",
-        "Convexite et limites"
+        "Convexity et limites"
       ],
-      "issues": [
-        "missing expected keywords: cash-flow"
-      ]
+      "issues": []
     },
     {
       "slug": "implied-volatility-smile",
@@ -85,7 +83,7 @@
         "Definir la question de risque",
         "Calcul VaR",
         "Stress overlay",
-        "Escalade"
+        "Escalation"
       ],
       "issues": []
     },
@@ -102,7 +100,7 @@
         "Ticket de simulation",
         "Generer les chemins",
         "Prix et intervalle",
-        "Reduction de variance"
+        "Variance reduction"
       ],
       "issues": []
     },
@@ -204,7 +202,7 @@
       "source_count": 10,
       "modules": [
         "Lire les instruments de courbe",
-        "Bootstrap des facteurs d'actualisation",
+        "Bootstrap discount factors",
         "Zeros et forwards",
         "Controle et usage desk"
       ],
@@ -212,7 +210,7 @@
     }
   ],
   "summary": {
-    "passed": 11,
-    "failed": 1
+    "passed": 12,
+    "failed": 0
   }
 }

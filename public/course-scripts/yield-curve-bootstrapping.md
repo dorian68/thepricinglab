@@ -7,140 +7,126 @@ concepts: discount factors, zero curve, forward rates, interpolation
 source_count: 10
 ---
 
-# Module pratique - Construction de courbes de taux pour le pricing desk
+# Module pratique - Yield curve bootstrapping for desk pricing
 
-> Légende de provenance du contenu:
+> Legende de provenance du contenu:
 > - **[extrait]** texte issu directement des sources RAG (marque [Sx]).
-> - **[reformule]** réécriture pédagogique d'un passage source.
-> - **[genere]** exemple/exercice/quiz construit à partir des concepts; calculs vérifiés par le moteur déterministe, non extraits d'une source.
+> - **[reformule]** reecriture pedagogique d'un passage source.
+> - **[genere]** exemple/exercice/quiz construit a partir des concepts; calculs verifies par le moteur deterministe, non extraits d'une source.
 
 ## Promesse du module
-Apprendre la construction de courbes de taux pour le pricing desk par la pratique : manipuler, calculer, comparer, décider, puis seulement formaliser la théorie nécessaire.
+Apprendre Yield curve bootstrapping for desk pricing par la pratique: manipuler, calculer, comparer,
+decider, puis seulement formaliser la theorie necessaire.
 
 ## Niveau cible et public
-- Niveau : intermédiaire
-- Public visé : junior quant, analyste de risque de marché, junior sales/structuring
-- Durée estimée : 130 minutes
-- Produit : courbe de taux d'intérêt
-- Concepts : facteurs d'actualisation, courbe zéro, taux forward, interpolation
+- Niveau: intermediate
+- Public vise: junior quant, analyste market risk, sales/structuring junior
+- Duree estimee: 130 minutes
+- Produit: interest-rate curve
+- Concepts: discount factors, zero curve, forward rates, interpolation
 
 ## Prerequis
-- facteur d'actualisation
+- discount factor
 - interpolation
 - conventions de taux
 
 ## Objectifs d'apprentissage
-À la fin de ce module, vous saurez :
-- expliquer l'intuition du sujet avant toute formule ;
-- identifier les inputs, les risques et les hypothèses clés ;
-- dérouler un calcul chiffré et l'interpréter en langage de desk ;
-- répondre à un mini-quiz et résoudre un exercice corrigé ;
-- nommer les limites du modèle et la décision opérationnelle associée.
+A la fin de ce module, vous saurez:
+- expliquer l'intuition du sujet avant toute formule;
+- identifier les inputs, les risques et les hypotheses cles;
+- derouler un calcul chiffre et l'interpreter en langage de desk;
+- repondre a un mini-quiz et resoudre un exercice corrige;
+- nommer les limites du modele et la decision operationnelle associee.
 
 ## Positionnement bibliotheque
-- Track : Core Finance de Marché
-- Type d'asset : module réutilisable de cours.
-- Sorties attendues : fiche apprenant, cas pratique, corrigé, quiz, notes instructeur.
-- Intégration SaaS : ce module doit pouvoir être découpé en leçons, exercices et checkpoints.
+- Track: Market Finance Core
+- Type d'asset: module reutilisable de cours.
+- Sorties attendues: fiche apprenant, cas pratique, corrige, quiz, notes instructeur.
+- Integration SaaS: ce module doit pouvoir etre decoupe en lecons, exercices et checkpoints.
 
 ## Deroule pratique
 ### Module 1 - Lire les instruments de courbe
-- Objectif pratique : Classer les dépôts, futures et swaps par maturité et convention.
-- Situation de desk : Le desk doit reconstruire une courbe avant de pricer un swap.
-- Notion utile : Tenor, quote, accrual, facteur d'actualisation.
-- Activité : Transformer les quotes en tableau de bootstrap.
-- Livrable apprenant : Sheet d'input de courbe.
-
-### Module 2 - Bootstrap des facteurs d'actualisation
-- Objectif pratique : Extraire les facteurs d'actualisation un par un sans casser les maturités déjà calibrées.
-- Situation de desk : Une nouvelle quote 5Y arrive et change le point de courbe.
-- Notion utile : Récursion sur coupons, interpolation locale.
-- Activité : Calculer un point de courbe et documenter la convention.
-- Livrable apprenant : Échelle des facteurs d'actualisation.
-
+- Objectif pratique: Classer deposits, futures et swaps par maturite et convention.
+- Situation de desk: Le desk doit reconstruire une courbe avant de pricer un swap.
+- Notion utile: Tenor, quote, accrual, discount factor.
+- Activite: Transformer les quotes en tableau de bootstrap.
+- Livrable apprenant: Curve input sheet.
+### Module 2 - Bootstrap discount factors
+- Objectif pratique: Extraire les discount factors un par un sans casser les maturites deja calibrees.
+- Situation de desk: Une nouvelle quote 5Y arrive et change le point de courbe.
+- Notion utile: Recursion sur coupons, interpolation locale.
+- Activite: Calculer un point de courbe et documenter la convention.
+- Livrable apprenant: Discount-factor ladder.
 ### Module 3 - Zeros et forwards
-- Objectif pratique : Convertir les facteurs d'actualisation en taux zéro et forwards exploitables.
-- Situation de desk : Le trader veut lire le carry implicite entre deux maturités.
-- Notion utile : Taux zéro continu, taux forward discret.
-- Activité : Calculer les taux zéro/forward et commenter la pente.
-- Livrable apprenant : Rapport zéro-forward.
-
+- Objectif pratique: Convertir discount factors en zero rates et forwards exploitables.
+- Situation de desk: Le trader veut lire le carry implicite entre deux maturites.
+- Notion utile: Zero rate continu, forward rate discret.
+- Activite: Calculer zero/forward et commenter la pente.
+- Livrable apprenant: Zero-forward report.
 ### Module 4 - Controle et usage desk
-- Objectif pratique : Vérifier la monotonie, l'interpolation et l'impact sur la valeur actuelle (PV).
-- Situation de desk : Une interpolation trop agressive crée un faux signal de risque.
-- Notion utile : No-arbitrage local, smoothness, risque de forme de courbe.
-- Activité : Comparer deux interpolations et choisir une action.
-- Livrable apprenant : Mémo de validation de courbe.
+- Objectif pratique: Verifier monotonie, interpolation et impact sur PV.
+- Situation de desk: Une interpolation trop agressive cree un faux signal de risque.
+- Notion utile: No-arbitrage local, smoothness, curve-shape risk.
+- Activite: Comparer deux interpolations et choisir une action.
+- Livrable apprenant: Curve validation memo.
 
 ## Cours redige
 ### Lecon 1 - Lire les instruments de courbe
 
-**Intuition _[reformule]_.** Le desk doit reconstruire une courbe avant de pricer un swap. L'objectif de cette leçon est précisément : Classer les dépôts, futures et swaps par maturité et convention.
+Sur un desk de trading, la compréhension des instruments de courbe est cruciale pour la gestion des risques et la valorisation des swaps. Imaginons qu'un trader doit évaluer un swap à 5 ans. Pour cela, il doit d'abord établir une courbe de taux qui reflète les attentes du marché concernant les taux d'intérêt futurs. Les instruments comme les dépôts, les futures et les swaps doivent être classés par maturité et convention, car chaque instrument a un tenor spécifique qui influence sa contribution à la courbe.
 
-**Ce que disent les sources** _[extrait]_. « Distinguishing forward curves from discount curves (representing the collateralization of the forward) motivates an alternative interpolation method, namely interpolation of the forward value (the product of the forward and the discount factor). In addition, treating forward curves as native curves (instead of representing them by pseudo-discount curves) will avoid other problems, like that of overlapping instruments. » [S1]
+Le mécanisme de bootstrap consiste à extraire les taux d'intérêt à partir des quotes disponibles. Par exemple, un dépôt à terme de 3 mois aura une maturité différente d'un swap de 10 ans. En utilisant les quotes de ces instruments, le desk peut construire une courbe de taux qui permet de calculer les facteurs d'actualisation nécessaires pour évaluer le swap. La notion de quote est essentielle ici, car elle représente le taux d'intérêt implicite pour chaque maturité. En effet, comme le souligne l'extrait, "traiter les courbes forward comme des courbes natives" évite des problèmes d'interpolation qui pourraient fausser l'évaluation des instruments [S1].
 
-**Le point clé : Tenor, quote, accrual, facteur d'actualisation.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
+Il est également important de comprendre les conventions d'accumulation et de décote. L'accumulation se réfère à la manière dont les intérêts sont calculés sur une période donnée, tandis que le facteur de décote est utilisé pour ramener les flux de trésorerie futurs à leur valeur actuelle. Ces concepts sont interconnectés et leur bonne maîtrise permet d'éviter des erreurs dans la valorisation. En transformant les quotes en un tableau de bootstrap, le desk peut visualiser clairement comment chaque instrument contribue à la courbe, facilitant ainsi la prise de décision.
 
-**Mise en pratique _[genere]_.** Transformer les quotes en tableau de bootstrap. Livrable attendu : Sheet d'input de courbe - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
+Un piège courant pour un junior réside dans la confusion entre les courbes forward et les courbes de décote. Il peut être tentant de considérer les taux forward comme des taux de décote, mais cela peut mener à des évaluations erronées. Comprendre que les courbes forward doivent être traitées différemment pour éviter les chevauchements d'instruments est essentiel pour une évaluation précise des swaps.
 
-**Piège fréquent.** Confondre une sensibilité 'par 1%' avec 'par 0.01' : respecter strictement les unités.
+### Lecon 2 - Bootstrap discount factors
 
-### Lecon 2 - Bootstrap des facteurs d'actualisation
+Dans le contexte d'un desk de trading, la gestion précise des facteurs d'actualisation est cruciale, surtout lorsqu'une nouvelle quote arrive, comme une obligation à 5 ans, qui peut modifier la courbe des taux. L'intuition de marché ici est que chaque point de la courbe des taux doit être calibré avec soin pour refléter les conditions actuelles du marché, tout en maintenant la cohérence des maturités déjà établies. Cela signifie que, lorsque nous intégrons une nouvelle quote, nous devons extraire les facteurs d'actualisation un par un, en utilisant une méthode de bootstrap qui respecte les valeurs existantes.
 
-**Intuition _[reformule]_.** Une nouvelle quote 5Y arrive et change le point de courbe. L'objectif de cette leçon est précisément : Extraire les facteurs d'actualisation un par un sans casser les maturités déjà calibrées.
+Le mécanisme de bootstrap consiste à calculer les facteurs d'actualisation à partir des taux des instruments de taux d'intérêt, en commençant par les maturités les plus courtes. Chaque nouveau taux que nous ajoutons, comme celui de la quote à 5 ans, doit être intégré sans perturber les points de la courbe déjà calibrés. Cela implique une interpolation locale, où nous utilisons les taux existants pour estimer le nouveau facteur d'actualisation. En procédant ainsi, nous évitons les oscillations qui pourraient résulter de l'utilisation de taux pour des périodes qui se chevauchent, ce qui pourrait créer des delta-hedges peu plausibles [S3].
 
-**Ce que disent les sources** _[extrait]_. « The method is a common practice (also considered in [1]). However, considering forwards for overlapping periods, this may introduce oscillations and result in implausible delta-hedges (see » [S3]
+En pratique, lorsque vous calculez un point de courbe, il est essentiel de documenter la convention utilisée. Par exemple, si vous avez un coupon semestriel, il faut s'assurer que les périodes d'actualisation soient correctement alignées avec la fréquence des paiements. Cela garantit que les valeurs calculées sont non seulement précises, mais également conformes aux normes du marché.
 
-**Le point clé : Récursion sur coupons, interpolation locale.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
-
-**Mise en pratique _[genere]_.** Calculer un point de courbe et documenter la convention. Livrable attendu : Échelle des facteurs d'actualisation - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Oublier le signe de la position (long/short, payer/receiver) dans l'interprétation du P&L.
+Un piège courant pour un junior est de négliger l'importance de la cohérence dans l'interpolation des taux. Par exemple, en essayant d'ajuster trop rapidement un facteur d'actualisation sans tenir compte des impacts sur les autres maturités, il peut créer des incohérences dans la courbe, ce qui peut entraîner des erreurs de pricing significatives. Il est donc impératif de procéder avec prudence et méthode, en vérifiant systématiquement l'impact de chaque ajustement sur l'ensemble de la courbe.
 
 ### Lecon 3 - Zeros et forwards
 
-**Intuition _[reformule]_.** Le trader veut lire le carry implicite entre deux maturités. L'objectif de cette leçon est précisément : Convertir les facteurs d'actualisation en taux zéro et forwards exploitables.
+Dans le monde des marchés financiers, comprendre la relation entre les taux d'intérêt à différentes maturités est essentiel pour le trader. Lorsqu'un trader souhaite évaluer le carry implicite entre deux maturités, il doit pouvoir convertir les facteurs de discount en taux zéro et en taux forward. Cette conversion est cruciale car elle permet de déterminer le coût de financement et les opportunités d'arbitrage entre différents instruments financiers. Par exemple, si un trader observe un taux zéro à un an et un autre à deux ans, il peut en déduire le coût d'un financement à un an dans le cadre d'un investissement à deux ans.
 
-**Ce que disent les sources** _[extrait]_. « 15(3), 401–419 (2015) 14. Cuchiero, C., Fontana, C., Gnoatto, A.: A general HJM framework for multiple yield curve modeling. 20(2), 267–320 (2016) 15. Filipovi´c, D., Trolle, A.B.: The term structure of interbank risk. 109(3), 707–733 (2013) 16. Fujii, M., Takahashi, A.: Derivative pricing under asymmetric and imperfect collateralization and CVA. 13(5), 749–768 (2013) » [S4]
+Le mécanisme de conversion repose sur l'idée que les taux zéro représentent le rendement d'un investissement sans risque sur une période donnée, tandis que les taux forward indiquent le rendement anticipé d'un investissement à partir d'une date future. Dans un environnement de desk, ces taux sont utilisés pour évaluer les produits dérivés et les obligations, ainsi que pour gérer les risques de taux d'intérêt. En lisant les taux zéro et forward, un trader peut mieux comprendre comment les variations des taux d'intérêt affecteront la valeur de ses positions. Comme le souligne l'extrait, la modélisation de la structure par terme est essentielle pour appréhender les risques associés aux différents instruments financiers [S4].
 
-**Le point clé : Taux zéro continu, taux forward discret.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
-
-**Mise en pratique _[genere]_.** Calculer les taux zéro/forward et commenter la pente. Livrable attendu : Rapport zéro-forward - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Appliquer une approximation locale (Taylor) à un choc trop large sans vérifier sa validité.
+Cependant, un piège courant pour un junior réside dans la confusion entre les taux zéro continus et les taux forward discrets. Un junior pourrait penser que ces deux concepts sont interchangeables, alors qu'ils représentent des informations différentes sur le marché. Par exemple, un taux zéro continu pourrait sembler plus attractif, mais il ne doit pas être utilisé pour évaluer directement les opportunités de carry sans tenir compte des taux forward. Cette distinction est fondamentale pour éviter des erreurs d'interprétation qui pourraient coûter cher sur le desk.
 
 ### Lecon 4 - Controle et usage desk
 
-**Intuition _[reformule]_.** Une interpolation trop agressive crée un faux signal de risque. L'objectif de cette leçon est précisément : Vérifier la monotonie, l'interpolation et l'impact sur la valeur actuelle (PV).
+Dans le contexte d'un desk de trading, la gestion des courbes de taux est cruciale pour évaluer les instruments financiers. Imaginons que vous ayez deux courbes de taux, l'une obtenue par une interpolation linéaire et l'autre par une interpolation spline. Si la première présente une variation brutale à certains points, cela pourrait créer une perception erronée du risque associé à des produits dérivés. En effet, une interpolation trop agressive peut masquer des variations de taux plus subtiles, entraînant des décisions de trading basées sur des signaux erronés. C'est ici que la notion de monotonie entre en jeu : une courbe de taux doit être non seulement croissante, mais également lisse pour refléter correctement les attentes du marché.
 
-**Ce que disent les sources** _[extrait]_. « Note that these two curves are interchangeable, and knowledge of one completely determines the other. » [S5]
+Le mécanisme sous-jacent repose sur le principe de no-arbitrage local, qui stipule que les prix des actifs doivent être cohérents à court terme pour éviter des opportunités d'arbitrage. Si une interpolation crée des sauts brusques, cela peut engendrer des incohérences dans les prix des produits dérivés, ce qui est problématique pour un desk, car cela pourrait mener à des pertes inattendues. Ainsi, la smoothness de la courbe est essentielle pour garantir que les variations de prix soient prévisibles et alignées avec les attentes du marché. Comme le souligne l'extrait, "ces deux courbes sont interchangeables", ce qui signifie qu'une connaissance approfondie de l'une permet de déduire l'autre, rendant d'autant plus critique la précision de l'interpolation choisie [S5].
 
-**Le point clé : No-arbitrage local, smoothness, risque de forme de courbe.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
-
-**Mise en pratique _[genere]_.** Comparer deux interpolations et choisir une action. Livrable attendu : Mémo de validation de courbe - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Présenter un chiffre sans unité ni ordre de grandeur de contrôle.
+Un piège courant pour un junior est de privilégier une interpolation qui semble plus précise sur des données historiques, sans tenir compte de la continuité et de la forme de la courbe. Par exemple, choisir une interpolation qui présente des pics et des creux marqués peut sembler séduisant à première vue, mais cela peut créer des faux signaux de risque qui nuisent à la stratégie de pricing. En négligeant l'importance de la smoothness, un junior pourrait se retrouver à prendre des positions qui ne sont pas justifiées par la réalité du marché, augmentant ainsi le risque de pertes.
 
 ## Labs pratiques a inclure
-1. Inputs de courbe : classer dépôts/futures/swaps et conventions de jour.
-2. Bootstrap : calculer les facteurs d'actualisation successifs et vérifier la monotonie.
-3. Zéro/forward : convertir DF en taux zéro puis en taux forward.
-4. Contrôle d'interpolation : comparer deux interpolations et impact sur PV.
-5. Mémo de courbe : conventions, contrôles et risques de courbe résiduels.
+1. Curve inputs: classer deposits/futures/swaps et conventions de day count.
+2. Bootstrap: calculer les discount factors successifs et verifier la monotonie.
+3. Zero/forward: convertir DF en zero rates puis forward rates.
+4. Interpolation control: comparer deux interpolations et impact PV.
+5. Curve memo: conventions, controles et risques de courbe residuels.
 
 ## Script enseignant
 1. Ouvrir par un cas concret.
 2. Demander aux apprenants de formuler l'intuition.
 3. Introduire la notation minimale.
-4. Faire résoudre une micro-tâche.
-5. Débrief : erreurs courantes, limites, interprétation marché.
+4. Faire resoudre une micro-tache.
+5. Debrief: erreurs courantes, limites, interpretation marche.
 
 ## Supports a produire
 - Fiche apprenant d'une page.
-- Slides courtes orientées cas.
-- Notebook ou tableur de calcul si le sujet s'y prête.
-- Corrigé détaillé.
-- Quiz de vérification rapide.
+- Slides courtes orientees cas.
+- Notebook ou tableur de calcul si le sujet s'y prete.
+- Corrige detaille.
+- Quiz de verification rapide.
 
 ## Exemple numerique resolu
 _[genere - calcul verifie]_ On valorise un payer swap et on mesure sa sensibilite a la courbe.

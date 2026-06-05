@@ -73,63 +73,41 @@ A la fin de ce module, vous saurez:
 ## Cours redige
 ### Lecon 1 - SDE utile au hedge
 
-**Intuition _[reformule]_.** Un trader demande pourquoi delta hedge suppose un modele continu. L'objectif de cette lecon est precisement: Relier dynamique du sous-jacent et risque de couverture.
+Dans le monde du trading, comprendre la dynamique d'un sous-jacent est essentiel pour gérer efficacement le risque. Prenons l'exemple d'une action dont le prix évolue de manière aléatoire. Ce mouvement peut être modélisé par une équation différentielle stochastique (EDS) qui décrit comment le prix d'une action, noté \( S_t \), change au cours du temps. Cette EDS intègre des éléments cruciaux tels que le drift, qui représente la tendance générale du prix, et la volatilité, qui mesure l'incertitude ou la dispersion des rendements. En d'autres termes, la volatilité est le facteur qui rend le prix d'un actif imprévisible, et le drift indique la direction générale dans laquelle le prix est susceptible d'évoluer.
 
-**Ce que disent les sources** _[extrait]_. « They offer these services to help their clients manage their risks. These financial institutions then turn
-around and hedge the risk they have assumed on behalf of their clients. How do they
-1The material in this section draws heavily from C. Smith and R. Stulz, “The Determinants of Firms’
-Hedging Policies,” Journal of Financial and Quantitative Analysis 20 (1985): 391–405; D. » [S7]
+Sur un desk de trading, cette compréhension est primordiale pour le processus de couverture, notamment dans le cadre du delta hedge. Lorsqu'un trader cherche à se protéger contre les variations de prix d'un actif, il doit tenir compte de la continuité des mouvements de prix. En effet, le delta hedge repose sur l'idée que les variations infinitésimales du prix de l'actif sous-jacent peuvent être compensées par des ajustements dans la position de couverture. Cela signifie que le trader doit être capable de réagir rapidement aux chocs de Brownien, ces mouvements brusques et imprévisibles qui peuvent survenir à tout moment. Comme le souligne l'extrait, les institutions financières aident leurs clients à gérer leurs risques, mais elles doivent également couvrir les risques qu'elles assument [S7].
 
-**Le point cle: dS, drift, volatility, Brownian shock.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la a une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
-
-**Mise en pratique _[genere]_.** Lire une SDE et nommer chaque terme en langage desk. Livrable attendu: SDE risk translation - un document court contenant le calcul central, une phrase d'interpretation marche et une limite du modele.
-
-**Piege frequent.** confondre une sensibilite 'par 1%' avec 'par 0.01': respecter strictement les unites.
+Il est crucial de se rappeler que la modélisation continue est une hypothèse fondamentale qui permet de simplifier la gestion du risque. Un piège courant pour un junior est de penser que la couverture peut être effectuée efficacement sans prendre en compte la nature stochastique des mouvements de prix. Par exemple, un trader novice pourrait négliger l'importance de la volatilité dans ses calculs de couverture, en supposant que les mouvements de prix sont prévisibles et linéaires. Cette erreur peut entraîner des pertes significatives, car les ajustements de couverture basés sur des modèles discrets ne capturent pas la réalité des marchés, où les chocs de prix peuvent survenir de manière inattendue.
 
 ### Lecon 2 - Ito lemma pour P&L
 
-**Intuition _[reformule]_.** Le P&L explique montre un terme de convexite non intuitif. L'objectif de cette lecon est precisement: Faire apparaitre delta, gamma et theta depuis une fonction de prix.
+Dans un environnement de trading, il est essentiel de comprendre comment les variations de prix d'un actif peuvent affecter le P&L (profit et perte) d'une position. Imaginons un spot à 100, et considérons une option dont le prix évolue en fonction de ce spot. La dynamique de ce prix n'est pas linéaire, et c'est ici que le lemme d'Itô entre en jeu. En appliquant l'expansion d'Itô, nous pouvons décomposer le changement de prix en plusieurs composantes, dont le delta, le gamma et le theta, qui sont cruciaux pour la gestion des risques sur un desk.
 
-**Ce que disent les sources** _[extrait]_. « This model is called the Binomial Option Pricing
-Model (BOPM) and it is a discrete time model. The Binomial option pricing
-model uses a decision tree framework but goes beyond it. In fact, the Binomial
-option pricing model shows how to correctly discount option payoffs in a
-discrete, decision tree context. » [S8]
+Le delta représente la sensibilité du prix de l'option par rapport à un changement infinitésimal du prix de l'actif sous-jacent. Le gamma, quant à lui, mesure la variation du delta lorsque le prix de l'actif change, ce qui introduit une notion de convexité dans notre analyse. Cela signifie que les mouvements de prix ne se traduisent pas simplement par des changements proportionnels dans le P&L, mais peuvent engendrer des effets non intuitifs, surtout dans des marchés volatils. En effet, un desk de trading doit être conscient que ces effets de convexité peuvent influencer significativement le P&L, rendant la couverture plus complexe que prévu.
 
-**Le point cle: Ito expansion, quadratic variation.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la a une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
+L'extrait du modèle binomial de tarification des options [S8] souligne l'importance de bien comprendre comment les payoffs des options doivent être actualisés dans un cadre discret. Cela illustre que même dans des modèles simples, la gestion des risques et la tarification nécessitent une attention particulière aux variations quadratiques. Sur un desk, cela signifie que les traders doivent être capables d'anticiper ces variations pour ajuster leurs positions et leurs couvertures en conséquence.
 
-**Mise en pratique _[genere]_.** Deriver les blocs de P&L utiles a la couverture. Livrable attendu: Delta-gamma-theta map - un document court contenant le calcul central, une phrase d'interpretation marche et une limite du modele.
-
-**Piege frequent.** oublier le signe de la position (long/short, payer/receiver) dans l'interpretation du P&L.
+Un piège courant pour un junior est de négliger l'impact du gamma dans des situations de forte volatilité. Souvent, ils se concentrent uniquement sur le delta, pensant que la couverture est suffisante. Cependant, en omettant l'effet du gamma, ils peuvent se retrouver exposés à des mouvements de prix qui dépassent leurs attentes, entraînant des pertes inattendues. Il est donc crucial de toujours considérer la convexité et d'intégrer ces éléments dans la stratégie de couverture.
 
 ### Lecon 3 - Mesure risque-neutre
 
-**Intuition _[reformule]_.** Le learner confond forecast spot et prix d'option. L'objectif de cette lecon est precisement: Comprendre pourquoi le drift historique n'est pas l'input de pricing.
+Dans le monde du trading, il est crucial de comprendre que le drift historique d'un actif ne doit pas être utilisé comme input pour le pricing des options. Prenons l'exemple d'un actif dont le prix spot est actuellement à 100. Si l'on se base sur le drift historique pour prédire son évolution future, on pourrait s'attendre à ce qu'il continue à croître à un certain taux, disons 5% par an. Cependant, cette approche ne tient pas compte du fait que les marchés sont souvent influencés par des facteurs externes et que les prévisions basées sur le passé peuvent être trompeuses. En réalité, pour évaluer correctement les options, il est essentiel de se tourner vers une mesure de risque-neutre, où le drift est ajusté pour refléter les attentes du marché sans biais.
 
-**Ce que disent les sources** _[extrait]_. « Jamshidian, F. (1991a): “Bond and Option Evaluation in the Gaussian Interest
-Rate Model,” Research in Finance 9: 131–170. Jamshidian, F. (1991b): “Commodity Option Evaluation in the Gaussian Futures Term Structure Model,” Review of Futures Markets 10: 324–346. Jamshidian, F. (1991c): “Forward Induction and Construction of Yield Curve
-Diffusion Models,” Journal of Fixed Income, June: 62–74. Jamshidian, F. » [S10]
+Le mécanisme sous-jacent à cette notion repose sur l'idée que, dans un cadre de mesure risque-neutre, les prix des actifs suivent des martingales. Cela signifie que, lorsqu'on actualise les prix futurs à l'aide d'un taux d'intérêt sans risque, la valeur actuelle des flux de trésorerie futurs est égale à leur prix de marché. Par conséquent, au lieu d'utiliser le drift historique, les traders doivent se concentrer sur le drift risque-neutre, qui est souvent inférieur ou supérieur au drift historique en fonction des conditions de marché. Comme le souligne Jamshidian dans ses travaux, cette approche est fondamentale pour évaluer correctement les options dans des modèles de taux d'intérêt ou de produits dérivés [S10].
 
-**Le point cle: Risk-neutral drift, discounting, martingale pricing.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la a une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
+Dans un desk de trading, cette distinction est cruciale. Un trader qui confond le drift historique avec le drift risque-neutre risque de mal évaluer les options, ce qui peut conduire à des positions non couvertes ou à des pertes significatives. En effet, en utilisant un drift inapproprié, le trader peut se retrouver à surévaluer ou sous-évaluer une option, ce qui fausse sa stratégie de couverture et affecte la rentabilité globale de son portefeuille.
 
-**Mise en pratique _[genere]_.** Comparer intuition P et calcul Q. Livrable attendu: Pricing measure note - un document court contenant le calcul central, une phrase d'interpretation marche et une limite du modele.
-
-**Piege frequent.** appliquer une approximation locale (Taylor) a un choc trop large sans verifier sa validite.
+Un piège fréquent pour un junior est de penser que le prix d'une option peut être directement déduit des prévisions de prix spot basées sur le passé. Cette confusion entre prévision et pricing peut entraîner des erreurs de jugement, notamment en négligeant l'importance de l'actualisation et du drift risque-neutre, ce qui compromet la gestion des risques sur le desk.
 
 ### Lecon 4 - Limites du hedge continu
 
-**Intuition _[reformule]_.** Le hedge discret subit gaps, frais et liquidite. L'objectif de cette lecon est precisement: Transformer la theorie en controles operationnels.
+Dans un environnement de marché, la gestion des risques est primordiale pour les institutions financières, qui doivent souvent faire face à des situations où le hedge discret peut être insuffisant. Imaginons une position sur un actif dont le prix spot est à 100. Si un événement de marché provoque un gap, la couverture mise en place peut ne pas être efficace, entraînant une erreur de couverture discrète. Ce type d'erreur se produit lorsque le prix d'exécution de la couverture ne correspond pas à celui de l'actif sous-jacent, ce qui peut être amplifié par des frais de transaction et des problèmes de liquidité. Les institutions financières, comme le soulignent Smith et Stulz, doivent non seulement gérer les risques pour leurs clients, mais également se couvrir contre les risques qu'elles assument elles-mêmes [S7].
 
-**Ce que disent les sources** _[extrait]_. « They offer these services to help their clients manage their risks. These financial institutions then turn
-around and hedge the risk they have assumed on behalf of their clients. How do they
-1The material in this section draws heavily from C. Smith and R. Stulz, “The Determinants of Firms’
-Hedging Policies,” Journal of Financial and Quantitative Analysis 20 (1985): 391–405; D. » [S7]
+La compréhension des coûts de transaction et du risque de modèle est essentielle sur un desk de trading. Les coûts de transaction peuvent réduire significativement les gains potentiels d'une stratégie de couverture, surtout dans des marchés volatils où les spreads peuvent s'élargir. De plus, le risque de modèle intervient lorsque les hypothèses sous-jacentes d'un modèle de couverture ne se réalisent pas dans la réalité. Par exemple, si un modèle suppose une volatilité constante alors que celle-ci fluctue, la couverture peut devenir inefficace, laissant le desk exposé à des pertes imprévues. Cela souligne l'importance d'une surveillance continue des positions et des ajustements en temps réel.
 
-**Le point cle: Discrete hedging error, transaction costs, model risk.** C'est la notion qui transforme la situation en calcul exploitable. Reliez-la a une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
+Pour gérer ces risques, il est crucial de mettre en place des triggers de monitoring. Ces déclencheurs peuvent inclure des seuils de perte, des variations de volatilité, ou des écarts de prix spécifiques qui, lorsqu'atteints, signalent la nécessité d'une réévaluation de la stratégie de couverture. En parallèle, il est essentiel d'évaluer le risque résiduel, c'est-à-dire le risque qui demeure après la mise en place de la couverture. Cela permet de quantifier l'exposition restante et d'ajuster les positions en conséquence.
 
-**Mise en pratique _[genere]_.** Lister triggers de monitoring et residual risk. Livrable attendu: Hedging caveat memo - un document court contenant le calcul central, une phrase d'interpretation marche et une limite du modele.
-
-**Piege frequent.** presenter un chiffre sans unite ni ordre de grandeur de controle.
+Un piège fréquent pour un junior est de négliger l'impact des frais de transaction sur le résultat net de la couverture. Parfois, dans l'enthousiasme de réduire l'exposition au risque, un trader peut exécuter des transactions fréquentes sans tenir compte des coûts associés, ce qui peut finalement conduire à des pertes nettes. Cette méprise peut être particulièrement coûteuse dans un environnement de marché où les mouvements de prix sont rapides et imprévisibles.
 
 ## Labs pratiques a inclure
 1. SDE translation: relier drift, vol et choc Brownien au hedge desk.

@@ -9,139 +9,127 @@ source_count: 10
 
 # Module pratique - Vanilla options desk quote
 
-> Légende de provenance du contenu:
+> Legende de provenance du contenu:
 > - **[extrait]** texte issu directement des sources RAG (marque [Sx]).
-> - **[reformule]** réécriture pédagogique d'un passage source.
-> - **[genere]** exemple/exercice/quiz construit à partir des concepts; calculs vérifiés par le moteur déterministe, non extraits d'une source.
+> - **[reformule]** reecriture pedagogique d'un passage source.
+> - **[genere]** exemple/exercice/quiz construit a partir des concepts; calculs verifies par le moteur deterministe, non extraits d'une source.
 
 ## Promesse du module
-Apprendre à gérer les quotes d'options vanilla par la pratique : manipuler, calculer, comparer, décider, puis seulement formaliser la théorie nécessaire.
+Apprendre Vanilla options desk quote par la pratique: manipuler, calculer, comparer,
+decider, puis seulement formaliser la theorie necessaire.
 
 ## Niveau cible et public
-- Niveau : débutant
-- Public visé : étudiant L3/M1, candidat en finance de marché, développeur front-office débutant
-- Durée estimée : 90 minutes
-- Produit : option vanilla sur actions
-- Concepts : Black-Scholes, parité put-call, delta, vega
+- Niveau: beginner
+- Public vise: etudiant L3/M1, candidat en finance de marche, developpeur front-office debutant
+- Duree estimee: 90 minutes
+- Produit: equity vanilla option
+- Concepts: Black-Scholes, put-call parity, delta, vega
 
 ## Prerequis
-- Payoff d'une option
-- Actualisation
-- Loi normale
-- Notion de volatilité
+- payoff d'une option
+- actualisation
+- loi normale
+- notion de volatilite
 
 ## Objectifs d'apprentissage
-À la fin de ce module, vous saurez :
-- Expliquer l'intuition du sujet avant toute formule ;
-- Identifier les inputs, les risques et les hypothèses clés ;
-- Dérouler un calcul chiffré et l'interpréter en langage de desk ;
-- Répondre à un mini-quiz et résoudre un exercice corrigé ;
-- Nommer les limites du modèle et la décision opérationnelle associée.
+A la fin de ce module, vous saurez:
+- expliquer l'intuition du sujet avant toute formule;
+- identifier les inputs, les risques et les hypotheses cles;
+- derouler un calcul chiffre et l'interpreter en langage de desk;
+- repondre a un mini-quiz et resoudre un exercice corrige;
+- nommer les limites du modele et la decision operationnelle associee.
 
 ## Positionnement bibliotheque
-- Track : Dérivés & Volatilité
-- Type d'asset : module réutilisable de cours.
-- Sorties attendues : fiche apprenant, cas pratique, corrigé, quiz, notes instructeur.
-- Intégration SaaS : ce module doit pouvoir être découpé en leçons, exercices et checkpoints.
+- Track: Derivatives & Volatility
+- Type d'asset: module reutilisable de cours.
+- Sorties attendues: fiche apprenant, cas pratique, corrige, quiz, notes instructeur.
+- Integration SaaS: ce module doit pouvoir etre decoupe en lecons, exercices et checkpoints.
 
 ## Deroule pratique
 ### Module 1 - Lire le ticket vanilla
-- Objectif pratique : Transformer une demande de quote en inputs propres : spot, strike, maturité, taux, dividendes et volatilité.
-- Situation de desk : Sales demande un prix indicatif sur un call européen avant envoi client.
-- Notion utile : Moneyness, forward, actualisation, convention de maturité.
-- Activité : Construire le ticket et identifier les données manquantes.
-- Livrable apprenant : Quote ticket contrôlé.
-
+- Objectif pratique: Transformer une demande de quote en inputs propres: spot, strike, maturite, taux, dividendes et vol.
+- Situation de desk: Sales demande un prix indicatif sur un call europeen avant envoi client.
+- Notion utile: Moneyness, forward, discounting, convention de maturite.
+- Activite: Construire le ticket et identifier les donnees manquantes.
+- Livrable apprenant: Quote ticket controle.
 ### Module 2 - Prix Black-Scholes
-- Objectif pratique : Calculer call et put avec substitutions visibles et unité de premium.
-- Situation de desk : Le desk veut un prix défendable et reproductible.
-- Notion utile : d1/d2, prix call/put, rendement des dividendes.
-- Activité : Calculer le prix et vérifier la valeur intrinsèque/valeur temps.
-- Livrable apprenant : Pricing sheet.
-
+- Objectif pratique: Calculer call et put avec substitutions visibles et unite de premium.
+- Situation de desk: Le desk veut un prix defendable et reproductible.
+- Notion utile: d1/d2, prix call/put, dividend yield.
+- Activite: Calculer le prix et verifier intrinsic/time value.
+- Livrable apprenant: Pricing sheet.
 ### Module 3 - Controle put-call parity
-- Objectif pratique : Détecter une incohérence de quote avant de la transmettre.
-- Situation de desk : Le put mid ne colle pas avec le call mid et le forward.
-- Notion utile : C - P = forward actualisé moins strike actualisé.
-- Activité : Mesurer le parity gap et conclure quote/hold/reject.
-- Livrable apprenant : Parity control.
-
+- Objectif pratique: Detecter une incoherence de quote avant de la transmettre.
+- Situation de desk: Le put mid ne colle pas avec le call mid et le forward.
+- Notion utile: C - P = forward discounté moins strike discounté.
+- Activite: Mesurer le parity gap et conclure quote/hold/reject.
+- Livrable apprenant: Parity control.
 ### Module 4 - Greeks utiles au quote
-- Objectif pratique : Convertir delta et vega en risque concret pour le trader.
-- Situation de desk : Le client augmente la taille et le trader demande le hedge initial.
-- Notion utile : Delta hedge, vega par point de volatilité, convention de signe.
-- Activité : Calculer les actions de couverture et la sensibilité à la volatilité.
-- Livrable apprenant : Risk add-on note.
+- Objectif pratique: Convertir delta et vega en risque concret pour le trader.
+- Situation de desk: Le client augmente la taille et le trader demande le hedge initial.
+- Notion utile: Delta hedge, vega per vol point, sign convention.
+- Activite: Calculer hedge shares et sensibilite vol.
+- Livrable apprenant: Risk add-on note.
 
 ## Cours redige
 ### Lecon 1 - Lire le ticket vanilla
 
-**Intuition _[reformule]_.** La demande de prix sur un call européen nécessite de transformer les informations en inputs clairs : spot, strike, maturité, taux, dividendes et volatilité.
+Dans le monde des options, comprendre la notion de **moneyness** est essentiel pour évaluer correctement un call européen. Imaginons que vous ayez un sous-jacent dont le prix spot est à 100. Si le strike de l'option est fixé à 90, l'option est considérée comme "in the money", ce qui signifie qu'elle a une valeur intrinsèque. À l'inverse, si le strike est à 110, l'option est "out of the money" et n'a pas de valeur intrinsèque. Cette distinction est cruciale car elle influence directement la prime de l'option et, par conséquent, le prix que vous allez communiquer à votre client.
 
-**Ce que disent les sources** _[extrait]_. « La vega maximale d'une option vanilla diminue avec le temps. Intuitivement, la vega augmente pour des maturités plus longues car il y a plus de temps pour qu'un changement de volatilité implicite impacte le payoff. Pour une option vanilla donnée, la vega maximale (comme le gamma) se produit au strike où l'optionnalité et la valeur temps sont maximisées. » [S1]
+Dans un contexte de desk de trading, la demande d'un prix indicatif sur un call européen implique plusieurs inputs clés : le spot, le strike, la maturité, le taux d'intérêt, les dividendes et la volatilité implicite. Le **forward** est également un concept central ici, car il permet d'anticiper le prix futur du sous-jacent à la maturité de l'option. En effet, pour évaluer correctement la prime d'une option, il est nécessaire de prendre en compte le taux d'actualisation, qui permet de ramener les flux futurs à leur valeur actuelle. Cela fait appel à des conventions de maturité spécifiques, car les options peuvent avoir des dates d'échéance variées qui influencent leur valorisation.
 
-**Le point clé : Moneyness, forward, actualisation, convention de maturité.** Cette notion transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
+En se basant sur l'extrait [S1], il est important de noter que la **vega** d'une option, qui mesure la sensibilité de la prime par rapport à la volatilité, atteint son pic à la maturité où la valeur temporelle est maximisée. Cela signifie que plus l'option a de temps avant son expiration, plus elle est sensible aux variations de la volatilité implicite. Cette compréhension est fondamentale pour un junior sur le desk, car elle impacte la gestion des risques et la stratégie de pricing.
 
-**Mise en pratique _[genere]_.** Construire le ticket et identifier les données manquantes. Livrable attendu : Quote ticket contrôlé - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Confondre une sensibilité 'par 1%' avec 'par 0.01' : respecter strictement les unités.
+Un piège courant pour un junior est de négliger l'importance de la **maturité** dans l'évaluation des options. Par exemple, ils pourraient penser qu'un call avec un strike plus faible est toujours plus attractif, sans considérer que si la maturité est très courte, la prime pourrait être faible, même si l'option est "in the money". Cela peut conduire à des décisions de pricing erronées et à des opportunités manquées sur le marché.
 
 ### Lecon 2 - Prix Black-Scholes
 
-**Intuition _[reformule]_.** Le desk recherche un prix défendable et reproductible. L'objectif ici est de calculer les prix des calls et puts avec des substitutions visibles et des unités de premium.
+Dans le monde des options, comprendre le prix Black-Scholes est essentiel pour établir des cotations défendables sur un desk. Imaginons un actif sous-jacent dont le prix spot est de 100. Les traders doivent évaluer à quel point une option d'achat (call) ou de vente (put) est précieuse, en tenant compte de divers facteurs comme la volatilité, le temps jusqu'à l'échéance et le rendement des dividendes. En effet, la formule de Black-Scholes repose sur des concepts clés tels que d1 et d2, qui représentent des probabilités ajustées par la volatilité et le temps, influençant directement le prix des options.
 
-**Ce que disent les sources** _[extrait]_. « La description mathématique de l'évaluation des options remonte à plus de 100 ans, au célèbre article de Bachelier (1900), qui supposait une distribution normale pour le prix de l'actif. » [S4]
+Le mécanisme de Black-Scholes permet de décomposer la valeur d'une option en deux composantes principales : la valeur intrinsèque et la valeur temps. La valeur intrinsèque correspond à la différence entre le prix du sous-jacent et le prix d'exercice, tandis que la valeur temps reflète le potentiel de gain futur de l'option. Sur un desk de trading, cette distinction est cruciale, car elle aide à déterminer si une option est sous-évaluée ou surévaluée par rapport à son prix de marché. Les traders doivent donc être capables de calculer ces valeurs rapidement et avec précision pour prendre des décisions éclairées.
 
-**Le point clé : d1/d2, prix call/put, rendement des dividendes.** Cette notion transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
+L'extrait de Bachelier [S4] souligne l'importance historique de la modélisation des prix d'options, en se basant sur l'hypothèse d'une distribution normale des prix d'actifs. Cette approche a été fondatrice pour le développement de modèles modernes, comme celui de Black-Scholes, qui utilisent des distributions log-normales pour mieux refléter les comportements du marché. Ainsi, la capacité à évaluer correctement les options à l'aide de ces modèles est essentielle pour maintenir un avantage concurrentiel sur le marché.
 
-**Mise en pratique _[genere]_.** Calculer le prix et vérifier la valeur intrinsèque/valeur temps. Livrable attendu : Pricing sheet - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Oublier le signe de la position (long/short, payer/receiver) dans l'interprétation du P&L.
+Un piège courant pour un junior est de confondre la valeur intrinsèque et la valeur temps, en négligeant l'impact des dividendes. Par exemple, si un actif verse des dividendes, cela peut réduire la valeur d'un call, car le prix de l'actif pourrait baisser à cause des paiements de dividendes. Ignorer ce facteur peut mener à des évaluations erronées et à des décisions de trading désavantageuses.
 
 ### Lecon 3 - Controle put-call parity
 
-**Intuition _[reformule]_.** Lorsqu'une incohérence apparaît entre le put mid et le call mid, il est crucial de détecter cela avant de transmettre la quote.
+Dans le monde des options, la relation entre les options d'achat (calls) et les options de vente (puts) est fondamentale pour assurer une cohérence dans les prix. Imaginons un scénario où vous observez un call mid à 10 et un put mid à 5, alors que le forward est à 95. À première vue, cela semble acceptable, mais en creusant un peu, vous devez vérifier si cette quote respecte la parité put-call. En effet, la différence entre le prix du call et celui du put doit correspondre à la différence entre le forward et le strike, tous deux actualisés. Si cette relation est rompue, cela indique une incohérence dans le marché qui pourrait vous coûter cher si elle n'est pas corrigée avant d'envoyer la quote.
 
-**Ce que disent les sources** _[extrait]_. « La tarification des options vanille américaines et européennes montre comment l'exercice anticipé impacte le risque de trading. » [S5]
+Le mécanisme qui sous-tend cette parité est crucial pour un desk de trading. En tant que trader, vous devez comprendre que si le call est trop cher par rapport au put, cela peut signaler une opportunité d'arbitrage. Par exemple, si le call est surévalué, vous pourriez vendre ce call tout en achetant le put pour capturer la différence de prix. Cela vous permet de sécuriser un profit sans risque, car vous exploitez une inefficacité du marché. Comme mentionné dans l'extrait, la nature des options américaines, qui peuvent être exercées à tout moment, peut influencer leur prix par rapport aux options européennes, mais cela ne doit pas altérer la parité fondamentale que vous devez surveiller [S5].
 
-**Le point clé : C - P = forward actualisé moins strike actualisé.** Cette notion transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
-
-**Mise en pratique _[genere]_.** Mesurer le gap de parité et conclure quote/hold/reject. Livrable attendu : Parity control - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Appliquer une approximation locale (Taylor) à un choc trop large sans vérifier sa validité.
+Un piège courant pour un junior est de négliger l'importance de l'actualisation des valeurs. Parfois, un trader peut se concentrer uniquement sur les prix nominaux des options sans tenir compte des taux d'intérêt ou de la durée jusqu'à l'échéance, ce qui peut fausser son évaluation de la parité. En omettant de calculer correctement ces valeurs actualisées, vous risquez de transmettre une quote erronée, ce qui pourrait entraîner des pertes significatives pour votre desk.
 
 ### Lecon 4 - Greeks utiles au quote
 
-**Intuition _[reformule]_.** Lorsque le client augmente la taille de sa position, le trader doit demander le hedge initial pour gérer le risque.
+Dans un environnement de trading, comprendre comment les options réagissent aux mouvements du marché est essentiel pour gérer le risque. Prenons l'exemple d'un trader qui reçoit une demande d'un client souhaitant augmenter la taille de sa position sur une option. Dans cette situation, le trader doit évaluer l'impact de cette augmentation sur le portefeuille, notamment en utilisant le delta et le vega. Le delta indique combien le prix de l'option devrait changer pour un mouvement d'un point dans le prix de l'actif sous-jacent, tandis que le vega mesure la sensibilité du prix de l'option aux variations de volatilité. Ces deux grecs sont cruciaux pour établir un hedge efficace.
 
-**Ce que disent les sources** _[extrait]_. « Les options vanille américaines sont toujours plus chères que les équivalentes européennes. » [S5]
+Le mécanisme du delta hedge consiste à compenser les variations de prix de l'option en prenant une position opposée sur l'actif sous-jacent. Par exemple, si le delta de l'option est de 0,5, cela signifie que pour chaque mouvement de 1 point de l'actif sous-jacent, le prix de l'option variera de 0,5 point. Si le client augmente sa position, le trader doit ajuster le nombre d'actions à acheter ou à vendre pour maintenir une couverture neutre. En parallèle, le vega per vol point permet d'évaluer comment le prix de l'option changera si la volatilité augmente. Cela est particulièrement pertinent dans des marchés volatils, où une mauvaise évaluation peut entraîner des pertes significatives.
 
-**Le point clé : Delta hedge, vega par point de volatilité, convention de signe.** Cette notion transforme la situation en calcul exploitable. Reliez-la à une intuition de signe ou d'ordre de grandeur avant d'appliquer une formule.
+Dans la pratique, un trader doit donc non seulement surveiller le delta et le vega, mais aussi comprendre leur convention de signe. Par exemple, un delta positif indique que l'option est un call, tandis qu'un delta négatif indique un put. Cela influence directement la stratégie de couverture. Si le trader néglige de prendre en compte la convention de signe, il pourrait se retrouver à prendre une position qui aggrave le risque au lieu de le réduire.
 
-**Mise en pratique _[genere]_.** Calculer les actions de couverture et la sensibilité à la volatilité. Livrable attendu : Risk add-on note - un document court contenant le calcul central, une phrase d'interprétation marché et une limite du modèle.
-
-**Piège fréquent.** Présenter un chiffre sans unité ni ordre de grandeur de contrôle.
+Un piège courant pour un junior est de se concentrer uniquement sur le delta sans tenir compte du vega, surtout dans des marchés où la volatilité est en hausse. Ignorer la sensibilité à la volatilité peut mener à des couvertures incomplètes, exposant ainsi le portefeuille à des fluctuations imprévues. En somme, une compréhension intégrée des grecs est indispensable pour naviguer efficacement dans le monde des options.
 
 ## Labs pratiques a inclure
-1. Quote ticket : spot, strike, maturité, taux, dividendes, volatilité et convention de taille.
-2. Black-Scholes price : calculer call/put, valeur intrinsèque et valeur temps.
-3. Parity check : mesurer le gap call-put-forward et conclure quote ou reject.
-4. Greeks add-on : convertir delta et vega en hedge initial et risque comment.
-5. Trader memo : prix, contrôles, hypothèses, action et limites.
+1. Quote ticket: spot, strike, maturite, taux, dividendes, vol et convention de taille.
+2. Black-Scholes price: calculer call/put, intrinsic value et time value.
+3. Parity check: mesurer le gap call-put-forward et conclure quote ou reject.
+4. Greeks add-on: convertir delta et vega en hedge initial et risk comment.
+5. Trader memo: prix, controles, hypotheses, action et limites.
 
 ## Script enseignant
 1. Ouvrir par un cas concret.
 2. Demander aux apprenants de formuler l'intuition.
 3. Introduire la notation minimale.
-4. Faire résoudre une micro-tâche.
-5. Débrief : erreurs courantes, limites, interprétation marché.
+4. Faire resoudre une micro-tache.
+5. Debrief: erreurs courantes, limites, interpretation marche.
 
 ## Supports a produire
 - Fiche apprenant d'une page.
-- Slides courtes orientées cas.
-- Notebook ou tableur de calcul si le sujet s'y prête.
-- Corrigé détaillé.
-- Quiz de vérification rapide.
+- Slides courtes orientees cas.
+- Notebook ou tableur de calcul si le sujet s'y prete.
+- Corrige detaille.
+- Quiz de verification rapide.
 
 ## Exemple numerique resolu
 _[genere - calcul verifie]_ On price un call europeen a la monnaie et on lit prix, d1, d2 et greeks.
