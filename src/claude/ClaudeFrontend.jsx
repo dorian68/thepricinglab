@@ -1,6 +1,21 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
 import { useAuth } from '../contexts/AuthContext';
+import {
+  GENERATOR_PRESETS,
+  PRACTICE_COURSE_EXTENSIONS,
+  PRACTICE_EXERCISES,
+  exerciseDescription,
+  generateAiDeskExercise,
+  getCourseBlueprint,
+  getExerciseById,
+  getPracticeApiBase,
+  loadGeneratedExercises,
+  saveGeneratedExercise,
+} from './practiceEngine';
 import './claude.css';
 
 
@@ -303,7 +318,25 @@ const COURSES = [
    tagline:"Itô's lemma, SDEs, measure changes — the math behind it all.",
    topics:["Itô's lemma","SDE","Girsanov","Martingales"],
    accent:'#FF2E45'},
+  ...PRACTICE_COURSE_EXTENSIONS,
 ];
+
+const COURSE_SCRIPT_SLUGS = {
+  'black-scholes': 'vanilla-options-quote',
+  'greeks': 'options-book-greeks-pnl',
+  'hedging': 'options-book-greeks-pnl',
+  'rates-swaps': 'rates-swaps-dv01',
+  'yield-curves': 'yield-curve-bootstrapping',
+  'implied-vol': 'implied-volatility-smile',
+  'vol-products': 'implied-volatility-smile',
+  'monte-carlo': 'monte-carlo-pricing',
+  'exotics': 'barrier-options-gap-risk',
+  'structured-products': 'structured-products-autocall',
+  'credit-derivatives': 'credit-derivatives-cds',
+  'market-risk-var': 'market-risk-var-stress',
+  'fixed-income-bonds': 'fixed-income-bonds-duration',
+  'stochastic': 'stochastic-calculus-for-hedging',
+};
 
 const TOOLS = [
   {id:'bs-pricer', name:'Black-Scholes Pricer', cat:'Calculators', tier:'free', desc:'Closed-form price + Greeks for European options.'},
@@ -318,7 +351,7 @@ const TOOLS = [
 ];
 
 const TIER_BADGE = {
-  free:    {label:'Free', cls:'badge-green'},
+  free:    {label:'Starter', cls:'badge-green'},
   student: {label:'Student', cls:'badge-blue'},
   pro:     {label:'Pro', cls:'badge-red'},
 };
@@ -334,16 +367,7 @@ const POSTS = [
 ];
 
 // ---------- Mock: exercises ----------
-const EXERCISES = [
-  {id:'bs-eur-call', title:'Price a European Call (Black-Scholes)', cat:'Black-Scholes', level:'L1', time:'15m', done:true},
-  {id:'barrier-knock-in', title:'Down-and-In Barrier Pricing', cat:'Barrier', level:'L3', time:'35m', done:false},
-  {id:'smile-fit', title:'Fit a Volatility Smile (SVI)', cat:'Volatility', level:'L3', time:'40m', done:false},
-  {id:'mc-asian', title:'Monte Carlo Asian Option', cat:'Monte Carlo', level:'L3', time:'30m', done:true},
-  {id:'curve-boot', title:'Bootstrap a Zero-Coupon Curve', cat:'Yield Curves', level:'L2', time:'25m', done:false},
-  {id:'delta-hedge', title:'Daily Delta Hedging Simulation', cat:'Greeks', level:'L2', time:'20m', done:false},
-  {id:'iv-newton', title:'Implied Vol via Newton-Raphson', cat:'Volatility', level:'L2', time:'25m', done:true},
-  {id:'autocall', title:'Autocallable Payoff Engine', cat:'Exotic', level:'L4', time:'55m', done:false},
-];
+const EXERCISES = PRACTICE_EXERCISES;
 
 Object.assign(window, {
   useHashRoute, nav, Link, Icon, normCdf, normPdf, bsPrice, fmt, fmtPct, fmtBp,
@@ -961,7 +985,7 @@ function HeroBlock() {
           <div className="kpi"><div className="num">9+</div><div className="lbl">Courses</div></div>
           <div className="kpi"><div className="num">50+</div><div className="lbl">Exercises</div></div>
           <div className="kpi"><div className="num">9</div><div className="lbl">Tools</div></div>
-          <div className="kpi"><div className="num">100%</div><div className="lbl">Free to Start</div></div>
+          <div className="kpi"><div className="num">9€</div><div className="lbl">Starter Plan</div></div>
         </div>
       </div>
       <div className="hero-right">
@@ -1226,13 +1250,13 @@ function FinalCTA() {
         <div style={{position:'absolute', right:-40, top:-40, opacity:0.06, fontFamily:"'JetBrains Mono',monospace", fontSize:280, fontWeight:700, color:'#FF2E45'}}>σ</div>
         <div style={{position:'relative', maxWidth:'60ch'}}>
           <div className="section-eyebrow" style={{margin:0}}>// 05 · Get on the desk</div>
-          <h2 className="section-title" style={{fontSize:32, marginTop:8}}>Start today. Free.</h2>
+          <h2 className="section-title" style={{fontSize:32, marginTop:8}}>Start serious desk practice at 9€.</h2>
           <p className="text-2" style={{marginTop:10, fontSize:14}}>
-            No credit card. Three Fundamentals courses, four tools, all exercises. Upgrade only when you outgrow the floor.
+            Starter gives the core curriculum, practical exercises and calculators. Upgrade when you need advanced products, notebooks and professional workflow tools.
           </p>
         </div>
         <div className="row" style={{gap:10, position:'relative', flexShrink:0}}>
-          <Link to="/auth/signup" className="btn btn-primary">Create free account <Icon name="arrow-right" size={14}/></Link>
+          <Link to="/auth/signup" className="btn btn-primary">Choose a plan <Icon name="arrow-right" size={14}/></Link>
           <Link to="/pricing" className="btn btn-outline">See plans</Link>
         </div>
       </div>
@@ -1283,7 +1307,6 @@ function CoursesPage() {
 }
 
 function CourseCard({c}) {
-  const lockedFor = {free:[], student:['pro'], pro:['student','pro']};
   return (
     <Link to={"/courses/"+c.id} className="course-card">
       <div className="thumb">
@@ -1389,7 +1412,15 @@ function CourseThumb({c}) {
       </div>
     );
   }
-  return null;
+  return (
+    <svg viewBox="0 0 200 100" width="100%" height="100%" style={{padding:10}}>
+      <line x1="0" y1="76" x2="200" y2="76" stroke="#2C3340"/>
+      <line x1="20" y1="16" x2="20" y2="88" stroke="#2C3340"/>
+      <path d="M 12,76 L 46,70 L 82,58 L 116,42 L 150,28 L 190,20" fill="none" stroke={acc} strokeWidth="1.5"/>
+      <path d="M 12,76 L 54,76 L 88,62 L 124,62 L 158,40 L 190,40" fill="none" stroke="#FF2E45" strokeWidth="1.2" strokeDasharray="3 3"/>
+      <text x="28" y="18" fill="#7C8493" fontSize="8" fontFamily="JetBrains Mono">desk workflow</text>
+    </svg>
+  );
 }
 
 function ChartThumb({data, color}) {
@@ -1413,6 +1444,23 @@ function CourseDetailPage({route}) {
   const id = route.parts[1] || 'black-scholes';
   const c = COURSES.find(x=>x.id===id) || COURSES[0];
   const [tab, setTab] = useState('content');
+  const [selectedModuleIndex, setSelectedModuleIndex] = useState(0);
+  const scriptState = useCourseScript(c.id);
+  const scriptModel = useMemo(
+    () => scriptState.status === 'ready' ? parseCourseScript(scriptState.content) : null,
+    [scriptState.status, scriptState.content]
+  );
+
+  useEffect(() => {
+    setSelectedModuleIndex(0);
+    setTab('content');
+  }, [c.id]);
+
+  const openModule = useCallback((index) => {
+    setSelectedModuleIndex(index);
+    setTab('content');
+  }, []);
+
   return (
     <div className="container page">
       <PageHead
@@ -1424,16 +1472,24 @@ function CourseDetailPage({route}) {
           <span className="badge">{c.tier}</span>
           <span className="badge">{c.level}</span>
           <span className="badge">{c.duration}</span>
-          <button className="btn btn-primary btn-sm" onClick={()=>{setTab('content'); notify(`Resuming ${c.title}.`)}}>Resume <Icon name="play" size={13}/></button>
+          <button className="btn btn-primary btn-sm" onClick={()=>{openModule(selectedModuleIndex); notify(`Opening ${c.title} module ${selectedModuleIndex + 1}.`)}}>Resume <Icon name="play" size={13}/></button>
         </>}
       />
 
-      <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:24}}>
-        <CourseSidebar c={c}/>
+      <div className="course-detail-layout">
+        <CourseSidebar
+          c={c}
+          scriptModel={scriptModel}
+          selectedModuleIndex={selectedModuleIndex}
+          onSelectModule={openModule}
+          onOpenScript={()=>setTab('script')}
+          onOpenResources={()=>setTab('resources')}
+        />
         <div>
           <div className="tabs-bar">
             {[
               ['content','Content'],
+              ['script','Script'],
               ['calc','Calculator'],
               ['exercises','Exercises'],
               ['resources','Resources'],
@@ -1441,69 +1497,253 @@ function CourseDetailPage({route}) {
               <button key={k} className={"tab-btn "+(tab===k?'on':'')} onClick={()=>setTab(k)}>{l}</button>
             ))}
           </div>
-          {tab==='content' && <CourseContent c={c}/>}
+          {tab==='content' && <CourseContent c={c} scriptState={scriptState} scriptModel={scriptModel} selectedModuleIndex={selectedModuleIndex} onSelectModule={openModule} onOpenScript={()=>setTab('script')}/>}
+          {tab==='script' && <CourseScript c={c} scriptState={scriptState} scriptModel={scriptModel}/>}
           {tab==='calc' && <CourseCalculator c={c}/>}
           {tab==='exercises' && <CourseExercises c={c}/>}
-          {tab==='resources' && <CourseResources c={c}/>}
+          {tab==='resources' && <CourseResources c={c} scriptModel={scriptModel}/>}
         </div>
       </div>
     </div>
   );
 }
 
-function CourseSidebar({c}) {
-  const lessons = [
-    {n:'1.1', t:'Motivation: replication & no-arbitrage', d:'8m', done:true},
-    {n:'1.2', t:'The Black-Scholes PDE', d:'14m', done:true},
-    {n:'1.3', t:'Closed-form solution & d1/d2', d:'18m', done:true},
-    {n:'2.1', t:'Greeks: Delta & Gamma', d:'12m', done:true},
-    {n:'2.2', t:'Greeks: Vega, Theta, Rho', d:'16m', done:false, current:true},
-    {n:'3.1', t:'Implementation in Python', d:'22m', done:false},
-    {n:'3.2', t:'Implied vol via Newton', d:'15m', done:false},
-    {n:'4.1', t:'Limitations & extensions', d:'10m', done:false},
-  ];
-  const pct = 50;
+function useCourseScript(courseId) {
+  const scriptSlug = COURSE_SCRIPT_SLUGS[courseId];
+  const [script, setScript] = useState({status:'loading', content:'', error:''});
+
+  useEffect(() => {
+    if (!scriptSlug) {
+      setScript({status:'missing', content:'', error:''});
+      return undefined;
+    }
+
+    const controller = new AbortController();
+    setScript({status:'loading', content:'', error:''});
+    fetch(`/course-scripts/${scriptSlug}.md`, {signal: controller.signal})
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.text();
+      })
+      .then((content) => setScript({status:'ready', content, error:''}))
+      .catch((error) => {
+        if (error.name !== 'AbortError') {
+          setScript({status:'error', content:'', error:error.message || 'Course script unavailable'});
+        }
+      });
+
+    return () => controller.abort();
+  }, [scriptSlug]);
+
+  return {...script, slug: scriptSlug};
+}
+
+function parseCourseScript(markdown = '') {
+  const clean = stripFrontmatter(markdown);
+  const title = clean.match(/^#\s+(.+)$/m)?.[1]?.trim() || 'Generated course';
+  return {
+    title,
+    modules: parseScriptModules(clean),
+    writtenLessons: parseWrittenLessons(clean),
+    formulas: parseScriptFormulas(clean),
+    labs: parseNumberedSection(clean, 'Labs pratiques a inclure'),
+    exerciseBank: parseBulletSection(clean, "Banque d'exercices rattaches"),
+    teacherScript: parseNumberedSection(clean, 'Script enseignant'),
+    supports: parseBulletSection(clean, 'Supports a produire'),
+    facts: parseBulletSection(clean, 'Faits et angles extraits de la base'),
+    sources: parseSourceAppendix(clean),
+  };
+}
+
+function parseWrittenLessons(markdown) {
+  const section = markdownSection(markdown, 'Cours redige');
+  const matches = [...section.matchAll(/^### Lecon\s+(\d+)\s+-\s+(.+?)\s*\r?\n([\s\S]*?)(?=^### Lecon\s+\d+\s+-|\s*$)/gm)];
+  return matches.map((match)=>({
+    number: Number(match[1]),
+    title: match[2].trim(),
+    body: match[3].trim(),
+  }));
+}
+
+function parseScriptModules(markdown) {
+  const section = markdownSection(markdown, 'Deroule pratique');
+  const matches = [...section.matchAll(/^### Module\s+(\d+)\s+-\s+(.+?)\s*\r?\n([\s\S]*?)(?=^### Module\s+\d+\s+-|\s*$)/gm)];
+  return matches.map((match) => {
+    const fields = parseDeskBullets(match[3]);
+    return {
+      number: Number(match[1]),
+      title: match[2].trim(),
+      fields,
+      objective: fields['Objectif pratique'] || '',
+      situation: fields['Situation de desk'] || '',
+      notion: fields['Notion utile'] || '',
+      activity: fields.Activite || '',
+      deliverable: fields['Livrable apprenant'] || '',
+      raw: match[3].trim(),
+    };
+  });
+}
+
+function parseScriptFormulas(markdown) {
+  const section = markdownSection(markdown, 'Formules de desk');
+  const matches = [...section.matchAll(/^### F(\d+)\s+-\s+(.+?)\s*\r?\n\$\$\s*\r?\n([\s\S]*?)\r?\n\$\$\s*\r?\n([\s\S]*?)(?=^### F\d+\s+-|\s*$)/gm)];
+  return matches.map((match) => ({
+    number: Number(match[1]),
+    title: match[2].trim(),
+    expression: match[3].trim(),
+    usage: (match[4].match(/Usage desk:\s*(.+)/i)?.[1] || match[4].replace(/^-\s*/, '')).trim(),
+  }));
+}
+
+function parseDeskBullets(block = '') {
+  return block.split(/\r?\n/).reduce((acc, line) => {
+    const match = line.match(/^-\s*([^:]+):\s*(.+)$/);
+    if (match) acc[match[1].trim()] = match[2].trim();
+    return acc;
+  }, {});
+}
+
+function parseBulletSection(markdown, heading) {
+  return markdownSection(markdown, heading)
+    .split(/\r?\n/)
+    .map((line) => line.match(/^-\s+(.+)$/)?.[1]?.trim())
+    .filter(Boolean);
+}
+
+function parseNumberedSection(markdown, heading) {
+  return markdownSection(markdown, heading)
+    .split(/\r?\n/)
+    .map((line) => line.match(/^\d+\.\s+(.+)$/)?.[1]?.trim())
+    .filter(Boolean);
+}
+
+function parseSourceAppendix(markdown) {
+  const section = markdownSection(markdown, 'Source Appendix') || markdownSection(markdown, 'Sources RAG a citer');
+  return section
+    .split(/\r?\n/)
+    .map((line) => parseSourceLine(line))
+    .filter(Boolean);
+}
+
+// Robust to both the current backend format
+//   - [S1] Title, chunk 58, score 0.65: clean excerpt
+//   - [S2] Title, chunk 9, score 0.4 (extrait non cite: source bruitee)
+// and the legacy parenthesised format
+//   - [S1] Title (chunk 58, score 0.65)
+// Never folds the excerpt (or noise) into the title.
+export function parseSourceLine(line) {
+  if (!line) return null;
+  let m = line.match(
+    /^-\s+\[(S\d+)\]\s+(.+?),\s*chunk\s+([^,]+),\s+score\s+([\d.]+)\s*(?::\s*(.*)|\((extrait[^)]*)\))?\s*$/i,
+  );
+  if (m) {
+    const withheld = Boolean(m[6]);
+    return {
+      id: m[1],
+      title: m[2].trim(),
+      chunk: (m[3] || '').trim(),
+      score: m[4] || '',
+      snippet: withheld ? '' : (m[5] || '').trim(),
+      withheld,
+    };
+  }
+  m = line.match(/^-\s+\[(S\d+)\]\s+(.+?)(?:\s+\(chunk\s+([^,]+),\s+score\s+([^)]+)\))?\s*$/);
+  if (m) {
+    return {
+      id: m[1],
+      title: m[2].trim(),
+      chunk: (m[3] || '').trim(),
+      score: (m[4] || '').trim(),
+      snippet: '',
+      withheld: false,
+    };
+  }
+  return null;
+}
+
+function markdownSection(markdown, heading) {
+  const marker = `## ${heading}`;
+  const start = markdown.indexOf(marker);
+  if (start === -1) return '';
+  const firstLineBreak = markdown.indexOf('\n', start);
+  if (firstLineBreak === -1) return '';
+  const rest = markdown.slice(firstLineBreak + 1);
+  const next = rest.search(/\n##\s+/);
+  return (next === -1 ? rest : rest.slice(0, next)).trim();
+}
+
+function CourseSidebar({c, scriptModel, selectedModuleIndex = 0, onSelectModule, onOpenScript, onOpenResources}) {
+  const blueprint = getCourseBlueprint(c.id);
+  const lessons = scriptModel?.modules?.length
+    ? scriptModel.modules.map((module,idx)=>({
+        n: String(idx + 1).padStart(2, '0'),
+        t: module.title,
+        d: module.deliverable || module.objective || 'Desk deliverable',
+      }))
+    : (blueprint?.lessons || blueprint?.modules || [
+        {n:'01', t:'Desk setup', d:'Inputs, market context and first calculation'},
+        {n:'02', t:'Risk read', d:'Sensitivities and scenario interpretation'},
+        {n:'03', t:'Desk action', d:'Hedge, quote, monitor or escalate'},
+      ]).map((lesson,idx)=>({
+        n: lesson.n || String(idx + 1).padStart(2, '0'),
+        t: lesson.t,
+        d: lesson.d,
+      }));
+  const unlockedCount = lessons.length;
   return (
-    <div style={{position:'sticky',top:84,alignSelf:'start'}}>
+    <div className="course-sidebar">
       <div className="panel" style={{padding:16, marginBottom:16}}>
-        <div className="label" style={{marginBottom:10}}>Progress</div>
+        <div className="label" style={{marginBottom:10}}>Curriculum status</div>
         <div className="row between" style={{marginBottom:6}}>
-          <span className="mono" style={{fontSize:18,fontWeight:700}}>{pct}%</span>
-          <span className="mono mute" style={{fontSize:11}}>4 / 8 lessons</span>
+          <span className="mono" style={{fontSize:18,fontWeight:700}}>OPEN</span>
+          <span className="mono mute" style={{fontSize:11}}>{unlockedCount} / {unlockedCount} modules</span>
         </div>
         <div style={{height:3,background:'var(--line)',borderRadius:0}}>
-          <div style={{height:'100%',width:pct+'%',background:'var(--red)'}}></div>
+          <div style={{height:'100%',width:'100%',background:'var(--red)'}}></div>
         </div>
       </div>
       <div className="panel">
-        <div className="label" style={{padding:'14px 14px 8px'}}>Lessons</div>
-        {lessons.map(l => (
-          <div key={l.n} style={{padding:'10px 14px', borderTop:'1px solid var(--line)', display:'flex',gap:10,alignItems:'flex-start', background: l.current?'rgba(255,46,69,.05)':'transparent', borderLeft: l.current?'2px solid var(--red)':'2px solid transparent', cursor:'pointer'}}>
+        <div className="label" style={{padding:'14px 14px 8px'}}>Open modules</div>
+        {lessons.map((l,idx) => {
+          const active = idx === selectedModuleIndex;
+          return (
+          <button key={`${l.n}-${l.t}`} type="button" className={`course-lesson-item ${active ? 'active' : ''}`} onClick={()=>onSelectModule?.(idx)}>
             <span className="mono mute" style={{fontSize:11, minWidth:22}}>{l.n}</span>
             <div style={{flex:1}}>
-              <div style={{fontSize:12.5, color: l.current?'var(--text)':l.done?'var(--text-2)':'var(--mute)', fontWeight:l.current?600:500}}>{l.t}</div>
+              <div className="course-lesson-title">{l.t}</div>
               <div className="mono mute" style={{fontSize:10.5,marginTop:2}}>{l.d}</div>
             </div>
-            <Icon name={l.done?'check':l.current?'play':'lock'} size={12} style={{color: l.done?'var(--green)':l.current?'var(--red)':'var(--steel)', marginTop:2}}/>
-          </div>
-        ))}
+            <Icon name={active?'play':'circle'} size={12} style={{color: active?'var(--red)':'var(--steel)', marginTop:2}}/>
+          </button>
+        )})}
       </div>
       <div className="panel" style={{padding:14,marginTop:16}}>
-        <div className="label" style={{marginBottom:8}}>Resources</div>
+        <div className="label" style={{marginBottom:8}}>Course desk</div>
         <div className="col" style={{gap:6}}>
-          {['Course notes (PDF)','Python notebook','Reference papers','Cheatsheet'].map(r=>(
-            <div key={r} className="row between" style={{padding:'6px 0', borderTop:r!=='Course notes (PDF)'?'1px solid var(--line)':'none'}}>
-              <span className="mono" style={{fontSize:12}}>{r}</span>
-              <Icon name="download" size={13} style={{color:'var(--mute)'}}/>
-            </div>
-          ))}
+          <button type="button" className="course-side-action" onClick={onOpenScript}><span>Full script</span><Icon name="file-text" size={13}/></button>
+          <button type="button" className="course-side-action" onClick={onOpenResources}><span>RAG sources</span><Icon name="database" size={13}/></button>
+          <Link to="/exercises" className="course-side-action"><span>Practice cases</span><Icon name="arrow-right" size={13}/></Link>
         </div>
       </div>
     </div>
   );
 }
 
-function CourseContent({c}) {
+function CourseContent({c, scriptState, scriptModel, selectedModuleIndex, onSelectModule, onOpenScript}) {
+  const blueprint = getCourseBlueprint(c.id);
+  if (blueprint) {
+    return (
+      <PracticeCourseContent
+        c={c}
+        blueprint={blueprint}
+        scriptState={scriptState}
+        scriptModel={scriptModel}
+        selectedModuleIndex={selectedModuleIndex}
+        onSelectModule={onSelectModule}
+        onOpenScript={onOpenScript}
+      />
+    );
+  }
   if (c.id === 'black-scholes') return <BSContent/>;
   if (c.id === 'yield-curves') return <YCContent/>;
   if (c.id === 'greeks') return <GreeksContent/>;
@@ -1512,6 +1752,306 @@ function CourseContent({c}) {
   if (c.id === 'monte-carlo') return <MCContent/>;
   // generic fallback
   return <GenericContent c={c}/>;
+}
+
+function CourseScript({c, scriptState, scriptModel}) {
+  const scriptSlug = COURSE_SCRIPT_SLUGS[c.id];
+
+  if (scriptState.status === 'loading') {
+    return (
+      <div className="panel course-script-state">
+        <Icon name="loader-circle" size={16} style={{color:'var(--red)'}}/>
+        <span className="mono mute">Loading generated course script...</span>
+      </div>
+    );
+  }
+
+  if (scriptState.status === 'missing' || scriptState.status === 'error') {
+    return (
+      <div className="panel course-script-state">
+        <Icon name="circle-alert" size={16} style={{color:'var(--red)'}}/>
+        <span className="mono mute">{scriptState.error || 'No generated script is mapped to this course yet.'}</span>
+      </div>
+    );
+  }
+
+  const formulaCount = scriptModel?.formulas?.length || 0;
+  const sourceCount = scriptModel?.sources?.length || 0;
+  const scriptUrl = `/course-scripts/${scriptSlug}.md`;
+
+  return (
+    <div className="col course-script-shell" style={{gap:14}}>
+      <div className="panel course-script-hero">
+        <div>
+          <div className="section-eyebrow" style={{margin:0}}>// Generated desk course</div>
+          <h2 className="mono">{c.title} · course script</h2>
+          <p className="text-2">
+            Script construit depuis la base RAG locale, avec formules LaTeX, cas pratiques, livrables et sources rattachees.
+          </p>
+          <div className="row" style={{gap:8,flexWrap:'wrap',marginTop:14}}>
+            <span className="badge">{formulaCount} formulas</span>
+            <span className="badge">{sourceCount} sources</span>
+            <span className="badge">{c.level} · {c.duration}</span>
+          </div>
+        </div>
+        <a className="btn btn-outline btn-sm" href={scriptUrl} target="_blank" rel="noreferrer">
+          Open MD <Icon name="external-link" size={13}/>
+        </a>
+      </div>
+      <div className="panel course-script-panel">
+        <LatexMarkdown content={scriptState.content}/>
+      </div>
+    </div>
+  );
+}
+
+function LatexMarkdown({content}) {
+  return (
+    <div className="course-script-markdown">
+      <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+        {stripFrontmatter(content)}
+      </ReactMarkdown>
+    </div>
+  );
+}
+
+function stripFrontmatter(markdown = '') {
+  return markdown.replace(/^---\s*[\s\S]*?\s*---\s*/, '');
+}
+
+function PracticeCourseContent({c, blueprint, scriptState, scriptModel, selectedModuleIndex = 0, onSelectModule, onOpenScript}) {
+  const modules = scriptModel?.modules?.length
+    ? scriptModel.modules
+    : blueprint.modules.map((module,idx)=>({
+        number: idx + 1,
+        title: module.t,
+        objective: module.d,
+        situation: blueprint.deskPromise,
+        notion: c.topics.join(', '),
+        activity: `Build the desk calculation for ${module.t.toLowerCase()}.`,
+        deliverable: 'Desk note',
+      }));
+  const safeIndex = Math.min(Math.max(selectedModuleIndex, 0), Math.max(modules.length - 1, 0));
+  const activeModule = modules[safeIndex];
+  const formulas = scriptModel?.formulas || [];
+  const labs = scriptModel?.labs?.length ? scriptModel.labs : blueprint.labs.map(([lab, task])=>`${lab}: ${task}`);
+  const facts = scriptModel?.facts?.slice(0, 6) || [];
+  const supports = scriptModel?.supports?.length ? scriptModel.supports : blueprint.resources;
+  const loading = scriptState?.status === 'loading';
+
+  return (
+    <div className="col" style={{gap:18}}>
+      <div className="panel" style={{padding:24}}>
+        <div className="section-eyebrow" style={{margin:0}}>// Practice-first curriculum</div>
+        <h2 className="mono" style={{fontSize:24,fontWeight:700,marginTop:10,marginBottom:12}}>{blueprint.deskRole}</h2>
+        <p className="text-2" style={{fontSize:13.5,lineHeight:1.75,marginTop:0,maxWidth:'82ch'}}>
+          {blueprint.deskPromise} The module starts from a market task, introduces only the minimum theory needed,
+          then finishes with a calculation, a risk interpretation and a desk action.
+        </p>
+        <div className="row" style={{gap:8,flexWrap:'wrap',marginTop:16}}>
+          <span className="badge badge-green">All modules open</span>
+          {blueprint.workflow.map((step,idx)=>(
+            <span key={step} className="badge">{String(idx + 1).padStart(2,'0')} · {step}</span>
+          ))}
+        </div>
+      </div>
+
+      {loading && (
+        <div className="panel course-script-state">
+          <Icon name="loader-circle" size={16} style={{color:'var(--red)'}}/>
+          <span className="mono mute">Loading generated RAG course modules...</span>
+        </div>
+      )}
+
+      <CourseModuleReader
+        c={c}
+        module={activeModule}
+        writtenLesson={scriptModel?.writtenLessons?.[safeIndex]}
+        formula={formulas[safeIndex % Math.max(formulas.length, 1)]}
+        moduleCount={modules.length}
+        selectedModuleIndex={safeIndex}
+        onOpenScript={onOpenScript}
+      />
+
+      <div className="grid-2">
+        <div className="panel course-module-switcher">
+          <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
+            <div className="label">Modules du cours</div>
+            <span className="badge">{modules.length} open</span>
+          </div>
+          <div className="course-module-list">
+            {modules.map((module,idx)=>(
+              <button key={`${module.number}-${module.title}`} type="button" className={idx===safeIndex ? 'active' : ''} onClick={()=>onSelectModule?.(idx)}>
+                <span className="mono">{String(idx + 1).padStart(2,'0')}</span>
+                <div>
+                  <strong>{module.title}</strong>
+                  <small>{module.deliverable || module.objective || 'Desk output'}</small>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="panel" style={{padding:18}}>
+          <div className="label" style={{marginBottom:14}}>What the learner produces</div>
+          <div className="col" style={{gap:10}}>
+            {[
+              ['Market read', 'Inputs, assumptions and missing data are made explicit.'],
+              ['Calculation', 'Numbers are shown with units and signs, not hidden behind prose.'],
+              ['Risk view', 'The learner identifies the exposure that matters on a desk.'],
+              ['Action', 'Every lesson ends with hedge, monitor, reduce, quote or escalate.'],
+            ].map(([title,desc])=>(
+              <div key={title} className="row" style={{gap:12,alignItems:'flex-start',padding:'9px 0',borderTop:title!=='Market read'?'1px solid var(--line)':'none'}}>
+                <Icon name="check" size={13} style={{color:'var(--green)',marginTop:2}}/>
+                <div>
+                  <div className="mono" style={{fontWeight:700,fontSize:12.5}}>{title}</div>
+                  <div className="mute" style={{fontSize:12,marginTop:3,lineHeight:1.5}}>{desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid-2">
+        <div className="panel formula-bank-preview">
+          <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
+            <div className="label">Formules de desk</div>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={onOpenScript}>Full derivation <Icon name="arrow-right" size={13}/></button>
+          </div>
+          <div className="formula-bank-list">
+            {formulas.length ? formulas.map((formula)=>(
+              <div key={formula.number} className="formula-card">
+                <div className="row between" style={{marginBottom:8}}>
+                  <strong className="mono">{formula.title}</strong>
+                  <span className="badge">F{formula.number}</span>
+                </div>
+                <LatexMarkdown content={`$$\n${formula.expression}\n$$\n${formula.usage}`}/>
+              </div>
+            )) : (
+              <div className="mute" style={{fontSize:12.5,lineHeight:1.6,padding:16}}>Formula bank is loading from the generated script.</div>
+            )}
+          </div>
+        </div>
+        <div className="panel">
+          <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
+            <div className="label">Labs pratiques</div>
+            <Link to="/exercises" className="btn btn-outline btn-sm">Open exercises <Icon name="arrow-right" size={13}/></Link>
+          </div>
+          <div className="course-lab-list">
+            {labs.map((lab,idx)=>(
+              <div key={lab} className="course-lab-item">
+                <span className="mono">{String(idx + 1).padStart(2,'0')}</span>
+                <p>{lab}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid-3">
+        {[
+          {label:'Course role', value: blueprint.deskRole, icon:'briefcase'},
+          {label:'Practice assets', value: `${labs.length} labs`, icon:'clipboard-check'},
+          {label:'Source base', value: `${scriptModel?.sources?.length || blueprint.resources.length} sources`, icon:'database'},
+        ].map((item)=>(
+          <div key={item.label} className="panel" style={{padding:18}}>
+            <Icon name={item.icon} size={18} style={{color:'var(--red)'}}/>
+            <div className="label" style={{marginTop:14}}>{item.label}</div>
+            <div className="mono" style={{fontWeight:700,fontSize:15,marginTop:6}}>{item.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid-2">
+        <div className="panel" style={{padding:18}}>
+          <div className="label" style={{marginBottom:12}}>Angles extraits des ouvrages</div>
+          <div className="course-source-facts">
+            {(facts.length ? facts : supports).slice(0,6).map((fact,idx)=>(
+              <div key={`${idx}-${fact}`} className="row" style={{gap:10,alignItems:'flex-start'}}>
+                <Icon name="quote" size={13} style={{color:'var(--red)',marginTop:3,flexShrink:0}}/>
+                <p>{fact}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="panel" style={{padding:18}}>
+          <div className="label" style={{marginBottom:12}}>Supports produits par le cours</div>
+          <div className="course-support-list">
+            {supports.slice(0,6).map((support,idx)=>(
+              <div key={`${idx}-${support}`} className="row between">
+                <span>{support}</span>
+                <Icon name={idx % 2 ? 'file-text' : 'book-open'} size={13} style={{color:'var(--mute)'}}/>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CourseModuleReader({c, module, writtenLesson, formula, moduleCount, selectedModuleIndex, onOpenScript}) {
+  if (!module) {
+    return (
+      <div className="panel course-script-state">
+        <Icon name="circle-alert" size={16} style={{color:'var(--red)'}}/>
+        <span className="mono mute">No module content available yet.</span>
+      </div>
+    );
+  }
+
+  const fields = [
+    ['Situation de desk', module.situation || 'Start from a real market task and identify the missing data.', 'activity'],
+    ['Objectif pratique', module.objective || 'Produce a calculation usable by a trader or risk manager.', 'target'],
+    ['Notion utile', module.notion || c.topics.join(', '), 'sigma'],
+    ['Activite', module.activity || 'Calculate, check signs and write the desk action.', 'calculator'],
+    ['Livrable', module.deliverable || 'Risk snapshot', 'clipboard-check'],
+  ];
+
+  return (
+    <div className="panel course-module-reader">
+      <div className="course-module-reader-head">
+        <div>
+          <div className="section-eyebrow" style={{margin:0}}>// Module {selectedModuleIndex + 1} of {moduleCount}</div>
+          <h2 className="mono">{module.title}</h2>
+          <p className="text-2">{module.objective || module.situation || 'Module pratique construit depuis les sources de la bibliotheque.'}</p>
+        </div>
+        <div className="row" style={{gap:8,flexWrap:'wrap'}}>
+          <button type="button" className="btn btn-outline btn-sm" onClick={onOpenScript}>Script complet <Icon name="file-text" size={13}/></button>
+          <Link to="/exercises" className="btn btn-primary btn-sm">Exercice <Icon name="arrow-right" size={13}/></Link>
+        </div>
+      </div>
+      <div className="course-desk-fields">
+        {fields.map(([label,value,icon])=>(
+          <DeskField key={label} label={label} value={value} icon={icon}/>
+        ))}
+      </div>
+      {writtenLesson?.body && (
+        <div className="course-written-lesson">
+          <div className="label" style={{marginBottom:10}}>Cours redige</div>
+          <LatexMarkdown content={writtenLesson.body}/>
+        </div>
+      )}
+      {formula && (
+        <div className="course-module-formula">
+          <div className="label" style={{marginBottom:10}}>Formula used on desk</div>
+          <LatexMarkdown content={`### ${formula.title}\n$$\n${formula.expression}\n$$\n${formula.usage}`}/>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DeskField({label, value, icon}) {
+  return (
+    <div className="desk-field">
+      <Icon name={icon} size={15} style={{color:'var(--red)',marginTop:2,flexShrink:0}}/>
+      <div>
+        <div className="label">{label}</div>
+        <p>{value}</p>
+      </div>
+    </div>
+  );
 }
 
 function GenericContent({c}) {
@@ -1714,7 +2254,7 @@ function GreeksContent() {
             <div style={{width:60,height:60,borderRadius:30,border:'1px solid var(--red)',display:'grid',placeItems:'center',margin:'0 auto'}}>
               <Icon name="play" size={24} style={{color:'var(--red)'}}/>
             </div>
-            <div className="mono mute" style={{fontSize:11,marginTop:14,letterSpacing:'.08em'}}>VIDEO PLACEHOLDER — drop your lesson here</div>
+            <div className="mono mute" style={{fontSize:11,marginTop:14,letterSpacing:'.08em'}}>INTERACTIVE LESSON · GREEKS RISK PANEL</div>
           </div>
         </div>
       </div>
@@ -1925,15 +2465,21 @@ function CourseCalculator({c}) {
 }
 
 function CourseExercises({c}) {
+  const blueprint = getCourseBlueprint(c.id);
+  const related = EXERCISES
+    .filter((exercise)=>blueprint?.relatedExerciseIds?.includes(exercise.id) || exercise.courseIds?.includes(c.id) || exercise.cat === c.title)
+    .slice(0, 6);
+  const items = related.length ? related : EXERCISES.slice(0, 6);
   return (
     <div className="col" style={{gap:12}}>
-      {EXERCISES.slice(0,6).map(e=>(
+      {items.map(e=>(
         <Link to={"/exercises/"+e.id} key={e.id} className="panel" style={{padding:16, display:'flex',justifyContent:'space-between',alignItems:'center'}}>
           <div className="row" style={{gap:14}}>
             <span className="mono mute" style={{fontSize:11, width:30}}>#{e.id.slice(0,3).toUpperCase()}</span>
             <div>
               <div style={{fontWeight:600}}>{e.title}</div>
               <div className="mono mute" style={{fontSize:11,marginTop:4}}>{e.cat} · {e.level} · {e.time}</div>
+              <div className="mute" style={{fontSize:12,marginTop:5}}>{exerciseDescription(e)}</div>
             </div>
           </div>
           <div className="row" style={{gap:10}}>
@@ -1942,31 +2488,86 @@ function CourseExercises({c}) {
           </div>
         </Link>
       ))}
+      <div className="panel" style={{padding:18}}>
+        <div className="row between" style={{gap:14}}>
+          <div>
+            <div className="label" style={{marginBottom:6}}>Generate from this course</div>
+            <div className="mute" style={{fontSize:12.5,lineHeight:1.5}}>Use the AI generator to create a fresh desk case with this course context, difficulty and product family.</div>
+          </div>
+          <Link to="/exercises" className="btn btn-primary btn-sm" style={{flexShrink:0}}>Open generator <Icon name="arrow-right" size={13}/></Link>
+        </div>
+      </div>
     </div>
   );
 }
-function CourseResources({c}) {
+function CourseResources({c, scriptModel}) {
+  const blueprint = getCourseBlueprint(c.id);
+  const scriptSlug = COURSE_SCRIPT_SLUGS[c.id];
+  const generatedResources = [
+    {t:'Generated course script', d:'Full Markdown course populated from the local RAG corpus, with LaTeX formulas.', ic:'file-text', href:`/course-scripts/${scriptSlug}.md`},
+    {t:'Course generation index', d:'List of all generated modules, source counts and generation metadata.', ic:'database', href:'/course-scripts/_index.json'},
+  ];
+  const blueprintResources = blueprint?.resources?.map((item,idx)=>({
+    t: item,
+    d: idx === 0 ? 'Primary source from the local knowledge base.' : 'Practice support used for labs, exercises and desk cases.',
+    ic: idx % 3 === 0 ? 'book-open' : idx % 3 === 1 ? 'file-text' : 'database',
+  })) || [];
+  const resources = [
+    ...generatedResources,
+    ...(blueprintResources.length ? blueprintResources : [
+    {t:'Course notes', d:'Full PDF with derivations and code annotations.', ic:'file-text'},
+    {t:'Jupyter notebook', d:'Interactive Python notebook covering every exercise.', ic:'notebook'},
+    {t:'Reference papers', d:'Original Black & Scholes 1973, Merton 1973, Heston 1993.', ic:'book'},
+    {t:'Video lectures', d:'8 hours of recorded sessions with timestamps and transcripts.', ic:'video'},
+    {t:'Cheatsheet', d:'Single-page reference for formulas, Greeks, and pitfalls.', ic:'sticky-note'},
+    {t:'Sample data', d:'Real market data extracts in CSV for hands-on practice.', ic:'database'},
+    ]),
+  ];
+  const sources = scriptModel?.sources || [];
   return (
-    <div className="grid-2">
-      {[
-        {t:'Course notes', d:'Full PDF with derivations and code annotations.', ic:'file-text'},
-        {t:'Jupyter notebook', d:'Interactive Python notebook covering every exercise.', ic:'notebook'},
-        {t:'Reference papers', d:'Original Black & Scholes 1973, Merton 1973, Heston 1993.', ic:'book'},
-        {t:'Video lectures', d:'8 hours of recorded sessions with timestamps and transcripts.', ic:'video'},
-        {t:'Cheatsheet', d:'Single-page reference for formulas, Greeks, and pitfalls.', ic:'sticky-note'},
-        {t:'Sample data', d:'Real market data extracts in CSV for hands-on practice.', ic:'database'},
-      ].map(r=>(
-        <div key={r.t} className="panel" style={{padding:18}}>
-          <div className="row between">
-            <div className="row" style={{gap:10}}>
-              <Icon name={r.ic} size={16} style={{color:'var(--red)'}}/>
-              <span style={{fontWeight:700}}>{r.t}</span>
+    <div className="col" style={{gap:18}}>
+      <div className="grid-2">
+        {resources.map(r=>{
+          const body = (
+            <>
+              <div className="row between">
+                <div className="row" style={{gap:10}}>
+                  <Icon name={r.ic} size={16} style={{color:'var(--red)'}}/>
+                  <span style={{fontWeight:700}}>{r.t}</span>
+                </div>
+                <Icon name={r.href ? 'external-link' : 'database'} size={14} style={{color:'var(--mute)'}}/>
+              </div>
+              <div className="mute" style={{fontSize:12.5,marginTop:10,lineHeight:1.55}}>{r.d}</div>
+            </>
+          );
+          return r.href ? (
+            <a key={r.t} className="panel course-resource-card" href={r.href} target="_blank" rel="noreferrer">
+              {body}
+            </a>
+          ) : (
+            <div key={r.t} className="panel course-resource-card">
+              {body}
             </div>
-            <Icon name="download" size={14} style={{color:'var(--mute)'}}/>
-          </div>
-          <div className="mute" style={{fontSize:12.5,marginTop:10}}>{r.d}</div>
+          );
+        })}
+      </div>
+      <div className="panel">
+        <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
+          <div className="label">Sources RAG rattachees aux ouvrages</div>
+          <span className="badge">{sources.length || 'loading'} sources</span>
         </div>
-      ))}
+        <div className="course-source-table">
+          {(sources.length ? sources : [{id:'S-', title:'Sources loading from generated course script.', chunk:'', score:''}]).map((source)=>(
+            <div key={`${source.id}-${source.title}`} className="course-source-row">
+              <span className="mono">{source.id}</span>
+              <div>
+                <strong>{source.title}</strong>
+                {(source.chunk || source.score) && <small>chunk {source.chunk} · score {source.score}</small>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -3119,30 +3720,40 @@ function TradingExercisesPanel() {
 function ExercisesPage({route}) {
   const sub = route.parts[1];
   if (sub) return <ExerciseDetail id={sub}/>;
-  return <ExercisesIndex/>;
+  return <ExercisesIndex route={route}/>;
 }
 
-function ExercisesIndex() {
+function ExercisesIndex({route}) {
   const [cat,setCat] = useState('All');
   const [query,setQuery] = useState('');
-  const cats = ['All','Black-Scholes','Greeks','Volatility','Monte Carlo','Barrier','Yield Curves','Exotic'];
+  const [generated,setGenerated] = useState(()=>loadGeneratedExercises());
+  const cats = ['All','Generated','Black-Scholes','Greeks','Volatility','Monte Carlo','Barrier','Yield Curves','Rates','Credit','Risk','Exotic'];
   const normalizedQuery = query.trim().toLowerCase();
-  const filtered = EXERCISES.filter(e => {
-    const inCat = cat==='All' || e.cat===cat;
-    const haystack = `${e.title} ${e.cat} ${e.level}`.toLowerCase();
+  const allExercises = useMemo(()=>[...generated, ...EXERCISES], [generated]);
+  const filtered = allExercises.filter(e => {
+    const inCat = cat==='All' || (cat==='Generated' ? e.generated : e.cat===cat);
+    const haystack = `${e.title} ${e.cat} ${e.level} ${e.product || ''} ${e.concept || ''}`.toLowerCase();
     return inCat && (!normalizedQuery || haystack.includes(normalizedQuery));
   });
+  const onGenerated = (exercise) => {
+    const next = saveGeneratedExercise(exercise);
+    setGenerated(next);
+    notify(exercise.engine === 'rag' ? 'RAG exercise generated and added to the library.' : 'Local fallback exercise generated and added.');
+    nav(`/exercises/${exercise.id}`);
+  };
   return (
     <div className="container page">
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ exercises</span></>}
         title="Exercises"
-        sub="Hands-on coding exercises. Notebook-style, with hints, graded output, and reference solutions."
+        sub="Desk-first practice. Generate, solve and review exercises grounded in the local finance knowledge base."
         right={<>
           <input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Search exercises…" style={{background:'#0A0C10',border:'1px solid var(--line-2)',padding:'8px 10px',borderRadius:3,color:'var(--text)',fontFamily:"'JetBrains Mono',monospace",fontSize:12,width:220}}/>
           <Link to="/practice" className="btn btn-outline btn-sm">Practice Hub <Icon name="arrow-right" size={13}/></Link>
         </>}
       />
+      <ExerciseGeneratorPanel route={route} onGenerated={onGenerated}/>
+      <ExerciseLibraryStats exercises={allExercises} generatedCount={generated.length}/>
       <div className="tabs-bar">
         {cats.map(c=>(
           <button key={c} className={"tab-btn "+(cat===c?'on':'')} onClick={()=>setCat(c)}>{c}</button>
@@ -3150,31 +3761,7 @@ function ExercisesIndex() {
       </div>
       {filtered.length ? (
         <div className="grid-3">
-          {filtered.map(e=>(
-          <Link to={"/exercises/"+e.id} key={e.id} className="panel" style={{padding:18, display:'block', textDecoration:'none'}}>
-            <div className="row between" style={{marginBottom:12}}>
-              <span className="badge">{e.cat}</span>
-              <span className="row" style={{gap:8}}>
-                <span className="badge">{e.level}</span>
-                <span className="mono mute" style={{fontSize:11}}>{e.time}</span>
-              </span>
-            </div>
-            <div className="mono" style={{fontWeight:700,fontSize:14,marginBottom:8}}>{e.title}</div>
-            <div className="mute" style={{fontSize:12.5,lineHeight:1.5,minHeight:34}}>
-              {e.cat==='Black-Scholes' && 'Price options under risk-neutral measure with closed-form solution.'}
-              {e.cat==='Greeks' && 'Compute hedge ratios and rebalance a synthetic position.'}
-              {e.cat==='Volatility' && 'Calibrate the implied volatility from market data.'}
-              {e.cat==='Monte Carlo' && 'Estimate price via sampled paths with variance reduction.'}
-              {e.cat==='Barrier' && 'Handle path-dependent activation and knock-out conditions.'}
-              {e.cat==='Yield Curves' && 'Bootstrap discount factors from quoted instruments.'}
-              {e.cat==='Exotic' && 'Implement payoff and pricing for path-dependent exotics.'}
-            </div>
-            <div className="row between" style={{marginTop:16,paddingTop:14,borderTop:'1px solid var(--line)'}}>
-              {e.done ? <span className="badge badge-green">Completed</span> : <span className="badge">Open</span>}
-              <span className="mono" style={{fontSize:11,color:'var(--red)'}}>start ›</span>
-            </div>
-          </Link>
-          ))}
+          {filtered.map(e=><ExerciseCard key={e.id} e={e}/>)}
         </div>
       ) : (
         <div className="panel" style={{padding:28,textAlign:'center'}}><span className="mono mute">No exercise found.</span></div>
@@ -3183,15 +3770,177 @@ function ExercisesIndex() {
   );
 }
 
+function ExerciseLibraryStats({exercises, generatedCount}) {
+  const uniqueCats = new Set(exercises.map((exercise)=>exercise.cat)).size;
+  const ragCount = exercises.filter((exercise)=>exercise.generated && exercise.engine === 'rag').length;
+  return (
+    <div className="exercise-stats-row">
+      {[
+        ['Cases', exercises.length],
+        ['Tracks', uniqueCats],
+        ['Generated', generatedCount],
+        ['RAG sourced', ragCount],
+      ].map(([label,value])=>(
+        <div key={label} className="panel exercise-stat">
+          <div className="label">{label}</div>
+          <div className="mono">{value}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ExerciseGeneratorPanel({onGenerated}) {
+  const [form,setForm] = useState(()=>({...GENERATOR_PRESETS[0]}));
+  const [busy,setBusy] = useState(false);
+  const [status,setStatus] = useState({checked:false, ok:false, detail:'Checking engine'});
+
+  useEffect(()=>{
+    let alive = true;
+    fetch(`${getPracticeApiBase()}/health`)
+      .then((response)=>response.ok ? response.json() : Promise.reject(new Error(`HTTP ${response.status}`)))
+      .then((data)=>{
+        if (!alive) return;
+        const canGenerate = !String(data.llm || '').startsWith('openai:') || data.openai_configured;
+        setStatus({
+          checked:true,
+          ok:canGenerate,
+          detail:canGenerate ? `${data.llm} · ${data.embedding_backend}` : `${data.llm} · API key missing`,
+        });
+      })
+      .catch((error)=>{ if (alive) setStatus({checked:true, ok:false, detail:error.message}); });
+    return ()=>{ alive = false; };
+  },[]);
+
+  const update = (key,value) => setForm((current)=>({...current, [key]: value}));
+  const applyPreset = (preset) => setForm({...preset});
+  const generate = async () => {
+    setBusy(true);
+    try {
+      const exercise = await generateAiDeskExercise(form);
+      onGenerated(exercise);
+    } catch (error) {
+      notify(error instanceof Error ? error.message : 'Generation failed.', 'error');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="panel generator-panel">
+      <div className="row between generator-head">
+        <div>
+          <div className="section-eyebrow" style={{margin:0}}>// AI Practice Engine</div>
+          <h2 className="mono" style={{fontSize:20,fontWeight:700,margin:'8px 0 0'}}>Generate a desk case</h2>
+        </div>
+        <div className="row" style={{gap:8,flexWrap:'wrap',justifyContent:'flex-end'}}>
+          <span className={"badge "+(status.ok?'badge-green':'badge-amber')}>
+            <span className={"dot "+(status.ok?'dot-green':'dot-red')}></span>{status.ok ? 'RAG ONLINE' : 'LOCAL FALLBACK'}
+          </span>
+          <span className="mono mute" style={{fontSize:10.5}}>{status.detail}</span>
+        </div>
+      </div>
+      <div className="generator-body">
+        <div className="col" style={{gap:12}}>
+          <div className="label">Desk presets</div>
+          <div className="row" style={{gap:8,flexWrap:'wrap'}}>
+            {GENERATOR_PRESETS.map((preset)=>(
+              <button key={preset.id} className="btn btn-ghost btn-sm" onClick={()=>applyPreset(preset)}>{preset.label}</button>
+            ))}
+          </div>
+          <div className="field">
+            <span className="mono mute" style={{fontSize:11,letterSpacing:'.08em'}}>Free prompt / constraints</span>
+            <textarea value={form.free_prompt} onChange={(event)=>update('free_prompt', event.target.value)} rows={6} placeholder="Describe the market case, product, numbers and expected action."/>
+          </div>
+        </div>
+        <div className="generator-form">
+          <div className="field">
+            <span className="mono mute" style={{fontSize:11,letterSpacing:'.08em'}}>Topic</span>
+            <input value={form.topic} onChange={(event)=>update('topic', event.target.value)}/>
+          </div>
+          <div className="field">
+            <span className="mono mute" style={{fontSize:11,letterSpacing:'.08em'}}>Product</span>
+            <input value={form.product} onChange={(event)=>update('product', event.target.value)}/>
+          </div>
+          <div className="field">
+            <span className="mono mute" style={{fontSize:11,letterSpacing:'.08em'}}>Concept</span>
+            <input value={form.concept} onChange={(event)=>update('concept', event.target.value)}/>
+          </div>
+          <div className="field">
+            <span className="mono mute" style={{fontSize:11,letterSpacing:'.08em'}}>Difficulty</span>
+            <select value={form.difficulty} onChange={(event)=>update('difficulty', event.target.value)}>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+              <option value="expert">Expert</option>
+            </select>
+          </div>
+          <div className="field">
+            <span className="mono mute" style={{fontSize:11,letterSpacing:'.08em'}}>Format</span>
+            <select value={form.exercise_format} onChange={(event)=>update('exercise_format', event.target.value)}>
+              <option value="mixed">Mixed</option>
+              <option value="case_study">Case study</option>
+              <option value="quantitative_problem">Quantitative problem</option>
+              <option value="trading_decision">Trading decision</option>
+              <option value="risk_management">Risk management</option>
+            </select>
+          </div>
+          <button className="btn btn-primary" onClick={generate} disabled={busy} style={{alignSelf:'end',justifyContent:'center'}}>
+            {busy ? <><Icon name="terminal" size={13}/> Generating</> : <><Icon name="play" size={13}/> Generate exercise</>}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ExerciseCard({e}) {
+  return (
+    <Link to={"/exercises/"+e.id} className="panel exercise-card" style={{display:'block', textDecoration:'none'}}>
+      <div className="row between exercise-card-top">
+        <span className="row" style={{gap:6,flexWrap:'wrap'}}>
+          <span className="badge">{e.cat}</span>
+          {e.generated && <span className={"badge "+(e.engine==='rag'?'badge-green':'badge-amber')}>{e.engine==='rag'?'AI/RAG':'AI/LOCAL'}</span>}
+        </span>
+        <span className="row" style={{gap:8}}>
+          <span className="badge">{e.level}</span>
+          <span className="mono mute" style={{fontSize:11}}>{e.time}</span>
+        </span>
+      </div>
+      <div className="exercise-card-body">
+        <div className="mono exercise-card-title">{e.title}</div>
+        <div className="mute exercise-card-desc">
+        {exerciseDescription(e)}
+        </div>
+        <div className="row wrap" style={{gap:6,marginTop:12}}>
+          {[
+            e.product,
+            e.concept,
+          ].filter(Boolean).slice(0,2).map((tag)=><span key={tag} className="badge exercise-mini-badge">{tag}</span>)}
+        </div>
+      </div>
+      <div className="row between exercise-card-foot">
+        {e.done ? <span className="badge badge-green">Completed</span> : <span className="badge">Open</span>}
+        <span className="mono" style={{fontSize:11,color:'var(--red)'}}>start ›</span>
+      </div>
+    </Link>
+  );
+}
+
 function ExerciseDetail({id}) {
-  const ex = EXERCISES.find(e=>e.id===id) || EXERCISES[0];
+  const ex = getExerciseById(id) || EXERCISES[0];
+  if (ex.generated) return <GeneratedExerciseDetail ex={ex}/>;
+  return <StaticExerciseDetail ex={ex}/>;
+}
+
+function StaticExerciseDetail({ex}) {
   const [tab,setTab] = useState('problem');
   return (
     <div className="container page">
       <PageHead
         crumb={<><Link to="/exercises">exercises</Link><i>›</i><span>{ex.title.toLowerCase()}</span></>}
         title={ex.title}
-        sub={`${ex.cat} · ${ex.level} · est. ${ex.time}`}
+        sub={`${ex.cat} · ${ex.level} · est. ${ex.time} · ${ex.product || 'market finance'}`}
         right={<>
           {ex.done && <span className="badge badge-green">Completed</span>}
           <button className="btn btn-outline btn-sm" onClick={()=>handleSave(ex.title)}><Icon name="bookmark" size={13}/> Save</button>
@@ -3204,45 +3953,39 @@ function ExerciseDetail({id}) {
         ))}
       </div>
 
-      <div style={{display:'grid',gridTemplateColumns:'1fr 320px',gap:14}}>
+      <div className="exercise-detail-grid">
         <div className="col" style={{gap:14}}>
           {tab==='problem' && (
             <>
-              <div className="panel" style={{padding:24}}>
+              <div className="panel exercise-readable-panel">
                 <div className="label" style={{marginBottom:8}}>Objective</div>
-                <p className="text-2" style={{fontSize:13.5,lineHeight:1.7,marginTop:0}}>
-                  Implement a Black-Scholes pricer for European calls and puts. Verify your implementation
-                  against the put-call parity relationship and benchmark with the closed-form values provided.
-                </p>
-                <div className="label" style={{marginBottom:8,marginTop:18}}>Prerequisites</div>
-                <ul className="text-2" style={{fontSize:13,lineHeight:1.7,paddingLeft:18, margin:0}}>
-                  <li>Basic Python (NumPy, SciPy)</li>
-                  <li>Familiarity with the normal CDF</li>
-                  <li>Read: Black & Scholes (1973)</li>
-                </ul>
-                <div className="label" style={{marginBottom:8,marginTop:18}}>Steps</div>
-                <ol className="text-2" style={{fontSize:13,lineHeight:1.8,paddingLeft:18,margin:0}}>
-                  <li>Write <code className="mono">bs_call(S,K,r,sigma,T)</code> using d₁/d₂.</li>
-                  <li>Write <code className="mono">bs_put(...)</code> using put-call parity.</li>
-                  <li>Verify on test cases: S=100, K=100, r=2%, σ=20%, T=0.5y → C ≈ 6.04.</li>
-                  <li>Plot price vs spot for K=100 from S=50 to 150.</li>
-                </ol>
+                <p className="exercise-lead">{ex.objective}</p>
+                <div className="label" style={{marginBottom:8,marginTop:20}}>Market data</div>
+                <table className="data">
+                  <tbody>
+                    {(ex.marketData || []).map(([k,v])=>(
+                      <tr key={k}><td className="symbol">{k}</td><td>{v}</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="label" style={{marginBottom:10,marginTop:22}}>Desk tasks</div>
+                <div className="exercise-task-list">
+                  {(ex.steps || []).map((step,idx)=>(
+                    <div key={step} className="exercise-task">
+                      <span className="mono">{String(idx + 1).padStart(2,'0')}</span>
+                      <p>{step}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <div className="panel" style={{padding:24}}>
+              <div className="panel exercise-readable-panel">
                 <div className="label" style={{marginBottom:14}}>Reference output</div>
-                <ChartFrame>
-                  <LineChart width={620} height={220} series={[{name:'C',color:'#FF2E45',data:genCurve(60,(i,n)=>{
-                    const S=50+i*100/n,K=100,r=.02,sigma=.2,T=.5;
-                    const d1=(Math.log(S/K)+(r+.5*sigma*sigma)*T)/(sigma*Math.sqrt(T));
-                    const d2=d1-sigma*Math.sqrt(T);
-                    return S*normCdf(d1)-K*Math.exp(-r*T)*normCdf(d2);
-                  }),fillOpacity:0.08}]}/>
-                </ChartFrame>
+                <ExerciseReferenceChart ex={ex}/>
               </div>
             </>
           )}
           {tab==='code' && (
-            <div className="panel">
+            <div className="panel exercise-readable-panel" style={{padding:0}}>
               <div className="row between" style={{padding:'10px 14px',borderBottom:'1px solid var(--line)'}}>
                 <div className="row" style={{gap:14}}>
                   <span className="badge">Python 3.11</span>
@@ -3253,70 +3996,37 @@ function ExerciseDetail({id}) {
                   <button className="btn btn-primary btn-sm" onClick={()=>{setTab('output'); notify('Code executed against sample tests.')}}><Icon name="play" size={12}/> Run</button>
                 </div>
               </div>
-              <pre className="code" style={{border:'none', borderRadius:0}}><code>{`from math import log, sqrt, exp
-from scipy.stats import norm
-import numpy as np
-import matplotlib.pyplot as plt
-
-def bs_call(S, K, r, sigma, T):
-    # implement using d1, d2
-    pass
-
-def bs_put(S, K, r, sigma, T):
-    # use put-call parity
-    pass
-
-if __name__ == "__main__":
-    print(bs_call(100, 100, 0.02, 0.20, 0.5))  # expect ≈ 6.04
-    spots = np.linspace(50, 150, 100)
-    prices = [bs_call(s, 100, 0.02, 0.20, 0.5) for s in spots]
-    plt.plot(spots, prices)
-    plt.show()`}</code></pre>
+              <pre className="code exercise-code"><code>{ex.starterCode}</code></pre>
             </div>
           )}
           {tab==='output' && (
-            <div className="panel" style={{padding:20}}>
+            <div className="panel exercise-readable-panel">
               <div className="label" style={{marginBottom:10}}>Console output</div>
-              <pre className="code" style={{marginBottom:14}}><code>{`>>> python exercise.py
-6.0401
-Plot saved to ./out/payoff.png`}</code></pre>
+              <pre className="code" style={{marginBottom:14}}><code>{ex.output}</code></pre>
               <ChartFrame title="Your output">
-                <LineChart width={620} height={200} series={[{name:'C',color:'#FF2E45',data:genCurve(50,(i,n)=>{
-                  const S=50+i*100/n,K=100,r=.02,sigma=.2,T=.5;
-                  const d1=(Math.log(S/K)+(r+.5*sigma*sigma)*T)/(sigma*Math.sqrt(T));
-                  const d2=d1-sigma*Math.sqrt(T);
-                  return S*normCdf(d1)-K*Math.exp(-r*T)*normCdf(d2);
-                })}]}/>
+                <ExerciseReferenceChart ex={ex} compact/>
               </ChartFrame>
             </div>
           )}
           {tab==='solution' && (
-            <div className="panel" style={{padding:20}}>
+            <div className="panel exercise-readable-panel">
               <div className="row between" style={{marginBottom:14}}>
                 <div className="label">Reference solution</div>
                 <span className="badge badge-amber">Spoiler</span>
               </div>
-              <pre className="code"><code>{`def bs_call(S, K, r, sigma, T):
-    d1 = (log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*sqrt(T))
-    d2 = d1 - sigma*sqrt(T)
-    return S*norm.cdf(d1) - K*exp(-r*T)*norm.cdf(d2)
-
-def bs_put(S, K, r, sigma, T):
-    return bs_call(S, K, r, sigma, T) - S + K*exp(-r*T)`}</code></pre>
+              <pre className="code"><code>{ex.solution}</code></pre>
             </div>
           )}
         </div>
 
-        <div className="col" style={{gap:14, alignSelf:'start'}}>
-          <div className="panel" style={{padding:16}}>
+        <div className="col exercise-side-stack">
+          <div className="panel exercise-side-panel">
             <div className="label" style={{marginBottom:10}}>Grading</div>
             <div className="col" style={{gap:8}}>
               {[
-                ['Tests passed','7 / 8','green'],
-                ['Code style','PEP-8 ✓','green'],
-                ['Runtime','0.42s','mute'],
-                ['Memory','82 MB','mute'],
-              ].map(([k,v,c])=>(
+                ...(ex.grading || []),
+                ['Runtime','browser / notebook','mute'],
+              ].map(([k,v,c='mute'])=>(
                 <div key={k} className="row between" style={{padding:'4px 0'}}>
                   <span className="mono mute" style={{fontSize:11}}>{k}</span>
                   <span className={"mono "+c} style={{fontSize:12,fontWeight:600}}>{v}</span>
@@ -3324,10 +4034,10 @@ def bs_put(S, K, r, sigma, T):
               ))}
             </div>
           </div>
-          <div className="panel" style={{padding:16}}>
+          <div className="panel exercise-side-panel">
             <div className="label" style={{marginBottom:10}}>Hints</div>
             <div className="col" style={{gap:10}}>
-              {['Use scipy.stats.norm.cdf','Watch out for T → 0','Vectorize with NumPy for speed'].map((h,i)=>(
+              {(ex.hints || []).map((h,i)=>(
                 <div key={i} className="row" style={{gap:8,alignItems:'flex-start'}}>
                   <Icon name="lightbulb" size={12} style={{color:'var(--amber)',marginTop:2}}/>
                   <span className="mute" style={{fontSize:12}}>{h}</span>
@@ -3339,6 +4049,220 @@ def bs_put(S, K, r, sigma, T):
       </div>
     </div>
   );
+}
+
+function ExerciseReferenceChart({ex, compact=false}) {
+  const seed = (ex.id || 'exercise').split('').reduce((sum,ch)=>sum + ch.charCodeAt(0), 0);
+  const data = useMemo(()=>genCurve(60,(i,n)=>{
+    const x = i / Math.max(n - 1, 1);
+    if (ex.cat === 'Rates' || ex.cat === 'Yield Curves') return 3 + 1.2 * (1 - Math.exp(-x * 4)) - 0.2 * Math.cos(x * 8);
+    if (ex.cat === 'Risk' || ex.cat === 'Credit') return Math.max(0, 8 - 9 * x + 1.5 * Math.sin(x * 9));
+    if (ex.cat === 'Monte Carlo') return 100 + 18 * Math.sin(x * 5) + 10 * Math.cos(x * 17 + seed);
+    if (ex.cat === 'Exotic' || ex.cat === 'Barrier') return x < 0.35 ? 0 : x < 0.72 ? 20 : 20 + (x - 0.72) * 180;
+    const S = 50 + x * 100, K=100, r=.02, sigma=.2, T=.5;
+    const d1=(Math.log(S/K)+(r+.5*sigma*sigma)*T)/(sigma*Math.sqrt(T));
+    const d2=d1-sigma*Math.sqrt(T);
+    return S*normCdf(d1)-K*Math.exp(-r*T)*normCdf(d2);
+  }),[ex.id, ex.cat]);
+  return (
+    <LineChart width={620} height={compact ? 180 : 220} series={[{name:ex.cat,color:'#FF2E45',data,fillOpacity:0.08}]}/>
+  );
+}
+
+function GeneratedExerciseDetail({ex}) {
+  const [tab,setTab] = useState('brief');
+  const sources = ex.sources || [];
+  return (
+    <div className="container page">
+      <PageHead
+        crumb={<><Link to="/exercises">exercises</Link><i>›</i><span>generated</span></>}
+        title={ex.title}
+        sub={`${ex.cat} · ${ex.level} · ${ex.engine === 'rag' ? 'RAG grounded' : 'local fallback'} · ${ex.time}`}
+        right={<>
+          <span className={"badge "+(ex.engine==='rag'?'badge-green':'badge-amber')}>{ex.engine==='rag'?'AI/RAG':'AI/LOCAL'}</span>
+          <button className="btn btn-outline btn-sm" onClick={()=>copyText(ex.content, 'Exercise copied as Markdown.')}><Icon name="copy" size={13}/> Copy Markdown</button>
+          <button className="btn btn-primary btn-sm" onClick={()=>handleSave(ex.title)}><Icon name="bookmark" size={13}/> Save</button>
+        </>}
+      />
+      <div className="tabs-bar">
+        {[['brief','Brief'],['solution','Correction'],['sources','Sources'],['export','Export']].map(([k,l])=>(
+          <button key={k} className={"tab-btn "+(tab===k?'on':'')} onClick={()=>setTab(k)}>{l}</button>
+        ))}
+      </div>
+      <div className="exercise-detail-grid">
+        <div className="panel generated-markdown">
+          {tab==='brief' && <MarkdownBlock content={pickGeneratedContent(ex.content, 'brief')}/>}
+          {tab==='solution' && <MarkdownBlock content={pickGeneratedContent(ex.content, 'solution')}/>}
+          {tab==='sources' && <GeneratedSources sources={sources}/>}
+          {tab==='export' && (
+            <div>
+              <div className="label" style={{marginBottom:12}}>Markdown export</div>
+              <pre className="code"><code>{ex.content}</code></pre>
+            </div>
+          )}
+        </div>
+        <div className="col exercise-side-stack">
+          <div className="panel exercise-side-panel">
+            <div className="label" style={{marginBottom:10}}>Generation metadata</div>
+            <div className="col" style={{gap:8}}>
+              {[
+                ['Engine', ex.engine === 'rag' ? 'RAG backend' : 'Local fallback'],
+                ['Product', ex.product || '-'],
+                ['Concept', ex.concept || '-'],
+                ['Sources', String(sources.length)],
+                ['Created', ex.createdAt ? new Date(ex.createdAt).toLocaleString() : '-'],
+              ].map(([k,v])=>(
+                <div key={k} className="row between" style={{padding:'4px 0'}}>
+                  <span className="mono mute" style={{fontSize:11}}>{k}</span>
+                  <span className="mono" style={{fontSize:11.5,fontWeight:600,textAlign:'right',maxWidth:190}}>{v}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="panel exercise-side-panel">
+            <div className="label" style={{marginBottom:10}}>Next action</div>
+            <div className="mute" style={{fontSize:12.5,lineHeight:1.55}}>
+              Solve the case first, then open the correction. If the source count is zero, start the RAG backend to regenerate with document grounding.
+            </div>
+            <button className="btn btn-outline btn-sm" onClick={()=>nav('/exercises')} style={{width:'100%',justifyContent:'center',marginTop:14}}>Back to generator</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function GeneratedSources({sources}) {
+  if (!sources.length) {
+    return (
+      <div>
+        <div className="label" style={{marginBottom:12}}>Sources</div>
+        <p className="text-2" style={{fontSize:13.5,lineHeight:1.7}}>No retrieved sources were attached. This usually means the browser used the local fallback because the RAG backend was not running.</p>
+      </div>
+    );
+  }
+  return (
+    <div>
+      <div className="label" style={{marginBottom:12}}>Retrieved sources</div>
+      <table className="data">
+        <thead><tr><th>#</th><th>Source</th><th className="num">Score</th></tr></thead>
+        <tbody>
+          {sources.map((src,idx)=>(
+            <tr key={src.chunk_id || idx}>
+              <td className="symbol">S{idx + 1}</td>
+              <td>
+                <div className="symbol">{src.title || src.source || src.document_id}</div>
+                <div className="mute" style={{fontSize:11,marginTop:4,lineHeight:1.45}}>{src.snippet}</div>
+              </td>
+              <td className="num">{typeof src.score === 'number' ? src.score.toFixed(3) : '-'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function MarkdownBlock({content}) {
+  const parsed = useMemo(()=>parseMarkdownSections(content), [content]);
+  return (
+    <div className="generated-doc">
+      {parsed.title && <h1>{parsed.title}</h1>}
+      <div className="generated-section-grid">
+        {parsed.sections.map((section,idx)=>(
+          <section key={idx} className="generated-section">
+            <h2>{section.title}</h2>
+            <MarkdownLines lines={section.lines}/>
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MarkdownLines({lines}) {
+  let inCode = false;
+  const rendered = [];
+  let codeLines = [];
+  const flushCode = (key) => {
+    if (!codeLines.length) return;
+    rendered.push(<pre key={key} className="code generated-code"><code>{codeLines.join('\n')}</code></pre>);
+    codeLines = [];
+  };
+  lines.forEach((line,idx)=>{
+    if (line.trim().startsWith('```')) {
+      if (inCode) {
+        flushCode(`code-${idx}`);
+        inCode = false;
+      } else {
+        inCode = true;
+      }
+      return;
+    }
+    if (inCode) {
+      codeLines.push(line);
+      return;
+    }
+    if (!line.trim()) {
+      rendered.push(<div key={idx} style={{height:6}}/>);
+      return;
+    }
+    if (line.startsWith('### ')) {
+      rendered.push(<h3 key={idx}>{line.slice(4)}</h3>);
+      return;
+    }
+    if (line.startsWith('- ')) {
+      rendered.push(<div key={idx} className="md-line md-bullet">{renderInlineMarkdown(line.slice(2))}</div>);
+      return;
+    }
+    if (/^\d+\.\s/.test(line)) {
+      rendered.push(<div key={idx} className="md-line md-number">{renderInlineMarkdown(line)}</div>);
+      return;
+    }
+    rendered.push(<p key={idx}>{renderInlineMarkdown(line)}</p>);
+  });
+  flushCode('code-final');
+  return <>{rendered}</>;
+}
+
+function renderInlineMarkdown(text) {
+  return String(text).split(/(\[S\d+\])/g).map((part,idx)=>{
+    if (/^\[S\d+\]$/.test(part)) return <span key={idx} className="source-chip">{part}</span>;
+    return part;
+  });
+}
+
+function parseMarkdownSections(content) {
+  const lines = String(content || '').split(/\r?\n/);
+  let title = '';
+  const sections = [];
+  let current = {title:'Desk brief', lines:[]};
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+    if (line.startsWith('# ')) {
+      title = line.slice(2).trim();
+      continue;
+    }
+    if (line.startsWith('## ')) {
+      if (current.lines.some((item)=>item.trim())) sections.push(current);
+      current = {title: line.slice(3).trim(), lines: []};
+      continue;
+    }
+    current.lines.push(line);
+  }
+  if (current.lines.some((item)=>item.trim())) sections.push(current);
+  return {title, sections};
+}
+
+function pickGeneratedContent(content, mode) {
+  if (mode === 'solution') {
+    const match = String(content || '').match(/## Corrig[\s\S]*/i);
+    return match ? match[0] : content;
+  }
+  if (mode === 'brief') {
+    return String(content || '').split(/## Corrig/i)[0].trim() || content;
+  }
+  return content;
 }
 
 // ============= SURVIVAL MODE =============
@@ -4133,14 +5057,14 @@ function DashAchievements() {
 function PricingPage() {
   const [annual,setAnnual] = useState(false);
   const plans = [
-    {name:'Free', price:0, desc:'Get started with the fundamentals.',
-     features:['3 Fundamentals courses','5 free tools','All exercises','Community forum','Weekly newsletter'],
-     cta:'Start free', highlight:false},
-    {name:'Student', price:annual?15:19, save:annual?'-21%':null, desc:'Most popular for active learners.', popular:true,
-     features:['All Fundamentals + Advanced','7 tools (incl. Calibration)','All exercises + quizzes','Trading Lab access','Survival Mode unlocked','Notebooks workspace','Priority support'],
+    {name:'Starter', price:annual?7:9, save:annual?'-22%':null, desc:'For learners who want the core desk workflow, not scattered theory.',
+     features:['All Fundamentals courses','Core calculators: BS, payoff, Monte Carlo','Starter AI exercise quota','Course scripts with LaTeX formulas','Community + weekly desk brief'],
+     cta:'Start Starter', highlight:false},
+    {name:'Student', price:annual?15:19, save:annual?'-21%':null, desc:'Most popular for active learners building real pricing reflexes.', popular:true,
+     features:['Everything in Starter','All Advanced courses','Unlimited exercises + quizzes','Trading Lab access','Notebooks workspace','Source-backed RAG course scripts','Priority support'],
      cta:'Go Student', highlight:true},
-    {name:'Professional', price:annual?39:49, save:annual?'-20%':null, desc:'For working quants.',
-     features:['Everything in Student','All 9 tools incl. PRO','All Complex courses','API access','Backtest engine','Mentoring credits (2/mo)','Job board access'],
+    {name:'Professional', price:annual?39:49, save:annual?'-20%':null, desc:'For working quants, desk analysts and serious career transition.',
+     features:['Everything in Student','All Complex courses','All 9 tools incl. PRO','API access','Backtest engine','Mentoring credits (2/mo)','Job board access'],
      cta:'Go Pro', highlight:false},
   ];
   return (
@@ -4148,7 +5072,7 @@ function PricingPage() {
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ pricing</span></>}
         title="Plans"
-        sub="Start free. Upgrade when you outgrow the floor."
+        sub="Three paid tiers: 9€, 19€ and 49€ per month. Each tier maps to a real learning workflow, not just locked pages."
         right={<>
           <div className="toggle">
             <button className={!annual?'on':''} onClick={()=>setAnnual(false)}>Monthly</button>
@@ -4163,7 +5087,7 @@ function PricingPage() {
             <div className="mono" style={{fontWeight:700,fontSize:18, color: p.highlight?'var(--red)':'var(--text)'}}>{p.name}</div>
             <div className="mute" style={{fontSize:12.5,marginTop:8,minHeight:36}}>{p.desc}</div>
             <div className="row" style={{gap:6,alignItems:'baseline',marginTop:18}}>
-              <span className="mono" style={{fontSize:48,fontWeight:700,lineHeight:1}}>{p.price === 0 ? '0€' : p.price+'€'}</span>
+              <span className="mono" style={{fontSize:48,fontWeight:700,lineHeight:1}}>{p.price+'€'}</span>
               <span className="mono mute" style={{fontSize:12}}>/mo</span>
               {p.save && <span className="badge badge-green" style={{marginLeft:8}}>{p.save}</span>}
             </div>
@@ -4184,17 +5108,20 @@ function PricingPage() {
         <h2 className="section-title">Feature comparison</h2>
         <div className="panel" style={{marginTop:16,overflowX:'auto'}}>
           <table className="data">
-            <thead><tr><th>Feature</th><th className="num">Free</th><th className="num">Student</th><th className="num">Professional</th></tr></thead>
+            <thead><tr><th>Feature</th><th className="num">Starter</th><th className="num">Student</th><th className="num">Professional</th></tr></thead>
             <tbody>
               {[
                 ['CONTENT ACCESS',null,null,null,true],
-                ['Fundamentals courses','3','All','All'],
+                ['Fundamentals courses','All','All','All'],
                 ['Advanced courses','—','All','All'],
                 ['Complex courses','—','—','All'],
+                ['Generated RAG course scripts','✓','✓','✓'],
+                ['LaTeX formula rendering','✓','✓','✓'],
                 ['LEARNING TOOLS',null,null,null,true],
                 ['Black-Scholes Pricer','✓','✓','✓'],
                 ['Payoff Visualizer','✓','✓','✓'],
                 ['Monte Carlo','✓','✓','✓'],
+                ['AI exercise generation','Limited','Unlimited','Unlimited'],
                 ['Calibration','—','✓','✓'],
                 ['Vol Surface','—','—','✓'],
                 ['Binomial Tree','—','—','✓'],
@@ -4222,7 +5149,7 @@ function PricingPage() {
         <h2 className="section-title">FAQ</h2>
         <div className="grid-2" style={{marginTop:16}}>
           {[
-            ['Is there a free trial?','Student and Pro plans include a 14-day money-back guarantee. The free tier is permanent.'],
+            ['Is there a free trial?','All paid plans include a 14-day money-back guarantee. Starter is priced to keep the entry point low without diluting the product.'],
             ['Can I cancel anytime?','Yes — cancel from your dashboard in one click. No questions asked.'],
             ['Do you offer student discounts?','Yes — verify with your .edu email for 40% off Student and Pro.'],
             ['What about teams?','Team plans (5+ seats) available. Contact sales for a quote and bulk pricing.'],
@@ -4296,7 +5223,7 @@ function AuthPage({route}) {
               <div className="label" style={{marginBottom:10}}>Plan</div>
               <div className="col" style={{gap:8,marginBottom:24}}>
                 {[
-                  {k:'free',n:'Free',p:'0€'},
+                  {k:'starter',n:'Starter',p:'9€/mo'},
                   {k:'student',n:'Student',p:'19€/mo',pop:true},
                   {k:'pro',n:'Professional',p:'49€/mo'},
                 ].map(p=>(

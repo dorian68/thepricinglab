@@ -1,6 +1,7 @@
 
 import React, { Suspense } from 'react' 
 import { createRoot } from 'react-dom/client'
+import 'katex/dist/katex.min.css'
 // Import i18n configuration first to ensure it's loaded before components
 import './i18n'
 import App from './App.tsx'
