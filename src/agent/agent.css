@@ -1,0 +1,154 @@
+/* AG-UI AgentDock — DA-consistent with claude.css tokens (--red/--panel/--line). */
+.agui-avatar {
+  display: inline-grid; place-items: center; flex-shrink: 0;
+  background: var(--red); color: #fff; font-weight: 700; border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace; letter-spacing: .02em;
+}
+
+/* Floating launcher */
+.agui-fab {
+  position: fixed; right: 24px; bottom: 24px; z-index: 60;
+  width: 52px; height: 52px; border-radius: 26px;
+  background: var(--red); color: #fff; display: grid; place-items: center;
+  border: none; cursor: pointer; box-shadow: 0 10px 32px -8px rgba(255, 46, 69, .6);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.agui-fab:hover { transform: translateY(-2px); box-shadow: 0 14px 38px -8px rgba(255, 46, 69, .75); }
+.agui-fab.open { background: var(--panel-2); color: var(--text); box-shadow: 0 8px 28px rgba(0, 0, 0, .45); }
+.agui-fab .icon { font-size: 22px; }
+.agui-fab-dot { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px #fff; }
+
+/* Panel */
+.agui-panel {
+  position: fixed; right: 20px; bottom: 88px; z-index: 60;
+  width: 420px; max-width: calc(100vw - 32px); height: min(680px, calc(100vh - 120px));
+  background: var(--panel); border: 1px solid var(--line-2); border-radius: 10px;
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 24px 70px -20px rgba(0, 0, 0, .7);
+  color: var(--text); font-size: 13.5px;
+}
+@media (max-width: 560px) {
+  .agui-panel { right: 0; left: 0; bottom: 0; width: 100vw; max-width: 100vw; height: 88vh; border-radius: 14px 14px 0 0; }
+  .agui-fab { right: 16px; bottom: 16px; }
+}
+
+.agui-panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px; border-bottom: 1px solid var(--line); background: #06080B;
+}
+.agui-panel-title { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 12.5px; }
+.agui-panel-actions { display: flex; gap: 4px; }
+
+/* Message list */
+.agui-list { flex: 1; overflow-y: auto; padding: 16px 14px; display: flex; flex-direction: column; gap: 16px; }
+
+.agui-msg { display: flex; gap: 10px; }
+.agui-msg-user { justify-content: flex-end; }
+.agui-bubble-user {
+  background: var(--panel-2); border: 1px solid var(--line-2); color: var(--text);
+  padding: 9px 13px; border-radius: 12px 12px 2px 12px; max-width: 80%; white-space: pre-wrap; line-height: 1.5;
+}
+.agui-msg-assistant { align-items: flex-start; }
+.agui-msg-body { flex: 1; min-width: 0; }
+
+/* Thinking indicator */
+.agui-thinking { display: inline-flex; gap: 4px; padding: 8px 4px; }
+.agui-thinking span { width: 6px; height: 6px; border-radius: 50%; background: var(--mute); animation: agui-bounce 1.2s infinite ease-in-out; }
+.agui-thinking span:nth-child(2) { animation-delay: .15s; }
+.agui-thinking span:nth-child(3) { animation-delay: .3s; }
+@keyframes agui-bounce { 0%, 80%, 100% { opacity: .3; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+
+/* Tool chips */
+.agui-toolchips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.agui-toolchip {
+  display: inline-flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .04em; padding: 3px 8px; border-radius: 3px;
+  border: 1px solid var(--line-2); color: var(--text-2); background: rgba(255, 255, 255, .02);
+}
+.agui-toolchip.running { color: var(--amber); border-color: rgba(255, 176, 32, .35); }
+.agui-toolchip.done { color: var(--green); border-color: rgba(25, 195, 125, .3); }
+.agui-toolchip .icon.icon-loader { animation: agui-spin 1s linear infinite; }
+@keyframes agui-spin { to { transform: rotate(360deg); } }
+
+/* Markdown body */
+.agui-md { line-height: 1.6; color: var(--text); word-break: break-word; }
+.agui-md p { margin: 0 0 8px; }
+.agui-md p:last-child { margin-bottom: 0; }
+.agui-md h1, .agui-md h2, .agui-md h3 { font-family: 'JetBrains Mono', monospace; font-size: 14px; margin: 12px 0 6px; color: var(--white); }
+.agui-md ul, .agui-md ol { margin: 4px 0 8px; padding-left: 20px; }
+.agui-md li { margin: 2px 0; }
+.agui-md code { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: #06080B; border: 1px solid var(--line); padding: 1px 4px; border-radius: 3px; }
+.agui-md pre { background: #06080B; border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px; overflow-x: auto; }
+.agui-md pre code { border: none; padding: 0; }
+.agui-md a { color: var(--red); }
+.agui-md table { border-collapse: collapse; font-size: 12px; }
+.agui-md th, .agui-md td { border: 1px solid var(--line); padding: 4px 8px; }
+.agui-md .katex { font-size: 1.02em; }
+
+/* UIBlocks */
+.agui-block { margin-top: 10px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.agui-block-head { display: flex; align-items: center; gap: 7px; padding: 8px 11px; border-bottom: 1px solid var(--line); background: #06080B; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; color: var(--text); }
+.agui-block-head .icon { color: var(--red); }
+.agui-block-body { padding: 11px; color: var(--text-2); line-height: 1.55; }
+
+.agui-source { padding: 8px 11px; border-bottom: 1px solid var(--line); }
+.agui-source:last-child { border-bottom: none; }
+.agui-source-title { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--text); font-weight: 600; }
+.agui-source-score { float: right; font-size: 10px; color: var(--mute); }
+.agui-source-snippet { font-size: 12px; color: var(--mute); margin-top: 4px; line-height: 1.5; }
+
+.agui-metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); }
+.agui-metric { background: var(--panel-2); padding: 10px 12px; }
+.agui-metric-label { font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); }
+.agui-metric-value { font-size: 16px; font-weight: 700; color: var(--text); margin-top: 3px; }
+
+.agui-step { padding: 7px 0; border-bottom: 1px solid var(--line); }
+.agui-step:last-child { border-bottom: none; }
+.agui-step-label { font-size: 12px; color: var(--text); }
+.agui-step-formula { font-size: 11.5px; color: var(--text-2); margin-top: 3px; }
+.agui-step-result { font-size: 12px; color: var(--green); margin-top: 3px; }
+
+.agui-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.agui-table th { text-align: left; color: var(--mute); font-weight: 500; padding: 6px 9px; border-bottom: 1px solid var(--line); background: #06080B; }
+.agui-table td { padding: 5px 9px; border-bottom: 1px solid var(--line); color: var(--text-2); }
+
+.agui-exercise-sources { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 11px; font-size: 10px; color: var(--mute); }
+.agui-confirm-actions { display: flex; gap: 8px; padding: 11px; }
+.agui-error-card { border-color: rgba(255, 46, 69, .35); }
+
+/* Chips / suggestions */
+.agui-chips, .agui-suggestions { display: flex; flex-direction: column; gap: 8px; }
+.agui-chip {
+  text-align: left; padding: 10px 12px; border-radius: 7px; cursor: pointer;
+  background: var(--panel-2); border: 1px solid var(--line-2); color: var(--text-2);
+  font-size: 12.5px; transition: all .15s;
+}
+.agui-chip:hover { border-color: var(--steel); color: var(--text); background: var(--panel); }
+
+/* Landing */
+.agui-landing { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 18px 6px; gap: 12px; }
+.agui-landing-title { font-family: 'JetBrains Mono', monospace; font-size: 16px; margin: 4px 0 0; color: var(--white); }
+.agui-landing-sub { font-size: 12.5px; color: var(--mute); line-height: 1.55; max-width: 38ch; margin: 0 0 6px; }
+.agui-landing .agui-suggestions { width: 100%; margin-top: 4px; }
+.agui-resume { margin-top: 6px; background: none; border: 1px dashed var(--line-2); color: var(--text-2); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; display: inline-flex; align-items: center; gap: 7px; }
+.agui-resume:hover { border-color: var(--steel); color: var(--text); }
+
+/* Composer */
+.agui-composer { display: flex; align-items: flex-end; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--line); background: #06080B; }
+.agui-composer textarea {
+  flex: 1; resize: none; background: var(--bg); border: 1px solid var(--line-2); color: var(--text);
+  border-radius: 8px; padding: 9px 11px; font: inherit; font-size: 13px; line-height: 1.45; outline: none; max-height: 140px;
+}
+.agui-composer textarea:focus { border-color: var(--red); }
+.agui-send { flex-shrink: 0; width: 36px; height: 36px; border-radius: 8px; background: var(--red); color: #fff; border: none; cursor: pointer; display: grid; place-items: center; }
+.agui-send:disabled { opacity: .4; cursor: default; }
+.agui-send.agui-stop { background: var(--panel-2); border: 1px solid var(--line-2); color: var(--text); }
+
+.agui-form-input { width: 100%; background: var(--bg); border: 1px solid var(--line-2); color: var(--text); border-radius: 5px; padding: 7px 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none; }
+.agui-form-input:focus { border-color: var(--red); }
+.agui-chip.quiz-correct { border-color: rgba(25, 195, 125, .5); color: var(--green); background: rgba(25, 195, 125, .08); }
+.agui-chip.quiz-wrong { border-color: rgba(255, 46, 69, .5); color: var(--red); background: rgba(255, 46, 69, .08); }
+
+@media (prefers-reduced-motion: reduce) {
+  .agui-thinking span, .agui-toolchip .icon.icon-loader, .agui-fab { animation: none !important; transition: none !important; }
+}

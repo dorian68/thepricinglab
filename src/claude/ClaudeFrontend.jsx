@@ -4,6 +4,7 @@ import { Link as RouterLink, useLocation } from 'react-router-dom';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import { useAuth } from '../contexts/AuthContext';
+import { useToolRegister } from '../agent/toolControl';
 import {
   GENERATOR_PRESETS,
   PRACTICE_COURSE_EXTENSIONS,
@@ -15,6 +16,7 @@ import {
   getPracticeApiBase,
   loadGeneratedExercises,
   saveGeneratedExercise,
+  startCheckout,
 } from './practiceEngine';
 import './claude.css';
 
@@ -2683,6 +2685,7 @@ function ProLockedTool({tool}) {
 function BSPricerTool() {
   const [S,setS]=useState(100),[K,setK]=useState(100),[r,setR]=useState(2),[q,setQ]=useState(0),[sigma,setSigma]=useState(20),[T,setT]=useState(180);
   const [view,setView]=useState('spot'); // sensitivity
+  useToolRegister('bs-pricer', {S,K,r,q,sigma,T,view}, {S:setS,K:setK,r:setR,q:setQ,sigma:setSigma,T:setT,view:setView});
   const params = {S,K,r:r/100,q:q/100,sigma:sigma/100,T:T/365};
   const call = bsPrice({...params, type:'call'});
   const put  = bsPrice({...params, type:'put'});
@@ -2868,6 +2871,7 @@ function PayoffVisualizerTool() {
   const addLeg = () => setLegs([...legs, {id:Date.now(), type:'call', side:'long', K:100, qty:1, prem:5}]);
   const updateLeg = (id, k, v) => setLegs(legs.map(l => l.id===id?{...l,[k]:v}:l));
   const removeLeg = (id) => setLegs(legs.filter(l => l.id!==id));
+  useToolRegister('payoff', {legs}, {legs:(v)=>setLegs((v||[]).map((l,i)=>({id:i+1,qty:1,prem:0,...l})))});
 
   const presets = [
     {name:'Bull Call Spread', legs:[{type:'call',side:'long',K:100,qty:1,prem:6},{type:'call',side:'short',K:110,qty:1,prem:2.5}]},
@@ -3092,6 +3096,7 @@ function PayoffChart({payoff, breakevens, legs}) {
 // ============= MONTE CARLO =============
 function MonteCarloTool() {
   const [S,setS]=useState(100),[mu,setMu]=useState(5),[sigma,setSigma]=useState(20),[T,setT]=useState(252),[N,setN]=useState(1000);
+  useToolRegister('mc', {S,mu,sigma,T,N}, {S:setS,mu:setMu,sigma:setSigma,T:setT,N:setN});
   const [seed,setSeed] = useState(7);
   const paths = useMemo(()=>{
     const out = [];
@@ -3229,6 +3234,7 @@ function MonteCarloTool() {
 function IVCalcTool() {
   const [asset,setAsset] = useState('SPX');
   const [window,setWin] = useState(20);
+  useToolRegister('iv-calc', {asset,window}, {asset:setAsset, window:setWin});
   const assets = ['SPX','NDX','TSLA','NVDA','BTC','EURUSD'];
   // Build a price walk and rolling realized vol
   const prices = useMemo(()=>genWalk(252, 100, 0.013, 0.0002, asset.charCodeAt(0)+window),[asset,window]);
@@ -3291,6 +3297,7 @@ function IVCalcTool() {
 // ============= CALIBRATION =============
 function CalibrationTool() {
   const [model, setModel] = useState('SABR');
+  useToolRegister('calib', {model}, {model:setModel});
   return (
     <div className="container page">
       <PageHead
@@ -5056,17 +5063,32 @@ function DashAchievements() {
 // ============= PRICING =============
 function PricingPage() {
   const [annual,setAnnual] = useState(false);
+  const [busy,setBusy] = useState(null);
+  const [notice,setNotice] = useState(null);
+  let authEmail = null;
+  try { authEmail = useAuth()?.user?.email || null; } catch { authEmail = null; }
   const plans = [
-    {name:'Starter', price:annual?7:9, save:annual?'-22%':null, desc:'For learners who want the core desk workflow, not scattered theory.',
+    {name:'Starter', key:'starter', price:annual?7:9, save:annual?'-22%':null, desc:'For learners who want the core desk workflow, not scattered theory.',
      features:['All Fundamentals courses','Core calculators: BS, payoff, Monte Carlo','Starter AI exercise quota','Course scripts with LaTeX formulas','Community + weekly desk brief'],
      cta:'Start Starter', highlight:false},
-    {name:'Student', price:annual?15:19, save:annual?'-21%':null, desc:'Most popular for active learners building real pricing reflexes.', popular:true,
+    {name:'Student', key:'student', price:annual?15:19, save:annual?'-21%':null, desc:'Most popular for active learners building real pricing reflexes.', popular:true,
      features:['Everything in Starter','All Advanced courses','Unlimited exercises + quizzes','Trading Lab access','Notebooks workspace','Source-backed RAG course scripts','Priority support'],
      cta:'Go Student', highlight:true},
-    {name:'Professional', price:annual?39:49, save:annual?'-20%':null, desc:'For working quants, desk analysts and serious career transition.',
+    {name:'Professional', key:'pro', price:annual?39:49, save:annual?'-20%':null, desc:'For working quants, desk analysts and serious career transition.',
      features:['Everything in Student','All Complex courses','All 9 tools incl. PRO','API access','Backtest engine','Mentoring credits (2/mo)','Job board access'],
      cta:'Go Pro', highlight:false},
   ];
+  async function handleCheckout(planKey, planName){
+    setNotice(null); setBusy(planKey);
+    try {
+      const s = await startCheckout(planKey, authEmail);
+      if (s.mode === 'live' && s.url) { window.location.href = s.url; return; }
+      // Backend reachable but Stripe not configured (mock) — be honest.
+      setNotice({type:'info', msg:`Paiement en mode test : Stripe n'est pas encore configuré sur le backend (plan ${planName}). Renseigne les clés Stripe pour activer le vrai checkout.`});
+    } catch(e){
+      setNotice({type:'error', msg:`Paiement indisponible — le backend de paiement est requis (${e.message}).`});
+    } finally { setBusy(null); }
+  }
   return (
     <div className="container page">
       <PageHead
@@ -5080,6 +5102,19 @@ function PricingPage() {
           </div>
         </>}
       />
+      {notice && (
+        <div className="panel" style={{padding:'12px 16px',marginBottom:16,borderColor:notice.type==='error'?'var(--red)':'var(--line-2)',fontSize:13}}>
+          <span className="mono" style={{color:notice.type==='error'?'var(--red)':'var(--text)'}}>{notice.type==='error'?'⚠ ':'ℹ '}</span>{notice.msg}
+        </div>
+      )}
+      <a href="/market-finance-starter-kit/" className="panel" style={{display:'flex',alignItems:'center',gap:18,padding:'18px 22px',marginBottom:18,borderColor:'rgba(255,46,69,.35)',background:'linear-gradient(100deg, rgba(255,46,69,.07), transparent 60%)',textDecoration:'none'}}>
+        <span className="badge badge-red">BÊTA · 29€</span>
+        <div style={{flex:1}}>
+          <div className="mono" style={{fontWeight:700,fontSize:14}}>Market Finance Starter Kit</div>
+          <div className="mute" style={{fontSize:12.5,marginTop:3}}>Construis en 7 jours ton premier projet finance de marché en Python &amp; Excel — prêt pour ton CV, GitHub ou LinkedIn.</div>
+        </div>
+        <span className="btn btn-primary btn-sm" style={{flexShrink:0}}>Voir l'offre<Icon name="arrow-right" size={13}/></span>
+      </a>
       <div className="grid-3">
         {plans.map(p=>(
           <div key={p.name} className="panel" style={{padding:30, position:'relative', borderColor: p.highlight?'var(--red)':'var(--line)'}}>
@@ -5091,7 +5126,7 @@ function PricingPage() {
               <span className="mono mute" style={{fontSize:12}}>/mo</span>
               {p.save && <span className="badge badge-green" style={{marginLeft:8}}>{p.save}</span>}
             </div>
-            <Link to="/auth/signup" className={"btn "+(p.highlight?'btn-primary':'btn-outline')} style={{width:'100%',justifyContent:'center',marginTop:24}}>{p.cta}</Link>
+            <button type="button" onClick={()=>handleCheckout(p.key, p.name)} disabled={busy===p.key} className={"btn "+(p.highlight?'btn-primary':'btn-outline')} style={{width:'100%',justifyContent:'center',marginTop:24,cursor:busy===p.key?'wait':'pointer'}}>{busy===p.key?'Redirection…':p.cta}</button>
             <ul style={{listStyle:'none',padding:0,marginTop:28}}>
               {p.features.map(f=>(
                 <li key={f} className="row" style={{gap:10,padding:'8px 0',borderTop:'1px solid var(--line)'}}>
@@ -5894,7 +5929,7 @@ function App() {
       <Header route={route}/>
       {page}
       <Footer/>
-      <ChatFab/>
+      {/* ChatFab replaced by the global AG-UI AgentDock (mounted in App.tsx) */}
       <ToastStack/>
     </div>
   );

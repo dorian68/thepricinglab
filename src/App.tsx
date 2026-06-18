@@ -5,6 +5,8 @@ import { I18nextProvider } from 'react-i18next';
 import { AuthProvider } from './contexts/AuthContext';
 import ScrollToTop from './components/ScrollToTop';
 import ClaudeFrontend from './claude/ClaudeFrontend';
+import { AgentProvider } from './agent/AgentProvider';
+import AgentDock from './agent/AgentDock';
 import i18n from './i18n';
 
 const queryClient = new QueryClient();
@@ -29,7 +31,10 @@ function App() {
             </Helmet>
             <Router>
               <ScrollToTop />
-              <ClaudeFrontend />
+              <AgentProvider>
+                <ClaudeFrontend />
+                <AgentDock />
+              </AgentProvider>
             </Router>
           </AuthProvider>
         </QueryClientProvider>

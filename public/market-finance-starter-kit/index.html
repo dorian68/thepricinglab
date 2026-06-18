@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Market Finance Starter Kit · The Pricing Library</title>
+<meta name="description" content="Construis en 7 jours ton premier projet finance de marché en Python & Excel — prêt à montrer sur CV, GitHub et LinkedIn. Prix bêta 49 €." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link href="https://unpkg.com/lucide-static@0.460.0/font/lucide.css" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#080A0E;
+    --bg-2:#0C0F15;
+    --card:#11161F;
+    --card-2:#161D28;
+    --panel:#11161F;
+    --panel-2:#161D28;
+    --line:#222934;
+    --line-2:#2C3340;
+    --border:rgba(255,255,255,.07);
+    --border-2:rgba(255,255,255,.13);
+    --steel:#3A4150;
+    --mute:#8A94A6;
+    --text:#E9ECF2;
+    --text-2:#AEB6C4;
+    --white:#F7F9FC;
+    --red:#FF2E45;
+    --red-2:#E03E4E;
+    --glow:rgba(255,46,69,.45);
+    --green:#21D08C;
+    --amber:#FFB627;
+    --blue:#3E8BFF;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,system-ui,sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input{font-family:inherit}
+  .mono{font-family:'JetBrains Mono','IBM Plex Mono',ui-monospace,monospace;font-feature-settings:"tnum","zero"}
+  .tnum{font-variant-numeric:tabular-nums}
+  ::selection{background:var(--red);color:#fff}
+  ::-webkit-scrollbar{width:11px;height:11px}
+  ::-webkit-scrollbar-track{background:var(--bg)}
+  ::-webkit-scrollbar-thumb{background:#222934;border-radius:6px}
+  ::-webkit-scrollbar-thumb:hover{background:#3A4150}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 26px}
+
+  /* atoms */
+  .label{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);font-family:'JetBrains Mono',monospace;font-weight:500}
+  .micro{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-family:'JetBrains Mono',monospace}
+  .red{color:var(--red)}.green{color:var(--green)}.amber{color:var(--amber)}.mute{color:var(--mute)}.text-2{color:var(--text-2)}
+
+  .eyebrow{display:inline-flex;align-items:center;gap:9px;color:var(--red);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:500}
+  .eyebrow::before{content:"";width:22px;height:1px;background:var(--red)}
+
+  h1,h2,h3{margin:0;font-family:'Inter',sans-serif;font-weight:800;letter-spacing:-.025em;line-height:1.08;color:var(--white)}
+  h2{font-size:clamp(28px,3.9vw,46px)}
+  h3{font-size:19px;font-weight:700;letter-spacing:-.015em}
+  .serif-lead{color:var(--text-2);font-size:clamp(15px,1.7vw,18px);line-height:1.62;font-family:'Inter',sans-serif}
+
+  .section{padding:clamp(60px,8vw,104px) 0;position:relative}
+  .section-eyebrow{margin-bottom:18px}
+
+  /* buttons */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:13px 22px;border-radius:10px;font-weight:700;font-size:14.5px;letter-spacing:-.01em;border:1px solid transparent;transition:transform .16s ease,box-shadow .16s ease,background .16s ease,border-color .16s ease;white-space:nowrap}
+  .btn-primary{background:var(--red);color:#fff;box-shadow:0 12px 34px -12px var(--glow)}
+  .btn-primary:hover{background:#ff4254;transform:translateY(-2px);box-shadow:0 18px 46px -12px var(--glow)}
+  .btn-outline{background:rgba(255,255,255,.02);color:var(--text);border-color:var(--border-2)}
+  .btn-outline:hover{border-color:var(--red);background:rgba(255,46,69,.06);color:#fff}
+  .btn-ghost{color:var(--text-2)}
+  .btn-ghost:hover{color:var(--text)}
+  .btn-lg{padding:16px 30px;font-size:16px;border-radius:12px}
+  .btn-sm{padding:9px 15px;font-size:13px;border-radius:8px}
+  .btn-block{width:100%}
+
+  /* badges */
+  .badge{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;font-size:11px;letter-spacing:.06em;font-family:'JetBrains Mono',monospace;font-weight:600;border:1px solid var(--border-2);border-radius:100px;color:var(--text-2);background:rgba(255,255,255,.03)}
+  .badge-red{color:#fff;border-color:transparent;background:var(--red);box-shadow:0 6px 20px -8px var(--glow)}
+  .badge-green{color:var(--green);border-color:rgba(33,208,140,.32);background:rgba(33,208,140,.1)}
+  .badge-amber{color:var(--amber);border-color:rgba(255,182,39,.34);background:rgba(255,182,39,.1)}
+  .dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+  .dot-red{background:#fff;box-shadow:0 0 8px rgba(255,255,255,.6)}
+  .dot-amber{background:var(--amber);box-shadow:0 0 9px var(--amber)}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,182,39,.6)}70%{box-shadow:0 0 0 8px rgba(255,182,39,0)}100%{box-shadow:0 0 0 0 rgba(255,182,39,0)}}
+  .dot-amber.live{animation:pulse 2.2s infinite}
+
+  /* top ticker */
+  .top-strip{background:#06080B;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--mute);letter-spacing:.05em}
+  .top-strip-inner{display:flex;align-items:center;justify-content:space-between;padding:0 26px;height:28px}
+  .ticker{flex:1;display:flex;gap:26px;overflow:hidden;margin:0 20px;mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)}
+  .ticker-track{display:flex;gap:26px;animation:tick 80s linear infinite;white-space:nowrap}
+  @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .ti{display:inline-flex;gap:6px}.ti .s{color:var(--text-2)}
+
+  /* promo banner */
+  .promo{background:linear-gradient(90deg,rgba(255,46,69,.16),rgba(255,46,69,.04) 55%,transparent);border-bottom:1px solid var(--border)}
+  .promo-in{display:flex;align-items:center;justify-content:center;gap:16px;padding:11px 26px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--text-2)}
+  .promo-in .pb{color:#fff;font-weight:700;font-size:14px}
+  .promo-mini{display:inline-flex;gap:6px;align-items:center;font-variant-numeric:tabular-nums;color:var(--text)}
+  .promo-mini b{color:#fff;font-weight:700}
+  .promo-btn{padding:7px 16px;font-size:12.5px}
+
+  /* header */
+  header.nav{position:sticky;top:0;z-index:60;background:rgba(8,10,14,.78);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+  .nav-in{display:flex;align-items:center;justify-content:space-between;height:60px;padding:0 26px}
+  .brand{display:flex;align-items:center;gap:11px;font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:.03em;font-size:13px;color:var(--white)}
+  .brand-mark{width:26px;height:26px;background:var(--red);display:grid;place-items:center;color:#fff;font-size:11px;font-weight:700;border-radius:7px;box-shadow:0 6px 18px -6px var(--glow)}
+  .nav-right{display:flex;align-items:center;gap:14px}
+  .nav-note{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mute)}
+  .lang-switch{display:flex;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;border:1px solid var(--border-2);border-radius:8px;overflow:hidden}
+  .lang-switch button{padding:6px 11px;color:var(--mute)}
+  .lang-switch button.on{background:rgba(255,255,255,.07);color:var(--text)}
+
+  /* hero */
+  .hero{position:relative;overflow:hidden;padding:clamp(44px,6vw,80px) 0 clamp(48px,7vw,90px)}
+  .hero::before{content:"";position:absolute;top:-280px;right:-180px;width:760px;height:760px;background:radial-gradient(circle,rgba(255,46,69,.16),transparent 62%);pointer-events:none}
+  .hero::after{content:"";position:absolute;bottom:-340px;left:-220px;width:680px;height:680px;background:radial-gradient(circle,rgba(62,139,255,.06),transparent 66%);pointer-events:none}
+  .hero-grid{position:relative;display:grid;grid-template-columns:1.06fr .94fr;gap:46px;align-items:center}
+  .hero-eyebrow{display:flex;margin-bottom:22px}
+  .hero-pain{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--amber);margin-bottom:16px;line-height:1.45;font-weight:600}
+  .hero-pain i{flex-shrink:0}
+  .hero h1{font-size:clamp(34px,5vw,58px);line-height:1.02;letter-spacing:-.03em}
+  .hero h1 .hl{color:var(--red)}
+  .hero-sub{color:var(--text-2);font-size:clamp(15px,1.6vw,17.5px);line-height:1.62;max-width:50ch;margin:22px 0 30px}
+  .hero-ctas{display:flex;gap:13px;flex-wrap:wrap}
+  .hero-micro{display:flex;align-items:center;gap:9px;color:var(--mute);font-size:12.5px;margin-top:20px;font-family:'Inter',sans-serif}
+  .hero-kpis{display:flex;gap:13px;margin-top:34px;flex-wrap:wrap}
+  .hk{flex:1;min-width:96px;background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px 18px}
+  .hk .n{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:var(--white)}
+  .hk .l{font-family:'Inter',sans-serif;font-size:11.5px;letter-spacing:.02em;color:var(--mute);margin-top:5px;font-weight:500}
+
+  .hero-right{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--border-2);border-radius:18px;overflow:hidden;box-shadow:0 50px 110px -50px rgba(0,0,0,.95),0 0 90px -36px var(--glow)}
+  .term-bar{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02);font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--mute)}
+  .nb-cell{padding:15px 20px;border-bottom:1px solid var(--border)}
+  .nb-tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--mute);margin-bottom:8px;letter-spacing:.08em}
+  .nb-code{font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.75;color:var(--text-2);white-space:pre-wrap;margin:0}
+  .nb-code .k{color:#FF7B92}.nb-code .s{color:#9CDCFE}.nb-code .f{color:var(--green)}.nb-code .n{color:var(--amber)}
+  .nb-out{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--green);font-weight:600}
+  .greek-strip{display:flex;gap:0;border-top:1px solid var(--border);background:rgba(255,255,255,.015)}
+  .gs{flex:1;padding:13px 12px;border-right:1px solid var(--border);text-align:center}
+  .gs:last-child{border-right:none}
+  .gs .g{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--mute);letter-spacing:.05em}
+  .gs .v{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;margin-top:4px;color:var(--white)}
+
+  /* generic card grid helper look */
+  .prob-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:34px}
+  .prob{display:flex;gap:14px;align-items:flex-start;padding:22px 24px;background:var(--card);border:1px solid var(--border);border-radius:14px;transition:border-color .16s,transform .16s}
+  .prob:hover{border-color:var(--border-2);transform:translateY(-2px)}
+  .prob i{color:var(--red);margin-top:1px;flex-shrink:0;font-size:17px}
+  .prob span{font-size:14.5px;color:var(--text-2);line-height:1.5}
+
+  /* video */
+  .video-wrap{display:grid;grid-template-columns:1.55fr 1fr;gap:26px;margin-top:36px;align-items:start}
+  .video-box{position:relative;aspect-ratio:16/9;background:linear-gradient(160deg,#12161F,#0A0C10);border:1px solid var(--border-2);border-radius:16px;overflow:hidden;display:grid;place-items:center;cursor:pointer;box-shadow:0 40px 90px -50px rgba(0,0,0,.9),0 0 70px -34px var(--glow)}
+  .video-box::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,rgba(255,46,69,.14),transparent 60%);pointer-events:none}
+  .video-thumb-grid{position:absolute;inset:0;opacity:.35}
+  .video-play{position:relative;z-index:2;text-align:center}
+  .video-play .pbtn{width:84px;height:84px;border-radius:50%;border:1px solid rgba(255,46,69,.5);background:rgba(255,46,69,.14);display:grid;place-items:center;color:#fff;margin:0 auto;transition:all .18s;backdrop-filter:blur(2px)}
+  .video-box:hover .pbtn{background:var(--red);transform:scale(1.06);box-shadow:0 0 40px -4px var(--red)}
+  .video-play .cap{font-family:'Inter',sans-serif;font-size:13px;color:var(--text);margin-top:16px;font-weight:600}
+  .video-play .dur{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mute);margin-top:5px}
+  .video-ph{position:relative;z-index:2;text-align:center;padding:0 30px}
+  .video-ph .vt{font-family:'Inter',sans-serif;font-size:15px;color:var(--text);font-weight:700}
+  .video-ph .vs{font-size:13px;color:var(--mute);margin-top:9px;line-height:1.55;max-width:42ch}
+  .video iframe,.video video{width:100%;height:100%;border:none;display:block;position:absolute;inset:0}
+  .video-side{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px}
+  .video-side h3{font-size:16px;margin-bottom:16px}
+  .video-side ul{list-style:none;margin:0;padding:0}
+  .video-side li{display:flex;gap:11px;align-items:flex-start;font-size:14px;color:var(--text-2);padding:10px 0;border-top:1px solid var(--border);line-height:1.5}
+  .video-side li:first-of-type{border-top:none}
+  .video-side li i{color:var(--red);margin-top:3px;flex-shrink:0;font-size:13px}
+  .video-cta{margin-top:22px}
+
+  /* transformation */
+  .transform{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;margin-top:36px;align-items:stretch}
+  .tcard{padding:34px 32px;border-radius:16px;display:flex;flex-direction:column;justify-content:center;min-height:168px;border:1px solid var(--border)}
+  .tcard.before{background:var(--card)}
+  .tcard.after{background:linear-gradient(155deg,rgba(255,46,69,.14),rgba(255,46,69,.02) 72%);border-color:rgba(255,46,69,.4);box-shadow:0 30px 70px -44px var(--glow)}
+  .tcard .tl{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:16px}
+  .tcard.before .tl{color:var(--mute)}.tcard.after .tl{color:var(--red)}
+  .tquote{font-size:19px;font-weight:600;line-height:1.42;color:var(--text);font-family:'Inter',sans-serif}
+  .tcard.after .tquote{color:var(--white)}
+  .tmid{display:grid;place-items:center;padding:0 8px}
+  .t7{text-align:center}
+  .t7 .n{font-family:'JetBrains Mono',monospace;font-size:34px;font-weight:700;color:var(--red);line-height:1}
+  .t7 .l{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--mute);margin-top:5px}
+
+  /* result final */
+  .rf{border:1px solid rgba(255,46,69,.3);background:linear-gradient(150deg,rgba(255,46,69,.1),transparent 66%);padding:44px;border-radius:18px;margin-top:36px;box-shadow:0 40px 90px -54px var(--glow)}
+  .rf .rfq{font-family:'Inter',sans-serif;font-size:clamp(19px,2.4vw,26px);font-weight:700;color:var(--white);line-height:1.38;border-left:3px solid var(--red);padding-left:24px;max-width:62ch;letter-spacing:-.02em}
+  .rf .rfs{color:var(--text-2);font-size:15px;line-height:1.6;margin-top:24px;max-width:64ch}
+
+  /* kit */
+  .kit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:36px}
+  .kit{padding:26px;background:var(--card);border:1px solid var(--border);border-radius:16px;transition:transform .18s,border-color .18s,box-shadow .18s}
+  .kit:hover{transform:translateY(-3px);border-color:rgba(255,46,69,.3);box-shadow:0 30px 60px -40px var(--glow)}
+  .kit .knum{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--red);letter-spacing:.12em;font-weight:600}
+  .kit .kic{width:46px;height:46px;border:1px solid rgba(255,46,69,.28);background:rgba(255,46,69,.1);display:grid;place-items:center;color:var(--red);margin:16px 0;border-radius:12px}
+  .kit h3{margin-bottom:12px}
+  .kit ul{list-style:none;margin:10px 0 0;padding:0}
+  .kit ul li{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--text-2);padding:5px 0}
+  .kit ul li i{color:var(--red);margin-top:3px;font-size:12px}
+  .kit .ksub{font-size:13.5px;color:var(--mute);line-height:1.55}
+  .kit.bonus{background:linear-gradient(150deg,rgba(255,182,39,.1),transparent 60%);border-color:rgba(255,182,39,.3);grid-column:span 3;display:flex;gap:26px;align-items:center}
+  .kit.bonus:hover{border-color:rgba(255,182,39,.45);box-shadow:0 30px 60px -40px rgba(255,182,39,.3)}
+  .kit.bonus .kic{color:var(--amber);border-color:rgba(255,182,39,.32);background:rgba(255,182,39,.12)}.kit.bonus .knum{color:var(--amber)}
+
+  /* deliverables */
+  .deliv{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:36px}
+  .dcard{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+  .dhead{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02)}
+  .dhead .dt{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;display:flex;align-items:center;gap:10px;color:var(--text)}
+  .dbody{padding:20px}
+  .xl{font-family:'JetBrains Mono',monospace;font-size:11.5px;border-collapse:separate;border-spacing:0;width:100%;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .xl td,.xl th{border-bottom:1px solid var(--border);border-right:1px solid var(--border);padding:7px 10px;text-align:right}
+  .xl tr td:last-child,.xl tr th:last-child{border-right:none}
+  .xl tr:last-child td{border-bottom:none}
+  .xl th{background:rgba(255,255,255,.03);color:var(--mute);font-weight:500;text-align:left;letter-spacing:.05em}
+  .xl td.lbl{text-align:left;color:var(--text-2)}
+  .xl td.in{background:rgba(255,46,69,.09);color:var(--red)}
+  .xl td.out{color:var(--text);font-weight:600}
+  .heat{display:grid;grid-template-columns:auto repeat(7,1fr);gap:3px;font-family:'JetBrains Mono',monospace;font-size:9.5px}
+  .heat .hc{aspect-ratio:1.7;display:grid;place-items:center;color:#06080B;font-weight:600;border-radius:3px}
+  .heat .hl{display:grid;place-items:center;color:var(--mute)}
+  .gh-row{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--border)}
+  .gh-row i{color:var(--mute)}
+  .gh-row .gn{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--red);font-weight:600}
+  .gh-row .gs2{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mute);display:flex;align-items:center;gap:5px}
+  .doc-line{height:9px;background:var(--line);margin-top:9px;border-radius:5px}
+  .doc-line.acc{background:rgba(255,46,69,.45);width:52%}
+  .doc-line.w90{width:90%}.doc-line.w70{width:70%}.doc-line.w40{width:40%}
+
+  /* founder */
+  .founder{display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:center;border:1px solid var(--border);background:var(--card);border-radius:18px;padding:40px;margin-top:34px}
+  .founder-av{width:120px;height:120px;background:linear-gradient(150deg,#161D28,#0A0C10);border:1px solid var(--border-2);display:grid;place-items:center;color:var(--red);border-radius:16px;box-shadow:0 20px 50px -28px var(--glow)}
+  .founder-av .ini{font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:700}
+  .founder h3{font-size:24px}
+  .founder .role{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--red);margin-top:7px;letter-spacing:.02em}
+  .founder p{color:var(--text-2);font-size:15px;line-height:1.66;margin:18px 0 0;max-width:66ch}
+  .logos{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}
+  .logo-chip{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:600;letter-spacing:.04em;color:var(--text-2);padding:6px 13px;border:1px solid var(--border-2);background:rgba(255,255,255,.02);border-radius:8px}
+
+  /* who */
+  .who-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:36px}
+  .who{padding:34px;border-radius:18px;border:1px solid var(--border)}
+  .who.yes{background:linear-gradient(155deg,rgba(33,208,140,.1),transparent 66%);border-color:rgba(33,208,140,.28)}
+  .who.no{background:var(--card)}
+  .who h3{display:flex;align-items:center;gap:11px;margin-bottom:20px;font-size:18px}
+  .who.yes h3{color:var(--green)}
+  .who ul{margin:0;padding:0;list-style:none}
+  .who li{display:flex;gap:12px;align-items:flex-start;padding:11px 0;font-size:14.5px;color:var(--text-2);line-height:1.5}
+  .who.yes li i{color:var(--green);margin-top:3px;flex-shrink:0;font-size:14px}
+  .who.no li i{color:var(--red);margin-top:3px;flex-shrink:0;font-size:13px}
+
+  /* result */
+  .res-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:36px}
+  .res{padding:26px 18px;text-align:center;background:var(--card);border:1px solid var(--border);border-radius:14px;transition:transform .16s,border-color .16s}
+  .res:hover{transform:translateY(-3px);border-color:rgba(255,46,69,.3)}
+  .res i{color:var(--red);font-size:22px}
+  .res p{font-size:13.5px;color:var(--text-2);margin:16px 0 0;line-height:1.45}
+
+  /* offer */
+  .offer-card{border:1px solid rgba(255,46,69,.3);background:var(--card);max-width:980px;margin:36px auto 0;border-radius:22px;overflow:hidden;box-shadow:0 60px 130px -56px var(--glow)}
+  .offer-top{display:grid;grid-template-columns:1.2fr 1fr}
+  .offer-left{padding:40px}
+  .offer-left h3{font-size:21px}
+  .offer-incl{margin:22px 0 0;padding:0;list-style:none}
+  .offer-incl li{display:flex;gap:11px;align-items:flex-start;padding:9px 0;font-size:14.5px;color:var(--text-2)}
+  .offer-incl li i{color:var(--red);margin-top:3px;flex-shrink:0;font-size:14px}
+  .offer-right{padding:40px;background:linear-gradient(160deg,rgba(255,46,69,.08),transparent 50%),#0A0C10;border-left:1px solid var(--border);display:flex;flex-direction:column;justify-content:center}
+  .price-row{display:flex;align-items:baseline;gap:13px;margin-top:16px}
+  .price-now{font-family:'JetBrains Mono',monospace;font-size:62px;font-weight:700;color:#fff;line-height:1;letter-spacing:-.02em}
+  .price-old{font-family:'JetBrains Mono',monospace;font-size:22px;color:var(--mute);text-decoration:line-through}
+  .price-sub{font-family:'Inter',sans-serif;font-size:13px;color:var(--text-2);margin-top:14px;line-height:1.6}
+  .cd{display:flex;gap:9px}
+  .cd-unit{flex:1;background:rgba(255,255,255,.03);border:1px solid var(--border-2);border-radius:10px;padding:13px 4px;text-align:center}
+  .cd-unit .num{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:var(--red);line-height:1;font-variant-numeric:tabular-nums}
+  .cd-unit .lbl{font-family:'Inter',sans-serif;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-top:7px;font-weight:600}
+  .cd-sub{font-family:'Inter',sans-serif;font-size:12px;color:var(--text-2);margin-top:12px;line-height:1.5}
+  .pay-row{display:flex;align-items:center;gap:10px;margin-top:18px;flex-wrap:wrap}
+  .pay-chip{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--text-2);border:1px solid var(--border-2);border-radius:7px;padding:5px 10px;background:rgba(255,255,255,.02)}
+
+  /* capture */
+  .capture{border:1px solid var(--border-2);background:var(--card);border-radius:16px;padding:28px 32px;margin-top:26px;display:flex;align-items:center;justify-content:space-between;gap:26px;flex-wrap:wrap}
+  .capture .ct{font-size:16px;color:var(--text);font-weight:700}
+  .capture .cs{font-size:13px;color:var(--mute);margin-top:5px}
+  .cform{display:flex;gap:9px;flex:1;min-width:280px;max-width:430px}
+  .cform input{flex:1;background:rgba(255,255,255,.03);border:1px solid var(--border-2);color:var(--text);padding:13px 15px;border-radius:10px;font-size:14px;outline:none;transition:border-color .15s}
+  .cform input:focus{border-color:var(--red)}
+
+  /* upsell */
+  .upsell{display:flex;align-items:center;gap:18px;border:1px solid var(--border);background:linear-gradient(120deg,rgba(255,182,39,.07),transparent 60%);border-radius:14px;padding:24px 28px;margin-top:38px}
+  .upsell i.li{color:var(--amber);font-size:26px;flex-shrink:0}
+  .upsell .ut{font-size:15.5px;color:var(--text);font-weight:700}
+  .upsell .us{font-size:13.5px;color:var(--text-2);margin-top:5px;line-height:1.5}
+  .upsell .up{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:var(--amber);white-space:nowrap;cursor:pointer}
+
+  /* faq */
+  .faq{max-width:860px;margin:36px auto 0}
+  .qa{border:1px solid var(--border);background:var(--card);margin-bottom:12px;border-radius:14px;overflow:hidden;transition:border-color .16s}
+  .qa.open{border-color:rgba(255,46,69,.3)}
+  .qa-q{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 26px;cursor:pointer;font-weight:700;font-size:16px;color:var(--text);font-family:'Inter',sans-serif;letter-spacing:-.01em}
+  .qa-q i{color:var(--red);transition:transform .2s;flex-shrink:0}
+  .qa.open .qa-q i{transform:rotate(45deg)}
+  .qa-a{max-height:0;overflow:hidden;transition:max-height .28s ease;color:var(--text-2);font-size:14.5px;line-height:1.65}
+  .qa-a div{padding:0 26px 24px}
+  .qa.open .qa-a{max-height:280px}
+
+  /* final */
+  .final{text-align:center;position:relative;overflow:hidden}
+  .final::before{content:"";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:820px;height:480px;background:radial-gradient(ellipse,rgba(255,46,69,.16),transparent 64%);pointer-events:none}
+  .final-sig{display:none}
+  .final h2{max-width:22ch;margin:0 auto;position:relative}
+  .final .serif-lead{max-width:56ch;margin:20px auto 0;position:relative}
+
+  /* footer */
+  footer.ft{border-top:1px solid var(--border);background:#06080B;padding:34px 0}
+  .ft-in{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mute);letter-spacing:.05em}
+  .ft-links{display:flex;gap:22px}.ft-links a:hover{color:var(--text)}
+
+  /* sticky mobile cta */
+  .sticky-cta{position:fixed;left:0;right:0;bottom:0;z-index:70;background:rgba(8,10,14,.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);padding:11px 16px;display:none;align-items:center;justify-content:space-between;gap:14px}
+  .sticky-cta .sp{font-family:'JetBrains Mono',monospace}
+  .sticky-cta .sp b{color:#fff;font-size:20px}
+  .sticky-cta .sp s{color:var(--mute);font-size:12px;margin-left:7px}
+
+  @media (max-width:920px){
+    .hero-grid{grid-template-columns:1fr;gap:40px}
+    .video-wrap{grid-template-columns:1fr}
+    .prob-grid{grid-template-columns:1fr}
+    .transform{grid-template-columns:1fr}
+    .tmid{padding:6px 0}.tmid .t7{display:flex;align-items:center;gap:12px}
+    .kit-grid{grid-template-columns:1fr 1fr}.kit.bonus{grid-column:span 2;flex-direction:column;align-items:flex-start;gap:16px}
+    .deliv{grid-template-columns:1fr}
+    .founder{grid-template-columns:1fr;text-align:center;justify-items:center}.founder p{margin-inline:auto}.logos{justify-content:center}
+    .who-grid{grid-template-columns:1fr}
+    .res-grid{grid-template-columns:1fr 1fr 1fr}
+    .offer-top{grid-template-columns:1fr}.offer-right{border-left:none;border-top:1px solid var(--border)}
+    .nav-note{display:none}
+  }
+  @media (max-width:600px){
+    .wrap{padding:0 18px}
+    .kit-grid{grid-template-columns:1fr}.kit.bonus{grid-column:span 1}
+    .res-grid{grid-template-columns:1fr 1fr}
+    .capture{flex-direction:column;align-items:stretch}.cform{max-width:none}
+    .upsell{flex-wrap:wrap}.upsell .up{margin-left:0}
+    .offer-left,.offer-right{padding:30px 24px}
+    .hk{min-width:0}
+    body{padding-bottom:66px}.sticky-cta{display:flex}
+  }
+</style>
+</head>
+<body>
+
+<template id="__bundler_thumbnail" data-bg-color="#0A0C10">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#0A0C10"/>
+    <rect x="380" y="250" width="440" height="300" fill="#10141B" stroke="#222934" stroke-width="2"/>
+    <line x1="380" y1="200" x2="380" y2="600" stroke="#FF2E45" stroke-width="3"/>
+    <path d="M 420 520 L 600 520 L 780 320" fill="none" stroke="#FF2E45" stroke-width="6"/>
+    <line x1="600" y1="280" x2="600" y2="560" stroke="#2C3340" stroke-width="2" stroke-dasharray="6 8"/>
+    <text x="600" y="180" font-family="monospace" font-size="56" font-weight="700" fill="#FF2E45" text-anchor="middle">σ</text>
+    <text x="600" y="660" font-family="monospace" font-size="34" font-weight="700" fill="#F4F5F7" text-anchor="middle">STARTER KIT</text>
+  </svg>
+</template>
+
+<!-- TOP STRIP / TICKER -->
+<div class="top-strip">
+  <div class="top-strip-inner">
+    <div style="display:flex;gap:12px;flex-shrink:0;align-items:center">
+      <span><span class="dot dot-red" style="margin-right:6px"></span><span data-i18n="strip.launch">CAMPAGNE · LANCEMENT</span></span>
+    </div>
+    <div class="ticker">
+      <div class="ticker-track" id="tick"></div>
+    </div>
+    <div style="flex-shrink:0"><span data-i18n="strip.kit">MARKET FINANCE STARTER KIT</span></div>
+  </div>
+</div>
+
+<!-- PROMO BANNER -->
+<div class="promo">
+  <div class="promo-in">
+    <span class="badge badge-amber"><span class="dot dot-amber live"></span><span data-i18n="promo.badge">Lancement bêta</span></span>
+    <span><span class="pb">49&nbsp;€</span> <span data-i18n="promo.until">jusqu'au</span> <b id="promo-date" class="mono" style="color:var(--text)"></b> · <span data-i18n="promo.then">puis</span> <span style="text-decoration:line-through;color:var(--mute)">99&nbsp;€</span></span>
+    <span class="promo-mini mute"><i class="icon icon-clock" style="font-size:12px"></i><b id="promo-cd">—</b></span>
+    <button class="btn btn-primary promo-btn" data-cta="banner" data-i18n="cta.join">Rejoindre la bêta</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="/">
+      <span class="brand-mark">TPL</span>
+      <span>THE PRICING LIBRARY</span>
+    </a>
+    <div class="nav-right">
+      <span class="nav-note" data-i18n="nav.note">Page de campagne · bêta</span>
+      <div class="lang-switch">
+        <button data-lang="fr">FR</button>
+        <button data-lang="en">EN</button>
+      </div>
+      <button class="btn btn-primary btn-sm" data-cta="header"><span data-i18n="cta.join29">Rejoindre la bêta · 49 €</span></button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div class="hero-left">
+        <div class="hero-eyebrow">
+          <span class="badge badge-amber"><span class="dot dot-amber live"></span><span data-i18n="hero.badge">Offre bêta limitée dans le temps</span></span>
+        </div>
+        <div class="hero-pain"><i class="icon icon-alert-triangle" style="font-size:14px"></i><span data-i18n="hero.pain">Tu veux postuler en finance de marché, mais ton CV manque de projets concrets ?</span></div>
+        <h1><span data-i18n="hero.h1a">Construis ton premier</span> <span class="hl" data-i18n="hero.h1b">projet finance de marché</span> <span data-i18n="hero.h1c">en Python &amp; Excel.</span></h1>
+        <p class="hero-sub" data-i18n="hero.sub">Un kit pratique pour étudiants et jeunes professionnels qui veulent se crédibiliser en pricing, risk et finance de marché — sans passer des semaines à chercher quoi construire. Prêt à montrer sur ton CV, GitHub ou LinkedIn.</p>
+        <div class="hero-ctas">
+          <button class="btn btn-primary btn-lg" data-cta="hero"><span data-i18n="cta.join29">Rejoindre la bêta à 49 €</span><i class="icon icon-arrow-right"></i></button>
+          <a href="#video" class="btn btn-outline btn-lg" data-i18n="hero.see">Voir la vidéo de présentation</a>
+        </div>
+        <div class="hero-micro"><i class="icon icon-info" style="font-size:13px"></i><span data-i18n="hero.micro">Prix bêta réservé au lancement. Après la date limite, le prix passera à 99 €.</span></div>
+        <div class="hero-kpis">
+          <div class="hk"><div class="n red">7<span style="font-size:13px;color:var(--mute)" data-i18n="hero.days">j</span></div><div class="l" data-i18n="hero.kpi1">Pour livrer</div></div>
+          <div class="hk"><div class="n">7</div><div class="l" data-i18n="hero.kpi2">Livrables</div></div>
+          <div class="hk"><div class="n">49<span style="font-size:13px;color:var(--mute)">€</span></div><div class="l" data-i18n="hero.kpi3">Prix bêta</div></div>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="term-bar">
+          <div style="display:flex;gap:12px"><span class="red" style="font-weight:700">BS&lt;GO&gt;</span><span data-i18n="hero.term">Black-Scholes · Call · ATM</span></div>
+          <div style="display:flex;gap:8px"><span class="green">● LIVE</span></div>
+        </div>
+        <div class="nb-cell">
+          <div class="nb-tag">In [1]</div>
+<pre class="nb-code"><span class="k">from</span> scipy.stats <span class="k">import</span> norm
+<span class="k">from</span> math <span class="k">import</span> log, sqrt, exp
+
+<span class="k">def</span> <span class="f">bs_call</span>(S, K, r, sigma, T):
+    d1 = (log(S/K)+(r+<span class="n">0.5</span>*sigma**<span class="n">2</span>)*T)/(sigma*sqrt(T))
+    d2 = d1 - sigma*sqrt(T)
+    <span class="k">return</span> S*norm.cdf(d1) - K*exp(-r*T)*norm.cdf(d2)</pre>
+        </div>
+        <div class="nb-cell">
+          <div class="nb-tag">In [2]</div>
+          <pre class="nb-code"><span class="f">bs_call</span>(<span class="n">100</span>, <span class="n">100</span>, <span class="n">0.02</span>, <span class="n">0.20</span>, <span class="n">0.5</span>)</pre>
+          <div class="nb-tag" style="margin-top:8px">Out [2]</div>
+          <div class="nb-out">6.0401</div>
+        </div>
+        <div style="flex:1"></div>
+        <div class="greek-strip">
+          <div class="gs"><div class="g">Δ DELTA</div><div class="v">0.540</div></div>
+          <div class="gs"><div class="g">Γ GAMMA</div><div class="v">0.028</div></div>
+          <div class="gs"><div class="g">ν VEGA</div><div class="v">0.281</div></div>
+          <div class="gs"><div class="g">Θ THETA</div><div class="v">-0.006</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEME -->
+<section class="section">
+  <div class="wrap">
+    <div class="eyebrow section-eyebrow"><span data-i18n="prob.eyebrow">// 01 · Le problème</span></div>
+    <h2 data-i18n="prob.h2">Tu connais la théorie. Mais tu n'as rien à montrer.</h2>
+    <p class="serif-lead" style="margin-top:16px;max-width:64ch" data-i18n="prob.lead">Tu as peut-être déjà appris Black-Scholes, la VaR ou les Greeks en cours. Mais face à un recruteur, le problème est souvent différent :</p>
+    <div class="prob-grid">
+      <div class="prob"><i class="icon icon-x"></i><span data-i18n="prob.1">Tu sais expliquer la théorie, mais tu n'as rien de concret à montrer.</span></div>
+      <div class="prob"><i class="icon icon-x"></i><span data-i18n="prob.2">Tu veux postuler en finance de marché mais ton CV manque de projets techniques.</span></div>
+      <div class="prob"><i class="icon icon-x"></i><span data-i18n="prob.3">Tu ne sais pas quel projet GitHub construire.</span></div>
+      <div class="prob"><i class="icon icon-x"></i><span data-i18n="prob.4">Tu veux progresser en Python / Excel appliqué à la finance.</span></div>
+      <div class="prob" style="grid-column:1/-1;border-right:none"><i class="icon icon-x"></i><span data-i18n="prob.5">Tu as besoin d'un livrable clair, propre et présentable — pas d'un cours de plus.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- VIDEO -->
+<section class="section" id="video">
+  <div class="wrap">
+    <div class="eyebrow section-eyebrow"><span data-i18n="vid.eyebrow">// 02 · Vidéo de présentation</span></div>
+    <h2 data-i18n="vid.h2">Regarde cette vidéo avant de rejoindre la bêta.</h2>
+    <p class="serif-lead" style="margin-top:16px;max-width:66ch" data-i18n="vid.sub">Je t'explique en quelques minutes ce qu'il y a dans le kit, à qui il s'adresse, et comment l'utiliser pour construire un projet finance de marché crédible à montrer sur ton CV, GitHub ou LinkedIn.</p>
+    <div class="video-wrap">
+      <div class="video" id="videoCol">
+        <div class="video-box" id="videoBox">
+          <svg class="video-thumb-grid" viewBox="0 0 600 338" preserveAspectRatio="none" aria-hidden="true">
+            <g stroke="#1A1F28" stroke-width="1">
+              <line x1="0" y1="84" x2="600" y2="84"/><line x1="0" y1="169" x2="600" y2="169"/><line x1="0" y1="253" x2="600" y2="253"/>
+              <line x1="150" y1="0" x2="150" y2="338"/><line x1="300" y1="0" x2="300" y2="338"/><line x1="450" y1="0" x2="450" y2="338"/>
+            </g>
+            <path d="M0,250 L150,250 L450,90" fill="none" stroke="#FF2E45" stroke-width="2" opacity="0.6"/>
+          </svg>
+          <!-- Placeholder shown when no video configured -->
+          <div class="video-ph" id="videoPh">
+            <div class="video-play" style="margin-bottom:16px"><div class="pbtn"><i class="icon icon-play" style="font-size:26px;margin-left:3px"></i></div></div>
+            <div class="vt" data-i18n="vid.phT">Vidéo de présentation bientôt disponible</div>
+            <div class="vs" data-i18n="vid.phS">Dorian présente le kit, les livrables et la meilleure manière de l'utiliser pour ton CV / GitHub.</div>
+          </div>
+          <!-- Play state shown when video IS configured -->
+          <div class="video-play" id="videoPlay" style="display:none">
+            <div class="pbtn"><i class="icon icon-play" style="font-size:26px;margin-left:3px"></i></div>
+            <div class="cap" data-i18n="vid.by">Vidéo de présentation par Dorian Labry</div>
+            <div class="dur">3–5 min</div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-lg video-cta" data-cta="video" style="display:none" id="videoCta"><span data-i18n="cta.join29">Rejoindre la bêta à 49 €</span><i class="icon icon-arrow-right"></i></button>
+      </div>
+      <div class="video-side">
+        <h3 data-i18n="vid.coverT">Ce que je couvre dans la vidéo</h3>
+        <ul>
+          <li><i class="icon icon-chevron-right"></i><span data-i18n="vid.c1">Pourquoi j'ai créé ce kit.</span></li>
+          <li><i class="icon icon-chevron-right"></i><span data-i18n="vid.c2">Ce que les étudiants et jeunes pros ont souvent du mal à montrer en entretien.</span></li>
+          <li><i class="icon icon-chevron-right"></i><span data-i18n="vid.c3">Ce que tu vas construire concrètement.</span></li>
+          <li><i class="icon icon-chevron-right"></i><span data-i18n="vid.c4">Comment présenter le projet sur CV, GitHub ou LinkedIn.</span></li>
+          <li><i class="icon icon-chevron-right"></i><span data-i18n="vid.c5">Pourquoi le prix bêta est à 49 € pendant le lancement.</span></li>
+        </ul>
+        <button class="btn btn-outline btn-block video-cta" data-cta="video-side"><span data-i18n="cta.join29">Rejoindre la bêta à 49 €</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRANSFORMATION -->
+<section class="section">
+  <div class="wrap">
+    <div class="eyebrow section-eyebrow"><span data-i18n="tf.eyebrow">// 03 · La transformation</span></div>
+    <h2 data-i18n="tf.h2">En 7 jours, tu changes de discours.</h2>
+    <div class="transform">
+      <div class="tcard before">
+        <div class="tl" data-i18n="tf.before">Avant</div>
+        <div class="tquote" data-i18n="tf.beforeq">"J'ai vu la théorie en cours."</div>
+      </div>
+      <div class="tmid"><div class="t7"><div class="n">7</div><div class="l" data-i18n="tf.days">JOURS</div></div></div>
+      <div class="tcard after">
+        <div class="tl" data-i18n="tf.after">Après</div>
+        <div class="tquote" data-i18n="tf.afterq">"J'ai construit un mini-projet pricing/risk que je peux montrer, expliquer et défendre."</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTAT FINAL -->
+<section class="section">
+  <div class="wrap">
+    <div class="eyebrow section-eyebrow"><span data-i18n="rf.eyebrow">// 04 · Résultat final</span></div>
+    <h2 data-i18n="rf.h2">À la fin, tu pourras présenter un vrai projet.</h2>
+    <div class="rf">
+      <div class="rfq" data-i18n="rf.quote">"J'ai construit un outil Python/Excel de pricing d'options, avec calcul des Greeks, visualisation des sensibilités et analyse VaR/PnL."</div>
+      <div class="rfs" data-i18n="rf.sub">C'est ce type de phrase que tu veux pouvoir défendre en entretien, sur ton CV, dans un README GitHub ou dans un post LinkedIn.</div>
+    </div>
+  </div>
+</section>
+
+<!-- KIT -->
+<section class="section" id="kit">
+  <div class="wrap">
+    <div class="eyebrow section-eyebrow"><span data-i18n="kit.eyebrow">// 05 · Ce qu'il y a dans le kit</span></div>
+    <h2 data-i18n="kit.h2">7 livrables, un seul projet propre.</h2>
+    <p class="serif-lead" style="margin-top:16px;max-width:58ch" data-i18n="kit.lead">Tout est guidé, structuré et pensé pour être présentable. Tu n'inventes rien : tu construis, tu comprends, tu montres.</p>
+    <div class="kit-grid">
+      <div class="kit">
+        <div class="knum">01</div>
+        <div class="kic"><i class="icon icon-code-2" style="font-size:18px"></i></div>
+        <h3 data-i18n="kit.1t">Notebook Python — Black-Scholes + Greeks</h3>
+        <ul>
+          <li><i class="icon icon-check"></i><span data-i18n="kit.1a">Pricing call / put</span></li>
+          <li><i class="icon icon-check"></i><span data-i18n="kit.1b">Delta, Gamma, Vega, Theta, Rho</span></li>
+          <li><i class="icon icon-check"></i><span data-i18n="kit.1c">Visualisations simples</span></li>
+          <li><i class="icon icon-check"></i><span data-i18n="kit.1d">Structure propre pour GitHub</span></li>
+        </ul>
+      </div>
+      <div class="kit">
+        <div class="knum">02</div>
+        <div class="kic"><i class="icon icon-table-2" style="font-size:18px"></i></div>
+        <h3 data-i18n="kit.2t">Mini-dashboard Excel</h3>
+        <ul>
+          <li><i class="icon icon-check"></i><span data-i18n="kit.2a">Inputs modifiables</span></li>
+          <li><i class="icon icon-check"></i><span data-i18n="kit.2b">Visualisation prix &amp; sensibilités</span></li>
+          <li><i class="icon icon-check"></i><span data-i18n="kit.2c">Rendu propre pour démonstration</span></li>
+        </ul>
+      </div>
+      <div class="kit">
+        <div class="knum">03</div>
+        <div class="kic"><i class="icon icon-activity" style="font-size:18px"></i></div>
+        <h3 data-i18n="kit.3t">Notebook VaR / PnL</h3>
+        <ul>
+          <li><i class="icon icon-check"></i><span data-i18n="kit.3a">Calcul de rendement</span></li>
+          <li><i class="icon icon-check"></i><span data-i18n="kit.3b">Volatilité historique</span></li>
+          <li><i class="icon icon-check"></i><span data-i18n="kit.3c">Value-at-Risk + stress scenario</span></li>
+          <li><i class="icon icon-check"></i><span data-i18n="kit.3d">Lecture orientée entretien</span></li>
+        </ul>
+      </div>
+      <div class="kit">
+        <div class="knum">04</div>
+        <div class="kic"><i class="icon icon-list-checks" style="font-size:18px"></i></div>
+        <h3 data-i18n="kit.4t">Fiche "30 questions d'entretien"</h3>
+        <p class="ksub" data-i18n="kit.4s">Les questions de finance de marché qui reviennent le plus — pricing, Greeks, VaR, PnL, scénarios — avec des réponses claires pour t'entraîner.</p>
+      </div>
+      <div class="kit">
+        <div class="knum">05</div>
+        <div class="kic"><i class="icon icon-file-badge" style="font-size:18px"></i></div>
+        <h3 data-i18n="kit.5t">Template CV / GitHub / LinkedIn</h3>
+        <p class="ksub" data-i18n="kit.5s">Comment présenter ton projet correctement : la ligne CV, le README GitHub, le post LinkedIn. Le livrable qui fait la différence.</p>
+      </div>
+      <div class="kit">
+        <div class="knum">06</div>
+        <div class="kic"><i class="icon icon-play-circle" style="font-size:18px"></i></div>
+        <h3 data-i18n="kit.6t">Vidéo explicative</h3>
+        <p class="ksub" data-i18n="kit.6s">Une vidéo qui déroule le projet de bout en bout, pour suivre même si tu débutes en Python.</p>
+      </div>
+      <div class="kit bonus">
+        <div>
+          <div class="knum" data-i18n="kit.7n">07 · BONUS</div>
+          <div class="kic"><i class="icon icon-radio" style="font-size:18px"></i></div>
+        </div>
+        <div>
+          <h3 data-i18n="kit.7t">Live Q&amp;A de lancement</h3>
+          <p class="ksub" data-i18n="kit.7s">Une session live de questions / réponses avec Dorian pour débloquer ton projet et préparer tes questions d'entretien. Réservé aux inscrits de la bêta.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- APERCU LIVRABLES -->
+<section class="section">
+  <div class="wrap">
+    <div class="eyebrow section-eyebrow"><span data-i18n="dv.eyebrow">// 06 · Aperçu des livrables</span></div>
+    <h2 data-i18n="dv.h2">À quoi ça ressemble concrètement.</h2>
+    <div class="deliv">
+      <div class="dcard">
+        <div class="dhead"><span class="dt"><i class="icon icon-table-2 red"></i>pricing_dashboard.xlsx</span><span class="badge badge-red">EXCEL</span></div>
+        <div class="dbody">
+          <table class="xl">
+            <tr><th data-i18n="dv.param">Paramètre</th><th data-i18n="dv.value">Valeur</th><th>Output</th></tr>
+            <tr><td class="lbl">Spot S</td><td class="in">100.00</td><td class="lbl">Call</td></tr>
+            <tr><td class="lbl">Strike K</td><td class="in">100.00</td><td class="out">6.04</td></tr>
+            <tr><td class="lbl">Vol σ</td><td class="in">20.0%</td><td class="lbl">Put</td></tr>
+            <tr><td class="lbl">Taux r</td><td class="in">2.0%</td><td class="out">5.05</td></tr>
+            <tr><td class="lbl">Mat. T</td><td class="in">0.50</td><td class="out red">Δ 0.54</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="dcard">
+        <div class="dhead"><span class="dt"><i class="icon icon-trending-up red"></i>payoff_call.py</span><span class="badge badge-red">PYTHON</span></div>
+        <div class="dbody">
+          <svg viewBox="0 0 440 188" width="100%" height="188" style="display:block">
+            <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF2E45" stop-opacity="0.22"/><stop offset="1" stop-color="#FF2E45" stop-opacity="0"/></linearGradient></defs>
+            <line x1="40" y1="146" x2="430" y2="146" stroke="#222934"/>
+            <line x1="40" y1="18" x2="40" y2="146" stroke="#222934"/>
+            <line x1="220" y1="18" x2="220" y2="146" stroke="#2C3340" stroke-dasharray="3 4"/>
+            <text x="224" y="30" fill="#7C8493" font-size="10" font-family="JetBrains Mono">K=100</text>
+            <path d="M40,146 L220,146 L430,28" fill="none" stroke="#FF2E45" stroke-width="2.2"/>
+            <path d="M40,146 L220,146 L430,28 L430,146 Z" fill="url(#g1)"/>
+            <line x1="40" y1="122" x2="430" y2="122" stroke="#FFB020" stroke-width="1" stroke-dasharray="4 4" opacity="0.5"/>
+            <circle cx="262" cy="122" r="3.2" fill="#FFB020"/>
+            <text x="268" y="118" fill="#FFB020" font-size="9.5" font-family="JetBrains Mono" data-i18n="dv.breakeven">break-even</text>
+          </svg>
+        </div>
+      </div>
+      <div class="dcard">
+        <div class="dhead"><span class="dt"><i class="icon icon-grid-3x3 red"></i>var_stress_scenarios</span><span class="badge badge-red">VAR / PNL</span></div>
+        <div class="dbody">
+          <div class="heat" id="heat"></div>
+          <div style="display:flex;justify-content:space-between;margin-top:9px;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#7C8493">
+            <span data-i18n="dv.spotrange">spot −10% → +10%</span><span data-i18n="dv.volrange">vol 10% → 40%</span>
+          </div>
+        </div>
+      </div>
+      <div class="dcard">
+        <div class="dhead"><span class="dt"><i class="icon icon-file-badge red"></i>presentation_template</span><span class="badge badge-red">CV · GITHUB · LINKEDIN</span></div>
+        <div class="dbody">
+          <div class="gh-row"><i class="icon icon-github"></i><span class="gn">market-finance-starter</span><span class="gs2"><i class="icon icon-star"></i>12 · Python</span></div>
+          <div class="doc-line acc"></div>
+          <div class="doc-line w90"></div>
+          <div class="doc-line w70"></div>
+          <div class="doc-line w40"></div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#7C8493;margin-top:12px" data-i18n="dv.readme">README.md · ligne CV · post LinkedIn inclus</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOUNDER -->
+<section class="section">
+  <div class="wrap">
+    <div class="eyebrow section-eyebrow"><span data-i18n="fd.eyebrow">// 07 · Créé par</span></div>
+    <h2>Dorian Labry.</h2>
+    <div class="founder">
+      <div class="founder-av"><span class="ini">DL</span></div>
+      <div>
+        <h3>Dorian Labry</h3>
+        <div class="role" data-i18n="fd.role">Ingénieur financier · Quant / AI Developer</div>
+        <p data-i18n="fd.bio">Dorian a travaillé sur des problématiques de finance de marché, risk, PnL, pricing, VBA/Python et automatisation chez SG, AXA, Natixis, CACIB et BNP Cardif. Il a aussi fondé OptiQuantIA et The Pricing Library pour rendre la finance quantitative plus concrète, pratique et accessible.</p>
+        <div class="logos">
+          <span class="logo-chip">SG</span>
+          <span class="logo-chip">AXA</span>
+          <span class="logo-chip">Natixis</span>
+          <span class="logo-chip">CACIB</span>
+          <span class="logo-chip">BNP Cardif</span>
+          <span class="logo-chip red" style="border-color:rgba(255,46,69,.3)">OptiQuantIA</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POUR QUI -->
+<section class="section">
+  <div class="wrap">
+    <div class="eyebrow section-eyebrow"><span data-i18n="who.eyebrow">// 08 · Pour qui / pas pour qui</span></div>
+    <h2 data-i18n="who.h2">Ce kit est fait pour toi (ou pas).</h2>
+    <div class="who-grid">
+      <div class="who yes">
+        <h3><i class="icon icon-circle-check"></i><span data-i18n="who.yes">C'est pour toi si…</span></h3>
+        <ul>
+          <li><i class="icon icon-check"></i><span data-i18n="who.y1">Tu es étudiant en finance, ingénierie financière, maths appliquées, école d'ingénieur ou data.</span></li>
+          <li><i class="icon icon-check"></i><span data-i18n="who.y2">Tu vises un stage en finance de marché, risk, quant, structuration, asset management ou data finance.</span></li>
+          <li><i class="icon icon-check"></i><span data-i18n="who.y3">Tu veux construire un projet Python/Excel concret.</span></li>
+          <li><i class="icon icon-check"></i><span data-i18n="who.y4">Tu veux avoir quelque chose à montrer en entretien.</span></li>
+        </ul>
+      </div>
+      <div class="who no">
+        <h3><i class="icon icon-circle-slash mute"></i><span data-i18n="who.no">Ce n'est pas pour toi si…</span></h3>
+        <ul>
+          <li><i class="icon icon-x"></i><span data-i18n="who.n1">Tu cherches un cours académique exhaustif.</span></li>
+          <li><i class="icon icon-x"></i><span data-i18n="who.n2">Tu veux devenir quant senior en une semaine.</span></li>
+          <li><i class="icon icon-x"></i><span data-i18n="who.n3">Tu refuses de coder ou d'ouvrir Excel/Python.</span></li>
+          <li><i class="icon icon-x"></i><span data-i18n="who.n4">Tu veux seulement regarder des vidéos sans pratiquer.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTAT -->
+<section class="section">
+  <div class="wrap">
+    <div class="eyebrow section-eyebrow"><span data-i18n="res.eyebrow">// 09 · Résultat attendu</span></div>
+    <h2 data-i18n="res.h2">À la fin, tu repars avec…</h2>
+    <div class="res-grid">
+      <div class="res"><i class="icon icon-github"></i><p data-i18n="res.1">Un projet propre à mettre sur GitHub</p></div>
+      <div class="res"><i class="icon icon-file-text"></i><p data-i18n="res.2">Une ligne concrète à ajouter sur ton CV</p></div>
+      <div class="res"><i class="icon icon-table-2"></i><p data-i18n="res.3">Un dashboard Excel simple à montrer</p></div>
+      <div class="res"><i class="icon icon-messages-square"></i><p data-i18n="res.4">Mieux parler pricing / risk en entretien</p></div>
+      <div class="res"><i class="icon icon-trending-up"></i><p data-i18n="res.5">Une base que tu peux améliorer ensuite</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVRAISON IMMEDIATE -->
+<section class="section">
+  <div class="wrap">
+    <div class="eyebrow section-eyebrow"><span data-i18n="inst.eyebrow">// 10 · Livraison immédiate</span></div>
+    <h2 data-i18n="inst.h2">Après ton achat, tu reçois immédiatement :</h2>
+    <div class="inst">
+      <div class="inst-item"><i class="icon icon-check"></i><span data-i18n="inst.1">L'accès au kit</span></div>
+      <div class="inst-item"><i class="icon icon-check"></i><span data-i18n="inst.2">Le notebook Black-Scholes + Greeks</span></div>
+      <div class="inst-item"><i class="icon icon-check"></i><span data-i18n="inst.3">Le mini-dashboard Excel</span></div>
+      <div class="inst-item"><i class="icon icon-check"></i><span data-i18n="inst.4">Le notebook VaR / PnL</span></div>
+      <div class="inst-item"><i class="icon icon-check"></i><span data-i18n="inst.5">La fiche "30 questions d'entretien"</span></div>
+      <div class="inst-item"><i class="icon icon-check"></i><span data-i18n="inst.6">Le template CV / GitHub / LinkedIn</span></div>
+      <div class="inst-item" style="grid-column:1/-1;border-right:none"><i class="icon icon-check"></i><span data-i18n="inst.7">Les informations pour rejoindre le live Q&amp;A</span></div>
+    </div>
+    <div class="inst-note"><i class="icon icon-info" style="font-size:13px"></i><span data-i18n="inst.note">Certains contenus bonus peuvent être enrichis pendant la bêta, mais les livrables principaux sont accessibles dès l'achat.</span></div>
+  </div>
+</section>
+
+<!-- OFFRE -->
+<section class="section" id="offre">
+  <div class="wrap">
+    <div class="eyebrow section-eyebrow" style="justify-content:center"><span data-i18n="of.eyebrow">// 11 · L'offre</span></div>
+    <h2 style="text-align:center" data-i18n="of.h2">Rejoins la bêta dès maintenant.</h2>
+    <div class="offer-card">
+      <div class="offer-top">
+        <div class="offer-left">
+          <span class="badge badge-red"><i class="icon icon-package" style="font-size:11px"></i>Market Finance Starter Kit</span>
+          <h3 style="margin-top:16px" data-i18n="of.h3">Tout ce dont tu as besoin pour ton premier projet.</h3>
+          <ul class="offer-incl">
+            <li><i class="icon icon-check"></i><span data-i18n="of.1">Notebook Python Black-Scholes + Greeks</span></li>
+            <li><i class="icon icon-check"></i><span data-i18n="of.2">Mini-dashboard Excel</span></li>
+            <li><i class="icon icon-check"></i><span data-i18n="of.3">Notebook VaR / PnL + stress scenario</span></li>
+            <li><i class="icon icon-check"></i><span data-i18n="of.4">Fiche "30 questions d'entretien"</span></li>
+            <li><i class="icon icon-check"></i><span data-i18n="of.5">Template CV / GitHub / LinkedIn</span></li>
+            <li><i class="icon icon-check"></i><span data-i18n="of.6">Vidéo explicative</span></li>
+            <li><i class="icon icon-check"></i><span data-i18n="of.7">Live Q&amp;A de lancement</span></li>
+          </ul>
+        </div>
+        <div class="offer-right">
+          <span class="badge badge-amber" id="offerBadge" style="align-self:flex-start"><span class="dot dot-amber live"></span><span data-i18n="of.betaprice">Prix bêta</span></span>
+          <div class="price-row"><span class="price-now" id="priceNow">49&nbsp;€</span><span class="price-old" id="priceOld">99&nbsp;€</span></div>
+          <div class="price-sub" id="priceSub" data-i18n="of.pricesub">Offre bêta disponible au lancement.<br/>Après la date limite, le prix passera à 99 €.</div>
+          <div style="margin-top:18px" id="cdWrap">
+            <div class="label" style="margin-bottom:8px" data-i18n="of.cdlead">Le prix bêta à 49 € se termine dans :</div>
+            <div class="cd" id="countdown">
+              <div class="cd-unit"><div class="num" id="cd-d">00</div><div class="lbl" data-i18n="cd.days">Jours</div></div>
+              <div class="cd-unit"><div class="num" id="cd-h">00</div><div class="lbl" data-i18n="cd.hours">Heures</div></div>
+              <div class="cd-unit"><div class="num" id="cd-m">00</div><div class="lbl" data-i18n="cd.mins">Min</div></div>
+              <div class="cd-unit"><div class="num" id="cd-s">00</div><div class="lbl" data-i18n="cd.secs">Sec</div></div>
+            </div>
+            <div class="cd-sub" id="cdSub" data-i18n="cd.sub">Après cette date, le prix passera de 49 € à 99 €.</div>
+          </div>
+          <button class="btn btn-primary btn-lg btn-block" style="margin-top:20px" data-cta="offer-buy"><span id="offerCtaTxt" data-i18n="cta.joinnow">Rejoindre la bêta maintenant</span><i class="icon icon-arrow-right"></i></button>
+          <div class="pay-row">
+            <span class="micro" data-i18n="of.securepay">Paiement sécurisé</span>
+            <span class="pay-chip">Stripe</span><span class="pay-chip">Gumroad</span><span class="pay-chip">Payhip</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="capture">
+      <div>
+        <div class="ct" data-i18n="cap.t">Pas encore décidé ? Reçois un extrait gratuit.</div>
+        <div class="cs" data-i18n="cap.s">5 questions d'entretien finance de marché + un aperçu du notebook. Directement par email.</div>
+      </div>
+      <form class="cform" id="captureForm">
+        <input type="email" id="captureEmail" placeholder="ton.email@exemple.com" data-i18n-ph="cap.ph" required />
+        <button type="submit" class="btn btn-outline" data-cta="free-sample" data-i18n="cap.btn">Recevoir l'extrait</button>
+      </form>
+    </div>
+
+    <div class="upsell">
+      <i class="icon icon-user-check li"></i>
+      <div>
+        <div class="ut" data-i18n="up.t">Après l'achat — Review CV / GitHub / Projet</div>
+        <div class="us" data-i18n="up.s">45 min en visio : on regarde ton CV, la manière dont tu présentes ton projet, ton GitHub, et les points à améliorer pour postuler en finance de marché / risk / quant. Entièrement optionnel.</div>
+      </div>
+      <span class="up" id="upsellPrice">99&nbsp;€</span>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section">
+  <div class="wrap">
+    <div class="eyebrow section-eyebrow" style="justify-content:center"><span data-i18n="faq.eyebrow">// 12 · FAQ</span></div>
+    <h2 style="text-align:center" data-i18n="faq.h2">Les questions qu'on nous pose.</h2>
+    <div class="faq" id="faq"></div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="section final">
+  <div class="final-sig">σ</div>
+  <div class="wrap" style="position:relative">
+    <span class="badge badge-amber" style="margin-bottom:18px"><span class="dot dot-amber live"></span><span data-i18n="hero.badge">Prix bêta — 30 premiers inscrits</span></span>
+    <h2 data-i18n="fn.h2">Arrête d'avoir juste de la théorie. Construis le livrable.</h2>
+    <p class="serif-lead" data-i18n="fn.sub">En 7 jours, tu as un projet finance de marché propre, présentable et défendable en entretien. Le prix bêta est à 49 € — uniquement pour les 30 premiers.</p>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:28px;flex-wrap:wrap">
+      <button class="btn btn-primary btn-lg" data-cta="final"><span data-i18n="cta.join29">Rejoindre la bêta à 49 €</span><i class="icon icon-arrow-right"></i></button>
+    </div>
+    <div class="hero-micro" style="justify-content:center"><i class="icon icon-shield" style="font-size:13px"></i><span data-i18n="fn.disclaimer">Le kit ne garantit pas un recrutement — il t'aide à construire un projet concret pour mieux démontrer tes compétences.</span></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="ft">
+  <div class="wrap ft-in">
+    <span data-i18n="ft.copy">© 2026 The Pricing Library · Market Finance Starter Kit</span>
+    <div class="ft-links">
+      <a href="/" data-i18n="ft.platform">Plateforme</a>
+      <a href="/pricing" data-i18n="ft.plans">Tous les plans</a>
+      <a href="#offre" data-i18n="ft.join">Rejoindre la bêta</a>
+    </div>
+  </div>
+</footer>
+
+<!-- STICKY MOBILE CTA -->
+<div class="sticky-cta">
+  <div class="sp"><b>49&nbsp;€</b><s>99 €</s></div>
+  <button class="btn btn-primary" data-cta="sticky"><span data-i18n="cta.join">Rejoindre la bêta</span><i class="icon icon-arrow-right"></i></button>
+</div>
+
+<script>
+/* ============ i18n ============ */
+var I18N = {
+  fr: {
+    'strip.launch':'CAMPAGNE · LANCEMENT','strip.kit':'MARKET FINANCE STARTER KIT',
+    'nav.note':'Page de campagne · bêta',
+    'cta.join29':'Rejoindre la bêta · 49 €','cta.joinnow':'Rejoindre la bêta maintenant','cta.join':'Rejoindre la bêta',
+    'cta.normal49':'Accéder au kit à 99 €','cta.normal':'Accéder au kit',
+    'promo.badge':'Lancement bêta','promo.until':'jusqu\'au','promo.then':'puis',
+    'hero.badge':'Offre bêta limitée dans le temps',
+    'hero.pain':'Tu veux postuler en finance de marché, mais ton CV manque de projets concrets ?',
+    'hero.h1a':'Construis ton premier','hero.h1b':'projet finance de marché','hero.h1c':'en Python & Excel.',
+    'hero.sub':"Un kit pratique pour étudiants et jeunes professionnels qui veulent se crédibiliser en pricing, risk et finance de marché — sans passer des semaines à chercher quoi construire. Prêt à montrer sur ton CV, GitHub ou LinkedIn.",
+    'hero.see':'Voir la vidéo de présentation',
+    'hero.micro':'Prix bêta réservé au lancement. Après la date limite, le prix passera à 99 €.',
+    'vid.eyebrow':'// 02 · Vidéo de présentation','vid.h2':'Regarde cette vidéo avant de rejoindre la bêta.',
+    'vid.sub':"Je t'explique en quelques minutes ce qu'il y a dans le kit, à qui il s'adresse, et comment l'utiliser pour construire un projet finance de marché crédible à montrer sur ton CV, GitHub ou LinkedIn.",
+    'vid.phT':'Vidéo de présentation bientôt disponible','vid.phS':"Dorian présente le kit, les livrables et la meilleure manière de l'utiliser pour ton CV / GitHub.",
+    'vid.by':'Vidéo de présentation par Dorian Labry','vid.coverT':'Ce que je couvre dans la vidéo',
+    'vid.c1':"Pourquoi j'ai créé ce kit.",'vid.c2':"Ce que les étudiants et jeunes pros ont souvent du mal à montrer en entretien.",'vid.c3':'Ce que tu vas construire concrètement.','vid.c4':'Comment présenter le projet sur CV, GitHub ou LinkedIn.','vid.c5':'Pourquoi le prix bêta est à 49 € pendant le lancement.',
+    'rf.eyebrow':'// 04 · Résultat final','rf.h2':'À la fin, tu pourras présenter un vrai projet.',
+    'rf.quote':"\"J'ai construit un outil Python/Excel de pricing d'options, avec calcul des Greeks, visualisation des sensibilités et analyse VaR/PnL.\"",
+    'rf.sub':"C'est ce type de phrase que tu veux pouvoir défendre en entretien, sur ton CV, dans un README GitHub ou dans un post LinkedIn.",
+    'inst.eyebrow':'// 10 · Livraison immédiate','inst.h2':'Après ton achat, tu reçois immédiatement :',
+    'inst.1':"L'accès au kit",'inst.2':'Le notebook Black-Scholes + Greeks','inst.3':'Le mini-dashboard Excel','inst.4':'Le notebook VaR / PnL','inst.5':'La fiche "30 questions d\'entretien"','inst.6':'Le template CV / GitHub / LinkedIn','inst.7':'Les informations pour rejoindre le live Q&A',
+    'inst.note':"Certains contenus bonus peuvent être enrichis pendant la bêta, mais les livrables principaux sont accessibles dès l'achat.",
+    'of.cdlead':'Le prix bêta à 49 € se termine dans :','of.normalprice':'Prix normal','of.expiredsub':"L'offre bêta est terminée. Le kit est maintenant disponible au prix normal de 99 €.",
+    'cd.days':'Jours','cd.hours':'Heures','cd.mins':'Min','cd.secs':'Sec','cd.sub':'Après cette date, le prix passera de 49 € à 99 €.',
+    'hero.days':'j','hero.kpi1':'Pour livrer','hero.kpi2':'Livrables','hero.kpi3':'Prix bêta','hero.term':'Black-Scholes · Call · ATM',
+    'prob.eyebrow':'// 01 · Le problème','prob.h2':"Tu connais la théorie. Mais tu n'as rien à montrer.",
+    'prob.lead':'Tu as peut-être déjà appris Black-Scholes, la VaR ou les Greeks en cours. Mais face à un recruteur, le problème est souvent différent :',
+    'prob.1':"Tu sais expliquer la théorie, mais tu n'as rien de concret à montrer.",
+    'prob.2':"Tu veux postuler en finance de marché mais ton CV manque de projets techniques.",
+    'prob.3':"Tu ne sais pas quel projet GitHub construire.",
+    'prob.4':"Tu veux progresser en Python / Excel appliqué à la finance.",
+    'prob.5':"Tu as besoin d'un livrable clair, propre et présentable — pas d'un cours de plus.",
+    'tf.eyebrow':'// 03 · La transformation','tf.h2':'En 7 jours, tu changes de discours.',
+    'tf.before':'Avant','tf.beforeq':'"J\'ai vu la théorie en cours."','tf.days':'JOURS',
+    'tf.after':'Après','tf.afterq':'"J\'ai construit un mini-projet pricing/risk que je peux montrer, expliquer et défendre."',
+    'kit.eyebrow':"// 05 · Ce qu'il y a dans le kit",'kit.h2':'7 livrables, un seul projet propre.',
+    'kit.lead':"Tout est guidé, structuré et pensé pour être présentable. Tu n'inventes rien : tu construis, tu comprends, tu montres.",
+    'kit.1t':'Notebook Python — Black-Scholes + Greeks','kit.1a':'Pricing call / put','kit.1b':'Delta, Gamma, Vega, Theta, Rho','kit.1c':'Visualisations simples','kit.1d':'Structure propre pour GitHub',
+    'kit.2t':'Mini-dashboard Excel','kit.2a':'Inputs modifiables','kit.2b':'Visualisation prix & sensibilités','kit.2c':'Rendu propre pour démonstration',
+    'kit.3t':'Notebook VaR / PnL','kit.3a':'Calcul de rendement','kit.3b':'Volatilité historique','kit.3c':'Value-at-Risk + stress scenario','kit.3d':'Lecture orientée entretien',
+    'kit.4t':'Fiche "30 questions d\'entretien"','kit.4s':"Les questions de finance de marché qui reviennent le plus — pricing, Greeks, VaR, PnL, scénarios — avec des réponses claires pour t'entraîner.",
+    'kit.5t':'Template CV / GitHub / LinkedIn','kit.5s':'Comment présenter ton projet correctement : la ligne CV, le README GitHub, le post LinkedIn. Le livrable qui fait la différence.',
+    'kit.6t':'Vidéo explicative','kit.6s':'Une vidéo qui déroule le projet de bout en bout, pour suivre même si tu débutes en Python.',
+    'kit.7n':'07 · BONUS','kit.7t':'Live Q&A de lancement','kit.7s':"Une session live de questions / réponses avec Dorian pour débloquer ton projet et préparer tes questions d'entretien. Réservé aux inscrits de la bêta.",
+    'dv.eyebrow':'// 06 · Aperçu des livrables','dv.h2':'À quoi ça ressemble concrètement.',
+    'dv.param':'Paramètre','dv.value':'Valeur','dv.breakeven':'break-even','dv.spotrange':'spot −10% → +10%','dv.volrange':'vol 10% → 40%','dv.readme':'README.md · ligne CV · post LinkedIn inclus',
+    'fd.eyebrow':'// 07 · Créé par','fd.role':'Ingénieur financier · Quant / AI Developer',
+    'fd.bio':'Dorian a travaillé sur des problématiques de finance de marché, risk, PnL, pricing, VBA/Python et automatisation chez SG, AXA, Natixis, CACIB et BNP Cardif. Il a aussi fondé OptiQuantIA et The Pricing Library pour rendre la finance quantitative plus concrète, pratique et accessible.',
+    'who.eyebrow':'// 08 · Pour qui / pas pour qui','who.h2':'Ce kit est fait pour toi (ou pas).',
+    'who.yes':"C'est pour toi si…",
+    'who.y1':"Tu es étudiant en finance, ingénierie financière, maths appliquées, école d'ingénieur ou data.",
+    'who.y2':"Tu vises un stage en finance de marché, risk, quant, structuration, asset management ou data finance.",
+    'who.y3':'Tu veux construire un projet Python/Excel concret.','who.y4':'Tu veux avoir quelque chose à montrer en entretien.',
+    'who.no':"Ce n'est pas pour toi si…",
+    'who.n1':'Tu cherches un cours académique exhaustif.','who.n2':'Tu veux devenir quant senior en une semaine.',
+    'who.n3':"Tu refuses de coder ou d'ouvrir Excel/Python.",'who.n4':'Tu veux seulement regarder des vidéos sans pratiquer.',
+    'res.eyebrow':'// 09 · Résultat attendu','res.h2':'À la fin, tu repars avec…',
+    'res.1':'Un projet propre à mettre sur GitHub','res.2':'Une ligne concrète à ajouter sur ton CV','res.3':'Un dashboard Excel simple à montrer','res.4':'Mieux parler pricing / risk en entretien','res.5':'Une base que tu peux améliorer ensuite',
+    'of.eyebrow':"// 11 · L'offre",'of.h2':'Rejoins la bêta dès maintenant.','of.h3':'Tout ce dont tu as besoin pour ton premier projet.',
+    'of.1':'Notebook Python Black-Scholes + Greeks','of.2':'Mini-dashboard Excel','of.3':'Notebook VaR / PnL + stress scenario','of.4':'Fiche "30 questions d\'entretien"','of.5':'Template CV / GitHub / LinkedIn','of.6':'Vidéo explicative','of.7':'Live Q&A de lancement',
+    'of.betaprice':'Prix bêta','of.pricesub':'Offre bêta disponible au lancement.<br/>Après la date limite, le prix passera à 99 €.','of.spotsleft':'places restantes','of.securepay':'Paiement sécurisé',
+    'cap.t':'Pas encore décidé ? Reçois un extrait gratuit.','cap.s':"5 questions d'entretien finance de marché + un aperçu du notebook. Directement par email.",'cap.btn':"Recevoir l'extrait",'cap.ph':'ton.email@exemple.com','cap.sent':'Envoyé ✓',
+    'up.t':'Après l\'achat — Review CV / GitHub / Projet','up.s':'45 min en visio : on regarde ton CV, la manière dont tu présentes ton projet, ton GitHub, et les points à améliorer pour postuler en finance de marché / risk / quant. Entièrement optionnel.',
+    'faq.eyebrow':'// 12 · FAQ','faq.h2':'Les questions qu\'on nous pose.',
+    'fn.h2':"Arrête d'avoir juste de la théorie. Construis le livrable.",
+    'fn.sub':'En 7 jours, tu as un projet finance de marché propre, présentable et défendable en entretien. Le prix bêta est à 49 € — uniquement pour les 30 premiers.',
+    'fn.disclaimer':"Le kit ne garantit pas un recrutement — il t'aide à construire un projet concret pour mieux démontrer tes compétences.",
+    'ft.copy':'© 2026 The Pricing Library · Market Finance Starter Kit','ft.platform':'Plateforme','ft.plans':'Tous les plans','ft.join':'Rejoindre la bêta',
+    'faq.q1':'Est-ce adapté aux débutants ?','faq.a1':'Oui, si tu as des bases en Python ou que tu es prêt à suivre le code pas à pas. Tout est guidé et la vidéo explicative déroule le projet de bout en bout.',
+    'faq.q2':'Est-ce que je dois être expert en maths ?','faq.a2':'Non. Le kit vise surtout à construire un projet propre et à comprendre les intuitions importantes, pas à démontrer des théorèmes.',
+    'faq.q3':'Est-ce que je peux mettre le projet sur mon CV ?','faq.a3':'Oui. Le kit inclut un template pour le présenter correctement sur CV, GitHub et LinkedIn — avec la ligne CV, le README et le post LinkedIn.',
+    'faq.q4':'Est-ce une formation complète en finance quantitative ?','faq.a4':"Non. C'est un kit pratique orienté projet, entretien et crédibilité professionnelle — pas un cours académique exhaustif.",
+    'faq.q5':'Est-ce que le prix va rester à 49 € ?','faq.a5':'Non. 49 € est le prix bêta réservé aux 30 premiers inscrits. Ensuite, le kit passera à 99 €.',
+    'faq.q6':'Est-ce que ça garantit un stage ou un emploi ?','faq.a6':"Non. Le kit ne garantit pas de recrutement. Il t'aide à construire un projet concret pour mieux démontrer tes compétences."
+  },
+  en: {
+    'strip.launch':'CAMPAIGN · LAUNCH','strip.kit':'MARKET FINANCE STARTER KIT',
+    'nav.note':'Campaign page · beta',
+    'cta.join29':'Join the beta · €49','cta.joinnow':'Join the beta now','cta.join':'Join the beta',
+    'cta.normal49':'Get the kit for €99','cta.normal':'Get the kit',
+    'promo.badge':'Beta launch','promo.until':'until','promo.then':'then',
+    'hero.badge':'Time-limited beta offer',
+    'hero.pain':'Want to apply in market finance, but your CV lacks concrete projects?',
+    'hero.h1a':'Build your first','hero.h1b':'market finance project','hero.h1c':'in Python & Excel.',
+    'hero.sub':"A practical kit for students and early-career professionals who want real credibility in pricing, risk and market finance — without spending weeks figuring out what to build. Ready to show on your CV, GitHub or LinkedIn.",
+    'hero.see':'Watch the intro video',
+    'hero.micro':'Beta price for the launch only. After the deadline, the price moves to €99.',
+    'vid.eyebrow':'// 02 · Intro video','vid.h2':'Watch this before joining the beta.',
+    'vid.sub':"In a few minutes I walk you through what's in the kit, who it's for, and how to use it to build a credible market-finance project to show on your CV, GitHub or LinkedIn.",
+    'vid.phT':'Intro video coming soon','vid.phS':'Dorian presents the kit, the deliverables and the best way to use it for your CV / GitHub.',
+    'vid.by':'Intro video by Dorian Labry','vid.coverT':'What I cover in the video',
+    'vid.c1':'Why I created this kit.','vid.c2':"What students and early-career pros often struggle to show in interviews.",'vid.c3':"What you'll actually build.",'vid.c4':'How to present the project on CV, GitHub or LinkedIn.','vid.c5':'Why the beta price is €49 during launch.',
+    'rf.eyebrow':'// 04 · Final result','rf.h2':"By the end, you'll be able to present a real project.",
+    'rf.quote':'"I built a Python/Excel option-pricing tool, with Greeks computation, sensitivity visualization and VaR/PnL analysis."',
+    'rf.sub':"That's the kind of sentence you want to defend in an interview, on your CV, in a GitHub README or a LinkedIn post.",
+    'inst.eyebrow':'// 10 · Instant delivery','inst.h2':'After your purchase, you instantly receive:',
+    'inst.1':'Access to the kit','inst.2':'The Black-Scholes + Greeks notebook','inst.3':'The mini Excel dashboard','inst.4':'The VaR / PnL notebook','inst.5':'The "30 interview questions" sheet','inst.6':'The CV / GitHub / LinkedIn template','inst.7':'The info to join the live Q&A',
+    'inst.note':'Some bonus content may be enriched during the beta, but the main deliverables are available right after purchase.',
+    'of.cdlead':'The €49 beta price ends in:','of.normalprice':'Regular price','of.expiredsub':'The beta offer has ended. The kit is now available at the regular price of €99.',
+    'cd.days':'Days','cd.hours':'Hours','cd.mins':'Min','cd.secs':'Sec','cd.sub':'After this date, the price moves from €49 to €99.',
+    'hero.days':'d','hero.kpi1':'To ship','hero.kpi2':'Deliverables','hero.kpi3':'Beta price','hero.term':'Black-Scholes · Call · ATM',
+    'prob.eyebrow':'// 01 · The problem','prob.h2':"You know the theory. But you have nothing to show.",
+    'prob.lead':"You may already have learned Black-Scholes, VaR or the Greeks in class. But in front of a recruiter, the problem is often different:",
+    'prob.1':"You can explain the theory, but you have nothing concrete to show.",
+    'prob.2':"You want to apply in market finance but your CV lacks technical projects.",
+    'prob.3':"You don't know which GitHub project to build.",
+    'prob.4':"You want to improve at Python / Excel applied to finance.",
+    'prob.5':"You need a clear, clean, presentable deliverable — not yet another course.",
+    'tf.eyebrow':'// 03 · The transformation','tf.h2':'In 7 days, your pitch changes.',
+    'tf.before':'Before','tf.beforeq':'"I covered the theory in class."','tf.days':'DAYS',
+    'tf.after':'After','tf.afterq':'"I built a pricing/risk mini-project I can show, explain and defend."',
+    'kit.eyebrow':"// 05 · What's in the kit",'kit.h2':'7 deliverables, one clean project.',
+    'kit.lead':"Everything is guided, structured and built to be presentable. You invent nothing: you build, you understand, you show.",
+    'kit.1t':'Python Notebook — Black-Scholes + Greeks','kit.1a':'Call / put pricing','kit.1b':'Delta, Gamma, Vega, Theta, Rho','kit.1c':'Simple visualizations','kit.1d':'Clean structure for GitHub',
+    'kit.2t':'Mini Excel dashboard','kit.2a':'Editable inputs','kit.2b':'Price & sensitivity visualization','kit.2c':'Clean render for demos',
+    'kit.3t':'VaR / PnL Notebook','kit.3a':'Return computation','kit.3b':'Historical volatility','kit.3c':'Simple Value-at-Risk + stress scenario','kit.3d':'Interview-oriented reading',
+    'kit.4t':'"30 interview questions" sheet','kit.4s':"The market-finance questions that come up most — pricing, Greeks, VaR, PnL, scenarios — with clear answers to practice.",
+    'kit.5t':'CV / GitHub / LinkedIn template','kit.5s':'How to present your project properly: the CV line, the GitHub README, the LinkedIn post. The deliverable that makes the difference.',
+    'kit.6t':'Explainer video','kit.6s':'A video walking through the project end to end, so you can follow even as a Python beginner.',
+    'kit.7n':'07 · BONUS','kit.7t':'Launch Live Q&A','kit.7s':"A live Q&A session with Dorian to unblock your project and prepare your interview questions. Reserved for beta sign-ups.",
+    'dv.eyebrow':'// 06 · Deliverables preview','dv.h2':'What it actually looks like.',
+    'dv.param':'Parameter','dv.value':'Value','dv.breakeven':'break-even','dv.spotrange':'spot −10% → +10%','dv.volrange':'vol 10% → 40%','dv.readme':'README.md · CV line · LinkedIn post included',
+    'fd.eyebrow':'// 07 · Created by','fd.role':'Financial engineer · Quant / AI Developer',
+    'fd.bio':'Dorian has worked on market finance, risk, PnL, pricing, VBA/Python and automation problems at SG, AXA, Natixis, CACIB and BNP Cardif. He also founded OptiQuantIA and The Pricing Library to make quantitative finance more concrete, practical and accessible.',
+    'who.eyebrow':'// 08 · For whom / not for whom','who.h2':'This kit is for you (or not).',
+    'who.yes':"It's for you if…",
+    'who.y1':"You're a student in finance, financial engineering, applied maths, engineering school or data.",
+    'who.y2':"You're targeting an internship in market finance, risk, quant, structuring, asset management or data finance.",
+    'who.y3':'You want to build a concrete Python/Excel project.','who.y4':'You want something to show in interviews.',
+    'who.no':"It's not for you if…",
+    'who.n1':'You want an exhaustive academic course.','who.n2':'You want to become a senior quant in a week.',
+    'who.n3':"You refuse to code or open Excel/Python.",'who.n4':'You only want to watch videos without practicing.',
+    'res.eyebrow':'// 09 · Expected outcome','res.h2':'By the end, you walk away with…',
+    'res.1':'A clean project to put on GitHub','res.2':'A concrete line to add to your CV','res.3':'A simple Excel dashboard to show','res.4':'Better pricing / risk talk in interviews','res.5':'A base you can improve afterwards',
+    'of.eyebrow':"// 11 · The offer",'of.h2':'Join the beta right now.','of.h3':'Everything you need for your first project.',
+    'of.1':'Python Black-Scholes + Greeks notebook','of.2':'Mini Excel dashboard','of.3':'VaR / PnL notebook + stress scenario','of.4':'"30 interview questions" sheet','of.5':'CV / GitHub / LinkedIn template','of.6':'Explainer video','of.7':'Launch Live Q&A',
+    'of.betaprice':'Beta price','of.pricesub':'Beta offer available during launch.<br/>After the deadline, the price moves to €99.','of.spotsleft':'spots left','of.securepay':'Secure payment',
+    'cap.t':'Not decided yet? Get a free sample.','cap.s':'5 market-finance interview questions + a notebook preview. Straight to your inbox.','cap.btn':'Get the sample','cap.ph':'your.email@example.com','cap.sent':'Sent ✓',
+    'up.t':'After purchase — CV / GitHub / Project review','up.s':'45 min on video: we review your CV, how you present your project, your GitHub, and what to improve to apply in market finance / risk / quant. Entirely optional.',
+    'faq.eyebrow':'// 12 · FAQ','faq.h2':'The questions we get asked.',
+    'fn.h2':"Stop having only theory. Build the deliverable.",
+    'fn.sub':'In 7 days you have a market-finance project that\'s clean, presentable and defensible in interviews. The beta price is €49 — for the first 30 only.',
+    'fn.disclaimer':"The kit doesn't guarantee a hire — it helps you build a concrete project to better demonstrate your skills.",
+    'ft.copy':'© 2026 The Pricing Library · Market Finance Starter Kit','ft.platform':'Platform','ft.plans':'All plans','ft.join':'Join the beta',
+    'faq.q1':'Is it suitable for beginners?','faq.a1':'Yes, if you have Python basics or are willing to follow the code step by step. Everything is guided and the explainer video walks through the project end to end.',
+    'faq.q2':'Do I need to be a maths expert?','faq.a2':'No. The kit is mainly about building a clean project and understanding the key intuitions, not proving theorems.',
+    'faq.q3':'Can I put the project on my CV?','faq.a3':'Yes. The kit includes a template to present it properly on CV, GitHub and LinkedIn — with the CV line, the README and the LinkedIn post.',
+    'faq.q4':'Is it a complete quantitative finance course?','faq.a4':"No. It's a practical, project-oriented kit focused on interviews and professional credibility — not an exhaustive academic course.",
+    'faq.q5':'Will the price stay at €49?','faq.a5':'No. €49 is the beta price reserved for the first 30 sign-ups. After that, the kit moves to €99.',
+    'faq.q6':'Does it guarantee an internship or a job?','faq.a6':"No. The kit doesn't guarantee a hire. It helps you build a concrete project to better demonstrate your skills."
+  }
+};
+
+var FAQ_KEYS = [['faq.q1','faq.a1'],['faq.q2','faq.a2'],['faq.q3','faq.a3'],['faq.q4','faq.a4'],['faq.q5','faq.a5'],['faq.q6','faq.a6']];
+var lang = localStorage.getItem('tpl_lang') || 'fr';
+
+function applyI18n(){
+  var dict = I18N[lang];
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    var k = el.getAttribute('data-i18n');
+    if (dict[k] != null) el.innerHTML = dict[k];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(function(el){
+    var k = el.getAttribute('data-i18n-ph');
+    if (dict[k] != null) el.placeholder = dict[k];
+  });
+  document.querySelectorAll('.lang-switch button').forEach(function(b){
+    b.classList.toggle('on', b.getAttribute('data-lang')===lang);
+  });
+  renderFaq();
+  if (typeof applyOfferState === 'function') applyOfferState();
+}
+document.querySelectorAll('.lang-switch button').forEach(function(b){
+  b.addEventListener('click', function(){
+    lang = b.getAttribute('data-lang');
+    localStorage.setItem('tpl_lang', lang);
+    track('lang_switch', {lang:lang});
+    applyI18n();
+  });
+});
+
+/* ============ Analytics ============ */
+window.dataLayer = window.dataLayer || [];
+function track(event, data){
+  var payload = Object.assign({event:event, ts:Date.now()}, data||{});
+  window.dataLayer.push(payload);
+  if (window.gtag) window.gtag('event', event, data||{});
+  console.log('[track]', event, data||{});
+}
+track('page_view_market_finance_starter_kit', {price:49, currency:'EUR'});
+
+/* ============ Offer config ============
+   Configure these for launch. In a Next.js host these map to
+   NEXT_PUBLIC_BETA_DEADLINE / NEXT_PUBLIC_OFFER_VIDEO_URL /
+   NEXT_PUBLIC_CHECKOUT_BETA_URL / NEXT_PUBLIC_CHECKOUT_NORMAL_URL */
+var CONFIG = {
+  BETA_DEADLINE: '2026-06-24T23:59:00+02:00',
+  OFFER_VIDEO_URL: '',          // e.g. 'https://www.youtube.com/embed/XXXX' — empty = placeholder
+  CHECKOUT_BETA_URL: '',        // 49 € checkout (Stripe/Gumroad/Payhip)
+  CHECKOUT_NORMAL_URL: ''       // 99 € checkout
+};
+var DEADLINE = new Date(CONFIG.BETA_DEADLINE);
+function isExpired(){ return Date.now() > DEADLINE.getTime(); }
+function fmtDate(){
+  try{
+    return DEADLINE.toLocaleDateString(lang==='en'?'en-GB':'fr-FR', {day:'2-digit',month:'long'});
+  }catch(e){ return CONFIG.BETA_DEADLINE.slice(0,10); }
+}
+
+/* ============ Checkout routing ============ */
+function startCheckout(source){
+  var expired = isExpired();
+  if (expired){
+    track('cta_click_normal_49', {source:source});
+    track('checkout_started', {source:source, price:99, currency:'EUR', product:'market_finance_starter_kit'});
+    if (CONFIG.CHECKOUT_NORMAL_URL){ window.location.href = CONFIG.CHECKOUT_NORMAL_URL; return; }
+  } else {
+    track('cta_click_beta_29', {source:source});
+    track('checkout_started_beta_29', {source:source, price:49, currency:'EUR', product:'market_finance_starter_kit'});
+    if (CONFIG.CHECKOUT_BETA_URL){ window.location.href = CONFIG.CHECKOUT_BETA_URL; return; }
+  }
+  // No checkout URL configured yet — scroll to the offer.
+  var offre = document.getElementById('offre');
+  if (offre) offre.scrollIntoView({behavior:'smooth'});
+}
+document.querySelectorAll('[data-cta]').forEach(function(el){
+  var src = el.getAttribute('data-cta');
+  if (src === 'free-sample') return;
+  el.addEventListener('click', function(){ startCheckout(src); });
+});
+
+/* ============ Offer state (deadline-driven) ============ */
+function applyOfferState(){
+  var dict = I18N[lang];
+  var expired = isExpired();
+  var pad = function(n){ return (n<10?'0':'')+n; };
+  // promo date label
+  var pd = document.getElementById('promo-date'); if (pd) pd.textContent = fmtDate() + ' · 23:59';
+  if (expired){
+    document.querySelectorAll('[data-cta-text]').forEach(function(){});
+    // price + badge
+    var pn=document.getElementById('priceNow'); if(pn){pn.textContent='49\u00A0€';}
+    var po=document.getElementById('priceOld'); if(po){po.style.display='none';}
+    var ob=document.getElementById('offerBadge'); if(ob){ ob.className='badge'; ob.innerHTML='<span data-i18n="of.normalprice">'+dict['of.normalprice']+'</span>'; }
+    var ps=document.getElementById('priceSub'); if(ps){ps.innerHTML=dict['of.expiredsub'];}
+    var cd=document.getElementById('cdWrap'); if(cd){cd.style.display='none';}
+    var oct=document.getElementById('offerCtaTxt'); if(oct){oct.textContent=dict['cta.normal49'];}
+    // all join CTAs → normal label
+    setCtaLabels(dict['cta.normal49'], dict['cta.normal']);
+    track('deadline_expired_view', {});
+  } else {
+    setCtaLabels(dict['cta.join29'], dict['cta.join']);
+  }
+}
+function setCtaLabels(longTxt, shortTxt){
+  // hero/header/final/video use cta.join29; banner/sticky use cta.join — only swap after expiry
+  document.querySelectorAll('[data-cta] [data-i18n="cta.join29"]').forEach(function(s){ s.textContent = longTxt; });
+  document.querySelectorAll('[data-cta] [data-i18n="cta.join"]').forEach(function(s){ s.textContent = shortTxt; });
+}
+
+/* ============ Countdown ============ */
+var cdSeen=false;
+function tickCountdown(){
+  var diff = DEADLINE.getTime() - Date.now();
+  var pad=function(n){return (n<10?'0':'')+n;};
+  function set(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+  if (diff<=0){
+    set('cd-d','00');set('cd-h','00');set('cd-m','00');set('cd-s','00');
+    var pcd=document.getElementById('promo-cd'); if(pcd) pcd.textContent='—';
+    return;
+  }
+  var d=Math.floor(diff/86400000);
+  var h=Math.floor(diff%86400000/3600000);
+  var m=Math.floor(diff%3600000/60000);
+  var s=Math.floor(diff%60000/1000);
+  set('cd-d',pad(d));set('cd-h',pad(h));set('cd-m',pad(m));set('cd-s',pad(s));
+  var pcd=document.getElementById('promo-cd'); if(pcd) pcd.textContent=d+'j '+pad(h)+':'+pad(m)+':'+pad(s);
+}
+tickCountdown();
+setInterval(tickCountdown, 1000);
+
+/* ============ Video ============ */
+(function(){
+  var box=document.getElementById('videoBox');
+  var ph=document.getElementById('videoPh');
+  var play=document.getElementById('videoPlay');
+  var cta=document.getElementById('videoCta');
+  if (CONFIG.OFFER_VIDEO_URL){
+    ph.style.display='none'; play.style.display='block'; cta.style.display='inline-flex';
+    box.addEventListener('click', function(){
+      if (box.dataset.loaded) return;
+      box.dataset.loaded='1';
+      track('offer_video_play', {});
+      var ifr=document.createElement('iframe');
+      ifr.src=CONFIG.OFFER_VIDEO_URL+(CONFIG.OFFER_VIDEO_URL.indexOf('?')>-1?'&':'?')+'autoplay=1';
+      ifr.setAttribute('allow','autoplay; encrypted-media; picture-in-picture');
+      ifr.setAttribute('allowfullscreen','');
+      ifr.setAttribute('loading','lazy');
+      box.innerHTML=''; box.appendChild(ifr);
+    });
+  } else {
+    // placeholder: clicking still logs intent + scrolls to offer
+    box.addEventListener('click', function(){ track('offer_video_play', {placeholder:true}); document.getElementById('offre').scrollIntoView({behavior:'smooth'}); });
+  }
+})();
+
+/* ============ Section-seen observers ============ */
+(function(){
+  if (!('IntersectionObserver' in window)) return;
+  var once={};
+  function watch(sel, ev){
+    var el=document.querySelector(sel); if(!el) return;
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting && !once[ev]){ once[ev]=true; track(ev,{}); io.disconnect(); }
+      });
+    },{threshold:0.4});
+    io.observe(el);
+  }
+  watch('#countdown','countdown_seen');
+  watch('#video','video_section_seen');
+})();
+
+/* email capture */
+document.getElementById('captureForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var email = document.getElementById('captureEmail').value;
+  track('email_capture_free_sample', {email_provided: !!email});
+  var btn = e.target.querySelector('button');
+  btn.textContent = I18N[lang]['cap.sent'];
+  btn.style.color = 'var(--green)'; btn.style.borderColor='rgba(25,195,125,.4)';
+  e.target.querySelector('input').value='';
+  setTimeout(function(){ btn.textContent=I18N[lang]['cap.btn']; btn.style.color=''; btn.style.borderColor=''; },2600);
+});
+
+/* upsell */
+document.getElementById('upsellPrice').addEventListener('click', function(){
+  track('upsell_review_click', {price:99, currency:'EUR'});
+});
+
+/* ============ FAQ ============ */
+function renderFaq(){
+  var faqEl = document.getElementById('faq');
+  faqEl.innerHTML = '';
+  FAQ_KEYS.forEach(function(qa, i){
+    var d = document.createElement('div');
+    d.className='qa';
+    d.innerHTML = '<div class="qa-q">'+I18N[lang][qa[0]]+'<i class="icon icon-plus"></i></div><div class="qa-a"><div>'+I18N[lang][qa[1]]+'</div></div>';
+    d.querySelector('.qa-q').addEventListener('click', function(){
+      var open = d.classList.contains('open');
+      faqEl.querySelectorAll('.qa').forEach(function(x){x.classList.remove('open');});
+      if(!open){ d.classList.add('open'); track('faq_open',{question:i+1}); }
+    });
+    faqEl.appendChild(d);
+  });
+}
+
+/* ============ Ticker ============ */
+(function(){
+  var data = [['SPX','5872.34','+0.31%','green'],['VIX','14.21','-2.41%','red'],['UST10Y','4.281','+2bp','green'],['BTC','97231','+2.18%','green'],['GOLD','2641.30','-0.42%','red'],['EURUSD','1.0832','-0.21%','red'],['NVDA','142.18','+0.92%','green'],['WTI','71.42','+1.21%','green']];
+  var html = data.concat(data).map(function(d){
+    return '<span class="ti"><span class="s">'+d[0]+'</span><span>'+d[1]+'</span><span class="'+d[3]+'">'+d[2]+'</span></span>';
+  }).join('');
+  document.getElementById('tick').innerHTML = html;
+})();
+
+/* ============ Risk heatmap ============ */
+(function(){
+  var heat = document.getElementById('heat');
+  function cell(cls,txt){var d=document.createElement('div');d.className=cls;d.textContent=txt;return d;}
+  var spots=['-10','-5','-2','0','+2','+5','+10'];
+  heat.appendChild(cell('hl','σ\\S'));
+  spots.forEach(function(s){heat.appendChild(cell('hl',s));});
+  for(var r=0;r<5;r++){
+    heat.appendChild(cell('hl',(10+r*7.5).toFixed(0)+'%'));
+    for(var c=0;c<7;c++){
+      var t=c/6; var pnl=(t-0.5)*2 - r*0.10;
+      var v=Math.max(-1,Math.min(1,pnl));
+      var hc=document.createElement('div'); hc.className='hc';
+      hc.style.background = v>=0 ? 'rgba(25,195,125,'+(0.16+v*0.6)+')' : 'rgba(255,46,69,'+(0.16+(-v)*0.62)+')';
+      hc.textContent=(v>=0?'+':'')+(v*100).toFixed(0);
+      heat.appendChild(hc);
+    }
+  }
+})();
+
+applyI18n();
+</script>
+</body>
+</html>

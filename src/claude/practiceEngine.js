@@ -1036,6 +1036,52 @@ export function getPracticeApiBase() {
   return raw.replace(/\/+$/, '');
 }
 
+// --- billing (Stripe) ------------------------------------------------------
+// Checkout MUST go through the backend (the Stripe secret key can never live in
+// the static frontend). These helpers degrade honestly: 'unreachable' when the
+// backend is down, 'mock' when the backend runs but Stripe is not configured.
+
+export async function getBillingConfig() {
+  try {
+    const r = await fetch(`${getPracticeApiBase()}/billing/config`);
+    if (!r.ok) return { configured: false, reachable: true, mode: 'mock' };
+    const data = await r.json();
+    return { ...data, reachable: true };
+  } catch {
+    return { configured: false, reachable: false, mode: 'unreachable' };
+  }
+}
+
+export async function startCheckout(plan, email) {
+  let r;
+  try {
+    r = await fetch(`${getPracticeApiBase()}/billing/checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(email ? { plan, email } : { plan }),
+    });
+  } catch (e) {
+    throw new Error(`backend unreachable: ${e.message}`);
+  }
+  if (!r.ok) {
+    let detail = `HTTP ${r.status}`;
+    try { detail = (await r.json()).detail || detail; } catch { /* ignore */ }
+    throw new Error(detail);
+  }
+  return r.json(); // { id, url, plan, mode }
+}
+
+export async function getEntitlement(email) {
+  if (!email) return { active: false, plan: null };
+  try {
+    const r = await fetch(`${getPracticeApiBase()}/billing/entitlement?email=${encodeURIComponent(email)}`);
+    if (!r.ok) return { active: false, plan: null };
+    return r.json();
+  } catch {
+    return { active: false, plan: null };
+  }
+}
+
 export function getCourseBlueprint(courseId) {
   return COURSE_BLUEPRINTS[courseId] || null;
 }

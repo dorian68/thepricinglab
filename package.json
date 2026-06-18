@@ -8,7 +8,10 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "smoke:sources": "node scripts/smoke_parse_sources.mjs",
+    "smoke:api": "node scripts/smoke_api.mjs",
+    "audit:technical": "npm run smoke:sources && npm run build"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
