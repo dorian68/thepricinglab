@@ -1,0 +1,42 @@
+/* ============================================================
+   MOTION — The Pricing Library / Agentic Trading Room
+   Fast, mechanical, data-terminal feel. No bounce. Quick fades,
+   crisp underlines, ticking progress. Respect reduced-motion.
+   ============================================================ */
+
+:root {
+  --ease-out:   cubic-bezier(0.22, 1, 0.36, 1); /* @kind other */
+  --ease-in-out:cubic-bezier(0.65, 0, 0.35, 1); /* @kind other */
+  --ease-snap:  cubic-bezier(0.16, 1, 0.3, 1); /* @kind other */
+
+  --dur-instant: 80ms;  /* @kind other */
+  --dur-fast:    140ms; /* @kind other */
+  --dur-base:    200ms; /* @kind other */
+  --dur-slow:    320ms; /* @kind other */
+
+  /* Live-data pulse (e.g. LIVE dot, quoting state) */
+  --pulse: 1600ms; /* @kind other */
+}
+
+@keyframes tpl-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+
+@keyframes tpl-blink {
+  0%, 49%  { opacity: 1; }
+  50%, 100%{ opacity: 0.25; }
+}
+
+@keyframes tpl-progress {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms; /* @kind other */
+    --dur-base: 0ms; /* @kind other */
+    --dur-slow: 0ms; /* @kind other */
+  }
+}

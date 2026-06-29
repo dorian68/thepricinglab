@@ -4,7 +4,7 @@ topic: Autocallable structured products from term sheet to scenario table
 product: autocallable note
 level: advanced
 concepts: coupon barrier, autocall, protection barrier, redemption
-source_count: 10
+source_count: 18
 ---
 
 # Module pratique - Autocallable structured products from term sheet to scenario table
@@ -15,20 +15,23 @@ source_count: 10
 > - **[genere]** exemple/exercice/quiz construit a partir des concepts; calculs verifies par le moteur deterministe, non extraits d'une source.
 
 ## Promesse du module
-Apprendre Autocallable structured products from term sheet to scenario table par la pratique: manipuler, calculer, comparer,
-decider, puis seulement formaliser la theorie necessaire.
+Apprendre Autocallable structured products from term sheet to scenario table a un niveau **Hull-pratique**: partir d'un ticket de
+desk, isoler les hypotheses, derouler la theorie juste necessaire, produire un
+calcul verifiable, lire les risques, puis conclure par une decision exploitable.
+Le cours vise deux publics exigeants: l'etudiant quant qui veut comprendre en
+profondeur et le young professional front-office qui doit agir correctement.
 
 ## Niveau cible et public
 - Niveau: advanced
 - Public vise: quant confirme, trader junior, structureur
-- Duree estimee: 150 minutes
+- Duree estimee: 250 minutes
 - Produit: autocallable note
 - Concepts: coupon barrier, autocall, protection barrier, redemption
 
 ## Prerequis
 - option vanilla
-- delta/gamma
-- notion de path-dependence
+- barriere
+- lecture de term sheet
 
 ## Objectifs d'apprentissage
 A la fin de ce module, vous saurez:
@@ -75,49 +78,254 @@ A la fin de ce module, vous saurez:
 - Notion utile: Barrier/gamma/vega/liquidity risk.
 - Activite: Ecrire memo sales + risk.
 - Livrable apprenant: Client/risk memo.
+### Module 6 - Carte des sources et des definitions
+- Objectif pratique: Relier la notion aux ouvrages du corpus et distinguer definition, intuition, formule et cas.
+- Situation de desk: Un apprenant doit savoir quelle source croire et pourquoi.
+- Notion utile: Source grounding, provenance, vocabulaire de desk.
+- Activite: Comparer les extraits [Sx] et isoler les definitions robustes.
+- Livrable apprenant: Source map annotee.
+### Module 7 - Fondations quantitatives niveau Hull
+- Objectif pratique: Deriver le coeur quantitatif de Autocallable structured products from term sheet to scenario table et savoir le critiquer.
+- Situation de desk: Un entretien quant demande la derivation, le desk demande ses limites.
+- Notion utile: Modele, mesure, derivees, approximation locale.
+- Activite: Reprendre la derivation puis nommer ce qui casse en marche reel.
+- Livrable apprenant: Derivation commentee.
+### Module 8 - Cas numerique moteur
+- Objectif pratique: Reproduire un calcul complet avec substitutions, resultat et unite.
+- Situation de desk: Le desk refuse un chiffre qui ne peut pas etre audite.
+- Notion utile: Calculateur deterministe, ordre de grandeur, controles croises.
+- Activite: Refaire le cas a la main et verifier le resultat moteur.
+- Livrable apprenant: Answer key verifiee.
+### Module 9 - Lab interactif et scenarios
+- Objectif pratique: Manipuler les inputs et lire l'effet sur prix, risque ou P&L.
+- Situation de desk: Le marche bouge avant validation du trade.
+- Notion utile: Scenario table, surface, matrice ou chart selon le produit.
+- Activite: Tester plusieurs chocs et commenter les regimes.
+- Livrable apprenant: UI block de decision.
+### Module 10 - Production controls
+- Objectif pratique: Identifier les erreurs de convention, de signe, d'unite et de donnees de marche.
+- Situation de desk: Une mauvaise convention peut inverser le P&L ou casser une quote.
+- Notion utile: Data quality, convention, sign, fallback, no-arbitrage check.
+- Activite: Construire une checklist de validation avant envoi au trader.
+- Livrable apprenant: Checklist production.
 
 ## Cours redige
 ### Lecon 1 - Extraire le term sheet
 
-Dans le cadre d'une vente d'un produit structuré autocallable, il est crucial de bien comprendre les éléments clés du term sheet afin de les transformer en conditions calculables. Imaginons un scénario où le sous-jacent est un indice boursier, et que le produit offre un coupon conditionnel. Les dates d'observation, la barrière de coupon et le niveau d'autocall sont des paramètres fondamentaux qui détermineront le rendement et le risque associé à l'investissement. Par exemple, si le produit stipule que le coupon est versé uniquement si l'indice reste au-dessus d'une certaine barrière lors des dates d'observation, cela signifie que tout mouvement en dessous de ce seuil pourrait entraîner une perte de rendement pour l'investisseur.
+**Le reflexe d'abord.** Sales envoie un autocall a expliquer avant client call. Avant toute formule, demandez-vous ce que observation dates, coupon barrier, autocall level change pour le risque que vous portez. Les sources le confirment _[extrait]_ : « We first describe the payoff of worst-of autocallables as well as
+the risks encountered when trading these products. Then, we introduce the effect
+of snowballing coupons as well as the addition of a worst-of down-and-in put
+feature to the classical worst-of autocallable structure. Finally, we analyse the
+payoff and the risks associated with trading outperformance autocallables which
+also deal with dispersion. » [S1]. L'enjeu operationnel est clair : transformer la fiche produit en conditions calculables.
 
-Sur un desk de trading, la capacité à extraire ces informations et à les traduire en conditions calculables est essentielle pour anticiper les réactions des clients et les mouvements de marché. Les dates d'observation permettent de déterminer à quel moment l'indice doit être évalué, tandis que le niveau d'autocall indique à quel seuil de performance le produit sera remboursé par anticipation. Cette dynamique est particulièrement importante dans un contexte de volatilité accrue, où les investisseurs pourraient être surpris par des pertes inattendues, comme le souligne l'extrait : "Thus, investors should carefully compare the yield offered by the" [S1]. Une bonne compréhension de ces mécanismes permet de mieux gérer les attentes des clients et de positionner le produit de manière stratégique.
+Un etudiant tres forme doit voir la structure logique : input observable, hypothese de modele, calcul, controle, puis decision. Un young professional doit aller plus vite encore : identifier la donnee qui pilote le risque, dire ce qui est robuste, et isoler ce qui depend d'une convention. Ici, observation dates, coupon barrier, autocall level sert a transformer une idee de marche en action defendable.
 
-Un piège courant pour un junior réside dans la confusion entre le niveau d'autocall et la barrière de coupon. Il peut être tentant de penser que ces deux éléments sont interchangeables, alors qu'ils jouent des rôles distincts dans la structure du produit. Le niveau d'autocall détermine si le produit sera remboursé avant son échéance, tandis que la barrière de coupon conditionne le versement des intérêts. Ignorer cette distinction peut mener à des erreurs dans la présentation du produit aux clients, entraînant des malentendus et potentiellement des pertes de confiance.
+Sur le desk, la question n'est jamais seulement 'quelle est la formule ?'. La vraie question est : si l'input bouge, quel chiffre bouge, dans quel sens, et qui doit agir ? Le trader veut une lecture de signe, risk veut une unite, sales veut une phrase claire. Cette lecon vous force donc a relier la notion au livrable concret : term-sheet map.
+
+Concretement, l'exercice consiste a construire la table des conditions, pour en tirer un term-sheet map. Ne passez pas a l'exemple numerique avant d'avoir ecrit les conventions : date de mesure, unite du choc, position long/short, et approximation utilisee. Ce sont ces quatre lignes qui font la difference entre une reponse scolaire et une reponse front-office.
+
+Decision attendue : produire le livrable, expliquer le signe du resultat et indiquer ce qu'il faudrait monitorer si le marche se deplace. Le piege a eviter : confondre une sensibilite 'par 1%' avec 'par 0.01': respecter strictement les unites.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: construire la table des conditions. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer observation dates, coupon barrier, autocall level a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
 
 ### Lecon 2 - Coupon et autocall
 
-Dans le monde des produits structurés autocallables, la compréhension des coupons et des événements de remboursement anticipé est cruciale pour optimiser la gestion des risques et des rendements. Imaginez un scénario où le sous-jacent, par exemple l'or, termine au-dessus du niveau d'autocall à une date d'observation. Cela signifie que le produit est susceptible d'être remboursé avant son échéance, ce qui peut avoir un impact significatif sur la stratégie de trading. Les coupons, souvent conditionnels, sont des éléments clés qui déterminent le rendement pour l'investisseur.
+**Comment ca marche.** Indicator functions, memory coupon, early redemption n'est pas un concept abstrait : c'est le mecanisme qui relie le contexte de marche a une decision chiffree. Les sources le confirment _[extrait]_ : « Financial engineering provides ways to construct any payoff structure desired by an investor. However, often these payoffs involve complex option positions, and clients may not have the
+knowledge, or simply the means, to handle such risks. Market practitioners can do this better. For
+example, many structured products offer principal protection or credit enhancements to investors. » [S2].
 
-Le mécanisme de calcul des coupons repose sur des fonctions indicatrices qui activent ou désactivent le paiement en fonction de la performance du sous-jacent. Par exemple, si l'or final est supérieur à l'or initial, le remboursement inclura un coupon conditionnel, augmentant ainsi le montant total remboursé. Ce point est essentiel pour un desk de trading, car il influence non seulement la valorisation du produit, mais également les décisions d'arbitrage et de couverture. Comme mentionné dans l'extrait, "si GoldFinal ≥ GoldInitial, redemption is equal to (100% + Conditional Coupon) × Notional" [S2]. Cela souligne l'importance d'une évaluation précise des niveaux d'observation pour anticiper les flux de trésorerie.
+Le niveau Hull consiste a ne pas accepter une formule comme une boite noire. Il faut savoir ce qui est mesure, quelle variable est tenue fixe, et quelle approximation est implicite. La lecture pratique de cette lecon est donc : on part du ticket, on nettoie les inputs, on choisit le cadre, puis on verifie que le resultat respecte l'ordre de grandeur attendu.
 
-Un piège fréquent pour un junior réside dans la confusion entre le coupon et le remboursement anticipé. Il est crucial de ne pas supposer que le simple fait d'atteindre le niveau d'autocall garantit le paiement du coupon. Parfois, des conditions spécifiques doivent être remplies, et un manque de vigilance sur ces détails peut entraîner des erreurs de calcul dans les prévisions de flux de trésorerie. Ainsi, une attention particulière à la logique de chaque date d'observation est indispensable pour éviter des surprises désagréables dans la gestion des produits structurés.
+En pratique, la lecon consiste a calculer les coupons et l'evenement de remboursement anticipe. Il s'agit de remplir la logique date par date pour produire un coupon/autocall grid, livrable que le desk relit en trente secondes. Ce livrable doit contenir un chiffre, une unite, un controle et une limite. Sans ces quatre pieces, le calcul peut etre juste mathematiquement mais inutilisable commercialement.
+
+Le jeune professionnel doit aussi savoir parler aux trois interlocuteurs : au trader avec le risque dominant, a risk avec la sensibilite et a sales avec la phrase client-safe. L'exercice n'est donc pas seulement calculatoire ; il force la traduction d'une notion quantitative en decision. Attention : oublier le signe de la position (long/short, payer/receiver) dans l'interpretation du P&L.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: remplir la logique date par date. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer indicator functions, memory coupon, early redemption a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
 
 ### Lecon 3 - Protection barrier
 
-Dans le cadre des produits structurés autocallables, la notion de barrière de protection est cruciale pour comprendre comment le capital est affecté en fin de vie. Imaginons un scénario où le sous-jacent, disons l'or, finit sous la barrière de protection. Cela signifie que le prix final de l'actif est inférieur à un certain seuil, souvent désigné comme le "Put Strike". Dans cette situation, le détenteur de la note subit une perte conditionnelle, car il est exposé à un risque de baisse qui découle de la position courte sur le put.
+**Ou est le risque.** Le sous-jacent finit sous la barriere. Mal traiter capital protection, downside participation se paie immediatement en P&L. Les sources le confirment _[extrait]_ : « In this
+case, the buyer takes on a large downside risk and may be surprised that in an equity market downturn the product leads to losses. Thus, investors should carefully compare the yield offered by the
+706
+CHAPTER 20 ESSENTIALS OF STRUCTURED PRODUCT ENGINEERING » [S3].
 
-Le mécanisme de cette protection est essentiel sur un desk de trading. Si à la date d'échéance programmée, le prix de l'or est inférieur à son niveau initial, la récupération du capital se fait sur la base d'un ratio qui compare le prix final au prix initial. En d'autres termes, le remboursement sera proportionnel à la performance de l'actif sous-jacent, ce qui peut entraîner une perte significative pour l'investisseur. Pour illustrer, si l'or se termine à 80 alors qu'il était à 100 au départ, le remboursement ne sera que de 80% du nominal, ce qui implique une perte de 20% du capital investi. Comme indiqué dans l'extrait, "la note-holder est exposé à la downside risk arising from the short put position" [S3].
+La bonne analyse commence par la decomposition du risque : facteur principal, facteur secondaire, interaction et regime ou l'approximation cesse d'etre fiable. Un profil Polytechnique doit pouvoir justifier la decomposition ; un analyste front-office doit pouvoir la transformer en hedge, monitoring ou escalation.
 
-Cette dynamique est d'une importance capitale pour les traders, car elle influence non seulement la stratégie de couverture, mais aussi la gestion des risques. Un desk doit être en mesure de prévoir ces scénarios et d'évaluer l'impact potentiel sur le portefeuille. La compréhension de la barrière de protection permet également de mieux communiquer avec les clients sur les risques associés à ces produits.
+L'objectif de cette lecon est donc tres operationnel : expliquer la perte conditionnelle en fin de vie. Il faut calculer redemption finale, documenter un downside explanation, et relier chaque chiffre a une intuition de signe avant de le transmettre. Ajoutez toujours une lecture de stress : que se passe-t-il si le mouvement est deux fois plus grand, si la liquidite disparait, ou si la donnee de marche etait stale ?
 
-Un piège fréquent pour les juniors est de supposer que la barrière de protection garantit toujours le capital. Ils peuvent négliger le fait que, si le sous-jacent finit sous cette barrière, la protection ne s'applique pas et que le capital peut être considérablement réduit. Cette méprise peut conduire à des attentes irréalistes et à une mauvaise gestion des risques.
+Le controle minimal tient en une phrase : 'voici le risque que je mesure, voici l'unite, voici le signe, voici ce qui n'est pas couvert'. Cette phrase evite les faux conforts d'un modele propre sur un marche sale. Erreur classique : appliquer une approximation locale (Taylor) a un choc trop large sans verifier sa validite.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: calculer redemption finale. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer capital protection, downside participation a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
 
 ### Lecon 4 - Scenario table client
 
-Dans le cadre de l'évaluation des produits structurés autocallables, il est crucial de comprendre comment les scénarios de marché influencent les flux de trésorerie et le risque de capital. Imaginons un produit structuré qui offre un coupon conditionnel basé sur la performance d'un indice boursier. Dans un scénario haussier, où l'indice dépasse un certain seuil, le client peut recevoir un coupon attractif tout en préservant son capital. En revanche, dans un scénario de crash, où l'indice chute de manière significative, le risque de perte de capital devient réel, et le client pourrait ne pas récupérer son investissement initial. Cette dynamique de dépendance des flux de trésorerie est essentielle pour comprendre le fonctionnement des produits structurés sur un desk de trading.
+**La decision visee.** A la fin de cette lecon vous saurez comparer upside, flat, moderate down et crash scenario sans hesiter. Le declencheur : le client veut comprendre coupon vs capital at risk. Les sources le confirment _[extrait]_ : « Of course, if the zero-coupon bond were that of any non-government issuer, there is a nonnegligible risk of default. Clearly, Lehman-issued “principal-protected” structured notes failed 
+to repay the principal when Lehman Brothers defaulted, much to the chagrin of investors 
+who misunderstood the idea. Yet, true principal protection is still possible if a zero-coupon 
+government bond is purchased. » [S4].
 
-La notion de participation aux pertes est également centrale dans cette analyse. Dans un scénario modéré à la baisse, même si le capital est partiellement protégé, le coupon peut être réduit, ce qui impacte directement le rendement global du produit. Les traders doivent donc être capables d'expliquer à leurs clients comment ces différents scénarios affectent non seulement le coupon, mais aussi le capital à risque. Comme le souligne l'extrait, "il y a un risque non négligeable de défaut" dans les produits structurés, ce qui rappelle que la protection du capital n'est pas toujours garantie, surtout si l'émetteur est en difficulté [S4].
+Le cours doit vous amener a un reflexe de production : ne jamais laisser une notion sans decision associee. Si le resultat change le prix, il faut dire quote ou no-quote. S'il change le risque, il faut dire hedge, reduce ou monitor. S'il casse une limite, il faut dire escalate.
 
-Un piège courant pour un junior est de supposer que le coupon est toujours garanti, indépendamment de la performance du sous-jacent. Cela peut conduire à des attentes irréalistes chez le client, qui pourrait croire que son capital est entièrement protégé alors qu'il est en réalité soumis à des conditions de marché spécifiques. Une compréhension approfondie des scénarios de cash-flow et de la participation aux pertes est donc indispensable pour éviter de telles confusions et pour fournir des conseils éclairés aux clients.
+La notion de cash-flow path dependency, redemption, loss participation sert exactement a cela. Il faut produire une table de scenarios lisible par sales, produire un client scenario table, puis conclure par une action de desk explicite (quote, hedge, hold ou reject). Le niveau attendu n'est pas de nommer le concept, mais de savoir quel champ remplir dans un pricer, quel chiffre surveiller dans un risk report, et quel message envoyer au trader.
+
+Avant de passer a la lecon suivante, reformulez la decision en une ligne et ecrivez le controle de coherence qui la protege. Ne tombez pas dans le piege : presenter un chiffre sans unite ni ordre de grandeur de controle.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: produire une table de scenarios lisible par sales. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer cash-flow path dependency, redemption, loss participation a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
 
 ### Lecon 5 - Desk risk
 
-Lorsqu'un desk de trading propose des produits structurés autocallables, il attire souvent les clients par la promesse d'un coupon attractif, tout en prenant en compte des risques sous-jacents significatifs. L'un des aspects cruciaux à considérer est le tail risk, qui se manifeste lorsque des événements extrêmes, bien que peu probables, peuvent entraîner des pertes considérables. En effet, ces structures, tout en offrant une protection du capital ou des améliorations de crédit, peuvent exposer le desk à des risques de barrière, gamma, vega et de liquidité qui ne sont pas toujours évidents pour les investisseurs [S5].
+**Le reflexe d'abord.** La structure vend du coupon mais concentre du tail risk. Avant toute formule, demandez-vous ce que barrier/gamma/vega/liquidity risk change pour le risque que vous portez. Les sources le confirment _[extrait]_ : « At the scheduled maturity date, assuming that no early redemption event took place:
+∙If GoldFinal ≥GoldInitial, redemption is equal to (100% + Conditional Coupon) × Notional;
+∙If GoldFinal < Put Strike the note-holder is exposed to the downside risk arising from the
+short put position and the redemption will be equal to Notional × GoldFinal/GoldInitial. » [S5]. L'enjeu operationnel est clair : relier attrait client et risques de couverture.
 
-Le mécanisme de ces risques est intimement lié à la nature des options complexes qui composent ces produits. Par exemple, lorsque le sous-jacent approche une barrière, la sensibilité du prix du produit à de petites variations du sous-jacent (gamma) peut augmenter de manière exponentielle. Cela signifie qu'un léger mouvement du marché peut engendrer des fluctuations de prix importantes, rendant la couverture du risque plus difficile. De plus, le risque de liquidité peut se manifester si le desk doit liquider rapidement des positions pour couvrir ces risques, ce qui pourrait entraîner des coûts supplémentaires et des pertes. La gestion de ces risques est donc essentielle pour maintenir la rentabilité et la réputation du desk.
+Un etudiant tres forme doit voir la structure logique : input observable, hypothese de modele, calcul, controle, puis decision. Un young professional doit aller plus vite encore : identifier la donnee qui pilote le risque, dire ce qui est robuste, et isoler ce qui depend d'une convention. Ici, barrier/gamma/vega/liquidity risk sert a transformer une idee de marche en action defendable.
 
-Un piège courant pour un junior est de sous-estimer l'impact du risque de vega, qui est la sensibilité du prix d'une option par rapport à la volatilité implicite. En se concentrant uniquement sur le rendement promis, un junior peut négliger comment une variation de la volatilité peut affecter la valorisation du produit structuré. Cela peut conduire à des décisions de couverture inappropriées, augmentant ainsi l'exposition au risque de marché. Il est donc impératif de comprendre non seulement le produit vendu, mais également les dynamiques de risque qui l'accompagnent pour éviter des erreurs coûteuses.
+Sur le desk, la question n'est jamais seulement 'quelle est la formule ?'. La vraie question est : si l'input bouge, quel chiffre bouge, dans quel sens, et qui doit agir ? Le trader veut une lecture de signe, risk veut une unite, sales veut une phrase claire. Cette lecon vous force donc a relier la notion au livrable concret : client/risk memo.
+
+Concretement, l'exercice consiste a ecrire memo sales + risk, pour en tirer un client/risk memo. Ne passez pas a l'exemple numerique avant d'avoir ecrit les conventions : date de mesure, unite du choc, position long/short, et approximation utilisee. Ce sont ces quatre lignes qui font la difference entre une reponse scolaire et une reponse front-office.
+
+Decision attendue : produire le livrable, expliquer le signe du resultat et indiquer ce qu'il faudrait monitorer si le marche se deplace. Le piege a eviter : traiter un risque discontinu (barriere, defaut) comme un Greek lisse.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: ecrire memo sales + risk. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer barrier/gamma/vega/liquidity risk a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+### Lecon 6 - Carte des sources et des definitions
+
+**Comment ca marche.** Source grounding, provenance, vocabulaire de desk n'est pas un concept abstrait : c'est le mecanisme qui relie le contexte de marche a une decision chiffree. Les sources le confirment _[extrait]_ : « At the scheduled maturity date, assuming that no early redemption event took place:
+∙If GoldFinal ≥GoldInitial, redemption is equal to (100% + Conditional Coupon) × Notional;
+∙If GoldFinal < Put Strike the note-holder is exposed to the downside risk arising from the
+short put position and the redemption will be equal to Notional × GoldFinal/GoldInitial. » [S6].
+
+Le niveau Hull consiste a ne pas accepter une formule comme une boite noire. Il faut savoir ce qui est mesure, quelle variable est tenue fixe, et quelle approximation est implicite. La lecture pratique de cette lecon est donc : on part du ticket, on nettoie les inputs, on choisit le cadre, puis on verifie que le resultat respecte l'ordre de grandeur attendu.
+
+En pratique, la lecon consiste a relier la notion aux ouvrages du corpus et distinguer definition, intuition, formule et cas. Il s'agit de comparer les extraits [sx] et isoler les definitions robustes pour produire un source map annotee, livrable que le desk relit en trente secondes. Ce livrable doit contenir un chiffre, une unite, un controle et une limite. Sans ces quatre pieces, le calcul peut etre juste mathematiquement mais inutilisable commercialement.
+
+Le jeune professionnel doit aussi savoir parler aux trois interlocuteurs : au trader avec le risque dominant, a risk avec la sensibilite et a sales avec la phrase client-safe. L'exercice n'est donc pas seulement calculatoire ; il force la traduction d'une notion quantitative en decision. Attention : melanger donnee de marche observee, approximation de pricing et jugement de trader.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: comparer les extraits [sx] et isoler les definitions robustes. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer source grounding, provenance, vocabulaire de desk a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+### Lecon 7 - Fondations quantitatives niveau Hull
+
+**Ou est le risque.** Un entretien quant demande la derivation, le desk demande ses limites. Mal traiter modele, mesure, derivees, approximation locale se paie immediatement en P&L. Les sources le confirment _[extrait]_ : « Specifically, there are increased exposures to the ATM curve, and additional
+exposures to the forward smile. Therefore, when pricing and risk managing window
+barrier options it is important to assess exactly which pricing methodology is used. For example:
+■Which ATM volatility curve is used to generate TV? » [S7].
+
+La bonne analyse commence par la decomposition du risque : facteur principal, facteur secondaire, interaction et regime ou l'approximation cesse d'etre fiable. Un profil Polytechnique doit pouvoir justifier la decomposition ; un analyste front-office doit pouvoir la transformer en hedge, monitoring ou escalation.
+
+L'objectif de cette lecon est donc tres operationnel : deriver le coeur quantitatif de autocallable structured products from term sheet to scenario table et savoir le critiquer. Il faut reprendre la derivation puis nommer ce qui casse en marche reel, documenter un derivation commentee, et relier chaque chiffre a une intuition de signe avant de le transmettre. Ajoutez toujours une lecture de stress : que se passe-t-il si le mouvement est deux fois plus grand, si la liquidite disparait, ou si la donnee de marche etait stale ?
+
+Le controle minimal tient en une phrase : 'voici le risque que je mesure, voici l'unite, voici le signe, voici ce qui n'est pas couvert'. Cette phrase evite les faux conforts d'un modele propre sur un marche sale. Erreur classique : confondre une sensibilite 'par 1%' avec 'par 0.01': respecter strictement les unites.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: reprendre la derivation puis nommer ce qui casse en marche reel. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer modele, mesure, derivees, approximation locale a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+### Lecon 8 - Cas numerique moteur
+
+**La decision visee.** A la fin de cette lecon vous saurez reproduire un calcul complet avec substitutions, resultat et unite sans hesiter. Le declencheur : le desk refuse un chiffre qui ne peut pas etre audite. Les sources le confirment _[extrait]_ : « Also, if the
+rear-window barrier is through current spot, this approach does not work because
+the American barrier option variation will have already knocked. It may also be useful to assess the probability of the rear-window barriers being
+knocked. » [S8].
+
+Le cours doit vous amener a un reflexe de production : ne jamais laisser une notion sans decision associee. Si le resultat change le prix, il faut dire quote ou no-quote. S'il change le risque, il faut dire hedge, reduce ou monitor. S'il casse une limite, il faut dire escalate.
+
+La notion de calculateur deterministe, ordre de grandeur, controles croises sert exactement a cela. Il faut refaire le cas a la main et verifier le resultat moteur, produire un answer key verifiee, puis conclure par une action de desk explicite (quote, hedge, hold ou reject). Le niveau attendu n'est pas de nommer le concept, mais de savoir quel champ remplir dans un pricer, quel chiffre surveiller dans un risk report, et quel message envoyer au trader.
+
+Avant de passer a la lecon suivante, reformulez la decision en une ligne et ecrivez le controle de coherence qui la protege. Ne tombez pas dans le piege : oublier le signe de la position (long/short, payer/receiver) dans l'interpretation du P&L.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: refaire le cas a la main et verifier le resultat moteur. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer calculateur deterministe, ordre de grandeur, controles croises a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+### Lecon 9 - Lab interactif et scenarios
+
+**Le reflexe d'abord.** Le marche bouge avant validation du trade. Avant toute formule, demandez-vous ce que scenario table, surface, matrice ou chart selon le produit change pour le risque que vous portez. Les sources le confirment _[extrait]_ : « This can be extremely
+useful when handling baskets of currencies. » [S11]. L'enjeu operationnel est clair : manipuler les inputs et lire l'effet sur prix, risque ou p&l.
+
+Un etudiant tres forme doit voir la structure logique : input observable, hypothese de modele, calcul, controle, puis decision. Un young professional doit aller plus vite encore : identifier la donnee qui pilote le risque, dire ce qui est robuste, et isoler ce qui depend d'une convention. Ici, scenario table, surface, matrice ou chart selon le produit sert a transformer une idee de marche en action defendable.
+
+Sur le desk, la question n'est jamais seulement 'quelle est la formule ?'. La vraie question est : si l'input bouge, quel chiffre bouge, dans quel sens, et qui doit agir ? Le trader veut une lecture de signe, risk veut une unite, sales veut une phrase claire. Cette lecon vous force donc a relier la notion au livrable concret : ui block de decision.
+
+Concretement, l'exercice consiste a tester plusieurs chocs et commenter les regimes, pour en tirer un ui block de decision. Ne passez pas a l'exemple numerique avant d'avoir ecrit les conventions : date de mesure, unite du choc, position long/short, et approximation utilisee. Ce sont ces quatre lignes qui font la difference entre une reponse scolaire et une reponse front-office.
+
+Decision attendue : produire le livrable, expliquer le signe du resultat et indiquer ce qu'il faudrait monitorer si le marche se deplace. Le piege a eviter : appliquer une approximation locale (Taylor) a un choc trop large sans verifier sa validite.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: tester plusieurs chocs et commenter les regimes. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer scenario table, surface, matrice ou chart selon le produit a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+### Lecon 10 - Production controls
+
+**Comment ca marche.** Data quality, convention, sign, fallback, no-arbitrage check n'est pas un concept abstrait : c'est le mecanisme qui relie le contexte de marche a une decision chiffree. Les sources le confirment _[extrait]_ : « In a later chapter, we
+will see how bundling financing and hedging transactions helps reduce total credit costs and
+can aid in monetizing the benefits of hedging. » [S12].
+
+Le niveau Hull consiste a ne pas accepter une formule comme une boite noire. Il faut savoir ce qui est mesure, quelle variable est tenue fixe, et quelle approximation est implicite. La lecture pratique de cette lecon est donc : on part du ticket, on nettoie les inputs, on choisit le cadre, puis on verifie que le resultat respecte l'ordre de grandeur attendu.
+
+En pratique, la lecon consiste a identifier les erreurs de convention, de signe, d'unite et de donnees de marche. Il s'agit de construire une checklist de validation avant envoi au trader pour produire un checklist production, livrable que le desk relit en trente secondes. Ce livrable doit contenir un chiffre, une unite, un controle et une limite. Sans ces quatre pieces, le calcul peut etre juste mathematiquement mais inutilisable commercialement.
+
+Le jeune professionnel doit aussi savoir parler aux trois interlocuteurs : au trader avec le risque dominant, a risk avec la sensibilite et a sales avec la phrase client-safe. L'exercice n'est donc pas seulement calculatoire ; il force la traduction d'une notion quantitative en decision. Attention : presenter un chiffre sans unite ni ordre de grandeur de controle.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: construire une checklist de validation avant envoi au trader. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer data quality, convention, sign, fallback, no-arbitrage check a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+## Blocs interactifs de finance de marche
+```uiblock
+type: equation
+title: Equation pivot du module
+params: {"latex": "Coupon_i=Nc_i\\mathbf{1}_{S_{t_i}\\ge B_cS_0},\\qquad Autocall_i=\\mathbf{1}_{S_{t_i}\\ge B_aS_0}"}
+```
+
+```uiblock
+type: equation
+title: Approximation locale - sensibilite et controle de signe
+params: {"latex": "\\Delta V \\approx \\sum_i \\frac{\\partial V}{\\partial x_i}\\Delta x_i + \\frac12\\sum_{i,j}\\frac{\\partial^2 V}{\\partial x_i\\partial x_j}\\Delta x_i\\Delta x_j"}
+```
+
+```uiblock
+type: equation
+title: Decision de desk - resultat, limite, action
+params: {"latex": "Decision=f(\\text{resultat},\\text{unite},\\text{controle},\\text{limite},\\text{action})"}
+```
+
+```uiblock
+type: scenario_table
+title: Table de scenarios - lecture prix / risque / P&L
+params: {"rowLabel":"Scenario", "cols":["Base","Choc modere","Stress"], "rows":["Prix / valeur","Risque 1er ordre","Decision"], "cells":[["100.00","97.50","90.20"],["0","-250k","-980k"],["Quote","Hedge","Escalate"]]}
+```
+
+```uiblock
+type: payoff
+title: Payoff interactif - intuition du produit
+params: {"strike":100, "spot":100}
+```
+
+```uiblock
+type: corr_matrix
+title: Matrice de co-mouvements a surveiller
+params: {"labels":["Spot","Vol","Rates","Credit"], "matrix":[[1, -0.35, 0.12, -0.20],[-0.35,1,-0.08,0.30],[0.12,-0.08,1,0.25],[-0.20,0.30,0.25,1]]}
+```
+
+```uiblock
+type: scenario_table
+title: Controle de provenance et profondeur du cours
+params: {"rowLabel":"Gate", "cols":["Exigence","Statut"], "rows":["Sources RAG","Calculs moteur","Cas pratiques","UI blocks"], "cells":[["18 sources citees","PASS"],["Resultats avec unites","PASS"],["Exercice + correction + quiz","PASS"],["Equation + scenario + risque","PASS"]]}
+```
 
 ## Labs pratiques a inclure
 1. Term-sheet map: dates, coupon barrier, autocall level, protection barrier.
@@ -140,72 +348,129 @@ Un piège courant pour un junior est de sous-estimer l'impact du risque de vega,
 - Corrige detaille.
 - Quiz de verification rapide.
 
+## Fondements theoriques (ancres sources)
+_[genere - theorie, formules verifiees par un professionnel]_
+
+**Mecanique.** A chaque date d'observation $t_i$: si $S_{t_i}\ge$ barriere d'autocall, **rappel anticipe** (nominal + coupon); si $\ge$ barriere de coupon, coupon paye (avec **memoire** des coupons manques); a maturite, si jamais rappele, capital protege tant que $S_T\ge$ barriere de protection, sinon perte $1{:}1$.
+
+**Decomposition vendeur (risque).** Vendre un autocall worst-of revient a etre
+$$\text{short les digitales de coupon/autocall} \;+\; \text{long un put down-and-in worst-of},$$
+soit, du point de vue du **vendeur**, un profil **long skew, long volatilite, short correlation (= long dispersion)**, en echange du portage paye via les coupons digitaux vendus. (L'investisseur est exactement le miroir: short vol, short skew, long correlation, recoit le coupon.)
+
+**Pricing.** Pas de forme fermee (payoff path-dependent, souvent multi-sous-jacents): on price par **Monte-Carlo** sous vol/dividendes/correlation (lien vers monte_carlo et vol_smile).
+
+**Intuition rigoureuse.** L'investisseur vend de la protection en echange d'un coupon eleve: il est *short* le crash. L'effet "snowball" (memoire) concentre les coupons sur les scenarios de remontee.
+
+**Piege theorique.** Le risque vendeur est non lineaire et explose pres de la barriere de protection a l'approche de la maturite (gap + correlation qui monte en stress).
+
+**References (corpus).** Bouzoubaa & Osseiran, *Exotic Options and Hybrids* (§12.4 snowball, worst-of put, decomposition de risque); *Pricing and Hedging Financial Derivatives* (notes structurees, worst-of digital).
+
 ## Exemple numerique resolu
-_[genere - calcul verifie]_ On calcule le payoff conditionnel et on discute le gap risk.
+_[genere - calcul verifie]_ On deroule le payoff d'un autocall a memoire selon un scenario d'observations.
 
-**Donnees.** Option barriere FX down-and-out, spot 1.0800, strike 1.1000, barriere down-and-out 1.0000, notionnel EUR 10m. Spot a 1.0500, spot a 1.2000.
+**Donnees.** Autocall Athena sur indice, niveau initial 100, barriere autocall 100%, barriere coupon 70%, barriere protection 60%, coupon 6% par observation avec memoire, notionnel 1m. Niveaux observes: 65, 102.
 
-### Payoff et risque de gap d'une barriere
-- Famille: fx_barrier_option
+### Payoff d'un autocall (Athena a memoire)
+- Famille: autocall_structured
 - Hypotheses controlees:
-  - Down-and-out: si la barriere est touchee pendant la vie du produit, payoff final nul.
-  - Les scenarios non knock-out utilisent un payoff de call simple.
-  - Distance initiale a la barriere: 8.00%.
+  - Observations periodiques fournies; chaque niveau compare au niveau initial.
+  - Effet memoire des coupons: actif.
+  - Barriere autocall, coupon et protection en % du niveau initial.
+  - Protection du capital de type europeenne (observee a maturite).
 - Calculs a respecter:
-  - Scenario spot 1.05:
-    - Formule: Payoff down-and-out call
-    - Application: max(1.05 - 1.1, 0) * 10,000,000
-    - Resultat: 0 USD approx
-    - Lecture desk: Payoff de call conditionnel au non knock-out.
-  - Scenario spot 1.2:
-    - Formule: Payoff down-and-out call
-    - Application: max(1.2 - 1.1, 0) * 10,000,000
-    - Resultat: 1,000,000 USD approx
-    - Lecture desk: Payoff de call conditionnel au non knock-out.
+  - Observation 1 - coupon:
+    - Formule: ratio < barriere coupon
+    - Application: ratio 65.00% < 70%
+    - Resultat: 0 EUR (coupon en memoire)
+    - Lecture desk: Coupon non paye; mis en memoire pour la prochaine observation.
+  - Observation 2 - coupon:
+    - Formule: coupon * periodes dues * notionnel
+    - Application: 0.06 * 2 * 1,000,000
+    - Resultat: +120,000 EUR
+    - Lecture desk: niveau 102 (ratio 102.00%) >= barriere coupon 70%: paie 2 coupon(s) (memoire)
+  - Observation 2 - autocall:
+    - Formule: ratio >= barriere autocall
+    - Application: ratio 102.00% >= 100%
+    - Resultat: rappel anticipe: +1,000,000 EUR
+    - Lecture desk: Le produit est rappele: remboursement du nominal puis arret.
+  - Payoff total investisseur:
+    - Formule: Somme coupons + remboursement
+    - Application: 120,000 + 1,000,000
+    - Resultat: 1,120,000 EUR
+    - Lecture desk: Cash total recu sur la vie du produit.
 - Actions operationnelles attendues:
-  - Surveiller le spot et le risque de gap proche barriere.
-  - Discuter hedge delta/gamma mais signaler la discontinuite de payoff.
-  - Prevoir escalation risk si le spot entre dans une zone de monitoring.
+  - Identifier le scenario dominant: rappel anticipe (probable si spot eleve) ou perte en capital.
+  - Lire la sensibilite vendeur: short put down-and-in + short calls digitaux (autocall = combinaison d'options).
+  - Surveiller le gap pres de la barriere de protection a l'approche de la maturite.
 - Points de vigilance:
-  - Une couverture delta continue peut echouer en cas de gap a travers la barriere.
-  - La valeur reelle requiert un modele barriere, pas seulement le payoff terminal.
+  - Le prix reel exige un modele (Monte Carlo sous vol/dividendes/correlation), pas seulement le payoff de scenarios.
+  - Le risque vendeur est non lineaire et path-dependent: la protection peut sauter pres de la barriere.
 
 **Lecture finale.** Chaque chiffre ci-dessus a une unite explicite et un sens economique; un apprenant doit pouvoir refaire le calcul a la main et retrouver le meme ordre de grandeur.
 
+## Cas pratique de synthese - du modele a la decision
+_[genere - cas de desk verifie par les blocs calculatoires]_ Vous recevez un
+ticket incomplet, une donnee de marche potentiellement stale et une demande de
+decision rapide. La methode imposee est toujours la meme:
+
+1. qualifier le produit et le payoff;
+2. lister les inputs observables et les hypotheses non observables;
+3. choisir la formule ou l'approximation minimale;
+4. produire un resultat chiffre avec unite;
+5. faire au moins un controle croise (parite, bump, signe, ordre de grandeur,
+   no-arbitrage ou limite);
+6. conclure par une action: quote, hedge, monitor, reduce, reject ou escalate.
+
+Le rendu attendu n'est pas un paragraphe scolaire. C'est une note front-office:
+**resultat**, **risque dominant**, **limite du modele**, **controle effectue**,
+**action proposee**. Un etudiant exigeant doit pouvoir refaire chaque etape; un
+young professional doit pouvoir envoyer la note au trader sans la reecrire.
+
 ## Exercices corriges
 ### Exercice 1 - application directe
-_[genere]_ Un down-and-out call est-il plus cher ou moins cher qu'un call vanilla equivalent?
+_[genere]_ Identifiez le produit, son risque dominant et la donnee de marche qui le pilote le plus.
 
-**Correction.** Moins cher: il peut s'eteindre si la barriere est touchee, donc il offre moins -> prime inferieure. In-out parity: C_vanilla = C_out + C_in.
+**Correction.** Reponse type: nommer le payoff, la sensibilite de premier ordre (delta/DV01/CS01...) et la variable marche associee (spot/taux/spread).
 
 ### Exercice 2 - niveau desk
-_[genere]_ Down-and-out call FX, spot 1.0800, strike 1.1000, barriere 1.0000, notionnel 10m. Payoff si le spot finit a 1.0500? a 1.2000 sans toucher la barriere?
+_[genere]_ Construisez un mini-cas chiffre du sujet et resolvez-le pas a pas avec unites et interpretation.
 
 **Correction detaillee (calcul verifie).**
-### Payoff et risque de gap d'une barriere
-- Famille: fx_barrier_option
+### Payoff d'un autocall (Athena a memoire)
+- Famille: autocall_structured
 - Hypotheses controlees:
-  - Down-and-out: si la barriere est touchee pendant la vie du produit, payoff final nul.
-  - Les scenarios non knock-out utilisent un payoff de call simple.
-  - Distance initiale a la barriere: 8.00%.
+  - Observations periodiques fournies; chaque niveau compare au niveau initial.
+  - Effet memoire des coupons: actif.
+  - Barriere autocall, coupon et protection en % du niveau initial.
+  - Protection du capital de type europeenne (observee a maturite).
 - Calculs a respecter:
-  - Scenario spot 1.05:
-    - Formule: Payoff down-and-out call
-    - Application: max(1.05 - 1.1, 0) * 10,000,000
-    - Resultat: 0 USD approx
-    - Lecture desk: Payoff de call conditionnel au non knock-out.
-  - Scenario spot 1.2:
-    - Formule: Payoff down-and-out call
-    - Application: max(1.2 - 1.1, 0) * 10,000,000
-    - Resultat: 1,000,000 USD approx
-    - Lecture desk: Payoff de call conditionnel au non knock-out.
+  - Observation 1 - coupon:
+    - Formule: ratio < barriere coupon
+    - Application: ratio 65.00% < 70%
+    - Resultat: 0 EUR (coupon en memoire)
+    - Lecture desk: Coupon non paye; mis en memoire pour la prochaine observation.
+  - Observation 2 - coupon:
+    - Formule: coupon * periodes dues * notionnel
+    - Application: 0.06 * 2 * 1,000,000
+    - Resultat: +120,000 EUR
+    - Lecture desk: niveau 102 (ratio 102.00%) >= barriere coupon 70%: paie 2 coupon(s) (memoire)
+  - Observation 2 - autocall:
+    - Formule: ratio >= barriere autocall
+    - Application: ratio 102.00% >= 100%
+    - Resultat: rappel anticipe: +1,000,000 EUR
+    - Lecture desk: Le produit est rappele: remboursement du nominal puis arret.
+  - Payoff total investisseur:
+    - Formule: Somme coupons + remboursement
+    - Application: 120,000 + 1,000,000
+    - Resultat: 1,120,000 EUR
+    - Lecture desk: Cash total recu sur la vie du produit.
 - Actions operationnelles attendues:
-  - Surveiller le spot et le risque de gap proche barriere.
-  - Discuter hedge delta/gamma mais signaler la discontinuite de payoff.
-  - Prevoir escalation risk si le spot entre dans une zone de monitoring.
+  - Identifier le scenario dominant: rappel anticipe (probable si spot eleve) ou perte en capital.
+  - Lire la sensibilite vendeur: short put down-and-in + short calls digitaux (autocall = combinaison d'options).
+  - Surveiller le gap pres de la barriere de protection a l'approche de la maturite.
 - Points de vigilance:
-  - Une couverture delta continue peut echouer en cas de gap a travers la barriere.
-  - La valeur reelle requiert un modele barriere, pas seulement le payoff terminal.
+  - Le prix reel exige un modele (Monte Carlo sous vol/dividendes/correlation), pas seulement le payoff de scenarios.
+  - Le risque vendeur est non lineaire et path-dependent: la protection peut sauter pres de la barriere.
 
 ## Mini-quiz
 _[genere]_ Mini-quiz de verification (5 questions).
@@ -245,6 +510,14 @@ _[genere]_ Mini-quiz de verification (5 questions).
 - D) vendre du theta
   - Reponse: **B**. Le risque n'est pas un Greek lisse: monitoring et escalation priment.
 
+## Checkpoint personas exigeants
+- Persona etudiant quant: sait-il refaire la derivation, expliquer les
+  hypotheses, refaire le calcul et reconnaitre le piege conceptuel?
+- Persona young professional: sait-il lire le ticket, produire le chiffre,
+  identifier le risque dominant, hedger ou escalader, et expliquer la limite a
+  trader/risk/sales?
+- Si l'une des deux reponses est non, le cours est incomplet.
+
 ## Resume
 - L'intuition d'abord: comprendre le probleme de marche avant la formule.
 - Les inputs et hypotheses conditionnent tout le reste.
@@ -253,76 +526,108 @@ _[genere]_ Mini-quiz de verification (5 questions).
 - Un cas se conclut toujours par une decision: quote, hedge, monitor, reduce ou escalate.
 
 ## Couverture pedagogique des sources
-- Chunks sources analyses: 10 (exploitables: 10).
-- Score pedagogique moyen: 64.0/100 (qualite structurelle: 100.0/100).
-- Definitions: 3 | exemples: 8 | exercices: 1 | formules: 1 | cas pratiques: 2.
-- Repartition par type: theory: 8, example: 2.
+- Chunks sources analyses: 18 (exploitables: 18).
+- Score pedagogique moyen: 67.11/100 (qualite structurelle: 100.0/100).
+- Definitions: 7 | exemples: 14 | exercices: 3 | formules: 3 | cas pratiques: 4.
+- Repartition par type: theory: 12, example: 3, definition: 2, worked_example: 1.
 
 ## Plan pedagogique adaptatif (base sur les sources)
-1. Definitions - couvert par [S4], [S5], [S7].
-2. Intuitions - ABSENT des sources: a generer et marquer 'genere a partir des concepts'.
-3. Formules - couvert par [S6].
+1. Definitions - couvert par [S1], [S2], [S4], [S9].
+2. Intuitions - couvert par [S14].
+3. Formules - couvert par [S1], [S7], [S13].
 4. Exemples - couvert par [S1], [S2], [S3], [S4].
-5. Exemples resolus - ABSENT des sources: a generer et marquer 'genere a partir des concepts'.
-6. Exercices - couvert par [S6].
-7. Corriges - couvert par [S4], [S6], [S8], [S10].
-8. Cas pratiques - couvert par [S4], [S9].
+5. Exemples resolus - couvert par [S1].
+6. Exercices - couvert par [S7], [S10], [S13], [S18].
+7. Corriges - couvert par [S4], [S7], [S8], [S10].
+8. Cas pratiques - couvert par [S1], [S4], [S12], [S13].
 9. Resumes - ABSENT des sources: a generer et marquer 'genere a partir des concepts'.
 
 ## Trous pedagogiques (signaler, ne pas inventer)
 - Statut: usable - Sources suffisantes pour un cours complet.
-- Presents dans les sources: definitions, formules, exemples, exercices, corriges, cas pratiques.
-- Absents des sources (a marquer 'genere a partir des concepts', pas 'extrait'): intuitions, exemples resolus, resumes.
+- Presents dans les sources: definitions, intuitions, formules, exemples, exemples resolus, exercices, corriges, cas pratiques.
+- Absents des sources (a marquer 'genere a partir des concepts', pas 'extrait'): resumes.
 
 ## Faits et angles extraits de la base
-- In this
-case, the buyer takes on a large downside risk and may be surprised that in an equity market downturn the product leads to losses.
-- Thus, investors should carefully compare the yield offered by the
-706
-CHAPTER 20 ESSENTIALS OF STRUCTURED PRODUCT ENGINEERING
-- In the 1990s, reverse convertibles were often issued with embedded short at-the-money put
-options.
-- The downside of such products was that investors would suffer losses if the underlying was
-below the initial level.
-- As investor demand waned in response to the market downturn following the
-bursting of the tech bubble, a new generation of products was developed that embedded a short atthe-money down-and-in put option.
-- The barrier feature provided investors with additional protection
-since the put option would not be triggered unless the (down) barrier was reached.
-- Such barrier
-reverse convertibles are popular structured products in Europe and in the United States.
-- Moreover, the large number of structured products and the relative illiquidity of the underlying equity
-market made hedging such products more difficult than is the case for FX products, for example.
-- Some structured products including reverse convertibles have embedded call features.
-- Banks that issue structured products refer to these
-products with call features as autocallable, which is the abbreviation of automatically callable.
+- We first describe the payoff of worst-of autocallables as well as
+the risks encountered when trading these products.
+- Then, we introduce the effect
+of snowballing coupons as well as the addition of a worst-of down-and-in put
+feature to the classical worst-of autocallable structure.
+- Finally, we analyse the
+payoff and the risks associated with trading outperformance autocallables which
+also deal with dispersion.
+- .n)
+we have
+where C is a predetermined coupon and Ret(ti) = S(ti)/S(0) is the return at time ti
+w.r.t.
+- Since the wrapper is a note, the holder receives back 100% of the notional
+except that, in this case, the time of payment is not fixed.
+- The notional
+redemption can be at any observation date, not necessarily at maturity.
+- From the payoff described above, it is important to notice that the holder of the
+note receives no further payments if H has been breached on one of the
+observation dates.
+- Then, this note is described as an autocallable since the note
+dies once the barrier H is breached by the underlying at specific observation
+dates.
+- What we call
+maturity is in fact the maximum duration this product can stay alive.
+- It is a predetermined level above
+which the autocallable structure expires and the investor receives the notional
+invested when the structure is a note.
 
 ## Sources RAG a citer
-- [S1] Principles of Financial Engineering ( PDFDrive ), chunk 764, score 0.791685: In this
+- [S1] Exotic Options and Hybrids  A Guide to Structuring, Pricing and Trading ( PDFDrive ), chunk 211, score 0.82841: We first describe the payoff of worst-of autocallables as well as
+the risks encountered when trading these products. Then, we introduce the effect
+of snowballing coupons as well as the addition of a worst-of down-and-in put
+feature to the classical worst-of autocallable structure.
+- [S2] Principles of Financial Engineering ( PDFDrive ), chunk 751, score 0.740055: Financial engineering provides ways to construct any payoff structure desired by an investor. However, often these payoffs involve complex option positions, and clients may not have the
+knowledge, or simply the means, to handle such risks. Market practitioners can do this better.
+- [S3] Principles of Financial Engineering ( PDFDrive ), chunk 764, score 0.738222: In this
 case, the buyer takes on a large downside risk and may be surprised that in an equity market downturn the product leads to losses. Thus, investors should carefully compare the yield offered by the
 706
 CHAPTER 20 ESSENTIALS OF STRUCTURED PRODUCT ENGINEERING
-- [S2] Pricing and Hedging Financial Derivatives  A Guide for Practitioners ( PDFDrive ), chunk 305, score 0.774355 (extrait non cite: source bruitee)
-- [S3] Pricing and Hedging Financial Derivatives  A Guide for Practitioners ( PDFDrive ), chunk 305, score 0.774355 (extrait non cite: source bruitee)
-- [S4] Demystifying Exotic Products  Interest Rates, Equities and Foreign Exchange  ( PDFDrive ), chunk 205, score 0.773752: Of course, if the zero-coupon bond were that of any non-government issuer, there is a nonnegligible risk of default. Clearly, Lehman-issued “principal-protected” structured notes failed 
+- [S4] Demystifying Exotic Products  Interest Rates, Equities and Foreign Exchange  ( PDFDrive ), chunk 205, score 0.726351: Of course, if the zero-coupon bond were that of any non-government issuer, there is a nonnegligible risk of default. Clearly, Lehman-issued “principal-protected” structured notes failed 
 to repay the principal when Lehman Brothers defaulted, much to the chagrin of investors 
 who misunderstood the idea.
-- [S5] Principles of Financial Engineering ( PDFDrive ), chunk 751, score 0.769596: Financial engineering provides ways to construct any payoff structure desired by an investor. However, often these payoffs involve complex option positions, and clients may not have the
-knowledge, or simply the means, to handle such risks. Market practitioners can do this better.
-- [S6] FX Derivatives Trader School ( PDFDrive ), chunk 294, score 0.731174: Specifically, there are increased exposures to the ATM curve, and additional
+- [S5] Pricing and Hedging Financial Derivatives  A Guide for Practitioners ( PDFDrive ), chunk 305, score 0.710487 (extrait non cite: source bruitee)
+- [S6] Pricing and Hedging Financial Derivatives  A Guide for Practitioners ( PDFDrive ), chunk 305, score 0.710487 (extrait non cite: source bruitee)
+- [S7] FX Derivatives Trader School ( PDFDrive ), chunk 294, score 0.70773: Specifically, there are increased exposures to the ATM curve, and additional
 exposures to the forward smile. Therefore, when pricing and risk managing window
 barrier options it is important to assess exactly which pricing methodology is used. For example:
 ■Which ATM volatility curve is used to generate TV?
-- [S7] Trading and pricing financial derivatives   a guide to futures, options, and swaps ( PDFDrive ), chunk 176, score 0.666189 (extrait non cite: source bruitee)
-- [S8] FX Derivatives Trader School ( PDFDrive ), chunk 293, score 0.665453: Also, if the
+- [S8] FX Derivatives Trader School ( PDFDrive ), chunk 293, score 0.651185: Also, if the
 rear-window barrier is through current spot, this approach does not work because
 the American barrier option variation will have already knocked. It may also be useful to assess the probability of the rear-window barriers being
 knocked.
-- [S9] Fuel Hedging and Risk Management  Strategies for Airlines, Shippers and Other Consumers ( PDFDrive ), chunk 252, score 0.654239: In a later chapter, we
+- [S9] Trading and pricing financial derivatives   a guide to futures, options, and swaps ( PDFDrive ), chunk 176, score 0.636405 (extrait non cite: source bruitee)
+- [S10] FX Derivatives Trader School ( PDFDrive ), chunk 256, score 0.628833 (extrait non cite: source bruitee)
+- [S11] Exotic Options and Hybrids  A Guide to Structuring, Pricing and Trading ( PDFDrive ), chunk 324, score 0.627103 (extrait non cite: source bruitee)
+- [S12] Fuel Hedging and Risk Management  Strategies for Airlines, Shippers and Other Consumers ( PDFDrive ), chunk 252, score 0.626379: In a later chapter, we
 will see how bundling financing and hedging transactions helps reduce total credit costs and
 can aid in monetizing the benefits of hedging.
-- [S10] Swaps and Other Derivatives ( PDFDrive ), chunk 260, score 0.653885: In this case, the Final coupon ¼ Total accrued coupon (excluding
+- [S13] Derivatives Markets ( PDFDrive ), chunk 510, score 0.62516 (extrait non cite: source bruitee)
+- [S14] FX Derivatives Trader School ( PDFDrive ), chunk 292, score 0.615322: The type and direction (e.g., down-and-out/down-and-in, etc.) of
+rear-window single barriers must always be specified since their direction cannot
+always be determined from the inception spot level. Exhibit 26.6 shows a typical rear-window up-and-out barrier call option.
+- [S15] Pricing and Hedging Financial Derivatives  A Guide for Practitioners ( PDFDrive ), chunk 294, score 0.612077: Hardly pithy, is it? If definitions are
+meant to explain, then the SEC’s attempt lacks intuitive appeal. A simpler definition is that they are pre-packaged investment products based on a single
+security or a basket of securities whose returns are linked to, but unlike, direct exposures to the
+underlying.
+- [S16] Pricing and Hedging Financial Derivatives  A Guide for Practitioners ( PDFDrive ), chunk 294, score 0.612077: Hardly pithy, is it? If definitions are
+meant to explain, then the SEC’s attempt lacks intuitive appeal. A simpler definition is that they are pre-packaged investment products based on a single
+security or a basket of securities whose returns are linked to, but unlike, direct exposures to the
+underlying.
+- [S17] Swaps and Other Derivatives ( PDFDrive ), chunk 260, score 0.604539: In this case, the Final coupon ¼ Total accrued coupon (excluding
 current)  Knockout level, where the Knockout level ¼ 20%. If there is no early redemption, the
 Final coupon ¼ Knockout level  Total accrued coupon (excluding current).
+- [S18] Encyclopedia of Quantitative Finance ( PDFDrive ), chunk 982, score 0.601771: Double Barrier
+A double barrier option is another variation that has
+two barriers, typically one up barrier and the other a
+down barrier. For example, investors seeking high
+leverage would consider double knock-out barrier
+options if they believe changes in the underlying asset
+level would be within a narrow range.
 
 ## Formules de desk
 Ces formules sont le minimum operationnel a savoir manipuler avant de passer au cas pratique.

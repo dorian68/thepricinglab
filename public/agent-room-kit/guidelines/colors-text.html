@@ -1,0 +1,20 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Text on Dark" subtitle="Off-white primary → dim meta, plus bid/ask signal" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { margin:0; padding:18px; background: var(--bg-panel); }
+  .line { font-family: var(--font-mono); font-size:15px; margin-bottom:9px; display:flex; align-items:baseline; gap:12px; }
+  .h { font-family: var(--font-mono); font-size:10px; color: var(--text-dim); }
+</style>
+</head>
+<body>
+<div class="line" style="color:var(--text-primary)">Primary — key data & headings <span class="h">#E6EAF1</span></div>
+<div class="line" style="color:var(--text-secondary)">Secondary — labels <span class="h">#8A94A4</span></div>
+<div class="line" style="color:var(--text-muted)">Muted — captions, axes <span class="h">#6B7585</span></div>
+<div class="line" style="color:var(--text-dim)">Dim — disabled, faint meta <span class="h">#48535F</span></div>
+<div class="line"><span style="color:var(--red-500)">BID 3.30</span> <span style="color:var(--green-500)">ASK 3.60</span> <span class="h">bid = red · ask = green</span></div>
+</body>
+</html>

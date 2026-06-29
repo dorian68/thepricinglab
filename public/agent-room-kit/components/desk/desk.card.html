@@ -1,0 +1,85 @@
+<!-- @dsCard group="Components" viewport="700x480" name="Desk" subtitle="Agent node, idea card, ticker, learning tip, metric row, RFQ header" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../styles.css" />
+<style>
+  body { margin: 0; padding: 20px; background: var(--bg-canvas); }
+  .col { display: flex; flex-direction: column; gap: 14px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+  .panel { background: var(--bg-panel); border: 1px solid var(--border-hairline); border-radius: var(--radius-md); padding: 12px; }
+  .sect { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+const NS = window.ThePricingLibraryDesignSystem_f20ac6;
+const { AgentNode, IdeaCard, TickerStrip, LearningTip, MetricRow, RfqHeader } = NS;
+
+function Demo() {
+  const [sel, setSel] = React.useState(0);
+  return (
+    <div className="col">
+      <div className="panel">
+        <RfqHeader title="Trader View" subtitle="Desk execution, hedging strategy and live market context."
+          rfqId="RFQ-2026-0617-001" savedAt="15:42:18" />
+      </div>
+
+      <div className="grid">
+        <AgentNode index={4} name="Quant Agent" icon={<span>Σ</span>} hue="purple" active
+          status="Modeling" description="Selecting model and calibrating parameters."
+          rows={[{label:'Model',value:'Black-Scholes'},{label:'Volatility',value:'42.6%'}]}
+          elapsed="00:12" progress={0.7} />
+        <AgentNode index={7} name="Risk Manager" icon={<span>⛉</span>} hue="blue"
+          status="Validating" description="Checking limits and running risk scenarios."
+          rows={[{label:'DV01 (Oil)',value:'1.24K'},{label:'Limit Usage',value:'42%'}]}
+          elapsed="00:10" progress={0.55} />
+      </div>
+
+      <div className="grid">
+        <IdeaCard title="Call Option (WTI)" tagKind="directional" tagLabel="Directional"
+          rationale="Buy a call option to benefit from rising oil prices."
+          estCost="$3.45 /bbl" confidence="high"
+          payoff={{strike:85, spot:78.42}}
+          selected={sel===0} onClick={()=>setSel(0)} />
+        <IdeaCard title="Call Spread" tagKind="balanced" tagLabel="Balanced"
+          rationale="Bull call spread to reduce cost while capping upside."
+          estCost="$1.85 /bbl" confidence="high"
+          payoff={{strike:82, spot:78.42}}
+          selected={sel===1} onClick={()=>setSel(1)} />
+      </div>
+
+      <div className="grid">
+        <div className="panel">
+          <div className="sect">Greeks (per 1 bbl)</div>
+          <MetricRow label="Delta" value="0.62" change="+0.02" changeTone="positive" desc="Directional sensitivity" />
+          <MetricRow label="Gamma" value="0.0187" change="+0.0012" changeTone="positive" desc="Delta sensitivity" />
+          <MetricRow label="Theta" value="-0.0062" change="-0.0003" changeTone="negative" desc="Time decay" />
+        </div>
+        <LearningTip label="Educational Tip" icon={<span>🎓</span>} linkLabel="Learn more about Options">
+          A call option gives you the right, but not the obligation, to buy at the strike price.
+        </LearningTip>
+      </div>
+
+      <TickerStrip status="All Systems Operational" items={[
+        {sym:'SPX',value:'5,872.34',delta:'+0.31%'},
+        {sym:'WTI',value:'78.42',delta:'+1.32%'},
+        {sym:'BRENT',value:'82.15',delta:'+1.08%'},
+        {sym:'GOLD',value:'2,337.25',delta:'+0.45%'},
+        {sym:'EUR/USD',value:'1.0712',delta:'-0.12%'},
+        {sym:'10Y US',value:'4.28%',delta:'-0.02bp'},
+      ]} />
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Demo />);
+</script>
+</body>
+</html>

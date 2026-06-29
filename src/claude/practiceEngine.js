@@ -1082,6 +1082,152 @@ export async function getEntitlement(email) {
   }
 }
 
+// --- platform data API (community/jobs/blog/leaderboard/progress/...) ------
+// Real persistence via the local/VPS FastAPI backend. Every call degrades
+// gracefully (returns null/[]) so the UI can show an honest empty/offline state
+// instead of crashing when the backend is down.
+
+async function platformGet(path) {
+  try {
+    const r = await fetch(`${getPracticeApiBase()}${path}`);
+    if (!r.ok) return null;
+    return await r.json();
+  } catch {
+    return null;
+  }
+}
+
+async function platformPost(path, body) {
+  const r = await fetch(`${getPracticeApiBase()}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body || {}),
+  });
+  if (!r.ok) {
+    let detail = `HTTP ${r.status}`;
+    try { detail = (await r.json()).detail || detail; } catch { /* ignore */ }
+    throw new Error(detail);
+  }
+  return r.json();
+}
+
+export const platformApi = {
+  base: getPracticeApiBase,
+  async health() { return platformGet('/platform/health'); },
+  // blog
+  async listBlog() { const d = await platformGet('/platform/blog'); return d?.posts || []; },
+  async getBlog(slug) { return platformGet(`/platform/blog/${encodeURIComponent(slug)}`); },
+  // community
+  async listThreads(channel) { const d = await platformGet(`/platform/community/threads${channel && channel !== 'all' ? `?channel=${channel}` : ''}`); return d?.threads || []; },
+  async createThread(body) { return platformPost('/platform/community/threads', body); },
+  async voteThread(id) { return platformPost(`/platform/community/threads/${id}/vote`, {}); },
+  async listComments(id) { const d = await platformGet(`/platform/community/threads/${id}/comments`); return d?.comments || []; },
+  async addComment(id, body) { return platformPost(`/platform/community/threads/${id}/comments`, body); },
+  // jobs
+  async listJobs(kind) { const d = await platformGet(`/platform/jobs${kind && kind !== 'all' ? `?kind=${kind}` : ''}`); return d?.jobs || []; },
+  async createJob(body) { return platformPost('/platform/jobs', body); },
+  async applyJob(id, body) { return platformPost(`/platform/jobs/${id}/apply`, body); },
+  // bug reports
+  async reportBug(body) { return platformPost('/platform/bug-reports', body); },
+  // newsletter
+  async subscribe(email, source) { return platformPost('/platform/newsletter', { email, source }); },
+  // progress + leaderboard
+  async recordProgress(body) { try { return await platformPost('/platform/progress', body); } catch { return null; } },
+  async getProgress(userId) { return platformGet(`/platform/progress/${encodeURIComponent(userId)}`); },
+  async leaderboard(limit = 20) { const d = await platformGet(`/platform/leaderboard?limit=${limit}`); return d?.leaderboard || []; },
+  // agentic desk (multi-agent trading room)
+  async deskRun(query) { try { return await platformPost('/agent/desk/run', { query }); } catch { return null; } },
+  async deskState() { return platformGet('/agent/desk/state'); },
+  async deskTrade(query) { try { return await platformPost('/agent/desk/trade', { query }); } catch { return null; } },
+  // survival
+  async recordSurvival(body) { try { return await platformPost('/platform/survival', body); } catch { return null; } },
+  async survivalLeaderboard(limit = 20) { const d = await platformGet(`/platform/survival/leaderboard?limit=${limit}`); return d?.leaderboard || []; },
+};
+
+// --- strategy lab (REAL backtest engine via the FastAPI subprocess bridge) --
+// Honest: every call hits the live trading engine. backtest()/walkforward()
+// THROW on failure so the UI shows a "backend requis" state instead of fake
+// numbers; instruments() degrades to null so the picker can show an offline
+// state. No values are ever synthesised on the client.
+
+function strategyQs(params) {
+  const q = Object.entries(params)
+    .filter(([, v]) => v !== undefined && v !== null && v !== '')
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+    .join('&');
+  return q ? `?${q}` : '';
+}
+
+async function strategyPost(path, params) {
+  let r;
+  try {
+    r = await fetch(`${getPracticeApiBase()}${path}${strategyQs(params)}`, { method: 'POST' });
+  } catch (e) {
+    throw new Error(`backend injoignable: ${e.message}`);
+  }
+  if (!r.ok) {
+    let detail = `HTTP ${r.status}`;
+    try { detail = (await r.json()).detail || detail; } catch { /* ignore */ }
+    throw new Error(detail);
+  }
+  const data = await r.json();
+  if (data && data.error) throw new Error(data.error);
+  return data;
+}
+
+// instrument -> yfinance-style symbol for an honest passive buy&hold benchmark
+const STRATEGY_BENCH_SYMBOL = {
+  EURUSD: 'EURUSD=X', GBPUSD: 'GBPUSD=X', USDJPY: 'USDJPY=X',
+  XAUUSD: 'XAUUSD=X', BTCUSD: 'BTC-USD', ETHUSD: 'ETH-USD',
+};
+
+export const strategyApi = {
+  base: getPracticeApiBase,
+  // Returns { instruments, available, strategies } or null when offline.
+  async instruments() {
+    try {
+      const r = await fetch(`${getPracticeApiBase()}/strategy/instruments`);
+      if (!r.ok) return null;
+      return await r.json();
+    } catch {
+      return null;
+    }
+  },
+  // Real in-sample backtest of the engine ensemble/router on the instrument.
+  async backtest({ instrument, maxBars, capital }) {
+    return strategyPost('/strategy/backtest', { instrument, max_bars: maxBars, capital });
+  },
+  // Real walk-forward (train/validation/test OOS + deflated Sharpe) for one strategy.
+  async walkforward({ instrument, strategy, maxBars }) {
+    return strategyPost('/strategy/walkforward', { instrument, strategy_name: strategy, max_bars: maxBars });
+  },
+  // Honest passive buy&hold return % for the same instrument over [fromIso,toIso]
+  // computed from REAL market prices. Returns null when the benchmark series is
+  // unavailable for that window, so the UI never shows a fabricated comparison.
+  async buyHoldReturnPct(instrument, fromIso, toIso) {
+    const sym = STRATEGY_BENCH_SYMBOL[instrument];
+    if (!sym) return null;
+    const f = (fromIso || '').slice(0, 10);
+    const t = (toIso || '').slice(0, 10);
+    try {
+      const r = await fetch(`${getPracticeApiBase()}/market/intraday/${encodeURIComponent(sym)}?interval=15m&points=5000`);
+      if (!r.ok) return null;
+      const d = await r.json();
+      const series = (d?.series || []).filter((p) => {
+        const day = (p.t || '').slice(0, 10);
+        return (!f || day >= f) && (!t || day <= t);
+      });
+      if (series.length < 2) return null;
+      const first = series[0].close;
+      const last = series[series.length - 1].close;
+      if (!(first > 0)) return null;
+      return (last / first - 1) * 100;
+    } catch {
+      return null;
+    }
+  },
+};
+
 export function getCourseBlueprint(courseId) {
   return COURSE_BLUEPRINTS[courseId] || null;
 }

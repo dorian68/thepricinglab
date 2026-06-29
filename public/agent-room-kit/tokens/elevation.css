@@ -1,0 +1,31 @@
+/* ============================================================
+   ELEVATION & EFFECTS — The Pricing Library / Trading Room
+   On a near-black canvas, depth comes mostly from hairline
+   borders + faint inner gradients + colored glows on accents,
+   not heavy drop shadows.
+   ============================================================ */
+
+:root {
+  /* ---- Shadows (subtle; panels mostly use borders) ---- */
+  --shadow-none: none;
+  --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.40);
+  --shadow-md:   0 4px 16px rgba(0, 0, 0, 0.45);
+  --shadow-lg:   0 12px 40px rgba(0, 0, 0, 0.55);
+  --shadow-pop:  0 8px 28px rgba(0, 0, 0, 0.60);
+
+  /* ---- Colored glows (active / focus / live accents) ---- */
+  --glow-red:    0 0 0 1px var(--red-500), 0 0 16px var(--red-glow);
+  --glow-red-sm: 0 0 12px rgba(255, 46, 69, 0.30);
+  --glow-green:  0 0 12px rgba(46, 204, 113, 0.30);
+  --glow-focus:  0 0 0 2px rgba(255, 46, 69, 0.45);
+
+  /* ---- Inner gradients (hero panels, chart wells, cards) ---- */
+  --grad-panel:  linear-gradient(180deg, rgba(255,255,255,0.018) 0%, rgba(255,255,255,0) 40%); /* @kind other */
+  --grad-hero:   radial-gradient(120% 100% at 0% 0%, rgba(255,46,69,0.07) 0%, rgba(255,46,69,0) 55%); /* @kind other */
+  --grad-chart-red:   linear-gradient(180deg, rgba(255,46,69,0.18) 0%, rgba(255,46,69,0) 100%); /* @kind other */
+  --grad-chart-green: linear-gradient(180deg, rgba(46,204,113,0.18) 0%, rgba(46,204,113,0) 100%); /* @kind other */
+  --grad-inset:  linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0) 100%); /* @kind other */
+
+  /* ---- Hairline ring used by most panels ---- */
+  --ring-panel:  inset 0 0 0 1px var(--border-hairline);
+}

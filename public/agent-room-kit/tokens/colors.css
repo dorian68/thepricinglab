@@ -1,0 +1,141 @@
+/* ============================================================
+   COLORS — The Pricing Library / Agentic Trading Room
+   Dark "terminal / trading-desk" palette (Bloomberg-like).
+   Near-black deep-navy canvas, hairline-bordered panels,
+   vivid RED primary accent, signal GREEN, and a set of
+   categorical hues for agent status + product tags.
+   Base scales first, then semantic aliases.
+   ============================================================ */
+
+:root {
+  /* ---- Canvas / background (deepest → raised) ---- */
+  --bg-base:     #07090E;  /* page void, ticker strip */
+  --bg-canvas:   #0A0E14;  /* app canvas */
+  --bg-inset:    #0B0F15;  /* chart wells, sunken areas */
+  --bg-panel:    #0D1219;  /* default panel */
+  --bg-panel-2:  #10161E;  /* raised / nested panel */
+  --bg-elevated: #131A24;  /* inputs, hover rows, popovers */
+  --bg-hover:    #182230;  /* row / control hover */
+
+  /* ---- Borders (hairlines) ---- */
+  --border-subtle:   #141C28;
+  --border-hairline: #1A2330;  /* the signature 1px panel border */
+  --border-strong:   #283447;
+  --border-bright:   #34425A;
+
+  /* ---- Text ---- */
+  --text-primary:   #E6EAF1;  /* off-white, headings + key data */
+  --text-secondary: #8A94A4;  /* secondary labels */
+  --text-muted:     #6B7585;  /* captions, axis labels */
+  --text-dim:       #48535F;  /* disabled, faint meta */
+  --text-on-accent: #FFFFFF;  /* text on red buttons */
+
+  /* ---- Brand RED (primary accent / active / quoting / live) ---- */
+  --red-300: #FF7480;
+  --red-400: #FF5566;
+  --red-500: #FF2E45;  /* PRIMARY */
+  --red-600: #F5333E;
+  --red-700: #C8202F;  /* pressed */
+  --red-glow: rgba(255, 46, 69, 0.35);
+  --red-tint: rgba(255, 46, 69, 0.10);
+
+  /* ---- Signal GREEN (gains / live / approved / positive) ---- */
+  --green-300: #6FE3A6;
+  --green-400: #34D27B;
+  --green-500: #2ECC71;
+  --green-600: #22A75C;
+  --green-tint: rgba(46, 204, 113, 0.12);
+
+  /* ---- Amber (hedge / proposing / quoting / warning) ---- */
+  --amber-400: #F2C14E;
+  --amber-500: #E8A838;
+  --amber-600: #C98A22;
+  --amber-tint: rgba(232, 168, 56, 0.12);
+
+  /* ---- Purple (modeling / balanced / structured-alt) ---- */
+  --purple-400: #B79CF5;
+  --purple-500: #9B7BF0;
+  --purple-600: #7C57E0;
+  --purple-tint: rgba(155, 123, 240, 0.14);
+
+  /* ---- Blue (loading / validating / data export / info) ---- */
+  --blue-400: #6BA3F0;
+  --blue-500: #4D8DF0;
+  --blue-600: #2E6FD6;
+  --blue-tint: rgba(77, 141, 240, 0.14);
+
+  /* ---- Cyan/Teal (confidence / collaboration) ---- */
+  --cyan-400: #4FE0E8;
+  --cyan-500: #2BC7D4;
+  --cyan-600: #1E9DA8;
+  --cyan-tint: rgba(43, 199, 212, 0.14);
+
+  /* ========================================================
+     SEMANTIC ALIASES — reference these in components.
+     ======================================================== */
+
+  /* Surfaces */
+  --surface-canvas:  var(--bg-canvas);
+  --surface-panel:   var(--bg-panel);
+  --surface-raised:  var(--bg-panel-2);
+  --surface-input:   var(--bg-elevated);
+  --surface-inset:   var(--bg-inset);
+  --surface-strip:   var(--bg-base);
+
+  /* Borders */
+  --border:          var(--border-hairline);
+  --border-faint:    var(--border-subtle);
+  --border-active:   var(--red-500);
+
+  /* Interactive accent */
+  --accent:          var(--red-500);
+  --accent-hover:    var(--red-400);
+  --accent-active:   var(--red-700);
+  --accent-tint:     var(--red-tint);
+  --on-accent:       var(--text-on-accent);
+
+  /* Financial / status signal */
+  --positive:        var(--green-500);
+  --positive-tint:   var(--green-tint);
+  --negative:        var(--red-500);
+  --negative-tint:   var(--red-tint);
+  --warning:         var(--amber-500);
+  --warning-tint:    var(--amber-tint);
+  --info:            var(--blue-500);
+  --info-tint:       var(--blue-tint);
+  --live:            var(--green-500);
+
+  /* Risk status */
+  --risk-green:      var(--green-500);
+  --risk-amber:      var(--amber-500);
+  --risk-red:        var(--red-500);
+
+  /* Order book depth */
+  --depth-ask:       var(--red-500);   /* asks render red */
+  --depth-bid:       var(--green-500); /* bids render green */
+
+  /* Product / idea tag chips */
+  --tag-directional:   var(--red-500);
+  --tag-balanced:      var(--purple-500);
+  --tag-hedge:         var(--amber-500);
+  --tag-structured:    var(--green-500);
+  --tag-high-exposure: var(--amber-500);
+  --tag-data-export:   var(--blue-500);
+  --tag-term-sheet:    var(--red-500);
+  --tag-notebook:      var(--green-500);
+
+  /* Agent pipeline status hues */
+  --agent-understanding: var(--red-500);
+  --agent-proposing:     var(--amber-500);
+  --agent-loading:       var(--blue-500);
+  --agent-modeling:      var(--purple-500);
+  --agent-pricing:       var(--green-500);
+  --agent-quoting:       var(--amber-500);
+  --agent-validating:    var(--blue-500);
+  --agent-simulating:    var(--red-500);
+  --agent-analyzing:     var(--green-500);
+  --agent-preparing:     var(--purple-500);
+
+  /* Focus */
+  --focus-ring: var(--red-500);
+}

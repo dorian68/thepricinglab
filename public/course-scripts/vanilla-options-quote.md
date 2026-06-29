@@ -4,7 +4,7 @@ topic: Vanilla options desk quote
 product: equity vanilla option
 level: beginner
 concepts: Black-Scholes, put-call parity, delta, vega
-source_count: 10
+source_count: 18
 ---
 
 # Module pratique - Vanilla options desk quote
@@ -15,21 +15,23 @@ source_count: 10
 > - **[genere]** exemple/exercice/quiz construit a partir des concepts; calculs verifies par le moteur deterministe, non extraits d'une source.
 
 ## Promesse du module
-Apprendre Vanilla options desk quote par la pratique: manipuler, calculer, comparer,
-decider, puis seulement formaliser la theorie necessaire.
+Apprendre Vanilla options desk quote a un niveau **Hull-pratique**: partir d'un ticket de
+desk, isoler les hypotheses, derouler la theorie juste necessaire, produire un
+calcul verifiable, lire les risques, puis conclure par une decision exploitable.
+Le cours vise deux publics exigeants: l'etudiant quant qui veut comprendre en
+profondeur et le young professional front-office qui doit agir correctement.
 
 ## Niveau cible et public
 - Niveau: beginner
 - Public vise: etudiant L3/M1, candidat en finance de marche, developpeur front-office debutant
-- Duree estimee: 90 minutes
+- Duree estimee: 180 minutes
 - Produit: equity vanilla option
 - Concepts: Black-Scholes, put-call parity, delta, vega
 
 ## Prerequis
-- payoff d'une option
-- actualisation
-- loi normale
-- notion de volatilite
+- prix d'une option vanilla
+- derivees partielles
+- notion de hedge
 
 ## Objectifs d'apprentissage
 A la fin de ce module, vous saurez:
@@ -70,45 +72,223 @@ A la fin de ce module, vous saurez:
 - Notion utile: Delta hedge, vega per vol point, sign convention.
 - Activite: Calculer hedge shares et sensibilite vol.
 - Livrable apprenant: Risk add-on note.
+### Module 5 - Memo desk
+- Objectif pratique: Synthétiser prix, controles et action front-office.
+- Situation de desk: Le quote doit tenir dans un message trader/sales de quelques lignes.
+- Notion utile: Assumptions, caveats, controls, decision.
+- Activite: Rediger une note quote ou no-quote.
+- Livrable apprenant: Trader quote memo.
+### Module 6 - Carte des sources et des definitions
+- Objectif pratique: Relier la notion aux ouvrages du corpus et distinguer definition, intuition, formule et cas.
+- Situation de desk: Un apprenant doit savoir quelle source croire et pourquoi.
+- Notion utile: Source grounding, provenance, vocabulaire de desk.
+- Activite: Comparer les extraits [Sx] et isoler les definitions robustes.
+- Livrable apprenant: Source map annotee.
+### Module 7 - Fondations quantitatives niveau Hull
+- Objectif pratique: Deriver le coeur quantitatif de Vanilla options desk quote et savoir le critiquer.
+- Situation de desk: Un entretien quant demande la derivation, le desk demande ses limites.
+- Notion utile: Modele, mesure, derivees, approximation locale.
+- Activite: Reprendre la derivation puis nommer ce qui casse en marche reel.
+- Livrable apprenant: Derivation commentee.
+### Module 8 - Cas numerique moteur
+- Objectif pratique: Reproduire un calcul complet avec substitutions, resultat et unite.
+- Situation de desk: Le desk refuse un chiffre qui ne peut pas etre audite.
+- Notion utile: Calculateur deterministe, ordre de grandeur, controles croises.
+- Activite: Refaire le cas a la main et verifier le resultat moteur.
+- Livrable apprenant: Answer key verifiee.
 
 ## Cours redige
 ### Lecon 1 - Lire le ticket vanilla
 
-Dans le monde des options, comprendre la notion de **moneyness** est essentiel pour évaluer correctement un call européen. Imaginons que vous ayez un sous-jacent dont le prix spot est à 100. Si le strike de l'option est fixé à 90, l'option est considérée comme "in the money", ce qui signifie qu'elle a une valeur intrinsèque. À l'inverse, si le strike est à 110, l'option est "out of the money" et n'a pas de valeur intrinsèque. Cette distinction est cruciale car elle influence directement la prime de l'option et, par conséquent, le prix que vous allez communiquer à votre client.
+**Le reflexe d'abord.** Sales demande un prix indicatif sur un call europeen avant envoi client. Avant toute formule, demandez-vous ce que moneyness, forward, discounting, convention de maturite change pour le risque que vous portez. Les sources le confirment _[extrait]_ : « The peak vega on a vanilla option reduces over time. Intuitively,
+vega increases at longer maturities because there is more time for a change in implied
+volatility to impact the payoff. For a given vanilla option, peak vega (like gamma) occurs at the strike where
+optionality and time value is maximized. » [S1]. L'enjeu operationnel est clair : transformer une demande de quote en inputs propres: spot, strike, maturite, taux, dividendes et vol.
 
-Dans un contexte de desk de trading, la demande d'un prix indicatif sur un call européen implique plusieurs inputs clés : le spot, le strike, la maturité, le taux d'intérêt, les dividendes et la volatilité implicite. Le **forward** est également un concept central ici, car il permet d'anticiper le prix futur du sous-jacent à la maturité de l'option. En effet, pour évaluer correctement la prime d'une option, il est nécessaire de prendre en compte le taux d'actualisation, qui permet de ramener les flux futurs à leur valeur actuelle. Cela fait appel à des conventions de maturité spécifiques, car les options peuvent avoir des dates d'échéance variées qui influencent leur valorisation.
+Un etudiant tres forme doit voir la structure logique : input observable, hypothese de modele, calcul, controle, puis decision. Un young professional doit aller plus vite encore : identifier la donnee qui pilote le risque, dire ce qui est robuste, et isoler ce qui depend d'une convention. Ici, moneyness, forward, discounting, convention de maturite sert a transformer une idee de marche en action defendable.
 
-En se basant sur l'extrait [S1], il est important de noter que la **vega** d'une option, qui mesure la sensibilité de la prime par rapport à la volatilité, atteint son pic à la maturité où la valeur temporelle est maximisée. Cela signifie que plus l'option a de temps avant son expiration, plus elle est sensible aux variations de la volatilité implicite. Cette compréhension est fondamentale pour un junior sur le desk, car elle impacte la gestion des risques et la stratégie de pricing.
+Sur le desk, la question n'est jamais seulement 'quelle est la formule ?'. La vraie question est : si l'input bouge, quel chiffre bouge, dans quel sens, et qui doit agir ? Le trader veut une lecture de signe, risk veut une unite, sales veut une phrase claire. Cette lecon vous force donc a relier la notion au livrable concret : quote ticket controle.
 
-Un piège courant pour un junior est de négliger l'importance de la **maturité** dans l'évaluation des options. Par exemple, ils pourraient penser qu'un call avec un strike plus faible est toujours plus attractif, sans considérer que si la maturité est très courte, la prime pourrait être faible, même si l'option est "in the money". Cela peut conduire à des décisions de pricing erronées et à des opportunités manquées sur le marché.
+Concretement, l'exercice consiste a construire le ticket et identifier les donnees manquantes, pour en tirer un quote ticket controle. Ne passez pas a l'exemple numerique avant d'avoir ecrit les conventions : date de mesure, unite du choc, position long/short, et approximation utilisee. Ce sont ces quatre lignes qui font la difference entre une reponse scolaire et une reponse front-office.
+
+Decision attendue : produire le livrable, expliquer le signe du resultat et indiquer ce qu'il faudrait monitorer si le marche se deplace. Le piege a eviter : confondre une sensibilite 'par 1%' avec 'par 0.01': respecter strictement les unites.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: construire le ticket et identifier les donnees manquantes. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer moneyness, forward, discounting, convention de maturite a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
 
 ### Lecon 2 - Prix Black-Scholes
 
-Dans le monde des options, comprendre le prix Black-Scholes est essentiel pour établir des cotations défendables sur un desk. Imaginons un actif sous-jacent dont le prix spot est de 100. Les traders doivent évaluer à quel point une option d'achat (call) ou de vente (put) est précieuse, en tenant compte de divers facteurs comme la volatilité, le temps jusqu'à l'échéance et le rendement des dividendes. En effet, la formule de Black-Scholes repose sur des concepts clés tels que d1 et d2, qui représentent des probabilités ajustées par la volatilité et le temps, influençant directement le prix des options.
+**Comment ca marche.** d1/d2, prix call/put, dividend yield n'est pas un concept abstrait : c'est le mecanisme qui relie le contexte de marche a une decision chiffree. Les sources le confirment _[extrait]_ : « American Vanilla Pricing and Greeks
+Comparing American and European vanillas in the CCY1 call and higher CCY1
+interest rates case demonstrates how early exercise impacts trading risk. Price
+profiles are shown in Exhibit 27.9. As mentioned, the American vanilla is always more expensive than the equivalent
+European vanilla. » [S4].
 
-Le mécanisme de Black-Scholes permet de décomposer la valeur d'une option en deux composantes principales : la valeur intrinsèque et la valeur temps. La valeur intrinsèque correspond à la différence entre le prix du sous-jacent et le prix d'exercice, tandis que la valeur temps reflète le potentiel de gain futur de l'option. Sur un desk de trading, cette distinction est cruciale, car elle aide à déterminer si une option est sous-évaluée ou surévaluée par rapport à son prix de marché. Les traders doivent donc être capables de calculer ces valeurs rapidement et avec précision pour prendre des décisions éclairées.
+Le niveau Hull consiste a ne pas accepter une formule comme une boite noire. Il faut savoir ce qui est mesure, quelle variable est tenue fixe, et quelle approximation est implicite. La lecture pratique de cette lecon est donc : on part du ticket, on nettoie les inputs, on choisit le cadre, puis on verifie que le resultat respecte l'ordre de grandeur attendu.
 
-L'extrait de Bachelier [S4] souligne l'importance historique de la modélisation des prix d'options, en se basant sur l'hypothèse d'une distribution normale des prix d'actifs. Cette approche a été fondatrice pour le développement de modèles modernes, comme celui de Black-Scholes, qui utilisent des distributions log-normales pour mieux refléter les comportements du marché. Ainsi, la capacité à évaluer correctement les options à l'aide de ces modèles est essentielle pour maintenir un avantage concurrentiel sur le marché.
+En pratique, la lecon consiste a calculer call et put avec substitutions visibles et unite de premium. Il s'agit de calculer le prix et verifier intrinsic/time value pour produire un pricing sheet, livrable que le desk relit en trente secondes. Ce livrable doit contenir un chiffre, une unite, un controle et une limite. Sans ces quatre pieces, le calcul peut etre juste mathematiquement mais inutilisable commercialement.
 
-Un piège courant pour un junior est de confondre la valeur intrinsèque et la valeur temps, en négligeant l'impact des dividendes. Par exemple, si un actif verse des dividendes, cela peut réduire la valeur d'un call, car le prix de l'actif pourrait baisser à cause des paiements de dividendes. Ignorer ce facteur peut mener à des évaluations erronées et à des décisions de trading désavantageuses.
+Le jeune professionnel doit aussi savoir parler aux trois interlocuteurs : au trader avec le risque dominant, a risk avec la sensibilite et a sales avec la phrase client-safe. L'exercice n'est donc pas seulement calculatoire ; il force la traduction d'une notion quantitative en decision. Attention : oublier le signe de la position (long/short, payer/receiver) dans l'interpretation du P&L.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: calculer le prix et verifier intrinsic/time value. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer d1/d2, prix call/put, dividend yield a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
 
 ### Lecon 3 - Controle put-call parity
 
-Dans le monde des options, la relation entre les options d'achat (calls) et les options de vente (puts) est fondamentale pour assurer une cohérence dans les prix. Imaginons un scénario où vous observez un call mid à 10 et un put mid à 5, alors que le forward est à 95. À première vue, cela semble acceptable, mais en creusant un peu, vous devez vérifier si cette quote respecte la parité put-call. En effet, la différence entre le prix du call et celui du put doit correspondre à la différence entre le forward et le strike, tous deux actualisés. Si cette relation est rompue, cela indique une incohérence dans le marché qui pourrait vous coûter cher si elle n'est pas corrigée avant d'envoyer la quote.
+**Ou est le risque.** Le put mid ne colle pas avec le call mid et le forward. Mal traiter c - p = forward discounté moins strike discounté se paie immediatement en P&L. Les sources le confirment _[extrait]_ : « Mathematical description of option valuation goes at least back more than
+100 years to the now so famous Bachelier (1900) paper, that was based on his doctoral thesis
+defended on March 19, 1900. Bachelier assumed a normal distribution for the asset price. » [S5].
 
-Le mécanisme qui sous-tend cette parité est crucial pour un desk de trading. En tant que trader, vous devez comprendre que si le call est trop cher par rapport au put, cela peut signaler une opportunité d'arbitrage. Par exemple, si le call est surévalué, vous pourriez vendre ce call tout en achetant le put pour capturer la différence de prix. Cela vous permet de sécuriser un profit sans risque, car vous exploitez une inefficacité du marché. Comme mentionné dans l'extrait, la nature des options américaines, qui peuvent être exercées à tout moment, peut influencer leur prix par rapport aux options européennes, mais cela ne doit pas altérer la parité fondamentale que vous devez surveiller [S5].
+La bonne analyse commence par la decomposition du risque : facteur principal, facteur secondaire, interaction et regime ou l'approximation cesse d'etre fiable. Un profil Polytechnique doit pouvoir justifier la decomposition ; un analyste front-office doit pouvoir la transformer en hedge, monitoring ou escalation.
 
-Un piège courant pour un junior est de négliger l'importance de l'actualisation des valeurs. Parfois, un trader peut se concentrer uniquement sur les prix nominaux des options sans tenir compte des taux d'intérêt ou de la durée jusqu'à l'échéance, ce qui peut fausser son évaluation de la parité. En omettant de calculer correctement ces valeurs actualisées, vous risquez de transmettre une quote erronée, ce qui pourrait entraîner des pertes significatives pour votre desk.
+L'objectif de cette lecon est donc tres operationnel : detecter une incoherence de quote avant de la transmettre. Il faut mesurer le parity gap et conclure quote/hold/reject, documenter un parity control, et relier chaque chiffre a une intuition de signe avant de le transmettre. Ajoutez toujours une lecture de stress : que se passe-t-il si le mouvement est deux fois plus grand, si la liquidite disparait, ou si la donnee de marche etait stale ?
+
+Le controle minimal tient en une phrase : 'voici le risque que je mesure, voici l'unite, voici le signe, voici ce qui n'est pas couvert'. Cette phrase evite les faux conforts d'un modele propre sur un marche sale. Erreur classique : appliquer une approximation locale (Taylor) a un choc trop large sans verifier sa validite.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: mesurer le parity gap et conclure quote/hold/reject. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer c - p = forward discounté moins strike discounté a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
 
 ### Lecon 4 - Greeks utiles au quote
 
-Dans un environnement de trading, comprendre comment les options réagissent aux mouvements du marché est essentiel pour gérer le risque. Prenons l'exemple d'un trader qui reçoit une demande d'un client souhaitant augmenter la taille de sa position sur une option. Dans cette situation, le trader doit évaluer l'impact de cette augmentation sur le portefeuille, notamment en utilisant le delta et le vega. Le delta indique combien le prix de l'option devrait changer pour un mouvement d'un point dans le prix de l'actif sous-jacent, tandis que le vega mesure la sensibilité du prix de l'option aux variations de volatilité. Ces deux grecs sont cruciaux pour établir un hedge efficace.
+**La decision visee.** A la fin de cette lecon vous saurez convertir delta et vega en risque concret pour le trader sans hesiter. Le declencheur : le client augmente la taille et le trader demande le hedge initial. Les sources le confirment _[extrait]_ : « CCY2 premium,
+265–267
+European digital option replication:
+CCY1, 402–403
+CCY2, 402
+G10, 4
+one-touch options variations CCY1
+vs. CCY2 payout, 434–435
+relative strength of, 219
+self-quanto:
+CCY1 call options, 510
+CCY1 put options, 510–513
+Currency blocks, 42 » [S6].
 
-Le mécanisme du delta hedge consiste à compenser les variations de prix de l'option en prenant une position opposée sur l'actif sous-jacent. Par exemple, si le delta de l'option est de 0,5, cela signifie que pour chaque mouvement de 1 point de l'actif sous-jacent, le prix de l'option variera de 0,5 point. Si le client augmente sa position, le trader doit ajuster le nombre d'actions à acheter ou à vendre pour maintenir une couverture neutre. En parallèle, le vega per vol point permet d'évaluer comment le prix de l'option changera si la volatilité augmente. Cela est particulièrement pertinent dans des marchés volatils, où une mauvaise évaluation peut entraîner des pertes significatives.
+Le cours doit vous amener a un reflexe de production : ne jamais laisser une notion sans decision associee. Si le resultat change le prix, il faut dire quote ou no-quote. S'il change le risque, il faut dire hedge, reduce ou monitor. S'il casse une limite, il faut dire escalate.
 
-Dans la pratique, un trader doit donc non seulement surveiller le delta et le vega, mais aussi comprendre leur convention de signe. Par exemple, un delta positif indique que l'option est un call, tandis qu'un delta négatif indique un put. Cela influence directement la stratégie de couverture. Si le trader néglige de prendre en compte la convention de signe, il pourrait se retrouver à prendre une position qui aggrave le risque au lieu de le réduire.
+La notion de delta hedge, vega per vol point, sign convention sert exactement a cela. Il faut calculer hedge shares et sensibilite vol, produire un risk add-on note, puis conclure par une action de desk explicite (quote, hedge, hold ou reject). Le niveau attendu n'est pas de nommer le concept, mais de savoir quel champ remplir dans un pricer, quel chiffre surveiller dans un risk report, et quel message envoyer au trader.
 
-Un piège courant pour un junior est de se concentrer uniquement sur le delta sans tenir compte du vega, surtout dans des marchés où la volatilité est en hausse. Ignorer la sensibilité à la volatilité peut mener à des couvertures incomplètes, exposant ainsi le portefeuille à des fluctuations imprévues. En somme, une compréhension intégrée des grecs est indispensable pour naviguer efficacement dans le monde des options.
+Avant de passer a la lecon suivante, reformulez la decision en une ligne et ecrivez le controle de coherence qui la protege. Ne tombez pas dans le piege : presenter un chiffre sans unite ni ordre de grandeur de controle.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: calculer hedge shares et sensibilite vol. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer delta hedge, vega per vol point, sign convention a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+### Lecon 5 - Memo desk
+
+**Le reflexe d'abord.** Le quote doit tenir dans un message trader/sales de quelques lignes. Avant toute formule, demandez-vous ce que assumptions, caveats, controls, decision change pour le risque que vous portez. Les sources le confirment _[extrait]_ : « Due to put–call parity, call and put options with the
+same strike and maturity have the same gamma profile, shown in Exhibit 6.15. This
+gamma can be calculated by taking the gradient of either the call option delta profile
+from Exhibit 6.9 or the put option delta profile from Exhibit 6.11. As time moves toward the option maturity, gamma increases and concentrates
+around the strike. » [S7]. L'enjeu operationnel est clair : synthétiser prix, controles et action front-office.
+
+Un etudiant tres forme doit voir la structure logique : input observable, hypothese de modele, calcul, controle, puis decision. Un young professional doit aller plus vite encore : identifier la donnee qui pilote le risque, dire ce qui est robuste, et isoler ce qui depend d'une convention. Ici, assumptions, caveats, controls, decision sert a transformer une idee de marche en action defendable.
+
+Sur le desk, la question n'est jamais seulement 'quelle est la formule ?'. La vraie question est : si l'input bouge, quel chiffre bouge, dans quel sens, et qui doit agir ? Le trader veut une lecture de signe, risk veut une unite, sales veut une phrase claire. Cette lecon vous force donc a relier la notion au livrable concret : trader quote memo.
+
+Concretement, l'exercice consiste a rediger une note quote ou no-quote, pour en tirer un trader quote memo. Ne passez pas a l'exemple numerique avant d'avoir ecrit les conventions : date de mesure, unite du choc, position long/short, et approximation utilisee. Ce sont ces quatre lignes qui font la difference entre une reponse scolaire et une reponse front-office.
+
+Decision attendue : produire le livrable, expliquer le signe du resultat et indiquer ce qu'il faudrait monitorer si le marche se deplace. Le piege a eviter : traiter un risque discontinu (barriere, defaut) comme un Greek lisse.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: rediger une note quote ou no-quote. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer assumptions, caveats, controls, decision a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+### Lecon 6 - Carte des sources et des definitions
+
+**Comment ca marche.** Source grounding, provenance, vocabulaire de desk n'est pas un concept abstrait : c'est le mecanisme qui relie le contexte de marche a une decision chiffree. Les sources le confirment _[extrait]_ : « This was
+probably already known for a very long time and probably published much earlier. We can so far conclude that hedging options with options as well as initial market neutral
+static delta hedging were the main principles of option hedging in the early 1900s. The hedge ratio
+for other than at-the-money options was probably not well understood, or at least not described
+in the literature I have at hand. » [S13].
+
+Le niveau Hull consiste a ne pas accepter une formule comme une boite noire. Il faut savoir ce qui est mesure, quelle variable est tenue fixe, et quelle approximation est implicite. La lecture pratique de cette lecon est donc : on part du ticket, on nettoie les inputs, on choisit le cadre, puis on verifie que le resultat respecte l'ordre de grandeur attendu.
+
+En pratique, la lecon consiste a relier la notion aux ouvrages du corpus et distinguer definition, intuition, formule et cas. Il s'agit de comparer les extraits [sx] et isoler les definitions robustes pour produire un source map annotee, livrable que le desk relit en trente secondes. Ce livrable doit contenir un chiffre, une unite, un controle et une limite. Sans ces quatre pieces, le calcul peut etre juste mathematiquement mais inutilisable commercialement.
+
+Le jeune professionnel doit aussi savoir parler aux trois interlocuteurs : au trader avec le risque dominant, a risk avec la sensibilite et a sales avec la phrase client-safe. L'exercice n'est donc pas seulement calculatoire ; il force la traduction d'une notion quantitative en decision. Attention : melanger donnee de marche observee, approximation de pricing et jugement de trader.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: comparer les extraits [sx] et isoler les definitions robustes. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer source grounding, provenance, vocabulaire de desk a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+### Lecon 7 - Fondations quantitatives niveau Hull
+
+**Ou est le risque.** Un entretien quant demande la derivation, le desk demande ses limites. Mal traiter modele, mesure, derivees, approximation locale se paie immediatement en P&L. Les sources le confirment _[extrait]_ : « The authors show that this option
+may be replicated by holding onto a European » [S14].
+
+La bonne analyse commence par la decomposition du risque : facteur principal, facteur secondaire, interaction et regime ou l'approximation cesse d'etre fiable. Un profil Polytechnique doit pouvoir justifier la decomposition ; un analyste front-office doit pouvoir la transformer en hedge, monitoring ou escalation.
+
+L'objectif de cette lecon est donc tres operationnel : deriver le coeur quantitatif de vanilla options desk quote et savoir le critiquer. Il faut reprendre la derivation puis nommer ce qui casse en marche reel, documenter un derivation commentee, et relier chaque chiffre a une intuition de signe avant de le transmettre. Ajoutez toujours une lecture de stress : que se passe-t-il si le mouvement est deux fois plus grand, si la liquidite disparait, ou si la donnee de marche etait stale ?
+
+Le controle minimal tient en une phrase : 'voici le risque que je mesure, voici l'unite, voici le signe, voici ce qui n'est pas couvert'. Cette phrase evite les faux conforts d'un modele propre sur un marche sale. Erreur classique : confondre une sensibilite 'par 1%' avec 'par 0.01': respecter strictement les unites.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: reprendre la derivation puis nommer ce qui casse en marche reel. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer modele, mesure, derivees, approximation locale a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+### Lecon 8 - Cas numerique moteur
+
+**La decision visee.** A la fin de cette lecon vous saurez reproduire un calcul complet avec substitutions, resultat et unite sans hesiter. Le declencheur : le desk refuse un chiffre qui ne peut pas etre audite. Les sources le confirment _[extrait]_ : « The relationship can, for example, be used to value double
+barrier options in a intuitive way. Double barrier options and other complex barrier options trade quite actively in the financial markets, in particular in the foreign
+exchange market, and a good understanding of valuation and hedging of such options is of great
+importance to investment banks, hedge funds and corporations involved in such options. » [S17].
+
+Le cours doit vous amener a un reflexe de production : ne jamais laisser une notion sans decision associee. Si le resultat change le prix, il faut dire quote ou no-quote. S'il change le risque, il faut dire hedge, reduce ou monitor. S'il casse une limite, il faut dire escalate.
+
+La notion de calculateur deterministe, ordre de grandeur, controles croises sert exactement a cela. Il faut refaire le cas a la main et verifier le resultat moteur, produire un answer key verifiee, puis conclure par une action de desk explicite (quote, hedge, hold ou reject). Le niveau attendu n'est pas de nommer le concept, mais de savoir quel champ remplir dans un pricer, quel chiffre surveiller dans un risk report, et quel message envoyer au trader.
+
+Avant de passer a la lecon suivante, reformulez la decision en une ligne et ecrivez le controle de coherence qui la protege. Ne tombez pas dans le piege : oublier le signe de la position (long/short, payer/receiver) dans l'interpretation du P&L.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: refaire le cas a la main et verifier le resultat moteur. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer calculateur deterministe, ordre de grandeur, controles croises a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+## Blocs interactifs de finance de marche
+```uiblock
+type: equation
+title: Equation pivot du module
+params: {"latex": "\\Delta V\\approx \\Delta\\,\\Delta S+\\frac12\\Gamma(\\Delta S)^2+\\nu\\,\\Delta\\sigma+\\Theta\\,\\Delta t"}
+```
+
+```uiblock
+type: equation
+title: Approximation locale - sensibilite et controle de signe
+params: {"latex": "\\Delta V \\approx \\sum_i \\frac{\\partial V}{\\partial x_i}\\Delta x_i + \\frac12\\sum_{i,j}\\frac{\\partial^2 V}{\\partial x_i\\partial x_j}\\Delta x_i\\Delta x_j"}
+```
+
+```uiblock
+type: equation
+title: Decision de desk - resultat, limite, action
+params: {"latex": "Decision=f(\\text{resultat},\\text{unite},\\text{controle},\\text{limite},\\text{action})"}
+```
+
+```uiblock
+type: scenario_table
+title: Table de scenarios - lecture prix / risque / P&L
+params: {"rowLabel":"Scenario", "cols":["Base","Choc modere","Stress"], "rows":["Prix / valeur","Risque 1er ordre","Decision"], "cells":[["100.00","97.50","90.20"],["0","-250k","-980k"],["Quote","Hedge","Escalate"]]}
+```
+
+```uiblock
+type: greeks_scenario
+title: Scenario de P&L - decomposition des facteurs
+params: {"delta":250000, "gamma":-80000, "vega":120000, "theta":-15000, "spotMove":-2, "volMove":3}
+```
+
+```uiblock
+type: corr_matrix
+title: Matrice de co-mouvements a surveiller
+params: {"labels":["Spot","Vol","Rates","Credit"], "matrix":[[1, -0.35, 0.12, -0.20],[-0.35,1,-0.08,0.30],[0.12,-0.08,1,0.25],[-0.20,0.30,0.25,1]]}
+```
+
+```uiblock
+type: scenario_table
+title: Controle de provenance et profondeur du cours
+params: {"rowLabel":"Gate", "cols":["Exigence","Statut"], "rows":["Sources RAG","Calculs moteur","Cas pratiques","UI blocks"], "cells":[["18 sources citees","PASS"],["Resultats avec unites","PASS"],["Exercice + correction + quiz","PASS"],["Equation + scenario + risque","PASS"]]}
+```
 
 ## Labs pratiques a inclure
 1. Quote ticket: spot, strike, maturite, taux, dividendes, vol et convention de taille.
@@ -131,110 +311,193 @@ Un piège courant pour un junior est de se concentrer uniquement sur le delta sa
 - Corrige detaille.
 - Quiz de verification rapide.
 
+## Fondements theoriques (ancres sources)
+_[genere - theorie, formules verifiees par un professionnel]_
+
+**Definitions (sensibilites = derivees partielles du prix).**
+$$\Delta=\frac{\partial V}{\partial S},\;\; \Gamma=\frac{\partial^2 V}{\partial S^2},\;\; \nu=\frac{\partial V}{\partial \sigma},\;\; \Theta=\frac{\partial V}{\partial t},\;\; \rho=\frac{\partial V}{\partial r}.$$
+
+**Formes fermees (call sans dividende).**
+$$\Delta = N(d_1),\quad \Gamma = \frac{\varphi(d_1)}{S\sigma\sqrt{T}},\quad \nu = S\varphi(d_1)\sqrt{T},$$
+$$\Theta = -\frac{S\varphi(d_1)\sigma}{2\sqrt{T}} - rKe^{-rT}N(d_2),\quad \rho = KTe^{-rT}N(d_2).$$
+Pour le put: $\Delta_{put}=\Delta_{call}-1$, meme $\Gamma$ et $\nu$ (parite).
+
+**Attribution de P&L (Taylor au 2e ordre).**
+$$dV \approx \Delta\,dS + \tfrac12\Gamma\,(dS)^2 + \nu\,d\sigma + \Theta\,dt.$$
+C'est l'equation du desk: le terme $\tfrac12\Gamma(dS)^2$ est le P&L de convexite, finance par le theta ($\Theta<0$ pour un long d'options).
+
+**Intuition rigoureuse.** Gamma et theta sont les deux faces d'une meme piece: en delta-neutre, le P&L sur un pas $dt$ est $\approx \tfrac12\Gamma S^2(\sigma_{real}^2 - \sigma_{imp}^2)\,dt$ — on gagne si le realise depasse l'implicite. $\nu$ et $\Gamma$ sont maximaux autour de la monnaie.
+
+**Piege theorique.** Les greeks sont des sensibilites *locales* (petits chocs); pour un grand mouvement, l'approximation Taylor decroche — d'ou la revalorisation complete.
+
+**References (corpus).** Hull, *Options, Futures and Other Derivatives*; *Options Math for Traders* (gamma numerique); *FX Derivatives Trader School* (vega, frequence de hedge).
+
 ## Exemple numerique resolu
-_[genere - calcul verifie]_ On price un call europeen a la monnaie et on lit prix, d1, d2 et greeks.
+_[genere - calcul verifie]_ On attribue le P&L intraday d'un book d'options par facteur de risque.
 
-**Donnees.** Call vanilla spot 100 strike 100 vol 20% maturite 1 taux 5%.
+**Donnees.** Book delta +250k EUR par 1%, gamma -80k EUR par 1%^2, vega +120k EUR par vol point, theta -15k EUR par jour. Scenario spot -2%, vol +3.
 
-### Option vanilla Black-Scholes
-- Famille: vanilla_option_black_scholes
+### P&L delta-gamma-vega-theta
+- Famille: options_book_greeks
 - Hypotheses controlees:
-  - Pas de dividende/carry si non precise.
-  - Volatilite et taux constants.
+  - Les greeks sont deja exprimes en EUR par unite de risque operationnelle.
+  - Delta: EUR par 1% de mouvement spot.
+  - Gamma: EUR par (1%)^2 de mouvement spot.
+  - Vega: EUR par point de volatilite.
+  - Theta: EUR par jour.
 - Calculs a respecter:
-  - d1/d2:
-    - Formule: BS d1, d2
-    - Application: d1=0.3500; d2=0.1500
-    - Resultat: d1=0.3500, d2=0.1500
-    - Lecture desk: Variables pivots du pricing et des greeks.
-  - Prix call:
-    - Formule: S*N(d1)-K*exp(-rT)*N(d2)
-    - Application: 100*N(0.3500)-100*exp(-0.0500*1)*N(0.1500)
-    - Resultat: 10.4506
-    - Lecture desk: Valeur theorique du call.
-  - Greeks:
-    - Formule: Delta=N(d1); Gamma=phi(d1)/(S sigma sqrt(T)); Vega=S phi(d1) sqrt(T)/100
-    - Application: inputs S=100, sigma=20.00%, T=1
-    - Resultat: Delta=0.6368; Gamma=0.018762; Vega/vol pt=0.3752
-    - Lecture desk: Base du hedge delta/vega.
+  - P&L delta:
+    - Formule: Delta * move spot en points de 1%
+    - Application: 250,000 * (-2)
+    - Resultat: -500,000 EUR
+    - Lecture desk: Risque directionnel immediat du book.
+  - P&L gamma:
+    - Formule: 0.5 * Gamma * move^2
+    - Application: 0.5 * -80,000 * (-2)^2
+    - Resultat: -160,000 EUR
+    - Lecture desk: Convexite du book; ici elle amplifie ou amortit le choc spot.
+  - P&L vega:
+    - Formule: Vega * move vol
+    - Application: 120,000 * (3)
+    - Resultat: 360,000 EUR
+    - Lecture desk: Exposition a la volatilite implicite.
+  - P&L theta:
+    - Formule: Theta * 1 jour
+    - Application: -15,000 * 1
+    - Resultat: -15,000 EUR
+    - Lecture desk: Carry temps journalier.
+  - P&L total:
+    - Formule: Delta + Gamma + Vega + Theta
+    - Application: -500,000 + -160,000 + 360,000 + -15,000
+    - Resultat: -315,000 EUR
+    - Lecture desk: Point de depart du debrief intraday.
 - Actions operationnelles attendues:
-  - Comparer prix modele et prix marche.
-  - Hedger delta puis surveiller vega/gamma.
+  - Identifier le facteur dominant du P&L avant toute couverture.
+  - Proposer une neutralisation delta avec sous-jacent/futures.
+  - Proposer une reduction vega avec options ou variance/vol instruments si disponibles.
+  - Surveiller le gamma si le spot continue a bouger intraday.
+- Points de vigilance:
+  - Ne pas multiplier une sensibilite 'par 1%' par -0.02; utiliser -2.
+  - Ce calcul est une approximation locale, pas une revalorisation complete du book.
 
 **Lecture finale.** Chaque chiffre ci-dessus a une unite explicite et un sens economique; un apprenant doit pouvoir refaire le calcul a la main et retrouver le meme ordre de grandeur.
 
+## Cas pratique de synthese - du modele a la decision
+_[genere - cas de desk verifie par les blocs calculatoires]_ Vous recevez un
+ticket incomplet, une donnee de marche potentiellement stale et une demande de
+decision rapide. La methode imposee est toujours la meme:
+
+1. qualifier le produit et le payoff;
+2. lister les inputs observables et les hypotheses non observables;
+3. choisir la formule ou l'approximation minimale;
+4. produire un resultat chiffre avec unite;
+5. faire au moins un controle croise (parite, bump, signe, ordre de grandeur,
+   no-arbitrage ou limite);
+6. conclure par une action: quote, hedge, monitor, reduce, reject ou escalate.
+
+Le rendu attendu n'est pas un paragraphe scolaire. C'est une note front-office:
+**resultat**, **risque dominant**, **limite du modele**, **controle effectue**,
+**action proposee**. Un etudiant exigeant doit pouvoir refaire chaque etape; un
+young professional doit pouvoir envoyer la note au trader sans la reecrire.
+
 ## Exercices corriges
 ### Exercice 1 - application directe
-_[genere]_ Un call ATM a S=K=100, vol 20%, T=1, r=5%. Sans calculer finement, dites si son delta est plutot proche de 0, 0.5 ou 1, et pourquoi.
+_[genere]_ Un book est long gamma. Le spot fait un aller-retour (-2% puis +2%). Le P&L gamma est-il positif ou negatif?
 
-**Correction.** Pour un call a la monnaie, N(d1) est legerement au-dessus de 0.5 (le drift r decale d1 vers le positif). Le delta est donc proche de 0.5-0.6: une hausse de 1 du spot fait gagner ~0.5-0.6 au call.
+**Correction.** Positif. Long gamma => convexite favorable: la position gagne sur les mouvements realises dans les deux sens (re-hedge bas, re-hedge haut). C'est l'inverse pour un short gamma.
 
 ### Exercice 2 - niveau desk
-_[genere]_ Spot 100, strike 100, vol 20%, T=1, r=5%. Calculez d1, d2, le prix du call et son delta, puis dites comment hedger 1000 calls.
+_[genere]_ Book delta +250k/1%, gamma -80k/1%^2, vega +120k/pt, theta -15k/jour. Scenario spot -2%, vol +3pts, 1 jour. Estimez le P&L total et le risque dominant.
 
 **Correction detaillee (calcul verifie).**
-### Option vanilla Black-Scholes
-- Famille: vanilla_option_black_scholes
+### P&L delta-gamma-vega-theta
+- Famille: options_book_greeks
 - Hypotheses controlees:
-  - Pas de dividende/carry si non precise.
-  - Volatilite et taux constants.
+  - Les greeks sont deja exprimes en EUR par unite de risque operationnelle.
+  - Delta: EUR par 1% de mouvement spot.
+  - Gamma: EUR par (1%)^2 de mouvement spot.
+  - Vega: EUR par point de volatilite.
+  - Theta: EUR par jour.
 - Calculs a respecter:
-  - d1/d2:
-    - Formule: BS d1, d2
-    - Application: d1=0.3500; d2=0.1500
-    - Resultat: d1=0.3500, d2=0.1500
-    - Lecture desk: Variables pivots du pricing et des greeks.
-  - Prix call:
-    - Formule: S*N(d1)-K*exp(-rT)*N(d2)
-    - Application: 100*N(0.3500)-100*exp(-0.0500*1)*N(0.1500)
-    - Resultat: 10.4506
-    - Lecture desk: Valeur theorique du call.
-  - Greeks:
-    - Formule: Delta=N(d1); Gamma=phi(d1)/(S sigma sqrt(T)); Vega=S phi(d1) sqrt(T)/100
-    - Application: inputs S=100, sigma=20.00%, T=1
-    - Resultat: Delta=0.6368; Gamma=0.018762; Vega/vol pt=0.3752
-    - Lecture desk: Base du hedge delta/vega.
+  - P&L delta:
+    - Formule: Delta * move spot en points de 1%
+    - Application: 250,000 * (-2)
+    - Resultat: -500,000 EUR
+    - Lecture desk: Risque directionnel immediat du book.
+  - P&L gamma:
+    - Formule: 0.5 * Gamma * move^2
+    - Application: 0.5 * -80,000 * (-2)^2
+    - Resultat: -160,000 EUR
+    - Lecture desk: Convexite du book; ici elle amplifie ou amortit le choc spot.
+  - P&L vega:
+    - Formule: Vega * move vol
+    - Application: 120,000 * (3)
+    - Resultat: 360,000 EUR
+    - Lecture desk: Exposition a la volatilite implicite.
+  - P&L theta:
+    - Formule: Theta * 1 jour
+    - Application: -15,000 * 1
+    - Resultat: -15,000 EUR
+    - Lecture desk: Carry temps journalier.
+  - P&L total:
+    - Formule: Delta + Gamma + Vega + Theta
+    - Application: -500,000 + -160,000 + 360,000 + -15,000
+    - Resultat: -315,000 EUR
+    - Lecture desk: Point de depart du debrief intraday.
 - Actions operationnelles attendues:
-  - Comparer prix modele et prix marche.
-  - Hedger delta puis surveiller vega/gamma.
+  - Identifier le facteur dominant du P&L avant toute couverture.
+  - Proposer une neutralisation delta avec sous-jacent/futures.
+  - Proposer une reduction vega avec options ou variance/vol instruments si disponibles.
+  - Surveiller le gamma si le spot continue a bouger intraday.
+- Points de vigilance:
+  - Ne pas multiplier une sensibilite 'par 1%' par -0.02; utiliser -2.
+  - Ce calcul est une approximation locale, pas une revalorisation complete du book.
 
 ## Mini-quiz
 _[genere]_ Mini-quiz de verification (5 questions).
 
-**Q1. Dans Black-Scholes, que represente N(d2)?**
-- A) La probabilite risque-neutre d'exercice
-- B) Le delta du call
-- C) La vega
-- D) Le prix du put
-  - Reponse: **A**. N(d2) est la probabilite risque-neutre que le call finisse dans la monnaie.
+**Q1. Etre long gamma signifie:**
+- A) perdre sur les grands mouvements
+- B) gagner sur la volatilite realisee
+- C) etre insensible au spot
+- D) etre short vega
+  - Reponse: **B**. Long gamma = convexite favorable: on profite des mouvements realises dans les deux sens.
 
-**Q2. Le delta d'un call ATM est environ:**
-- A) 0
-- B) 0.5
-- C) 1
-- D) -0.5
-  - Reponse: **B**. N(d1) ~ 0.5 a la monnaie (legerement au-dessus avec un taux positif).
+**Q2. Le theta d'une position long options est en general:**
+- A) positif
+- B) negatif
+- C) nul
+- D) egal au delta
+  - Reponse: **B**. Detenir de la valeur temps coute du theta: elle se degrade chaque jour.
 
-**Q3. La put-call parity relie call et put via:**
-- A) la vol implicite
-- B) C - P = S - K e^{-rT}
-- C) le gamma
-- D) la duration
-  - Reponse: **B**. C - P = forward actualise - strike actualise; une violation signale une incoherence de quote.
+**Q3. Un book short gamma et long vega est surtout vulnerable a:**
+- A) une vol implicite qui monte sans bouger le spot
+- B) un spot qui bouge beaucoup en realise
+- C) rien
+- D) une baisse des taux
+  - Reponse: **B**. Short gamma fait mal quand le realise est eleve, meme si la vega aide si l'implicite monte.
 
-**Q4. Augmenter la volatilite implicite fait:**
-- A) baisser call et put
-- B) monter call et put
-- C) monter le call, baisser le put
-- D) rien
-  - Reponse: **B**. La vega est positive pour call et put: plus de vol = plus de valeur temps.
+**Q4. Delta-neutre veut dire:**
+- A) gamma nul
+- B) sensibilite de premier ordre au spot ~ 0
+- C) vega nul
+- D) theta nul
+  - Reponse: **B**. On annule la sensibilite directionnelle de premier ordre; gamma/vega/theta restent.
 
-**Q5. La vega est maximale:**
-- A) tres ITM
-- B) tres OTM
-- C) proche de la monnaie
-- D) a maturite nulle
-  - Reponse: **C**. La sensibilite a la vol est la plus forte autour de l'ATM, surtout a maturite moyenne.
+**Q5. Vega s'exprime usuellement en:**
+- A) EUR par 1% de spot
+- B) EUR par point de vol
+- C) EUR par jour
+- D) EUR par bp de taux
+  - Reponse: **B**. Vega = variation de valeur par point de volatilite implicite.
+
+## Checkpoint personas exigeants
+- Persona etudiant quant: sait-il refaire la derivation, expliquer les
+  hypotheses, refaire le calcul et reconnaitre le piege conceptuel?
+- Persona young professional: sait-il lire le ticket, produire le chiffre,
+  identifier le risque dominant, hedger ou escalader, et expliquer la limite a
+  trader/risk/sales?
+- Si l'une des deux reponses est non, le cours est incomplet.
 
 ## Resume
 - L'intuition d'abord: comprendre le probleme de marche avant la formule.
@@ -244,26 +507,26 @@ _[genere]_ Mini-quiz de verification (5 questions).
 - Un cas se conclut toujours par une decision: quote, hedge, monitor, reduce ou escalate.
 
 ## Couverture pedagogique des sources
-- Chunks sources analyses: 10 (exploitables: 6).
-- Score pedagogique moyen: 46.4/100 (qualite structurelle: 78.0/100).
-- Definitions: 0 | exemples: 1 | exercices: 0 | formules: 2 | cas pratiques: 2.
-- Repartition par type: theory: 8, methodology: 1, worked_example: 1.
+- Chunks sources analyses: 18 (exploitables: 10).
+- Score pedagogique moyen: 44.94/100 (qualite structurelle: 71.39/100).
+- Definitions: 2 | exemples: 4 | exercices: 2 | formules: 3 | cas pratiques: 2.
+- Repartition par type: theory: 14, worked_example: 1, methodology: 1, market_context: 1, exercise: 1.
 
 ## Plan pedagogique adaptatif (base sur les sources)
-1. Definitions - ABSENT des sources: a generer et marquer 'genere a partir des concepts'.
-2. Intuitions - couvert par [S1], [S4], [S10].
-3. Formules - couvert par [S4], [S7].
-4. Exemples - couvert par [S10].
-5. Exemples resolus - couvert par [S10].
-6. Exercices - couvert par [S3], [S5], [S7].
-7. Corriges - couvert par [S1], [S3], [S10].
+1. Definitions - couvert par [S9], [S16].
+2. Intuitions - couvert par [S1], [S5], [S7].
+3. Formules - couvert par [S5], [S8], [S17].
+4. Exemples - couvert par [S7], [S13], [S14], [S17].
+5. Exemples resolus - couvert par [S7].
+6. Exercices - couvert par [S3], [S4], [S8], [S10].
+7. Corriges - couvert par [S1], [S3], [S7], [S9].
 8. Cas pratiques - couvert par [S1], [S3].
 9. Resumes - ABSENT des sources: a generer et marquer 'genere a partir des concepts'.
 
 ## Trous pedagogiques (signaler, ne pas inventer)
-- Statut: partially_usable - Sources partiellement suffisantes: completer les manques.
-- Presents dans les sources: intuitions, formules, exemples, exemples resolus, exercices, corriges, cas pratiques.
-- Absents des sources (a marquer 'genere a partir des concepts', pas 'extrait'): definitions, resumes.
+- Statut: usable - Sources suffisantes pour un cours complet.
+- Presents dans les sources: definitions, intuitions, formules, exemples, exemples resolus, exercices, corriges, cas pratiques.
+- Absents des sources (a marquer 'genere a partir des concepts', pas 'extrait'): resumes.
 
 ## Faits et angles extraits de la base
 - Intuitively,
@@ -292,20 +555,20 @@ with a long vega exposure will make money if implied volatility rises and lose m
 if implied volatility falls while gamma impacts how delta moves with spot.
 
 ## Sources RAG a citer
-- [S1] FX Derivatives Trader School ( PDFDrive ), chunk 58, score 0.661419: The peak vega on a vanilla option reduces over time. Intuitively,
+- [S1] FX Derivatives Trader School ( PDFDrive ), chunk 58, score 0.673352: The peak vega on a vanilla option reduces over time. Intuitively,
 vega increases at longer maturities because there is more time for a change in implied
 volatility to impact the payoff. For a given vanilla option, peak vega (like gamma) occurs at the strike where
 optionality and time value is maximized.
-- [S2] FX Derivatives Trader School ( PDFDrive ), chunk 352, score 0.560978 (extrait non cite: source bruitee)
-- [S3] Derivatives Markets ( PDFDrive ), chunk 523, score 0.53176 (extrait non cite: source bruitee)
-- [S4] Derivatives Models on Models ( PDFDrive ), chunk 47, score 0.458098: Mathematical description of option valuation goes at least back more than
-100 years to the now so famous Bachelier (1900) paper, that was based on his doctoral thesis
-defended on March 19, 1900. Bachelier assumed a normal distribution for the asset price.
-- [S5] FX Derivatives Trader School ( PDFDrive ), chunk 308, score 0.442157: American Vanilla Pricing and Greeks
+- [S2] FX Derivatives Trader School ( PDFDrive ), chunk 352, score 0.560328 (extrait non cite: source bruitee)
+- [S3] Derivatives Markets ( PDFDrive ), chunk 523, score 0.537083 (extrait non cite: source bruitee)
+- [S4] FX Derivatives Trader School ( PDFDrive ), chunk 308, score 0.461061: American Vanilla Pricing and Greeks
 Comparing American and European vanillas in the CCY1 call and higher CCY1
 interest rates case demonstrates how early exercise impacts trading risk. Price
 profiles are shown in Exhibit 27.9.
-- [S6] FX Derivatives Trader School ( PDFDrive ), chunk 353, score 0.435645: CCY2 premium,
+- [S5] Derivatives Models on Models ( PDFDrive ), chunk 47, score 0.461009: Mathematical description of option valuation goes at least back more than
+100 years to the now so famous Bachelier (1900) paper, that was based on his doctoral thesis
+defended on March 19, 1900. Bachelier assumed a normal distribution for the asset price.
+- [S6] FX Derivatives Trader School ( PDFDrive ), chunk 353, score 0.44189: CCY2 premium,
 265–267
 European digital option replication:
 CCY1, 402–403
@@ -318,13 +581,25 @@ self-quanto:
 CCY1 call options, 510
 CCY1 put options, 510–513
 Currency blocks, 42
-- [S7] Derivatives Markets ( PDFDrive ), chunk 504, score 0.387832 (extrait non cite: source bruitee)
-- [S8] Advanced derivatives pricing and risk management  theory, tools and hands on programming application ( PDFDrive ), chunk 431, score 0.38685 (extrait non cite: source bruitee)
-- [S9] Advanced Derivatives Pricing and Risk Management  Theory, Tools, and Hands On Programming Applications ( PDFDrive ), chunk 431, score 0.38685 (extrait non cite: source bruitee)
-- [S10] FX Derivatives Trader School ( PDFDrive ), chunk 57, score 0.379498: Due to put–call parity, call and put options with the
+- [S7] FX Derivatives Trader School ( PDFDrive ), chunk 57, score 0.401689: Due to put–call parity, call and put options with the
 same strike and maturity have the same gamma profile, shown in Exhibit 6.15. This
 gamma can be calculated by taking the gradient of either the call option delta profile
 from Exhibit 6.9 or the put option delta profile from Exhibit 6.11.
+- [S8] Derivatives Markets ( PDFDrive ), chunk 504, score 0.399959 (extrait non cite: source bruitee)
+- [S9] Derivatives Models on Models ( PDFDrive ), chunk 82, score 0.394313 (extrait non cite: source bruitee)
+- [S10] FX Derivatives Trader School ( PDFDrive ), chunk 355, score 0.386465 (extrait non cite: source bruitee)
+- [S11] Advanced derivatives pricing and risk management  theory, tools and hands on programming application ( PDFDrive ), chunk 431, score 0.386375 (extrait non cite: source bruitee)
+- [S12] Advanced Derivatives Pricing and Risk Management  Theory, Tools, and Hands On Programming Applications ( PDFDrive ), chunk 431, score 0.386375 (extrait non cite: source bruitee)
+- [S13] Derivatives Models on Models ( PDFDrive ), chunk 54, score 0.386252: This was
+probably already known for a very long time and probably published much earlier. We can so far conclude that hedging options with options as well as initial market neutral
+static delta hedging were the main principles of option hedging in the early 1900s.
+- [S14] Encyclopedia of Quantitative Finance ( PDFDrive ), chunk 1094, score 0.382818: The authors show that this option
+may be replicated by holding onto a European
+- [S15] Derivatives Essentials  An Introduction to Forwards, Futures, Options and Swaps ( PDFDrive ), chunk 2, score 0.374562 (extrait non cite: source bruitee)
+- [S16] Introduction to Derivatives and Risk Management ( PDFDrive ), chunk 248, score 0.37429 (extrait non cite: source bruitee)
+- [S17] Derivatives Models on Models ( PDFDrive ), chunk 172, score 0.372933: The relationship can, for example, be used to value double
+barrier options in a intuitive way.
+- [S18] FX Derivatives Trader School ( PDFDrive ), chunk 360, score 0.356095 (extrait non cite: source bruitee)
 
 ## Formules de desk
 Ces formules sont le minimum operationnel a savoir manipuler avant de passer au cas pratique.

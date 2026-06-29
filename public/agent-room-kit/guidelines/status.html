@@ -1,0 +1,42 @@
+<!-- @dsCard group="Brand" viewport="700x200" name="Status System" subtitle="Agent pipeline hues, risk status, and workflow states" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { margin:0; padding:18px; background: var(--bg-canvas); }
+  .grid { display:grid; grid-template-columns: repeat(5,1fr); gap:8px; margin-bottom:14px; }
+  .chip { display:flex; align-items:center; gap:7px; padding:7px 9px; border-radius: var(--radius-xs); border:1px solid var(--border-hairline); background: var(--bg-panel); }
+  .dot { width:8px; height:8px; border-radius:50%; flex:none; }
+  .lab { font-family: var(--font-mono); font-size:10px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color: var(--text-secondary); }
+  .h { font-family: var(--font-mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color: var(--text-dim); margin-bottom:8px; }
+  .risk { display:flex; gap:8px; }
+  .pill { padding:5px 12px; border-radius: var(--radius-xs); font-family: var(--font-mono); font-size:11px; font-weight:700; letter-spacing:.08em; }
+</style>
+</head>
+<body>
+  <div class="h">Agent pipeline status</div>
+  <div class="grid">
+    <div class="chip"><span class="dot" style="background:var(--red-500)"></span><span class="lab">Understanding</span></div>
+    <div class="chip"><span class="dot" style="background:var(--amber-500)"></span><span class="lab">Proposing</span></div>
+    <div class="chip"><span class="dot" style="background:var(--blue-500)"></span><span class="lab">Loading</span></div>
+    <div class="chip"><span class="dot" style="background:var(--purple-500)"></span><span class="lab">Modeling</span></div>
+    <div class="chip"><span class="dot" style="background:var(--green-500)"></span><span class="lab">Pricing</span></div>
+    <div class="chip"><span class="dot" style="background:var(--amber-500)"></span><span class="lab">Quoting</span></div>
+    <div class="chip"><span class="dot" style="background:var(--blue-500)"></span><span class="lab">Validating</span></div>
+    <div class="chip"><span class="dot" style="background:var(--red-500)"></span><span class="lab">Simulating</span></div>
+    <div class="chip"><span class="dot" style="background:var(--green-500)"></span><span class="lab">Analyzing</span></div>
+    <div class="chip"><span class="dot" style="background:var(--purple-500)"></span><span class="lab">Preparing</span></div>
+  </div>
+  <div class="h">Risk status &amp; workflow</div>
+  <div class="risk">
+    <span class="pill" style="background:var(--green-tint); color:var(--green-400)">● GREEN</span>
+    <span class="pill" style="background:var(--amber-tint); color:var(--amber-400)">● AMBER</span>
+    <span class="pill" style="background:var(--red-tint); color:var(--red-400)">● RED</span>
+    <span class="pill" style="background:var(--green-tint); color:var(--green-400)">✓ APPROVED</span>
+    <span class="pill" style="background:var(--purple-tint); color:var(--purple-400)">IN PROGRESS</span>
+    <span class="pill" style="background:rgba(138,148,164,.1); color:var(--text-muted)">⊘ LOCKED</span>
+  </div>
+</body>
+</html>

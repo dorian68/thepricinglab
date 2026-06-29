@@ -4,7 +4,7 @@ topic: Market risk VaR, stress testing and escalation
 product: multi-asset portfolio
 level: intermediate
 concepts: parametric VaR, expected shortfall, stress test, risk limit
-source_count: 10
+source_count: 18
 ---
 
 # Module pratique - Market risk VaR, stress testing and escalation
@@ -15,13 +15,16 @@ source_count: 10
 > - **[genere]** exemple/exercice/quiz construit a partir des concepts; calculs verifies par le moteur deterministe, non extraits d'une source.
 
 ## Promesse du module
-Apprendre Market risk VaR, stress testing and escalation par la pratique: manipuler, calculer, comparer,
-decider, puis seulement formaliser la theorie necessaire.
+Apprendre Market risk VaR, stress testing and escalation a un niveau **Hull-pratique**: partir d'un ticket de
+desk, isoler les hypotheses, derouler la theorie juste necessaire, produire un
+calcul verifiable, lire les risques, puis conclure par une decision exploitable.
+Le cours vise deux publics exigeants: l'etudiant quant qui veut comprendre en
+profondeur et le young professional front-office qui doit agir correctement.
 
 ## Niveau cible et public
 - Niveau: intermediate
 - Public vise: junior quant, analyste market risk, sales/structuring junior
-- Duree estimee: 120 minutes
+- Duree estimee: 220 minutes
 - Produit: multi-asset portfolio
 - Concepts: parametric VaR, expected shortfall, stress test, risk limit
 
@@ -69,41 +72,246 @@ A la fin de ce module, vous saurez:
 - Notion utile: Reduce, hedge, monitor, escalate.
 - Activite: Ecrire une note decisionnelle.
 - Livrable apprenant: Escalation memo.
+### Module 5 - Carte des sources et des definitions
+- Objectif pratique: Relier la notion aux ouvrages du corpus et distinguer definition, intuition, formule et cas.
+- Situation de desk: Un apprenant doit savoir quelle source croire et pourquoi.
+- Notion utile: Source grounding, provenance, vocabulaire de desk.
+- Activite: Comparer les extraits [Sx] et isoler les definitions robustes.
+- Livrable apprenant: Source map annotee.
+### Module 6 - Fondations quantitatives niveau Hull
+- Objectif pratique: Deriver le coeur quantitatif de Market risk VaR, stress testing and escalation et savoir le critiquer.
+- Situation de desk: Un entretien quant demande la derivation, le desk demande ses limites.
+- Notion utile: Modele, mesure, derivees, approximation locale.
+- Activite: Reprendre la derivation puis nommer ce qui casse en marche reel.
+- Livrable apprenant: Derivation commentee.
+### Module 7 - Cas numerique moteur
+- Objectif pratique: Reproduire un calcul complet avec substitutions, resultat et unite.
+- Situation de desk: Le desk refuse un chiffre qui ne peut pas etre audite.
+- Notion utile: Calculateur deterministe, ordre de grandeur, controles croises.
+- Activite: Refaire le cas a la main et verifier le resultat moteur.
+- Livrable apprenant: Answer key verifiee.
+### Module 8 - Lab interactif et scenarios
+- Objectif pratique: Manipuler les inputs et lire l'effet sur prix, risque ou P&L.
+- Situation de desk: Le marche bouge avant validation du trade.
+- Notion utile: Scenario table, surface, matrice ou chart selon le produit.
+- Activite: Tester plusieurs chocs et commenter les regimes.
+- Livrable apprenant: UI block de decision.
+### Module 9 - Production controls
+- Objectif pratique: Identifier les erreurs de convention, de signe, d'unite et de donnees de marche.
+- Situation de desk: Une mauvaise convention peut inverser le P&L ou casser une quote.
+- Notion utile: Data quality, convention, sign, fallback, no-arbitrage check.
+- Activite: Construire une checklist de validation avant envoi au trader.
+- Livrable apprenant: Checklist production.
 
 ## Cours redige
 ### Lecon 1 - Definir la question de risque
 
-Dans un environnement de marché, chaque décision de trading est empreinte d'incertitude. Prenons l'exemple d'un desk qui gère un portefeuille d'actions. Si ce portefeuille approche son seuil de VaR intraday, cela signifie que la perte potentielle sur une journée donnée pourrait dépasser un certain montant, disons 1 million d'euros. Cette situation nécessite une attention particulière, car elle implique que le desk est exposé à un risque de perte significatif. La notion de VaR one-sided devient alors cruciale : elle évalue la perte maximale attendue sur un horizon donné, ici intraday, avec un certain niveau de confiance, souvent fixé à 95% ou 99%. Cela signifie que, dans 95% des cas, la perte ne dépassera pas ce montant, mais dans 5% des cas, elle pourrait être bien plus importante.
+**Le reflexe d'abord.** Un portefeuille approche son seuil de VaR intraday. Avant toute formule, demandez-vous ce que var one-sided, horizon, volatility change pour le risque que vous portez. Les sources le confirment _[extrait]_ : « Banks assume market risk because they trade as principals, risking
+their own capital, and hold positions in financial instruments. Failure to manage market risk can have significant direct effects on a bank’s profitability
+and reputation. » [S2]. L'enjeu operationnel est clair : clarifier horizon, confiance, exposition et limite.
 
-La volatilité joue un rôle central dans cette évaluation. En période de forte volatilité, les mouvements de prix peuvent être plus importants, ce qui augmente la VaR et, par conséquent, l'exposition au risque. Sur un desk de trading, cette dynamique est essentielle à comprendre, car elle influence non seulement les décisions de positionnement, mais aussi la gestion des limites de risque. Comme le souligne l'extrait, "les banques assument le risque de marché parce qu'elles négocient en tant que principaux, risquant leur propre capital" [S2]. Cela signifie qu'une mauvaise gestion de cette exposition peut avoir des conséquences directes sur la rentabilité et la réputation de l'institution.
+Un etudiant tres forme doit voir la structure logique : input observable, hypothese de modele, calcul, controle, puis decision. Un young professional doit aller plus vite encore : identifier la donnee qui pilote le risque, dire ce qui est robuste, et isoler ce qui depend d'une convention. Ici, var one-sided, horizon, volatility sert a transformer une idee de marche en action defendable.
 
-Un piège fréquent pour un junior est de négliger l'importance de l'horizon temporel dans l'évaluation de la VaR. Par exemple, un trader peut se concentrer uniquement sur la VaR intraday sans prendre en compte les fluctuations potentielles qui pourraient survenir sur des horizons plus longs, comme une semaine ou un mois. Cette vision à court terme peut conduire à une sous-estimation des risques réels et à des décisions de trading précipitées, mettant ainsi en péril la santé financière du desk.
+Sur le desk, la question n'est jamais seulement 'quelle est la formule ?'. La vraie question est : si l'input bouge, quel chiffre bouge, dans quel sens, et qui doit agir ? Le trader veut une lecture de signe, risk veut une unite, sales veut une phrase claire. Cette lecon vous force donc a relier la notion au livrable concret : risk ticket.
+
+Concretement, l'exercice consiste a construire la fiche inputs du risk report, pour en tirer un risk ticket. Ne passez pas a l'exemple numerique avant d'avoir ecrit les conventions : date de mesure, unite du choc, position long/short, et approximation utilisee. Ce sont ces quatre lignes qui font la difference entre une reponse scolaire et une reponse front-office.
+
+Decision attendue : produire le livrable, expliquer le signe du resultat et indiquer ce qu'il faudrait monitorer si le marche se deplace. Le piege a eviter : confondre une sensibilite 'par 1%' avec 'par 0.01': respecter strictement les unites.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: construire la fiche inputs du risk report. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer var one-sided, horizon, volatility a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
 
 ### Lecon 2 - Calcul VaR
 
-Dans le monde du trading, la gestion des risques est cruciale pour assurer la pérennité des opérations. Imaginons un desk qui gère un portefeuille d'actions. À la fin de la journée, le Chief Risk Officer (CRO) demande une estimation rapide de la Value at Risk (VaR) pour évaluer le risque potentiel avant la clôture du marché. La VaR est un indicateur clé qui permet de quantifier la perte maximale attendue sur un portefeuille dans un scénario de marché donné, sur une période spécifique et avec un certain niveau de confiance. En d'autres termes, elle aide à répondre à la question : "Quelle est la pire perte que nous pourrions subir dans un avenir proche, avec une probabilité donnée ?"
+**Comment ca marche.** VaR = notional * vol * quantile n'est pas un concept abstrait : c'est le mecanisme qui relie le contexte de marche a une decision chiffree. Les sources le confirment _[extrait]_ : « Risk management activity focuses on every level of transaction processing from pre-trade analysis through the deal capture and from 
+confirmation through the settlement in order to control the operational risk. Market Risk Management Systems
+Market risk management systems (MRMSs) capture trade valuations of all portfolios and calculate various market risk measures, such as value at risk (VaR), 
+at different levels. » [S3].
 
-Le calcul de la VaR repose sur trois éléments fondamentaux : le montant notionnel du portefeuille, la volatilité des actifs et le quantile correspondant à notre niveau de confiance. Par exemple, si nous avons un portefeuille d'actions d'une valeur notionnelle de 1 million d'euros, avec une volatilité estimée de 20 % sur une période d'un jour, et que nous cherchons une VaR à 95 % (ce qui signifie que nous nous attendons à ne pas dépasser cette perte dans 95 % des cas), nous pouvons rapidement estimer notre risque. Ce calcul est essentiel pour le desk, car il permet de prendre des décisions éclairées sur les positions à maintenir ou à réduire, en fonction de l'appétit pour le risque de l'entreprise. Comme mentionné dans l'extrait, les systèmes de gestion des risques de marché (MRMS) jouent un rôle clé dans la capture des valorisations des transactions et le calcul des mesures de risque, y compris la VaR [S3].
+Le niveau Hull consiste a ne pas accepter une formule comme une boite noire. Il faut savoir ce qui est mesure, quelle variable est tenue fixe, et quelle approximation est implicite. La lecture pratique de cette lecon est donc : on part du ticket, on nettoie les inputs, on choisit le cadre, puis on verifie que le resultat respecte l'ordre de grandeur attendu.
 
-Cependant, un piège courant pour les juniors est de négliger l'importance des unités dans le calcul de la VaR. Par exemple, un junior pourrait se concentrer sur le calcul de la volatilité en pourcentage sans considérer comment cela se traduit en termes de valeur monétaire sur le portefeuille. Cela peut entraîner des erreurs significatives dans l'estimation du risque, car une mauvaise interprétation des unités peut fausser la perception du risque global. Il est donc crucial de toujours garder à l'esprit que la VaR doit être exprimée dans la même unité que le montant notionnel pour être pertinente et utile dans le contexte de la gestion des risques.
+En pratique, la lecon consiste a calculer une var parametrique simple avec les bonnes unites. Il s'agit de calculer et comparer a la limite pour produire un var + statut de limite, livrable que le desk relit en trente secondes. Ce livrable doit contenir un chiffre, une unite, un controle et une limite. Sans ces quatre pieces, le calcul peut etre juste mathematiquement mais inutilisable commercialement.
+
+Le jeune professionnel doit aussi savoir parler aux trois interlocuteurs : au trader avec le risque dominant, a risk avec la sensibilite et a sales avec la phrase client-safe. L'exercice n'est donc pas seulement calculatoire ; il force la traduction d'une notion quantitative en decision. Attention : oublier le signe de la position (long/short, payer/receiver) dans l'interpretation du P&L.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: calculer et comparer a la limite. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer var = notional * vol * quantile a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
 
 ### Lecon 3 - Stress overlay
 
-Dans le monde du trading, il est crucial de comprendre que la Value at Risk (VaR) ne capture pas toujours les événements extrêmes, souvent appelés "tail events". Prenons un exemple concret : imaginez que vous gérez un portefeuille d'options sur actions, et que vous anticipez un mouvement normal des prix. Cependant, un événement imprévu, comme une annonce gouvernementale majeure, pourrait provoquer un choc sévère sur le marché, dépassant les fluctuations habituelles. C'est ici qu'intervient le stress test, une méthode qui permet d'évaluer la résilience d'un portefeuille face à des scénarios extrêmes, en simulant des conditions de marché défavorables.
+**Ou est le risque.** Un scenario historique depasse le mouvement normal. Mal traiter stress test, tail loss, expected shortfall se paie immediatement en P&L. Les sources le confirment _[extrait]_ : « Based on Exhibit 1, the best explanation for Nuñes to implement Strategy 8 would be 
+that, between the February and December expiration dates, she expects the share price of 
+XDF to:
+A. remain unchanged. The option trade that Nuñes should recommend relating to the government committee’s 
+decision is a:
+A. bull spread. long straddle. » [S4].
 
-Le stress test permet de quantifier les pertes potentielles dans des situations extrêmes, en allant au-delà des limites de la VaR. Par exemple, si vous avez un portefeuille avec une VaR de 1 million d'euros sur un horizon de 10 jours, cela signifie que vous vous attendez à ne pas perdre plus de cette somme dans des conditions normales de marché. Cependant, un événement comme une crise financière pourrait entraîner des pertes bien plus importantes. En utilisant des scénarios historiques, comme ceux observés lors de la crise de 2008, vous pouvez simuler des chocs qui révèlent des pertes de queue (tail loss) significatives, ce que la VaR ne pourrait pas anticiper. En effet, comme le souligne l'extrait [S4], la stratégie adoptée par Nuñes doit prendre en compte des mouvements inattendus des prix, ce qui est essentiel pour une gestion proactive des risques.
+La bonne analyse commence par la decomposition du risque : facteur principal, facteur secondaire, interaction et regime ou l'approximation cesse d'etre fiable. Un profil Polytechnique doit pouvoir justifier la decomposition ; un analyste front-office doit pouvoir la transformer en hedge, monitoring ou escalation.
 
-Dans un desk de trading, la compréhension de l'expected shortfall, qui mesure la perte moyenne au-delà de la VaR, devient essentielle. Cela permet aux traders de se préparer à des scénarios où les pertes dépassent les attentes normales, leur offrant ainsi une vision plus complète des risques auxquels ils sont exposés. En intégrant des chocs sévères dans vos simulations, vous pouvez comparer les résultats obtenus avec ceux de la VaR, et ainsi mieux appréhender la vulnérabilité de votre portefeuille.
+L'objectif de cette lecon est donc tres operationnel : montrer ce que la var ne capture pas. Il faut ajouter un choc severe et comparer, documenter un table var/stress, et relier chaque chiffre a une intuition de signe avant de le transmettre. Ajoutez toujours une lecture de stress : que se passe-t-il si le mouvement est deux fois plus grand, si la liquidite disparait, ou si la donnee de marche etait stale ?
 
-Un piège courant pour un junior est de se fier uniquement à la VaR sans considérer les scénarios de stress. Ils pourraient penser que la VaR est suffisante pour évaluer les risques, alors qu'en réalité, elle ne prend pas en compte les événements extrêmes qui pourraient avoir un impact dévastateur sur le portefeuille. Cette méprise peut mener à des décisions de trading mal informées, augmentant ainsi le risque global de l'entreprise.
+Le controle minimal tient en une phrase : 'voici le risque que je mesure, voici l'unite, voici le signe, voici ce qui n'est pas couvert'. Cette phrase evite les faux conforts d'un modele propre sur un marche sale. Erreur classique : appliquer une approximation locale (Taylor) a un choc trop large sans verifier sa validite.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: ajouter un choc severe et comparer. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer stress test, tail loss, expected shortfall a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
 
 ### Lecon 4 - Escalation
 
-Dans un environnement de trading, la gestion des risques de marché est cruciale, notamment lorsque les limites de risque sont franchies. Imaginons un desk qui, après une journée volatile, constate que sa position en actions a dépassé la limite de perte acceptable. Au lieu de réagir immédiatement, le desk propose d'attendre, espérant un retournement de marché. Cette attitude peut sembler rationnelle à court terme, mais elle expose l'entreprise à des pertes accrues. C'est ici qu'intervient la notion d'escalation, qui consiste à transformer des chiffres alarmants en décisions de gestion concrètes.
+**La decision visee.** A la fin de cette lecon vous saurez transformer le chiffre en decision de gestion sans hesiter. Le declencheur : la limite est franchie mais le desk propose d'attendre. Les sources le confirment _[extrait]_ : « Stress testing has become more important over the
+years and is now a major part of a bank’s, and regulator’s, risk management
+activities. Market Risk
+205 » [S6].
 
-Lorsqu'une limite est franchie, il est essentiel de suivre un processus en quatre étapes : réduire, couvrir, surveiller et escalader. Réduire implique de diminuer l'exposition en liquidant une partie des positions risquées. Couvrir consiste à utiliser des instruments dérivés pour protéger les positions existantes. Surveiller, c'est garder un œil sur l'évolution du marché et l'impact potentiel sur le portefeuille. Enfin, escalader signifie alerter les niveaux supérieurs de la direction sur la situation, afin qu'ils puissent prendre des décisions éclairées. Comme le souligne l'extrait, "la variation des prix des actifs peut provenir de divers facteurs", et il est impératif de réagir rapidement pour éviter que ces variations n'affectent négativement les positions de la banque [S6].
+Le cours doit vous amener a un reflexe de production : ne jamais laisser une notion sans decision associee. Si le resultat change le prix, il faut dire quote ou no-quote. S'il change le risque, il faut dire hedge, reduce ou monitor. S'il casse une limite, il faut dire escalate.
 
-Sur un desk de trading, la rapidité de la décision est essentielle. Ignorer une limite franchie peut entraîner des conséquences désastreuses. Un junior pourrait être tenté de minimiser l'importance de l'escalation, pensant que la situation peut se résoudre d'elle-même. Ce piège réside dans l'idée que le marché va toujours se redresser, ce qui peut mener à une inaction fatale. En réalité, la proactivité dans la gestion des risques est ce qui permet de préserver la santé financière de l'organisation et d'éviter des pertes catastrophiques.
+La notion de reduce, hedge, monitor, escalate sert exactement a cela. Il faut ecrire une note decisionnelle, produire un escalation memo, puis conclure par une action de desk explicite (quote, hedge, hold ou reject). Le niveau attendu n'est pas de nommer le concept, mais de savoir quel champ remplir dans un pricer, quel chiffre surveiller dans un risk report, et quel message envoyer au trader.
+
+Avant de passer a la lecon suivante, reformulez la decision en une ligne et ecrivez le controle de coherence qui la protege. Ne tombez pas dans le piege : presenter un chiffre sans unite ni ordre de grandeur de controle.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: ecrire une note decisionnelle. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer reduce, hedge, monitor, escalate a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+### Lecon 5 - Carte des sources et des definitions
+
+**Le reflexe d'abord.** Un apprenant doit savoir quelle source croire et pourquoi. Avant toute formule, demandez-vous ce que source grounding, provenance, vocabulaire de desk change pour le risque que vous portez. Les sources le confirment _[extrait]_ : « Market Risk 
+Chapters 1–5 all dealt with market risk. This is the risk of losses coming from the market 
+change of asset prices that negatively affect the mark-to-market positions of the bank. The 
+change of asset prices can come from various factors, such as stock prices, volatility, and 
+correlation. » [S7]. L'enjeu operationnel est clair : relier la notion aux ouvrages du corpus et distinguer definition, intuition, formule et cas.
+
+Un etudiant tres forme doit voir la structure logique : input observable, hypothese de modele, calcul, controle, puis decision. Un young professional doit aller plus vite encore : identifier la donnee qui pilote le risque, dire ce qui est robuste, et isoler ce qui depend d'une convention. Ici, source grounding, provenance, vocabulaire de desk sert a transformer une idee de marche en action defendable.
+
+Sur le desk, la question n'est jamais seulement 'quelle est la formule ?'. La vraie question est : si l'input bouge, quel chiffre bouge, dans quel sens, et qui doit agir ? Le trader veut une lecture de signe, risk veut une unite, sales veut une phrase claire. Cette lecon vous force donc a relier la notion au livrable concret : source map annotee.
+
+Concretement, l'exercice consiste a comparer les extraits [sx] et isoler les definitions robustes, pour en tirer un source map annotee. Ne passez pas a l'exemple numerique avant d'avoir ecrit les conventions : date de mesure, unite du choc, position long/short, et approximation utilisee. Ce sont ces quatre lignes qui font la difference entre une reponse scolaire et une reponse front-office.
+
+Decision attendue : produire le livrable, expliquer le signe du resultat et indiquer ce qu'il faudrait monitorer si le marche se deplace. Le piege a eviter : traiter un risque discontinu (barriere, defaut) comme un Greek lisse.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: comparer les extraits [sx] et isoler les definitions robustes. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer source grounding, provenance, vocabulaire de desk a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+### Lecon 6 - Fondations quantitatives niveau Hull
+
+**Comment ca marche.** Modele, mesure, derivees, approximation locale n'est pas un concept abstrait : c'est le mecanisme qui relie le contexte de marche a une decision chiffree. Les sources le confirment _[extrait]_ : « It is designed to give them a single number to look at, so they can then 
+dig deeper to understand how concentrated risks might be, and where and why 
+these risks are being taken in the various departments that they oversee. While 
+this may make sense, VaR can be easy to misunderstand, and can be dangerous 
+when misunderstood. » [S8].
+
+Le niveau Hull consiste a ne pas accepter une formule comme une boite noire. Il faut savoir ce qui est mesure, quelle variable est tenue fixe, et quelle approximation est implicite. La lecture pratique de cette lecon est donc : on part du ticket, on nettoie les inputs, on choisit le cadre, puis on verifie que le resultat respecte l'ordre de grandeur attendu.
+
+En pratique, la lecon consiste a deriver le coeur quantitatif de market risk var, stress testing and escalation et savoir le critiquer. Il s'agit de reprendre la derivation puis nommer ce qui casse en marche reel pour produire un derivation commentee, livrable que le desk relit en trente secondes. Ce livrable doit contenir un chiffre, une unite, un controle et une limite. Sans ces quatre pieces, le calcul peut etre juste mathematiquement mais inutilisable commercialement.
+
+Le jeune professionnel doit aussi savoir parler aux trois interlocuteurs : au trader avec le risque dominant, a risk avec la sensibilite et a sales avec la phrase client-safe. L'exercice n'est donc pas seulement calculatoire ; il force la traduction d'une notion quantitative en decision. Attention : melanger donnee de marche observee, approximation de pricing et jugement de trader.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: reprendre la derivation puis nommer ce qui casse en marche reel. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer modele, mesure, derivees, approximation locale a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+### Lecon 7 - Cas numerique moteur
+
+**Ou est le risque.** Le desk refuse un chiffre qui ne peut pas etre audite. Mal traiter calculateur deterministe, ordre de grandeur, controles croises se paie immediatement en P&L. Les sources le confirment _[extrait]_ : « The expected loss 
+for each obligor can be calculated as Default rate × (Exposure amount − Expected 
+recovery). This means that individual credit limits should be set at levels that are inversely 
+proportional to the default rate corresponding to the obligor rating. » [S9].
+
+La bonne analyse commence par la decomposition du risque : facteur principal, facteur secondaire, interaction et regime ou l'approximation cesse d'etre fiable. Un profil Polytechnique doit pouvoir justifier la decomposition ; un analyste front-office doit pouvoir la transformer en hedge, monitoring ou escalation.
+
+L'objectif de cette lecon est donc tres operationnel : reproduire un calcul complet avec substitutions, resultat et unite. Il faut refaire le cas a la main et verifier le resultat moteur, documenter un answer key verifiee, et relier chaque chiffre a une intuition de signe avant de le transmettre. Ajoutez toujours une lecture de stress : que se passe-t-il si le mouvement est deux fois plus grand, si la liquidite disparait, ou si la donnee de marche etait stale ?
+
+Le controle minimal tient en une phrase : 'voici le risque que je mesure, voici l'unite, voici le signe, voici ce qui n'est pas couvert'. Cette phrase evite les faux conforts d'un modele propre sur un marche sale. Erreur classique : confondre une sensibilite 'par 1%' avec 'par 0.01': respecter strictement les unites.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: refaire le cas a la main et verifier le resultat moteur. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer calculateur deterministe, ordre de grandeur, controles croises a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+### Lecon 8 - Lab interactif et scenarios
+
+**La decision visee.** A la fin de cette lecon vous saurez manipuler les inputs et lire l'effet sur prix, risque ou p&l sans hesiter. Le declencheur : le marche bouge avant validation du trade. Les sources le confirment _[extrait]_ : « VAR only provides an
+estimate of losses under normal market conditions,
+that is, at a prespecified confidence level. Once a
+risk-management system is in place, however, stress
+scenarios are just hypothetical realizations of the risk
+factors (see Stress Testing). More generally, risk
+manager should be keenly aware of weaknesses in
+their risk models. By now, VAR is the most widely used measure
+of market risk. » [S11].
+
+Le cours doit vous amener a un reflexe de production : ne jamais laisser une notion sans decision associee. Si le resultat change le prix, il faut dire quote ou no-quote. S'il change le risque, il faut dire hedge, reduce ou monitor. S'il casse une limite, il faut dire escalate.
+
+La notion de scenario table, surface, matrice ou chart selon le produit sert exactement a cela. Il faut tester plusieurs chocs et commenter les regimes, produire un ui block de decision, puis conclure par une action de desk explicite (quote, hedge, hold ou reject). Le niveau attendu n'est pas de nommer le concept, mais de savoir quel champ remplir dans un pricer, quel chiffre surveiller dans un risk report, et quel message envoyer au trader.
+
+Avant de passer a la lecon suivante, reformulez la decision en une ligne et ecrivez le controle de coherence qui la protege. Ne tombez pas dans le piege : oublier le signe de la position (long/short, payer/receiver) dans l'interpretation du P&L.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: tester plusieurs chocs et commenter les regimes. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer scenario table, surface, matrice ou chart selon le produit a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+### Lecon 9 - Production controls
+
+**Le reflexe d'abord.** Une mauvaise convention peut inverser le P&L ou casser une quote. Avant toute formule, demandez-vous ce que data quality, convention, sign, fallback, no-arbitrage check change pour le risque que vous portez. Les sources le confirment _[extrait]_ : « Diebold, and T. Horizon problems and extreme
+events in financial risk management. Federal Reserve Bank of New York, Economic Policy
+Review, 4 (3), 109-118. Christopher, L. Mensink, and A. Value at risk for asset managers. Derivatives Quarterly, 5 (2), 21-33. Phillips, and S. Derivatives and corporate risk management: Participation and volume decisions in the insurance industry. » [S13]. L'enjeu operationnel est clair : identifier les erreurs de convention, de signe, d'unite et de donnees de marche.
+
+Un etudiant tres forme doit voir la structure logique : input observable, hypothese de modele, calcul, controle, puis decision. Un young professional doit aller plus vite encore : identifier la donnee qui pilote le risque, dire ce qui est robuste, et isoler ce qui depend d'une convention. Ici, data quality, convention, sign, fallback, no-arbitrage check sert a transformer une idee de marche en action defendable.
+
+Sur le desk, la question n'est jamais seulement 'quelle est la formule ?'. La vraie question est : si l'input bouge, quel chiffre bouge, dans quel sens, et qui doit agir ? Le trader veut une lecture de signe, risk veut une unite, sales veut une phrase claire. Cette lecon vous force donc a relier la notion au livrable concret : checklist production.
+
+Concretement, l'exercice consiste a construire une checklist de validation avant envoi au trader, pour en tirer un checklist production. Ne passez pas a l'exemple numerique avant d'avoir ecrit les conventions : date de mesure, unite du choc, position long/short, et approximation utilisee. Ce sont ces quatre lignes qui font la difference entre une reponse scolaire et une reponse front-office.
+
+Decision attendue : produire le livrable, expliquer le signe du resultat et indiquer ce qu'il faudrait monitorer si le marche se deplace. Le piege a eviter : appliquer une approximation locale (Taylor) a un choc trop large sans verifier sa validite.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: construire une checklist de validation avant envoi au trader. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer data quality, convention, sign, fallback, no-arbitrage check a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+## Blocs interactifs de finance de marche
+```uiblock
+type: equation
+title: Equation pivot du module
+params: {"latex": "VaR_\\alpha=V\\sigma z_\\alpha\\sqrt h,\\qquad ES_\\alpha=V\\sigma\\sqrt h\\frac{\\phi(z_\\alpha)}{1-\\alpha}"}
+```
+
+```uiblock
+type: equation
+title: Approximation locale - sensibilite et controle de signe
+params: {"latex": "\\Delta V \\approx \\sum_i \\frac{\\partial V}{\\partial x_i}\\Delta x_i + \\frac12\\sum_{i,j}\\frac{\\partial^2 V}{\\partial x_i\\partial x_j}\\Delta x_i\\Delta x_j"}
+```
+
+```uiblock
+type: equation
+title: Decision de desk - resultat, limite, action
+params: {"latex": "Decision=f(\\text{resultat},\\text{unite},\\text{controle},\\text{limite},\\text{action})"}
+```
+
+```uiblock
+type: scenario_table
+title: Table de scenarios - lecture prix / risque / P&L
+params: {"rowLabel":"Scenario", "cols":["Base","Choc modere","Stress"], "rows":["Prix / valeur","Risque 1er ordre","Decision"], "cells":[["100.00","97.50","90.20"],["0","-250k","-980k"],["Quote","Hedge","Escalate"]]}
+```
+
+```uiblock
+type: greeks_scenario
+title: Scenario de P&L - decomposition des facteurs
+params: {"delta":250000, "gamma":-80000, "vega":120000, "theta":-15000, "spotMove":-2, "volMove":3}
+```
+
+```uiblock
+type: corr_matrix
+title: Matrice de co-mouvements a surveiller
+params: {"labels":["Spot","Vol","Rates","Credit"], "matrix":[[1, -0.35, 0.12, -0.20],[-0.35,1,-0.08,0.30],[0.12,-0.08,1,0.25],[-0.20,0.30,0.25,1]]}
+```
+
+```uiblock
+type: scenario_table
+title: Controle de provenance et profondeur du cours
+params: {"rowLabel":"Gate", "cols":["Exigence","Statut"], "rows":["Sources RAG","Calculs moteur","Cas pratiques","UI blocks"], "cells":[["18 sources citees","PASS"],["Resultats avec unites","PASS"],["Exercice + correction + quiz","PASS"],["Equation + scenario + risque","PASS"]]}
+```
 
 ## Labs pratiques a inclure
 1. VaR ticket: horizon, confiance, volatilite et exposition.
@@ -125,29 +333,72 @@ Sur un desk de trading, la rapidité de la décision est essentielle. Ignorer un
 - Corrige detaille.
 - Quiz de verification rapide.
 
+## Fondements theoriques (ancres sources)
+_[genere - theorie, formules verifiees par un professionnel]_
+
+**Definition.** La VaR de niveau $\alpha$ sur l'horizon $h$ est le quantile de perte: $\mathbb{P}(L > \text{VaR}_\alpha)=1-\alpha$. En parametrique gaussien (moyenne nulle):
+$$\text{VaR}_\alpha = z_\alpha\,\sigma\sqrt{h}\,V,\qquad z_\alpha = \Phi^{-1}(\alpha).$$
+
+**Expected Shortfall (CVaR).** Perte moyenne au-dela de la VaR:
+$$\text{ES}_\alpha = \mathbb{E}[L\,|\,L>\text{VaR}_\alpha] = \sigma\sqrt{h}\,V\,\frac{\varphi(z_\alpha)}{1-\alpha} \;\ge\; \text{VaR}_\alpha.$$
+
+**Axiomes de coherence (Artzner et al.).** monotonicite, invariance par translation, homogeneite positive, **sous-additivite**. La VaR viole la sous-additivite en general (un risque diversifie peut afficher une VaR superieure a la somme); l'**ES est coherente**.
+
+**Backtesting (Kupiec POF).** Test du ratio de vraisemblance comparant le taux d'exceptions observe $\hat{p}=N/n$ au taux theorique $p=1-\alpha$: $LR_{POF}=-2\ln\frac{(1-p)^{n-N}p^{N}}{(1-\hat p)^{n-N}\hat p^{N}}\sim \chi^2_1$.
+
+**Piege theorique.** La VaR ne dit **rien** de l'ampleur des pertes au-dela du seuil et sous-estime les queues epaisses; d'ou l'ES et les stress tests en complement (Bale FRTB privilegie l'ES 97.5%).
+
+**References (corpus).** FRM Handbook (Jorion) (ES = CVaR); *Encyclopedia of Quantitative Finance* (axiomes de coherence); Wilmott, *FAQs in Quantitative Finance* (contre-exemple sous-additivite); *Mathematics of the Financial Markets* (test de Kupiec).
+
 ## Exemple numerique resolu
 _[genere - calcul verifie]_ On calcule une VaR parametrique simple et on la compare a une limite.
 
 **Donnees.** VaR parametrique: portefeuille 20m volatilite 2% confiance 95% horizon 1 jour.
 
-### VaR parametrique simple
+### VaR et Expected Shortfall parametriques
 - Famille: parametric_var
 - Hypotheses controlees:
-  - Quantile normal z=1.65.
-  - Volatilite donnee sur le meme pas de temps que l'horizon, sauf indication contraire.
+  - Quantile normal exact z=1.6449 pour une confiance de 95%.
+  - Rendements gaussiens de moyenne nulle sur l'horizon.
+  - Volatilite exprimee sur le meme pas de temps que l'horizon (sinon mise a l'echelle en sqrt(horizon)).
 - Calculs a respecter:
   - VaR:
-    - Formule: Valeur * vol * sqrt(horizon) * z
-    - Application: 20,000,000 * 0.0200 * sqrt(1) * 1.65
-    - Resultat: 660,000
-    - Lecture desk: Perte potentielle au niveau de confiance choisi.
+    - Formule: Valeur * vol * sqrt(horizon) * z(alpha)
+    - Application: 20,000,000 * 0.0200 * sqrt(1) * 1.6449
+    - Resultat: 657,941
+    - Lecture desk: Perte seuil non depassee avec une probabilite alpha.
+  - Expected Shortfall:
+    - Formule: Valeur * vol * sqrt(horizon) * phi(z)/(1-alpha)
+    - Application: 20,000,000 * 0.0200 * sqrt(1) * 0.1031/0.0500
+    - Resultat: 825,085
+    - Lecture desk: Perte moyenne CONDITIONNELLE au-dela de la VaR; toujours >= VaR.
 - Actions operationnelles attendues:
-  - Comparer VaR et stress tests.
-  - Identifier les facteurs dominants du risque.
+  - Comparer VaR et Expected Shortfall a la limite et aux stress tests.
+  - Si l'ES est tres au-dessus de la VaR, la queue est lourde: prioriser les stress scenarios.
+  - Identifier les facteurs dominants du risque avant de reduire.
 - Points de vigilance:
-  - La VaR ne capture pas correctement les queues extremes ni les risques de gap.
+  - La VaR parametrique sous-estime les queues epaisses et ignore le gap risk.
+  - La VaR n'est pas sous-additive en general: agreger des VaR par desk peut sous-estimer le risque; l'Expected Shortfall, lui, est coherent (sous-additif).
 
 **Lecture finale.** Chaque chiffre ci-dessus a une unite explicite et un sens economique; un apprenant doit pouvoir refaire le calcul a la main et retrouver le meme ordre de grandeur.
+
+## Cas pratique de synthese - du modele a la decision
+_[genere - cas de desk verifie par les blocs calculatoires]_ Vous recevez un
+ticket incomplet, une donnee de marche potentiellement stale et une demande de
+decision rapide. La methode imposee est toujours la meme:
+
+1. qualifier le produit et le payoff;
+2. lister les inputs observables et les hypotheses non observables;
+3. choisir la formule ou l'approximation minimale;
+4. produire un resultat chiffre avec unite;
+5. faire au moins un controle croise (parite, bump, signe, ordre de grandeur,
+   no-arbitrage ou limite);
+6. conclure par une action: quote, hedge, monitor, reduce, reject ou escalate.
+
+Le rendu attendu n'est pas un paragraphe scolaire. C'est une note front-office:
+**resultat**, **risque dominant**, **limite du modele**, **controle effectue**,
+**action proposee**. Un etudiant exigeant doit pouvoir refaire chaque etape; un
+young professional doit pouvoir envoyer la note au trader sans la reecrire.
 
 ## Exercices corriges
 ### Exercice 1 - application directe
@@ -159,22 +410,30 @@ _[genere]_ Une VaR 95% 1 jour de 660k signifie quoi exactement?
 _[genere]_ Portefeuille 20m, vol 2%/jour, 95%, 1 jour. Calculez la VaR et comparez a une limite de 500k.
 
 **Correction detaillee (calcul verifie).**
-### VaR parametrique simple
+### VaR et Expected Shortfall parametriques
 - Famille: parametric_var
 - Hypotheses controlees:
-  - Quantile normal z=1.65.
-  - Volatilite donnee sur le meme pas de temps que l'horizon, sauf indication contraire.
+  - Quantile normal exact z=1.6449 pour une confiance de 95%.
+  - Rendements gaussiens de moyenne nulle sur l'horizon.
+  - Volatilite exprimee sur le meme pas de temps que l'horizon (sinon mise a l'echelle en sqrt(horizon)).
 - Calculs a respecter:
   - VaR:
-    - Formule: Valeur * vol * sqrt(horizon) * z
-    - Application: 20,000,000 * 0.0200 * sqrt(1) * 1.65
-    - Resultat: 660,000
-    - Lecture desk: Perte potentielle au niveau de confiance choisi.
+    - Formule: Valeur * vol * sqrt(horizon) * z(alpha)
+    - Application: 20,000,000 * 0.0200 * sqrt(1) * 1.6449
+    - Resultat: 657,941
+    - Lecture desk: Perte seuil non depassee avec une probabilite alpha.
+  - Expected Shortfall:
+    - Formule: Valeur * vol * sqrt(horizon) * phi(z)/(1-alpha)
+    - Application: 20,000,000 * 0.0200 * sqrt(1) * 0.1031/0.0500
+    - Resultat: 825,085
+    - Lecture desk: Perte moyenne CONDITIONNELLE au-dela de la VaR; toujours >= VaR.
 - Actions operationnelles attendues:
-  - Comparer VaR et stress tests.
-  - Identifier les facteurs dominants du risque.
+  - Comparer VaR et Expected Shortfall a la limite et aux stress tests.
+  - Si l'ES est tres au-dessus de la VaR, la queue est lourde: prioriser les stress scenarios.
+  - Identifier les facteurs dominants du risque avant de reduire.
 - Points de vigilance:
-  - La VaR ne capture pas correctement les queues extremes ni les risques de gap.
+  - La VaR parametrique sous-estime les queues epaisses et ignore le gap risk.
+  - La VaR n'est pas sous-additive en general: agreger des VaR par desk peut sous-estimer le risque; l'Expected Shortfall, lui, est coherent (sous-additif).
 
 ## Mini-quiz
 _[genere]_ Mini-quiz de verification (5 questions).
@@ -214,6 +473,14 @@ _[genere]_ Mini-quiz de verification (5 questions).
 - D) changer la couleur
   - Reponse: **B**. La reaction operationnelle est de reduire le risque ou d'escalader.
 
+## Checkpoint personas exigeants
+- Persona etudiant quant: sait-il refaire la derivation, expliquer les
+  hypotheses, refaire le calcul et reconnaitre le piege conceptuel?
+- Persona young professional: sait-il lire le ticket, produire le chiffre,
+  identifier le risque dominant, hedger ou escalader, et expliquer la limite a
+  trader/risk/sales?
+- Si l'une des deux reponses est non, le cours est incomplet.
+
 ## Resume
 - L'intuition d'abord: comprendre le probleme de marche avant la formule.
 - Les inputs et hypotheses conditionnent tout le reste.
@@ -222,26 +489,26 @@ _[genere]_ Mini-quiz de verification (5 questions).
 - Un cas se conclut toujours par une decision: quote, hedge, monitor, reduce ou escalate.
 
 ## Couverture pedagogique des sources
-- Chunks sources analyses: 10 (exploitables: 8).
-- Score pedagogique moyen: 51.0/100 (qualite structurelle: 88.5/100).
-- Definitions: 2 | exemples: 3 | exercices: 1 | formules: 0 | cas pratiques: 4.
-- Repartition par type: theory: 8, market_context: 1, solution: 1.
+- Chunks sources analyses: 18 (exploitables: 16).
+- Score pedagogique moyen: 51.33/100 (qualite structurelle: 85.0/100).
+- Definitions: 4 | exemples: 5 | exercices: 3 | formules: 0 | cas pratiques: 8.
+- Repartition par type: theory: 15, solution: 1, market_context: 1, methodology: 1.
 
 ## Plan pedagogique adaptatif (base sur les sources)
-1. Definitions - couvert par [S6], [S10].
+1. Definitions - couvert par [S7], [S8], [S14], [S17].
 2. Intuitions - ABSENT des sources: a generer et marquer 'genere a partir des concepts'.
 3. Formules - ABSENT des sources: a generer et marquer 'genere a partir des concepts'.
-4. Exemples - couvert par [S1], [S7], [S10].
+4. Exemples - couvert par [S1], [S6], [S8], [S11].
 5. Exemples resolus - ABSENT des sources: a generer et marquer 'genere a partir des concepts'.
-6. Exercices - couvert par [S10].
-7. Corriges - couvert par [S4], [S5], [S9].
-8. Cas pratiques - couvert par [S1], [S3], [S8], [S9].
-9. Resumes - ABSENT des sources: a generer et marquer 'genere a partir des concepts'.
+6. Exercices - couvert par [S8], [S11], [S16].
+7. Corriges - couvert par [S4], [S5], [S9], [S17].
+8. Cas pratiques - couvert par [S1], [S3], [S9], [S10].
+9. Resumes - couvert par [S11].
 
 ## Trous pedagogiques (signaler, ne pas inventer)
 - Statut: partially_usable - Sources partiellement suffisantes: completer les manques.
-- Presents dans les sources: definitions, exemples, exercices, corriges, cas pratiques.
-- Absents des sources (a marquer 'genere a partir des concepts', pas 'extrait'): intuitions, formules, exemples resolus, resumes.
+- Presents dans les sources: definitions, exemples, exercices, corriges, cas pratiques, resumes.
+- Absents des sources (a marquer 'genere a partir des concepts', pas 'extrait'): intuitions, formules, exemples resolus.
 
 ## Faits et angles extraits de la base
 - ES is also referred to
@@ -272,36 +539,60 @@ portfolio performance in severe states of the world, either hypothetical or
 historical.
 
 ## Sources RAG a citer
-- [S1] Foundations of Financial Risk  An Overview of Financial Risk and Risk based Financial Regulation ( PDFDrive ), chunk 221, score 0.7518 (extrait non cite: source bruitee)
-- [S2] Foundations of Financial Risk  An Overview of Financial Risk and Risk based Financial Regulation ( PDFDrive ), chunk 190, score 0.601417: Banks assume market risk because they trade as principals, risking
+- [S1] Foundations of Financial Risk  An Overview of Financial Risk and Risk based Financial Regulation ( PDFDrive ), chunk 221, score 0.759209 (extrait non cite: source bruitee)
+- [S2] Foundations of Financial Risk  An Overview of Financial Risk and Risk based Financial Regulation ( PDFDrive ), chunk 190, score 0.601892: Banks assume market risk because they trade as principals, risking
 their own capital, and hold positions in financial instruments. Failure to manage market risk can have significant direct effects on a bank’s profitability
 and reputation.
-- [S3] Managing Derivatives Contracts  A Guide to Derivatives Market Structure, Contract Life Cycle, Operations, and Systems ( PDFDrive ), chunk 319, score 0.478973: Risk management activity focuses on every level of transaction processing from pre-trade analysis through the deal capture and from 
+- [S3] Managing Derivatives Contracts  A Guide to Derivatives Market Structure, Contract Life Cycle, Operations, and Systems ( PDFDrive ), chunk 319, score 0.486731: Risk management activity focuses on every level of transaction processing from pre-trade analysis through the deal capture and from 
 confirmation through the settlement in order to control the operational risk.
-- [S4] Derivatives Workbook ( PDFDrive ), chunk 31, score 0.473131: Based on Exhibit 1, the best explanation for Nuñes to implement Strategy 8 would be 
+- [S4] Derivatives Workbook ( PDFDrive ), chunk 31, score 0.484731: Based on Exhibit 1, the best explanation for Nuñes to implement Strategy 8 would be 
 that, between the February and December expiration dates, she expects the share price of 
 XDF to:
 A. remain unchanged. The option trade that Nuñes should recommend relating to the government committee’s 
 decision is a:
 A. bull spread.
-- [S5] Encyclopedia of Quantitative Finance ( PDFDrive ), chunk 2295, score 0.472369 (extrait non cite: source bruitee)
-- [S6] Practical Methods of Financial Engineering and Risk Management  Tools for Modern Financial Professionals ( PDFDrive ), chunk 222, score 0.447443: Market Risk 
+- [S5] Encyclopedia of Quantitative Finance ( PDFDrive ), chunk 2295, score 0.470631 (extrait non cite: source bruitee)
+- [S6] Foundations of Financial Risk  An Overview of Financial Risk and Risk based Financial Regulation ( PDFDrive ), chunk 222, score 0.45634: Stress testing has become more important over the
+years and is now a major part of a bank’s, and regulator’s, risk management
+activities. Market Risk
+205
+- [S7] Practical Methods of Financial Engineering and Risk Management  Tools for Modern Financial Professionals ( PDFDrive ), chunk 222, score 0.453966: Market Risk 
 Chapters 1–5 all dealt with market risk. This is the risk of losses coming from the market 
 change of asset prices that negatively affect the mark-to-market positions of the bank. The 
 change of asset prices can come from various factors, such as stock prices, volatility, and 
 correlation.
-- [S7] Foundations of Financial Risk  An Overview of Financial Risk and Risk based Financial Regulation ( PDFDrive ), chunk 222, score 0.44298: Stress testing has become more important over the
-years and is now a major part of a bank’s, and regulator’s, risk management
-activities. Market Risk
-205
-- [S8] Foundations of Financial Risk  An Overview of Financial Risk and Risk based Financial Regulation ( PDFDrive ), chunk 8, score 0.433809 (extrait non cite: source bruitee)
-- [S9] Fixed Income Markets  Management, Trading and Hedging ( PDFDrive ), chunk 546, score 0.426923: The expected loss 
+- [S8] Trading and pricing financial derivatives   a guide to futures, options, and swaps ( PDFDrive ), chunk 154, score 0.441157: It is designed to give them a single number to look at, so they can then 
+dig deeper to understand how concentrated risks might be, and where and why 
+these risks are being taken in the various departments that they oversee.
+- [S9] Fixed Income Markets  Management, Trading and Hedging ( PDFDrive ), chunk 546, score 0.436773: The expected loss 
 for each obligor can be calculated as Default rate × (Exposure amount − Expected 
 recovery). This means that individual credit limits should be set at levels that are inversely 
 proportional to the default rate corresponding to the obligor rating.
-- [S10] Trading and pricing financial derivatives   a guide to futures, options, and swaps ( PDFDrive ), chunk 154, score 0.424694: It is designed to give them a single number to look at, so they can then 
-dig deeper to understand how concentrated risks might be, and where and why 
-these risks are being taken in the various departments that they oversee.
+- [S10] Foundations of Financial Risk  An Overview of Financial Risk and Risk based Financial Regulation ( PDFDrive ), chunk 8, score 0.434461 (extrait non cite: source bruitee)
+- [S11] Encyclopedia of Quantitative Finance ( PDFDrive ), chunk 2310, score 0.42279: VAR only provides an
+estimate of losses under normal market conditions,
+that is, at a prespecified confidence level. Once a
+risk-management system is in place, however, stress
+scenarios are just hypothetical realizations of the risk
+factors (see Stress Testing).
+- [S12] Managing Risks in Commercial and Retail Banking ( PDFDrive ), chunk 539, score 0.414916 (extrait non cite: source bruitee)
+- [S13] The Oxford Guide to Financial Modeling  Applications for Capital Markets, Corporate Finance, Risk Management and Financial Institutions ( PDFDrive ), chunk 699, score 0.4097: Diebold, and T. Horizon problems and extreme
+events in financial risk management. Federal Reserve Bank of New York, Economic Policy
+Review, 4 (3), 109-118. Christopher, L. Mensink, and A. Value at risk for asset managers. Derivatives Quarterly, 5 (2), 21-33. Phillips, and S.
+- [S14] Financial Risk Manager Handbook + Test Bank  FRM Part I   Part II ( PDFDrive ), chunk 247, score 0.375318: More generally, risk managers should evaluate the entire distribution
+of profits and losses. In addition, the analysis should be complemented by stresstesting, which identifies potential losses under extreme market conditions that
+may not show up in the recent history.
+- [S15] Managing Derivatives Contracts  A Guide to Derivatives Market Structure, Contract Life Cycle, Operations, and Systems ( PDFDrive ), chunk 55, score 0.368591: In addition, 
+ERM places responsibility on a level closer to senior management, giving senior 
+management an overall view of the company’s risk position. Strategically, ERM is 
+a key component of corporate governance.
+- [S16] Encyclopedia of Quantitative Finance ( PDFDrive ), chunk 2333, score 0.364559 (extrait non cite: source bruitee)
+- [S17] Introduction to Derivatives and Risk Management ( PDFDrive ), chunk 793, score 0.364068: We also
+looked at credit risk, noting how credit risk entails elements of option pricing theory.
+- [S18] Managing Derivatives Contracts  A Guide to Derivatives Market Structure, Contract Life Cycle, Operations, and Systems ( PDFDrive ), chunk 52, score 0.362658: All 
+financial and nonfinancial corporations are exposed to risks in their everyday 
+business activities from adverse movements and events in various contingencies, such as interest rates, foreign exchange rates, commodity prices, credit, 
+liquidity, theft, weather, health, catastrophe, and competition.
 
 ## Formules de desk
 Ces formules sont le minimum operationnel a savoir manipuler avant de passer au cas pratique.

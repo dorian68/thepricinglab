@@ -1,0 +1,59 @@
+/* ============================================================
+   BASE — The Pricing Library / Agentic Trading Room
+   Minimal resets + canvas defaults. Consumers get a dark,
+   monospace-first baseline out of the box.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-variant-numeric: tabular-nums;   /* aligned price columns */
+}
+
+/* Tabular figures everywhere numbers live */
+.tpl-num, [data-numeric] {
+  font-family: var(--font-numeric);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "zero" 1;
+}
+
+/* Uppercase terminal label */
+.tpl-label {
+  font-family: var(--font-label);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+/* Long-form prose opts into the sans face */
+.tpl-prose { font-family: var(--font-body); }
+
+a { color: var(--blue-500); text-decoration: none; }
+a:hover { color: var(--blue-400); }
+
+::selection { background: var(--red-tint); color: var(--text-primary); }
+
+/* Thin dark scrollbars to match the terminal */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-pill);
+}
+*::-webkit-scrollbar-track { background: transparent; }

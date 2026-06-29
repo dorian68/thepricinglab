@@ -1,0 +1,25 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Canvas & Surfaces" subtitle="Near-black deep-navy backgrounds, deepest → raised" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { margin:0; padding:16px; background: var(--bg-canvas); }
+  .row { display:grid; grid-template-columns: repeat(6,1fr); gap:8px; }
+  .sw { border-radius: var(--radius-md); border:1px solid var(--border-hairline); height:74px; padding:8px; display:flex; flex-direction:column; justify-content:flex-end; }
+  .n { font-family: var(--font-mono); font-size:10px; color: var(--text-primary); }
+  .h { font-family: var(--font-mono); font-size:9px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+<div class="row">
+  <div class="sw" style="background:var(--bg-base)"><span class="n">base</span><span class="h">#07090E</span></div>
+  <div class="sw" style="background:var(--bg-canvas)"><span class="n">canvas</span><span class="h">#0A0E14</span></div>
+  <div class="sw" style="background:var(--bg-inset)"><span class="n">inset</span><span class="h">#0B0F15</span></div>
+  <div class="sw" style="background:var(--bg-panel)"><span class="n">panel</span><span class="h">#0D1219</span></div>
+  <div class="sw" style="background:var(--bg-panel-2)"><span class="n">panel-2</span><span class="h">#10161E</span></div>
+  <div class="sw" style="background:var(--bg-elevated)"><span class="n">elevated</span><span class="h">#131A24</span></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!-- @dsCard group="Trading Room" viewport="1536x900" name="Agentic Trading Room" subtitle="Interactive FIC desk cockpit — RFQ, agents, trader, dashboard" -->
+<!-- @startingPoint section="Trading Room" subtitle="Full agentic FIC trading-desk app shell" viewport="1536x900" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Pricing Library — Agentic Trading Room</title>
+<link rel="stylesheet" href="../../styles.css" />
+<style>
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg-canvas); overflow: hidden; }
+  #root { height: 100vh; }
+  [data-tr-icon] svg { width: 100%; height: 100%; stroke-width: 1.6; }
+  .tr-shell { display: flex; height: 100vh; }
+  .tr-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .tr-body { flex: 1; min-height: 0; overflow: auto; }
+  .tr-placeholder { display:flex; align-items:center; justify-content:center; height:100%; flex-direction:column; gap:10px; color: var(--text-muted); font-family: var(--font-mono); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@0.453.0/dist/umd/lucide.min.js"></script>
+<script src="../../_ds_bundle.js"></script>
+<script src="tr-data.js"></script>
+<script type="text/babel" src="tr-shell.jsx"></script>
+<script type="text/babel" src="tr-screens.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+const { TRSidebar, TRTopBar, TRTicker, TRScreens } = window;
+
+function Placeholder({ id }) {
+  const item = [...window.TR.sidebar, ...window.TR.sidebarSecondary].find(s => s.id === id);
+  return (
+    <div className="tr-placeholder">
+      <div style={{ fontSize: 14, color: 'var(--text-secondary)' }}>{(item && item.label) || id}</div>
+      <div style={{ fontSize: 12 }}>Screen not included in this kit sample — see Dashboard, RFQ Cockpit, Agent Room, Trader View.</div>
+    </div>
+  );
+}
+
+function App() {
+  const [active, setActive] = React.useState('rfq');
+  const nav = (id) => setActive(id);
+
+  React.useEffect(() => {
+    if (window.lucide) window.lucide.createIcons();
+  });
+
+  const Screen = TRScreens[active];
+  return (
+    <div className="tr-shell">
+      <div className="tr-main">
+        <TRTopBar active={active} onNav={nav} />
+        <div className="tr-body">
+          {Screen ? <Screen onNav={nav} /> : <Placeholder id={active} />}
+        </div>
+        <TRTicker />
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

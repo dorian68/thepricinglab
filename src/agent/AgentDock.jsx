@@ -25,6 +25,11 @@ function ToolChips({ calls }) {
   if (!calls?.length) return null;
   const LABELS = {
     rag_search: 'Recherche RAG', compute_black_scholes: 'Calcul Black-Scholes',
+    compute_greeks: 'Calcul des Greeks', compute_put_call_parity: 'Parité call-put',
+    greeks_sensitivity: 'Sensibilité Greek', simulate_monte_carlo: 'Simulation Monte-Carlo',
+    generate_payoff_scenario: 'Payoff de stratégie', build_structured_product_payoff: 'Produit structuré',
+    binomial_tree: 'Arbre binomial', grade_user_answer: 'Correction', get_related_concepts: 'Carte de concepts',
+    render_block: 'Bloc pédagogique',
     generate_exercise: 'Génération exercice', navigate: 'Navigation', set_tool_params: 'Pilotage outil',
   };
   return (

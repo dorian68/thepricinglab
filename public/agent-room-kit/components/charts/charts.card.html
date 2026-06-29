@@ -1,0 +1,77 @@
+<!-- @dsCard group="Components" viewport="700x460" name="Charts" subtitle="Line, payoff, order book, vol heatmap, donut, sparkline" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../styles.css" />
+<style>
+  body { margin: 0; padding: 20px; background: var(--bg-canvas); }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .panel { background: var(--bg-panel); border: 1px solid var(--border-hairline); border-radius: var(--radius-md); padding: 12px; }
+  .sect { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+const NS = window.ThePricingLibraryDesignSystem_f20ac6;
+const { LineChart, PayoffChart, OrderBook, VolHeatmap, Donut } = NS;
+
+const price = [70,71,69.5,72,71.4,73.5,72.2,75,74.6,73.8,76.5,75.4,77,78.42];
+const theo = price.map(p => p - 1.5);
+const heat = [
+  [0.2,0.35,0.5,0.62,0.7],
+  [0.3,0.5,0.7,0.85,0.78],
+  [0.45,0.7,0.95,0.8,0.6],
+  [0.3,0.5,0.65,0.55,0.4],
+];
+const bids = [{price:78.41,size:512},{price:78.40,size:638},{price:78.39,size:293}];
+const asks = [{price:78.42,size:487},{price:78.43,size:621},{price:78.44,size:712}];
+
+function Demo() {
+  return (
+    <div>
+      <div className="grid">
+        <div className="panel">
+          <div className="sect">Line · WTI Crude (price + theoretical)</div>
+          <LineChart data={price} theoretical={theo} tone="red" height={150}
+            xLabels={['Jan','Mar','May','Jun']} />
+        </div>
+        <div className="panel">
+          <div className="sect">Payoff · WTI Call</div>
+          <PayoffChart strike={85} spot={78.42} breakeven={88.45} height={150} />
+        </div>
+        <div className="panel">
+          <div className="sect">Order Book · WTI</div>
+          <OrderBook bids={bids} asks={asks} mid={'78.42'} spread={'0.01'} highlight={78.42} />
+        </div>
+        <div className="panel" style={{display:'flex',gap:16,alignItems:'center'}}>
+          <div>
+            <div className="sect">Vol Surface</div>
+            <VolHeatmap matrix={heat} rowLabels={['80%','100%','120%','140%']} colLabels={['1M','6M','1Y','2Y','5Y']} cell={22} />
+          </div>
+          <div style={{marginLeft:'auto'}}>
+            <div className="sect">Risk Score</div>
+            <Donut size={110} thickness={13}
+              center={{value:'62',label:'Medium'}}
+              segments={[
+                {value:48,color:'var(--green-500)'},
+                {value:28,color:'var(--blue-500)'},
+                {value:12,color:'var(--amber-500)'},
+                {value:12,color:'var(--purple-500)'},
+              ]} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Demo />);
+</script>
+</body>
+</html>

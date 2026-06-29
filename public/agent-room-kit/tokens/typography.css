@@ -1,0 +1,56 @@
+/* ============================================================
+   TYPOGRAPHY — The Pricing Library / Agentic Trading Room
+   Monospace-first. JetBrains Mono carries the whole UI:
+   headings, nav, labels, tickers, prices, Greeks. IBM Plex
+   Sans is reserved for long description/body paragraphs.
+   Labels are UPPERCASE with wide tracking.
+   ============================================================ */
+
+:root {
+  /* ---- Families ---- */
+  --font-mono: 'JetBrains Mono', 'IBM Plex Mono', 'SF Mono', ui-monospace, Menlo, monospace;
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Roles */
+  --font-display: var(--font-mono);  /* hero / big headings */
+  --font-heading: var(--font-mono);  /* panel titles, nav */
+  --font-label:   var(--font-mono);  /* uppercase eyebrows */
+  --font-numeric: var(--font-mono);  /* prices, Greeks, deltas */
+  --font-body:    var(--font-sans);  /* descriptions, prose */
+
+  /* ---- Type scale (dense terminal) ---- */
+  --text-2xs:  10px;
+  --text-xs:   11px;
+  --text-sm:   12px;
+  --text-base: 13px;   /* default UI text */
+  --text-md:   14px;
+  --text-lg:   16px;
+  --text-xl:   18px;
+  --text-2xl:  22px;
+  --text-3xl:  28px;
+  --text-4xl:  34px;
+  --text-5xl:  42px;   /* hero title */
+  --text-6xl:  56px;
+
+  /* ---- Weights ---- */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+  --weight-black:    800;
+
+  /* ---- Line heights ---- */
+  --leading-none:    1;
+  --leading-tight:   1.15;
+  --leading-snug:    1.3;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.6;
+
+  /* ---- Letter spacing ---- */
+  --tracking-tight:  -0.02em;
+  --tracking-snug:   -0.01em;
+  --tracking-normal: 0;
+  --tracking-label:  0.08em;   /* uppercase labels */
+  --tracking-caps:   0.14em;   /* eyebrows / overlines */
+  --tracking-wide:   0.18em;   /* logo wordmark */
+}

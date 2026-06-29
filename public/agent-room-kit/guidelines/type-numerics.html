@@ -1,0 +1,29 @@
+<!-- @dsCard group="Type" viewport="700x180" name="Labels & Numerics" subtitle="Uppercase mono labels + tabular figures with signs" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { margin:0; padding:20px; background: var(--bg-panel); }
+  .lab { font-family: var(--font-mono); font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color: var(--text-secondary); margin-bottom:10px; }
+  .nums { display:flex; gap:24px; align-items:baseline; }
+  .big { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size:30px; font-weight:700; color: var(--text-primary); }
+  .pos { color: var(--green-500); font-family: var(--font-mono); font-size:14px; }
+  .neg { color: var(--red-500); font-family: var(--font-mono); font-size:14px; }
+  .u { color: var(--text-muted); font-family: var(--font-mono); font-size:12px; }
+</style>
+</head>
+<body>
+  <div class="lab">Theo Price · Daily PnL · Var 1d (95%) · Risk Score</div>
+  <div class="nums">
+    <span class="big">3.45 <span class="u">/bbl</span></span>
+    <span class="big" style="color:var(--green-500)">+12,840 <span class="pos">+1.28%</span></span>
+    <span class="big" style="color:var(--red-500)">−64,200 <span class="neg">−1.26%</span></span>
+  </div>
+  <div class="lab" style="margin-top:18px">Greeks — Σ Δ Γ Θ ρ σ π set in mono</div>
+  <div style="font-family:var(--font-mono); font-size:14px; color:var(--text-primary); display:flex; gap:18px;">
+    <span>Δ 0.62</span><span>Γ 0.0187</span><span>Vega 0.182</span><span>Θ −0.0062</span><span>ρ 0.0021</span>
+  </div>
+</body>
+</html>

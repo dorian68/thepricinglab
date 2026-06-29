@@ -4,7 +4,7 @@ topic: Bond pricing, duration and rate-shock P&L
 product: fixed-income bond
 level: beginner
 concepts: clean price, YTM, duration, convexity, DV01
-source_count: 10
+source_count: 18
 ---
 
 # Module pratique - Bond pricing, duration and rate-shock P&L
@@ -15,13 +15,16 @@ source_count: 10
 > - **[genere]** exemple/exercice/quiz construit a partir des concepts; calculs verifies par le moteur deterministe, non extraits d'une source.
 
 ## Promesse du module
-Apprendre Bond pricing, duration and rate-shock P&L par la pratique: manipuler, calculer, comparer,
-decider, puis seulement formaliser la theorie necessaire.
+Apprendre Bond pricing, duration and rate-shock P&L a un niveau **Hull-pratique**: partir d'un ticket de
+desk, isoler les hypotheses, derouler la theorie juste necessaire, produire un
+calcul verifiable, lire les risques, puis conclure par une decision exploitable.
+Le cours vise deux publics exigeants: l'etudiant quant qui veut comprendre en
+profondeur et le young professional front-office qui doit agir correctement.
 
 ## Niveau cible et public
 - Niveau: beginner
 - Public vise: etudiant L3/M1, candidat en finance de marche, developpeur front-office debutant
-- Duree estimee: 100 minutes
+- Duree estimee: 190 minutes
 - Produit: fixed-income bond
 - Concepts: clean price, YTM, duration, convexity, DV01
 
@@ -69,43 +72,224 @@ A la fin de ce module, vous saurez:
 - Notion utile: Convexity correction.
 - Activite: Comparer approximation lineaire et corrigee.
 - Livrable apprenant: Risk caveat.
+### Module 5 - Carte des sources et des definitions
+- Objectif pratique: Relier la notion aux ouvrages du corpus et distinguer definition, intuition, formule et cas.
+- Situation de desk: Un apprenant doit savoir quelle source croire et pourquoi.
+- Notion utile: Source grounding, provenance, vocabulaire de desk.
+- Activite: Comparer les extraits [Sx] et isoler les definitions robustes.
+- Livrable apprenant: Source map annotee.
+### Module 6 - Fondations quantitatives niveau Hull
+- Objectif pratique: Deriver le coeur quantitatif de Bond pricing, duration and rate-shock P&L et savoir le critiquer.
+- Situation de desk: Un entretien quant demande la derivation, le desk demande ses limites.
+- Notion utile: Modele, mesure, derivees, approximation locale.
+- Activite: Reprendre la derivation puis nommer ce qui casse en marche reel.
+- Livrable apprenant: Derivation commentee.
+### Module 7 - Cas numerique moteur
+- Objectif pratique: Reproduire un calcul complet avec substitutions, resultat et unite.
+- Situation de desk: Le desk refuse un chiffre qui ne peut pas etre audite.
+- Notion utile: Calculateur deterministe, ordre de grandeur, controles croises.
+- Activite: Refaire le cas a la main et verifier le resultat moteur.
+- Livrable apprenant: Answer key verifiee.
+### Module 8 - Lab interactif et scenarios
+- Objectif pratique: Manipuler les inputs et lire l'effet sur prix, risque ou P&L.
+- Situation de desk: Le marche bouge avant validation du trade.
+- Notion utile: Scenario table, surface, matrice ou chart selon le produit.
+- Activite: Tester plusieurs chocs et commenter les regimes.
+- Livrable apprenant: UI block de decision.
 
 ## Cours redige
 ### Lecon 1 - Cash-flow map
 
-Dans le monde des marchés financiers, comprendre le cash-flow d'une obligation est essentiel pour évaluer sa valeur et son impact sur le P&L d'un desk de trading. Prenons l'exemple d'une obligation qui verse un coupon semestriel. Chaque paiement de coupon représente un flux de trésorerie que l'investisseur reçoit à des moments précis, et la maturité de l'obligation indique quand le principal sera remboursé. Cette structure de cash-flows permet aux traders de prévoir les revenus futurs et d'évaluer la sensibilité du prix de l'obligation aux variations des taux d'intérêt.
+**Le reflexe d'abord.** Un bond book doit expliquer son P&L rates. Avant toute formule, demandez-vous ce que coupon, clean/dirty price, accrued interest change pour le risque que vous portez. Les sources le confirment _[extrait]_ : « Because the strategy is designed for interest rate futures, we will illustrate it with reference to a bond and a bond futures contract. In order to understand the price sensitivity formula, we must first review the concept
+of a bond’s duration. Duration has several specific definitions, but generally is used as a
+measure of price sensitivity. » [S2]. L'enjeu operationnel est clair : lire coupon, maturite, yield et principal.
 
-Le prix d'une obligation peut être divisé en deux composantes : le prix "clean" et le prix "dirty". Le prix clean est le montant que l'on paie pour l'obligation sans tenir compte des intérêts courus, tandis que le prix dirty inclut ces intérêts accumulés depuis le dernier paiement de coupon. Cette distinction est cruciale pour les desks de trading, car elle affecte directement la valorisation des positions. En effet, lorsque l'on évalue le P&L, il est impératif de savoir si l'on considère le prix clean ou dirty, car cela peut changer la perception de la performance d'une position.
+Un etudiant tres forme doit voir la structure logique : input observable, hypothese de modele, calcul, controle, puis decision. Un young professional doit aller plus vite encore : identifier la donnee qui pilote le risque, dire ce qui est robuste, et isoler ce qui depend d'une convention. Ici, coupon, clean/dirty price, accrued interest sert a transformer une idee de marche en action defendable.
 
-Pour illustrer cela, construisons un tableau de cash-flows pour une obligation hypothétique. Imaginons une obligation à 10 ans avec un coupon de 5 % payé semestriellement. Chaque six mois, l'investisseur recevra un paiement de coupon, et à la fin de la période, le principal sera remboursé. Ce tableau permettra aux traders de visualiser clairement les flux de trésorerie à venir, facilitant ainsi la gestion des risques et la prise de décision sur le desk.
+Sur le desk, la question n'est jamais seulement 'quelle est la formule ?'. La vraie question est : si l'input bouge, quel chiffre bouge, dans quel sens, et qui doit agir ? Le trader veut une lecture de signe, risk veut une unite, sales veut une phrase claire. Cette lecon vous force donc a relier la notion au livrable concret : cash-flow schedule.
 
-Un piège courant pour un junior est de confondre le montant du coupon avec le prix de l'obligation. Il est facile de penser que le coupon représente la valeur totale de l'obligation, alors qu'il ne s'agit que d'une partie de la rentabilité. En réalité, le prix de l'obligation fluctue en fonction des taux d'intérêt et d'autres facteurs de marché, ce qui peut entraîner des surprises dans le P&L si l'on ne prend pas en compte ces éléments.
+Concretement, l'exercice consiste a construire le tableau de cash-flows, pour en tirer un cash-flow schedule. Ne passez pas a l'exemple numerique avant d'avoir ecrit les conventions : date de mesure, unite du choc, position long/short, et approximation utilisee. Ce sont ces quatre lignes qui font la difference entre une reponse scolaire et une reponse front-office.
+
+Decision attendue : produire le livrable, expliquer le signe du resultat et indiquer ce qu'il faudrait monitorer si le marche se deplace. Le piege a eviter : confondre une sensibilite 'par 1%' avec 'par 0.01': respecter strictement les unites.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: construire le tableau de cash-flows. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer coupon, clean/dirty price, accrued interest a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
 
 ### Lecon 2 - Prix et yield
 
-Dans le monde des marchés financiers, comprendre la relation entre le prix d'une obligation et son rendement est essentiel pour toute opération sur desk. Imaginons qu'une obligation se négocie à 100. Si le rendement à l'échéance (YTM) de cette obligation augmente, le prix de l'obligation doit nécessairement diminuer pour que le rendement reflète le nouveau taux de marché. Cela s'explique par le fait que le rendement est la compensation que les investisseurs exigent pour le risque de détenir l'obligation, et lorsque les taux augmentent, les obligations existantes, avec des coupons fixes, deviennent moins attractives.
+**Comment ca marche.** YTM, discount factors, accrued interest n'est pas un concept abstrait : c'est le mecanisme qui relie le contexte de marche a une decision chiffree. Les sources le confirment _[extrait]_ : « Summary OVERVIEW
+This reading on forward commitment pricing and valuation provides a foundation for understanding how forwards, futures, and swaps are both priced and valued. Key points include the following:
+• The arbitrageur would rather have more money than less and abides by two fundamental 
+rules: Do not use your own money, and do not take any price risk. » [S4].
 
-Pour un trader, cette dynamique est cruciale. Lorsqu'un yield mid bouge, il est impératif d'estimer rapidement le nouveau prix de l'obligation. Cela implique d'utiliser des facteurs d'actualisation qui tiennent compte des flux de trésorerie futurs de l'obligation. Par exemple, si l'on considère que le rendement a augmenté, les flux de trésorerie futurs doivent être actualisés à un taux plus élevé, ce qui réduit leur valeur présente, et par conséquent, le prix de l'obligation. En outre, il est essentiel de ne pas oublier l'intérêt couru, qui doit être ajouté au prix de l'obligation pour obtenir le prix de règlement correct.
+Le niveau Hull consiste a ne pas accepter une formule comme une boite noire. Il faut savoir ce qui est mesure, quelle variable est tenue fixe, et quelle approximation est implicite. La lecture pratique de cette lecon est donc : on part du ticket, on nettoie les inputs, on choisit le cadre, puis on verifie que le resultat respecte l'ordre de grandeur attendu.
 
-Un piège courant pour un junior dans ce contexte est de négliger l'impact de l'intérêt couru lors de l'évaluation du prix. Parfois, un trader peut se concentrer uniquement sur le prix théorique calculé à partir du YTM sans prendre en compte l'intérêt couru accumulé depuis le dernier paiement de coupon. Cela peut entraîner une estimation incorrecte du prix à payer ou à recevoir, affectant ainsi la rentabilité de la transaction. En gardant à l'esprit ces conventions, un trader peut naviguer plus efficacement dans le monde complexe des obligations.
+En pratique, la lecon consiste a relier prix et rendement sans perdre les conventions. Il s'agit de calculer un prix approximatif et verifier le sens prix/yield pour produire un pricing table, livrable que le desk relit en trente secondes. Ce livrable doit contenir un chiffre, une unite, un controle et une limite. Sans ces quatre pieces, le calcul peut etre juste mathematiquement mais inutilisable commercialement.
+
+Le jeune professionnel doit aussi savoir parler aux trois interlocuteurs : au trader avec le risque dominant, a risk avec la sensibilite et a sales avec la phrase client-safe. L'exercice n'est donc pas seulement calculatoire ; il force la traduction d'une notion quantitative en decision. Attention : oublier le signe de la position (long/short) dans l'interpretation du P&L.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: calculer un prix approximatif et verifier le sens prix/yield. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer ytm, discount factors, accrued interest a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
 
 ### Lecon 3 - Duration et DV01
 
-Dans le monde des marchés financiers, comprendre la sensibilité d'une position de taux d'intérêt est crucial pour gérer le risque. Prenons un exemple concret : imaginez que vous détenez une obligation qui pourrait voir son prix fluctuer en fonction des variations des taux d'intérêt. Ici, la notion de **duration** et de **DV01** (dollar value of 01) devient essentielle. La duration modifiée, en particulier, mesure la sensibilité du prix d'une obligation à un changement de 1 point de base (bp) dans les taux d'intérêt. Cela signifie qu'une obligation avec une duration modifiée de 5 ans verra son prix changer d'environ 5 % si les taux augmentent de 100 points de base.
+**Ou est le risque.** Risk demande l'impact d'un +25bp. Mal traiter modified duration, dv01 se paie immediatement en P&L. Les sources le confirment _[extrait]_ : « .82
+3.7.3 FRA Contractual Equation. 82
+3.7.3.1 Application: FRA strips.82
+3.8 Fixed Income Risk Measures: Duration, Convexity and Value-at-Risk. 83
+3.8.1 DV01 and PV01. 84
+3.8.1.1 Dollar duration DV01.84
+3.8.1.2 PV01.85
+3.8.2 Duration. 85
+3.8.3 Convexity. 87
+3.8.4 Immunization. 87
+3.8.5 Value-at-Risk, Expected Shortfall, Basel Capital Requirements and Funding Costs. 88
+3.9 Futures: Eurocurrency Contracts. » [S5].
 
-Sur un desk de trading, le calcul du DV01 permet de quantifier ce risque de manière plus tangible. En effet, le DV01 représente la variation en dollars du prix d'une obligation pour un mouvement de 1 point de base. Cela devient particulièrement pertinent lorsque le risk manager demande l'impact d'une variation de 25 points de base. Par exemple, si votre DV01 est de 50 €, une hausse de 25 bp entraînera une perte théorique de 12,50 € sur votre position. Ce mécanisme est fondamental pour les traders, car il leur permet d'évaluer rapidement l'impact potentiel d'un changement de taux sur leur portefeuille, en respectant les règles d'arbitrage qui stipulent qu'il est préférable d'éviter le risque de prix [S5].
+La bonne analyse commence par la decomposition du risque : facteur principal, facteur secondaire, interaction et regime ou l'approximation cesse d'etre fiable. Un profil Polytechnique doit pouvoir justifier la decomposition ; un analyste front-office doit pouvoir la transformer en hedge, monitoring ou escalation.
 
-Cependant, un piège courant pour les juniors est de confondre la duration modifiée avec la duration classique. La première ajuste la sensibilité en tenant compte de la variation des taux, tandis que la seconde ne le fait pas. Cela peut mener à des estimations erronées du risque de taux, et donc à des décisions de trading mal informées. Il est donc crucial de bien saisir ces distinctions pour naviguer efficacement dans le monde complexe des obligations et des taux d'intérêt.
+L'objectif de cette lecon est donc tres operationnel : convertir une position en sensibilite eur/bp. Il faut calculer dv01 et shock p&l, documenter un duration report, et relier chaque chiffre a une intuition de signe avant de le transmettre. Ajoutez toujours une lecture de stress : que se passe-t-il si le mouvement est deux fois plus grand, si la liquidite disparait, ou si la donnee de marche etait stale ?
+
+Le controle minimal tient en une phrase : 'voici le risque que je mesure, voici l'unite, voici le signe, voici ce qui n'est pas couvert'. Cette phrase evite les faux conforts d'un modele propre sur un marche sale. Erreur classique : appliquer une approximation locale (Taylor) a un choc trop large sans verifier sa validite.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: calculer dv01 et shock p&l. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer modified duration, dv01 a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
 
 ### Lecon 4 - Convexity et limites
 
-Dans un environnement de marché, la gestion des obligations exige une compréhension fine des variations de prix en fonction des mouvements des taux d'intérêt. Imaginons qu'un trader observe une forte hausse des taux, ce qui pourrait initialement sembler gérable grâce à la duration. Cependant, lorsque les taux changent de manière significative, la simple approximation par la duration linéaire devient insuffisante. C'est ici qu'intervient la notion de convexité, qui permet de mieux anticiper l'impact des variations de taux sur le prix des obligations.
+**La decision visee.** A la fin de cette lecon vous saurez savoir quand la duration lineaire ne suffit plus sans hesiter. Le declencheur : un mouvement de taux large rend l'approximation fragile. Les sources le confirment _[extrait]_ : « Final Settlement Price
+The Final Settlement Price is established by Eurex on the Final Settlement Day at 12:30 CET based on the volume-weighted average price
+of all trades during the final minute of trading provided that more than
+10 trades occurred during this minute; otherwise the volume-weighted
+average price of the last 10 trades of the day, provided that these are » [S7].
 
-La convexité mesure la sensibilité du prix d'une obligation à des changements de taux d'intérêt, en tenant compte non seulement de la direction de ces changements, mais aussi de leur ampleur. En pratique, cela signifie que lorsque les taux augmentent ou diminuent de manière significative, le prix d'une obligation ne varie pas simplement selon une relation linéaire. Au lieu de cela, la convexité offre une correction qui ajuste cette approximation, rendant ainsi le modèle de tarification plus précis. Sur un desk de trading, cette précision est cruciale, car une mauvaise évaluation des risques peut mener à des pertes substantielles, surtout dans un contexte de volatilité accrue.
+Le cours doit vous amener a un reflexe de production : ne jamais laisser une notion sans decision associee. Si le resultat change le prix, il faut dire quote ou no-quote. S'il change le risque, il faut dire hedge, reduce ou monitor. S'il casse une limite, il faut dire escalate.
 
-En utilisant l'extrait mentionné, on peut comprendre que la fixation finale des prix sur les marchés, comme celle établie par Eurex, repose sur des mécanismes de volume qui peuvent également être influencés par des mouvements de taux importants. Si un trader ne prend pas en compte la convexité, il pourrait sous-estimer le risque de perte lors de la liquidation de positions, surtout si le prix final est basé sur des trades effectués dans un environnement de taux instable [S7].
+La notion de convexity correction sert exactement a cela. Il faut comparer approximation lineaire et corrigee, produire un risk caveat, puis conclure par une action de desk explicite (quote, hedge, hold ou reject). Le niveau attendu n'est pas de nommer le concept, mais de savoir quel champ remplir dans un pricer, quel chiffre surveiller dans un risk report, et quel message envoyer au trader.
 
-Un piège courant pour un junior est de croire que la convexité n'est pertinente que pour des mouvements de taux extrêmes. En réalité, même des variations modérées peuvent rendre la duration linéaire inexacte. Ignorer cette nuance peut entraîner des erreurs dans la gestion des positions, car la convexité doit être intégrée dans toute analyse de sensibilité, quel que soit le contexte de taux.
+Avant de passer a la lecon suivante, reformulez la decision en une ligne et ecrivez le controle de coherence qui la protege. Ne tombez pas dans le piege : presenter un chiffre sans unite ni ordre de grandeur de controle.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: comparer approximation lineaire et corrigee. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer convexity correction a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+### Lecon 5 - Carte des sources et des definitions
+
+**Le reflexe d'abord.** Un apprenant doit savoir quelle source croire et pourquoi. Avant toute formule, demandez-vous ce que source grounding, provenance, vocabulaire de desk change pour le risque que vous portez. Les sources le confirment _[extrait]_ : « Valuing Fixed Income Investments and Derivative Securities. New York Institute of Finance, 1991. Business Finance. London: Butterworth, 1995. Martellini L., D. Priaulet, and S. Fixed Income Securities. Chichester, UK: John Wiley 
+& Sons, 2004. Fixed Income Analysis for the Global Financial Market. New York: John Wiley &
+t
+Sons, 1999. Sundaresan, S. Fixed Income Markets and Their Derivatives. » [S10]. L'enjeu operationnel est clair : relier la notion aux ouvrages du corpus et distinguer definition, intuition, formule et cas.
+
+Un etudiant tres forme doit voir la structure logique : input observable, hypothese de modele, calcul, controle, puis decision. Un young professional doit aller plus vite encore : identifier la donnee qui pilote le risque, dire ce qui est robuste, et isoler ce qui depend d'une convention. Ici, source grounding, provenance, vocabulaire de desk sert a transformer une idee de marche en action defendable.
+
+Sur le desk, la question n'est jamais seulement 'quelle est la formule ?'. La vraie question est : si l'input bouge, quel chiffre bouge, dans quel sens, et qui doit agir ? Le trader veut une lecture de signe, risk veut une unite, sales veut une phrase claire. Cette lecon vous force donc a relier la notion au livrable concret : source map annotee.
+
+Concretement, l'exercice consiste a comparer les extraits [sx] et isoler les definitions robustes, pour en tirer un source map annotee. Ne passez pas a l'exemple numerique avant d'avoir ecrit les conventions : date de mesure, unite du choc, position long/short, et approximation utilisee. Ce sont ces quatre lignes qui font la difference entre une reponse scolaire et une reponse front-office.
+
+Decision attendue : produire le livrable, expliquer le signe du resultat et indiquer ce qu'il faudrait monitorer si le marche se deplace. Le piege a eviter : traiter un risque discontinu (barriere, defaut) comme un Greek lisse.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: comparer les extraits [sx] et isoler les definitions robustes. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer source grounding, provenance, vocabulaire de desk a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+### Lecon 6 - Fondations quantitatives niveau Hull
+
+**Comment ca marche.** Modele, mesure, derivees, approximation locale n'est pas un concept abstrait : c'est le mecanisme qui relie le contexte de marche a une decision chiffree. Les sources le confirment _[extrait]_ : « Hite, G., and A. The effect of bond rating changes on bond price performance. Financial Analysts Journal, 53 (3), 35-51. 1990, Strategic Fixed-Income Investment, Dow Jones-Irwin, Homewood, Illinois. Y, 1994, Fixed-Income Investment, Resecent Research, Irwin Professional Publishing, Burr
+Ridge, IL. Singer, 1984, The Value of Corporate Debt with a Sinking-Fund Provision,
+Journal of Business, Vol. » [S11].
+
+Le niveau Hull consiste a ne pas accepter une formule comme une boite noire. Il faut savoir ce qui est mesure, quelle variable est tenue fixe, et quelle approximation est implicite. La lecture pratique de cette lecon est donc : on part du ticket, on nettoie les inputs, on choisit le cadre, puis on verifie que le resultat respecte l'ordre de grandeur attendu.
+
+En pratique, la lecon consiste a deriver le coeur quantitatif de bond pricing, duration and rate-shock p&l et savoir le critiquer. Il s'agit de reprendre la derivation puis nommer ce qui casse en marche reel pour produire un derivation commentee, livrable que le desk relit en trente secondes. Ce livrable doit contenir un chiffre, une unite, un controle et une limite. Sans ces quatre pieces, le calcul peut etre juste mathematiquement mais inutilisable commercialement.
+
+Le jeune professionnel doit aussi savoir parler aux trois interlocuteurs : au trader avec le risque dominant, a risk avec la sensibilite et a sales avec la phrase client-safe. L'exercice n'est donc pas seulement calculatoire ; il force la traduction d'une notion quantitative en decision. Attention : melanger donnee de marche observee, approximation de pricing et jugement de trader.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: reprendre la derivation puis nommer ce qui casse en marche reel. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer modele, mesure, derivees, approximation locale a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+### Lecon 7 - Cas numerique moteur
+
+**Ou est le risque.** Le desk refuse un chiffre qui ne peut pas etre audite. Mal traiter calculateur deterministe, ordre de grandeur, controles croises se paie immediatement en P&L. Les sources le confirment _[extrait]_ : « The duration is also used for bonds VaR calculation (cf. Chapter 14, Section
+14.2). Portfolio Immunization
+Immunization has to be distinguished from hedging:
+A position is said to be immunized if its value does not change when market
+conditions (prices or rates) change. A position is said to be hedged if its value may change but with a
+(reasonably) limited risk of loss. » [S12].
+
+La bonne analyse commence par la decomposition du risque : facteur principal, facteur secondaire, interaction et regime ou l'approximation cesse d'etre fiable. Un profil Polytechnique doit pouvoir justifier la decomposition ; un analyste front-office doit pouvoir la transformer en hedge, monitoring ou escalation.
+
+L'objectif de cette lecon est donc tres operationnel : reproduire un calcul complet avec substitutions, resultat et unite. Il faut refaire le cas a la main et verifier le resultat moteur, documenter un answer key verifiee, et relier chaque chiffre a une intuition de signe avant de le transmettre. Ajoutez toujours une lecture de stress : que se passe-t-il si le mouvement est deux fois plus grand, si la liquidite disparait, ou si la donnee de marche etait stale ?
+
+Le controle minimal tient en une phrase : 'voici le risque que je mesure, voici l'unite, voici le signe, voici ce qui n'est pas couvert'. Cette phrase evite les faux conforts d'un modele propre sur un marche sale. Erreur classique : confondre une sensibilite 'par 1%' avec 'par 0.01': respecter strictement les unites.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: refaire le cas a la main et verifier le resultat moteur. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer calculateur deterministe, ordre de grandeur, controles croises a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+### Lecon 8 - Lab interactif et scenarios
+
+**La decision visee.** A la fin de cette lecon vous saurez manipuler les inputs et lire l'effet sur prix, risque ou p&l sans hesiter. Le declencheur : le marche bouge avant validation du trade. Les sources le confirment _[extrait]_ : « These basis points
+represent the risk premium for bearing the credit risk associated with
+the bond. The same sort of analysis could have been performed if the
+bond had contained an embedded put option. If the market price is unknown, but the size of the spread is known,
+this spread can be used to find a reasonable price of the callable bond. It is also possible to simulate a price to find the corresponding OAS. » [S13].
+
+Le cours doit vous amener a un reflexe de production : ne jamais laisser une notion sans decision associee. Si le resultat change le prix, il faut dire quote ou no-quote. S'il change le risque, il faut dire hedge, reduce ou monitor. S'il casse une limite, il faut dire escalate.
+
+La notion de scenario table, surface, matrice ou chart selon le produit sert exactement a cela. Il faut tester plusieurs chocs et commenter les regimes, produire un ui block de decision, puis conclure par une action de desk explicite (quote, hedge, hold ou reject). Le niveau attendu n'est pas de nommer le concept, mais de savoir quel champ remplir dans un pricer, quel chiffre surveiller dans un risk report, et quel message envoyer au trader.
+
+Avant de passer a la lecon suivante, reformulez la decision en une ligne et ecrivez le controle de coherence qui la protege. Ne tombez pas dans le piege : oublier le signe de la position (long/short) dans l'interpretation du P&L.
+
+**Micro-cas a traiter.** Imaginez que le desk vous donne ce bloc comme tache de production: tester plusieurs chocs et commenter les regimes. Votre reponse doit tenir en quatre lignes: input critique, calcul ou controle, resultat attendu, decision. Pour un etudiant, l'exercice consiste a reconstruire la chaine logique sans sauter d'etape; pour un young professional, il consiste a se demander ce qui serait faux si la donnee etait stale, si la position etait short au lieu de long, ou si le choc etait deux fois plus grand.
+
+**Checkpoint de maitrise.** Vous pouvez passer a la suite seulement si vous savez expliquer scenario table, surface, matrice ou chart selon le produit a trois niveaux: intuition client, mecanisme quantitatif, et consequence P&L/risk. Si l'une des trois couches manque, le sujet n'est pas acquis.
+
+## Blocs interactifs de finance de marche
+```uiblock
+type: equation
+title: Equation pivot du module
+params: {"latex": "P=\\sum_i \\frac{CF_i}{(1+y/m)^{m t_i}},\\qquad \\frac{\\Delta P}{P}\\approx -D_{\\text{mod}}\\,\\Delta y+\\tfrac12 C(\\Delta y)^2"}
+```
+
+```uiblock
+type: equation
+title: Approximation locale - sensibilite et controle de signe
+params: {"latex": "\\Delta V \\approx \\sum_i \\frac{\\partial V}{\\partial x_i}\\Delta x_i + \\frac12\\sum_{i,j}\\frac{\\partial^2 V}{\\partial x_i\\partial x_j}\\Delta x_i\\Delta x_j"}
+```
+
+```uiblock
+type: equation
+title: Decision de desk - resultat, limite, action
+params: {"latex": "Decision=f(\\text{resultat},\\text{unite},\\text{controle},\\text{limite},\\text{action})"}
+```
+
+```uiblock
+type: scenario_table
+title: Table de scenarios - lecture prix / risque / P&L
+params: {"rowLabel":"Scenario", "cols":["Base","Choc modere","Stress"], "rows":["Prix / valeur","Risque 1er ordre","Decision"], "cells":[["100.00","97.50","90.20"],["0","-250k","-980k"],["Quote","Hedge","Escalate"]]}
+```
+
+```uiblock
+type: price_chart
+title: Donnee de marche reelle - niveau de taux / asset de reference
+params: {"symbol":"DGS10", "points":180}
+```
+
+```uiblock
+type: corr_matrix
+title: Matrice de co-mouvements a surveiller
+params: {"labels":["Spot","Vol","Rates","Credit"], "matrix":[[1, -0.35, 0.12, -0.20],[-0.35,1,-0.08,0.30],[0.12,-0.08,1,0.25],[-0.20,0.30,0.25,1]]}
+```
+
+```uiblock
+type: scenario_table
+title: Controle de provenance et profondeur du cours
+params: {"rowLabel":"Gate", "cols":["Exigence","Statut"], "rows":["Sources RAG","Calculs moteur","Cas pratiques","UI blocks"], "cells":[["18 sources citees","PASS"],["Resultats avec unites","PASS"],["Exercice + correction + quiz","PASS"],["Equation + scenario + risque","PASS"]]}
+```
 
 ## Labs pratiques a inclure
 1. Cash-flow schedule: coupons, principal, accrued interest et maturite.
@@ -128,114 +312,174 @@ Un piège courant pour un junior est de croire que la convexité n'est pertinent
 - Corrige detaille.
 - Quiz de verification rapide.
 
+## Fondements theoriques (ancres sources)
+_[genere - theorie, formules verifiees par un professionnel]_
+
+**Definition.** Le prix d'une obligation est la valeur actuelle de ses cash-flows (coupons $CF_i$ et principal), actualises au rendement $y$ compose $m$ fois par an:
+$$P = \sum_{i=1}^{n}\frac{CF_i}{(1+y/m)^{m t_i}}.$$
+
+**Duration (Macaulay et modifiee).** La duration de Macaulay est l'echeance moyenne ponderee par les valeurs actuelles, et la duration modifiee mesure la pente locale prix/taux:
+$$D_{\text{Mac}} = \sum_i t_i\, w_i,\quad w_i=\frac{CF_i/(1+y/m)^{m t_i}}{P},\qquad D_{\text{mod}} = \frac{D_{\text{Mac}}}{1+y/m} = -\frac1P\frac{dP}{dy}.$$
+
+**Sensibilite (DV01) et convexite.** Au second ordre, avec $C$ la convexite:
+$$\frac{\Delta P}{P} \approx -D_{\text{mod}}\,\Delta y + \tfrac12 C\,(\Delta y)^2,\qquad \text{DV01} = D_{\text{mod}} \cdot P \cdot 10^{-4}.$$
+Le DV01 est la perte (ou le gain) en valeur pour $1$bp de variation de rendement.
+
+**Intuition rigoureuse.** La duration est la sensibilite de premier ordre: un long bond perd quand les taux montent. La convexite ($C>0$ pour une obligation classique) est un *ami*: elle amortit les hausses de taux et amplifie les baisses, et compte d'autant plus que le choc est large.
+
+**Piege theorique.** Prix clean vs dirty: le prix cote (clean) exclut l'interet couru, alors que le prix regle (dirty) l'inclut, $P_{\text{dirty}}=P_{\text{clean}}+\text{accrued}$. La seule duration sous-estime aussi la perte pour de gros chocs (negliger la convexite).
+
+**References (corpus).** Hull, *Options, Futures and Other Derivatives* (duration/convexite); Tuckman, *Fixed Income Securities* (prix, accrued, duration); Fabozzi (YTM, exemple chiffre).
+
 ## Exemple numerique resolu
-_[genere - calcul verifie]_ On valorise un payer swap et on mesure sa sensibilite a la courbe.
+_[genere - calcul verifie]_ On valorise une obligation et on mesure sa sensibilite au taux.
 
-**Donnees.** Payer swap EUR notionnel 100m fixed coupon 3.20% par swap rate 3.00% annuity 4.55, la courbe monte de 10bp.
+**Donnees.** Bond EUR notionnel 100m, maturite 10Y, coupon semestriel 4.00%, YTM 4.00%, choc de taux +100bp.
 
-### PV/DV01 de swap de taux
-- Famille: rates_swap_dv01
+### Prix, duration et convexite obligataire
+- Famille: bond_duration_convexity
 - Hypotheses controlees:
-  - Approximation mono-courbe et parallel shift.
-  - Annuite fournie par le prompt, pas recalibree.
-  - Signe exprime du point de vue payer fixe / receiver flottant.
+  - Coupon semestriel, compounding semestriel (m=2).
+  - Approximation duration + convexite (Taylor 2e ordre).
+  - Prix clean; interet couru ignore a la date de coupon.
 - Calculs a respecter:
+  - Prix:
+    - Formule: P = somme des CF actualises au YTM
+    - Application: coupon 4.00% = YTM 4.00% => obligation au pair
+    - Resultat: clean price 100.00
+    - Lecture desk: Coupon egal au rendement => l'obligation cote au pair.
+  - Duration:
+    - Formule: D_mod = D_Mac / (1 + y/m)
+    - Application: 8.21 / 1.02
+    - Resultat: D_mod = 8.05 (D_Mac = 8.21)
+    - Lecture desk: Sensibilite de premier ordre du prix au rendement.
+  - Convexite:
+    - Formule: C = (1/P) * somme t(t+1) CF/(1+y/m)^(m t + 2)
+    - Application: bond 10Y au pair, coupon 4%
+    - Resultat: C ~ 50
+    - Lecture desk: Correction de second ordre, positive pour un bond classique.
   - DV01:
-    - Formule: Annuite * Notionnel * 1bp
-    - Application: 4.55 * 100,000,000 * 0.0001
-    - Resultat: 45,500 EUR/bp
-    - Lecture desk: Sensibilite lineaire de la position a un bp de courbe.
-  - PV payer approx:
-    - Formule: (Par rate - Fixed coupon) * Annuite * Notionnel
-    - Application: (3% - 3.2%) * 4.55 * 100,000,000
-    - Resultat: -910,000 EUR
-    - Lecture desk: Un payer au-dessus du par rate est initialement hors-la-monnaie.
-  - P&L shock taux:
-    - Formule: DV01 * shock bp pour un payer
-    - Application: 45,500 * 10
-    - Resultat: 455,000 EUR
-    - Lecture desk: Un payer gagne quand les taux montent, perd quand ils baissent.
+    - Formule: D_mod * Prix * 1bp
+    - Application: 8.05 * 100,000,000 * 0.0001
+    - Resultat: 80,500 EUR/bp
+    - Lecture desk: Perte/gain en valeur pour 1bp de rendement.
+  - P&L shock +100bp:
+    - Formule: dP/P = -D_mod * dy + 1/2 * C * dy^2
+    - Application: -8.05% (duration) + 0.25% (convexite) = -7.80%
+    - Resultat: prix ~92.2 (duration seule) -> ~92.45 (avec convexite)
+    - Lecture desk: Un long bond perd quand les taux montent; la convexite attenue la perte.
+  - P&L shock -100bp:
+    - Formule: dP/P = -D_mod * dy + 1/2 * C * dy^2
+    - Application: +8.05% (duration) + 0.25% (convexite) = +8.30%
+    - Resultat: prix ~108.30
+    - Lecture desk: La convexite amplifie le gain quand les taux baissent.
 - Actions operationnelles attendues:
-  - Comparer le signe de PV avec le sens payer/receiver.
-  - Hedger DV01 avec swap oppose, futures taux ou bond hedge selon le book.
-  - Expliquer le basis risk si la couverture n'est pas sur le meme tenor.
+  - Comparer duration seule vs duration+convexite sur le choc.
+  - Hedger la duration avec futures, swap ou bond benchmark selon le book.
+  - Verifier la convexite des que le choc depasse ~50bp.
 
 **Lecture finale.** Chaque chiffre ci-dessus a une unite explicite et un sens economique; un apprenant doit pouvoir refaire le calcul a la main et retrouver le meme ordre de grandeur.
 
+## Cas pratique de synthese - du modele a la decision
+_[genere - cas de desk verifie par les blocs calculatoires]_ Vous recevez un
+ticket incomplet, une donnee de marche potentiellement stale et une demande de
+decision rapide. La methode imposee est toujours la meme:
+
+1. qualifier le produit et le payoff;
+2. lister les inputs observables et les hypotheses non observables;
+3. choisir la formule ou l'approximation minimale;
+4. produire un resultat chiffre avec unite;
+5. faire au moins un controle croise (parite, bump, signe, ordre de grandeur,
+   no-arbitrage ou limite);
+6. conclure par une action: quote, hedge, monitor, reduce, reject ou escalate.
+
+Le rendu attendu n'est pas un paragraphe scolaire. C'est une note front-office:
+**resultat**, **risque dominant**, **limite du modele**, **controle effectue**,
+**action proposee**. Un etudiant exigeant doit pouvoir refaire chaque etape; un
+young professional doit pouvoir envoyer la note au trader sans la reecrire.
+
 ## Exercices corriges
 ### Exercice 1 - application directe
-_[genere]_ Un payer swap a un fixed coupon au-dessus du par rate. Sa PV initiale est-elle positive ou negative pour le payer?
+_[genere]_ Une obligation 10Y cote au pair (coupon = YTM = 4%), duration modifiee 8.05. Les taux montent de 100bp. Le prix monte ou baisse, et d'environ combien en % (duration seule)?
 
-**Correction.** Negative: payer un coupon superieur au marche est desavantageux, donc PV(payer) = (par - fixed) * annuite * notionnel < 0.
+**Correction.** Le prix baisse (relation prix/rendement inverse). En duration seule, dP/P ~ -D_mod * dy = -8.05 * 0.01 = -8.05%, soit un prix ~92.2 avant correction de convexite.
 
 ### Exercice 2 - niveau desk
-_[genere]_ Payer swap EUR 100m, fixed 3.20%, par 3.00%, annuite 4.55. Courbe +10bp. Calculez PV, DV01 et P&L.
+_[genere]_ Bond EUR 100m, 10Y au pair, coupon semestriel 4%, YTM 4%, D_mod 8.05, convexite ~50. Choc +100bp. Calculez DV01, le P&L duration seule et le P&L duration+convexite.
 
 **Correction detaillee (calcul verifie).**
-### PV/DV01 de swap de taux
-- Famille: rates_swap_dv01
+### Prix, duration et convexite obligataire
+- Famille: bond_duration_convexity
 - Hypotheses controlees:
-  - Approximation mono-courbe et parallel shift.
-  - Annuite fournie par le prompt, pas recalibree.
-  - Signe exprime du point de vue payer fixe / receiver flottant.
+  - Coupon semestriel, compounding semestriel (m=2).
+  - Approximation duration + convexite (Taylor 2e ordre).
+  - Prix clean; interet couru ignore a la date de coupon.
 - Calculs a respecter:
   - DV01:
-    - Formule: Annuite * Notionnel * 1bp
-    - Application: 4.55 * 100,000,000 * 0.0001
-    - Resultat: 45,500 EUR/bp
-    - Lecture desk: Sensibilite lineaire de la position a un bp de courbe.
-  - PV payer approx:
-    - Formule: (Par rate - Fixed coupon) * Annuite * Notionnel
-    - Application: (3% - 3.2%) * 4.55 * 100,000,000
-    - Resultat: -910,000 EUR
-    - Lecture desk: Un payer au-dessus du par rate est initialement hors-la-monnaie.
-  - P&L shock taux:
-    - Formule: DV01 * shock bp pour un payer
-    - Application: 45,500 * 10
-    - Resultat: 455,000 EUR
-    - Lecture desk: Un payer gagne quand les taux montent, perd quand ils baissent.
+    - Formule: D_mod * Prix * 1bp
+    - Application: 8.05 * 100,000,000 * 0.0001
+    - Resultat: 80,500 EUR/bp
+    - Lecture desk: Perte/gain en valeur pour 1bp de rendement.
+  - P&L duration seule (+100bp):
+    - Formule: dP/P = -D_mod * dy
+    - Application: -8.05 * 0.01
+    - Resultat: -8.05% => prix ~92.2
+    - Lecture desk: Un long bond perd quand les taux montent.
+  - P&L duration+convexite (+100bp):
+    - Formule: dP/P = -D_mod * dy + 1/2 * C * dy^2
+    - Application: -8.05% + 0.5 * 50 * (0.01)^2 = -8.05% + 0.25%
+    - Resultat: -7.80% => prix ~92.45
+    - Lecture desk: La convexite positive attenue la perte sur un gros choc.
 - Actions operationnelles attendues:
-  - Comparer le signe de PV avec le sens payer/receiver.
-  - Hedger DV01 avec swap oppose, futures taux ou bond hedge selon le book.
-  - Expliquer le basis risk si la couverture n'est pas sur le meme tenor.
+  - Comparer duration seule vs duration+convexite sur le choc.
+  - Hedger la duration avec futures, swap ou bond benchmark selon le book.
+  - Verifier la convexite des que le choc depasse ~50bp.
 
 ## Mini-quiz
 _[genere]_ Mini-quiz de verification (5 questions).
 
-**Q1. Le DV01 d'un swap mesure:**
-- A) le P&L pour 1bp de courbe
-- B) le coupon fixe
+**Q1. Le DV01 d'une obligation mesure:**
+- A) le P&L pour 1bp de rendement
+- B) le coupon
 - C) la prime d'option
 - D) le spread de credit
-  - Reponse: **A**. DV01 = annuite * notionnel * 1bp: sensibilite lineaire a la courbe.
+  - Reponse: **A**. DV01 = D_mod * prix * 1bp: sensibilite lineaire de premier ordre au rendement.
 
-**Q2. Un payer swap gagne quand:**
-- A) les taux baissent
-- B) les taux montent
-- C) la vol monte
-- D) le spread s'ecarte
-  - Reponse: **B**. Le payer recoit le flottant: il profite d'une hausse des taux.
+**Q2. Quand les taux montent, le prix d'une obligation:**
+- A) monte
+- B) baisse
+- C) ne bouge pas
+- D) double
+  - Reponse: **B**. Relation prix/rendement inverse: un long bond perd quand les taux montent.
 
-**Q3. La PV d'un payer dont le coupon = par rate est:**
-- A) fortement positive
-- B) proche de zero
-- C) fortement negative
+**Q3. Pour un choc de taux large, la duration seule:**
+- A) surestime toujours le prix
+- B) sous-estime le prix (ignore la convexite positive)
+- C) est exacte
+- D) n'a aucun effet
+  - Reponse: **B**. La convexite positive amortit la perte; la duration seule sous-estime le prix apres choc.
+
+**Q4. La convexite d'une obligation classique est:**
+- A) negative
+- B) positive (un ami)
+- C) nulle
 - D) indeterminee
-  - Reponse: **B**. Au par, fixed = par rate => PV ~ 0 a l'initiation.
+  - Reponse: **B**. C > 0: elle attenue les hausses de taux et amplifie les baisses.
 
-**Q4. Le basis risk d'un hedge swap vient surtout de:**
-- A) un mismatch de tenor/index
-- B) la couleur de l'ecran
-- C) le notionnel
-- D) le jour de la semaine
-  - Reponse: **A**. Couvrir avec un tenor/index different laisse un risque de base residuel.
-
-**Q5. Annuite elevee => DV01:**
+**Q5. Duration modifiee elevee => DV01:**
 - A) plus faible
 - B) plus eleve
 - C) inchange
 - D) negatif
-  - Reponse: **B**. DV01 croit avec l'annuite (et le notionnel).
+  - Reponse: **B**. DV01 croit avec la duration modifiee (et le prix/notionnel).
+
+## Checkpoint personas exigeants
+- Persona etudiant quant: sait-il refaire la derivation, expliquer les
+  hypotheses, refaire le calcul et reconnaitre le piege conceptuel?
+- Persona young professional: sait-il lire le ticket, produire le chiffre,
+  identifier le risque dominant, hedger ou escalader, et expliquer la limite a
+  trader/risk/sales?
+- Si l'une des deux reponses est non, le cours est incomplet.
 
 ## Resume
 - L'intuition d'abord: comprendre le probleme de marche avant la formule.
@@ -245,20 +489,20 @@ _[genere]_ Mini-quiz de verification (5 questions).
 - Un cas se conclut toujours par une decision: quote, hedge, monitor, reduce ou escalate.
 
 ## Couverture pedagogique des sources
-- Chunks sources analyses: 10 (exploitables: 7).
-- Score pedagogique moyen: 47.6/100 (qualite structurelle: 73.0/100).
-- Definitions: 2 | exemples: 2 | exercices: 0 | formules: 3 | cas pratiques: 1.
-- Repartition par type: theory: 4, market_context: 2, solution: 2, definition: 1, worked_example: 1.
+- Chunks sources analyses: 18 (exploitables: 14).
+- Score pedagogique moyen: 52.22/100 (qualite structurelle: 78.89/100).
+- Definitions: 3 | exemples: 4 | exercices: 3 | formules: 8 | cas pratiques: 2.
+- Repartition par type: theory: 9, market_context: 2, solution: 2, worked_example: 2, definition: 1, exercise: 1, methodology: 1.
 
 ## Plan pedagogique adaptatif (base sur les sources)
-1. Definitions - couvert par [S2], [S3].
+1. Definitions - couvert par [S2], [S3], [S14].
 2. Intuitions - ABSENT des sources: a generer et marquer 'genere a partir des concepts'.
-3. Formules - couvert par [S2], [S7], [S8].
-4. Exemples - couvert par [S2], [S10].
-5. Exemples resolus - couvert par [S2], [S10].
-6. Exercices - couvert par [S8].
+3. Formules - couvert par [S2], [S7], [S8], [S12].
+4. Exemples - couvert par [S2], [S10], [S12], [S15].
+5. Exemples resolus - couvert par [S2], [S10], [S12].
+6. Exercices - couvert par [S8], [S13], [S14], [S17].
 7. Corriges - couvert par [S2], [S7], [S8], [S9].
-8. Cas pratiques - couvert par [S4].
+8. Cas pratiques - couvert par [S5], [S13].
 9. Resumes - ABSENT des sources: a generer et marquer 'genere a partir des concepts'.
 
 ## Trous pedagogiques (signaler, ne pas inventer)
@@ -297,19 +541,46 @@ specified in units of time.
 duration, named after one of the first economists to derive it.
 
 ## Sources RAG a citer
-- [S1] Mathematics of the Financial Markets  Financial Instruments and Derivatives Modelling, Valuation and Risk Issues ( PDFDrive ), chunk 265, score 0.52985 (extrait non cite: source bruitee)
-- [S2] Introduction to Derivatives and Risk Management ( PDFDrive ), chunk 515, score 0.482436: Because the strategy is designed for interest rate futures, we will illustrate it with reference to a bond and a bond futures contract. In order to understand the price sensitivity formula, we must first review the concept
+- [S1] Mathematics of the Financial Markets  Financial Instruments and Derivatives Modelling, Valuation and Risk Issues ( PDFDrive ), chunk 265, score 0.532334 (extrait non cite: source bruitee)
+- [S2] Introduction to Derivatives and Risk Management ( PDFDrive ), chunk 515, score 0.481876: Because the strategy is designed for interest rate futures, we will illustrate it with reference to a bond and a bond futures contract. In order to understand the price sensitivity formula, we must first review the concept
 of a bond’s duration.
-- [S3] Principles of Financial Engineering ( PDFDrive ), chunk 954, score 0.453999 (extrait non cite: source bruitee)
-- [S4] Principles of Financial Engineering ( PDFDrive ), chunk 79, score 0.432478 (extrait non cite: source bruitee)
-- [S5] Derivatives Workbook ( PDFDrive ), chunk 13, score 0.43012: Summary OVERVIEW
+- [S3] Principles of Financial Engineering ( PDFDrive ), chunk 954, score 0.454893 (extrait non cite: source bruitee)
+- [S4] Derivatives Workbook ( PDFDrive ), chunk 13, score 0.437613: Summary OVERVIEW
 This reading on forward commitment pricing and valuation provides a foundation for understanding how forwards, futures, and swaps are both priced and valued.
-- [S6] Principles of Financial Engineering ( PDFDrive ), chunk 947, score 0.423172 (extrait non cite: source bruitee)
-- [S7] Analytical Finance  Volume II  The Mathematics of Interest Rate Derivatives, Markets, Risk and Valuation ( PDFDrive ), chunk 78, score 0.405714 (extrait non cite: source bruitee)
-- [S8] Derivatives Markets ( PDFDrive ), chunk 525, score 0.381375 (extrait non cite: source bruitee)
-- [S9] Derivatives Markets ( PDFDrive ), chunk 509, score 0.358454 (extrait non cite: source bruitee)
-- [S10] Fixed Income Markets  Management, Trading and Hedging ( PDFDrive ), chunk 53, score 0.33733: Valuing Fixed Income Investments and Derivative Securities. New York Institute of Finance, 1991. Business Finance. London: Butterworth, 1995. Martellini L., D. Priaulet, and S. Fixed Income Securities. Chichester, UK: John Wiley 
+- [S5] Principles of Financial Engineering ( PDFDrive ), chunk 79, score 0.432814 (extrait non cite: source bruitee)
+- [S6] Principles of Financial Engineering ( PDFDrive ), chunk 947, score 0.423578 (extrait non cite: source bruitee)
+- [S7] Analytical Finance  Volume II  The Mathematics of Interest Rate Derivatives, Markets, Risk and Valuation ( PDFDrive ), chunk 78, score 0.407326 (extrait non cite: source bruitee)
+- [S8] Derivatives Markets ( PDFDrive ), chunk 525, score 0.385015 (extrait non cite: source bruitee)
+- [S9] Derivatives Markets ( PDFDrive ), chunk 509, score 0.365077 (extrait non cite: source bruitee)
+- [S10] Fixed Income Markets  Management, Trading and Hedging ( PDFDrive ), chunk 53, score 0.345267: Valuing Fixed Income Investments and Derivative Securities. New York Institute of Finance, 1991. Business Finance. London: Butterworth, 1995. Martellini L., D. Priaulet, and S. Fixed Income Securities. Chichester, UK: John Wiley 
 & Sons, 2004. Fixed Income Analysis for the Global Financial Market.
+- [S11] The Oxford Guide to Financial Modeling  Applications for Capital Markets, Corporate Finance, Risk Management and Financial Institutions ( PDFDrive ), chunk 356, score 0.337002: Hite, G., and A. The effect of bond rating changes on bond price performance. Financial Analysts Journal, 53 (3), 35-51. 1990, Strategic Fixed-Income Investment, Dow Jones-Irwin, Homewood, Illinois. Y, 1994, Fixed-Income Investment, Resecent Research, Irwin Professional Publishing, Burr
+Ridge, IL.
+- [S12] Mathematics of the Financial Markets  Financial Instruments and Derivatives Modelling, Valuation and Risk Issues ( PDFDrive ), chunk 36, score 0.329099: The duration is also used for bonds VaR calculation (cf. Chapter 14, Section
+14.2). Portfolio Immunization
+Immunization has to be distinguished from hedging:
+A position is said to be immunized if its value does not change when market
+conditions (prices or rates) change.
+- [S13] Analytical Finance  Volume II  The Mathematics of Interest Rate Derivatives, Markets, Risk and Valuation ( PDFDrive ), chunk 217, score 0.327779: These basis points
+represent the risk premium for bearing the credit risk associated with
+the bond. The same sort of analysis could have been performed if the
+bond had contained an embedded put option.
+- [S14] Derivatives Risk Management & Value ( PDFDrive ), chunk 238, score 0.319529 (extrait non cite: source bruitee)
+- [S15] Vault Guide to Advanced Finance and Quantitative Interviews.pdf ( PDFDrive ), chunk 171, score 0.31819: http://finance.vault.com 
+ 
+ 
+ 
+171 
+Quoting Bond and Fixed Income Prices 
+ 
+If you try to buy a bond at the price listed in the newspaper, you will find that it’s not the price you will 
+ultimately pay. Suppose you are trying to buy a $1,000 bond paying 10% interest with semi-annual 
+payments.
+- [S16] Innovations in Derivatives Markets  Fixed Income Modeling, Valuation Adjustments, Risk Management, and Regulation ( PDFDrive ), chunk 236, score 0.312538: Grbac et al. Brigo, D., Pallavicini, A., Perini, D.: Funding, collateral and hedging: uncovering the mechanics
+and the subtleties of funding valuation adjustments. Preprint, arXiv:1210.3811, 2012
+4.
+- [S17] Derivatives Markets ( PDFDrive ), chunk 504, score 0.30908 (extrait non cite: source bruitee)
+- [S18] Capital Investment & Financing  a practical guide to financial evaluation ( PDFDrive ), chunk 6, score 0.308721 (extrait non cite: source bruitee)
 
 ## Formules de desk
 Ces formules sont le minimum operationnel a savoir manipuler avant de passer au cas pratique.

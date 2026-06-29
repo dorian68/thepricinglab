@@ -1,0 +1,20 @@
+<!-- @dsCard group="Type" viewport="700x150" name="Body & Prose" subtitle="IBM Plex Sans for descriptions; mono for everything else" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { margin:0; padding:20px; background: var(--bg-panel); }
+  .mono { font-family: var(--font-mono); font-size:13px; color: var(--text-primary); margin-bottom:10px; }
+  .prose { font-family: var(--font-sans); font-size:13px; line-height:1.55; color: var(--text-secondary); max-width:560px; }
+  .tag { font-family: var(--font-mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color: var(--text-dim); }
+</style>
+</head>
+<body>
+  <div class="tag">Mono — UI / labels / data</div>
+  <div class="mono">TRADER VIEW · Desk execution and live market context</div>
+  <div class="tag" style="margin-top:8px">Sans — long-form description</div>
+  <p class="prose">You profit if the WTI price is above the strike price (85.00 USD/bbl) at maturity. Below it, the maximum loss is the premium paid; above it, profit increases dollar-for-dollar with the WTI price.</p>
+</body>
+</html>

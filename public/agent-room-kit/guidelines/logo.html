@@ -1,0 +1,36 @@
+<!-- @dsCard group="Brand" viewport="700x180" name="Logo / Wordmark" subtitle="Two-line mono wordmark with red tick; on light & dark" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { margin:0; padding:0; background: var(--bg-canvas); display:grid; grid-template-columns: 1fr 1fr; }
+  .pane { padding:26px 24px; display:flex; align-items:center; gap:22px; }
+  .dark { background: var(--bg-base); }
+  .light { background: #F4F5F7; }
+  .mark { display:flex; align-items:center; gap:12px; }
+  .wave { color: var(--red-500); font-family: var(--font-mono); font-size:30px; line-height:1; letter-spacing:-2px; }
+  .word { font-family: var(--font-mono); font-weight:800; font-size:17px; line-height:1.04; letter-spacing:0.16em; position:relative; }
+  .word .tick { position:absolute; top:-3px; right:-8px; width:6px; height:6px; background: var(--red-500); border-radius:1px; }
+  .on-dark { color: #fff; } .on-light { color:#0A0E14; }
+  .cap { font-family: var(--font-mono); font-size:9px; letter-spacing:.14em; text-transform:uppercase; margin-top:10px; }
+</style>
+</head>
+<body>
+  <div class="pane dark">
+    <div class="mark">
+      <div class="word on-dark">THE<br/>PRICING<br/>LIBRARY<span class="tick"></span></div>
+    </div>
+  </div>
+  <div class="pane light">
+    <div class="mark">
+      <span class="wave">⩗⩘</span>
+      <div>
+        <div class="word on-light" style="font-size:15px; letter-spacing:.04em;">ThePricingLibrary</div>
+        <div style="font-family:var(--font-mono); font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:#6B7585; margin-top:3px;">Agentic Trading Room</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

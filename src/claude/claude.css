@@ -213,10 +213,85 @@
   .desk-field:nth-child(odd){border-right:1px solid var(--line)}
   .desk-field p{margin:5px 0 0;color:var(--text-2);font-size:13px;line-height:1.58}
   .course-written-lesson{padding:20px;border-bottom:1px solid var(--line)}
+  .course-written-lesson-cockpit{background:linear-gradient(180deg,rgba(255,255,255,.018),rgba(255,255,255,.006))}
+  .course-written-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:16px}
+  .course-written-head p{font-size:12.5px;line-height:1.55;margin:6px 0 0}
+  .course-written-title{font-size:14px;line-height:1.4;margin:6px 0 0;color:var(--text)}
   .course-written-lesson .course-script-markdown{padding:0;max-width:920px}
   .course-written-lesson .course-script-markdown p{font-size:13.8px;line-height:1.76;margin:9px 0}
   .course-written-lesson .course-script-markdown ol,.course-written-lesson .course-script-markdown ul{margin:10px 0 14px}
   .course-written-lesson .course-script-markdown li{font-size:13.5px;line-height:1.65}
+  .lesson-situation-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 14px}
+  .lesson-situation-card{border:1px solid var(--line);background:#0B0E13;padding:13px 14px}
+  .lesson-situation-card p{margin:7px 0 0;color:var(--text-2);font-size:13px;line-height:1.55}
+  .lesson-section-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0}
+  .lesson-concept-card{border:1px solid var(--line);background:#0A0D12;padding:14px;min-width:0}
+  .lesson-card-head{display:flex;align-items:center;gap:8px;color:var(--red);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.12em;font-size:10.5px;margin-bottom:10px}
+  .lesson-concept-card .course-script-markdown p,.lesson-concept-card .course-script-markdown li{font-size:13px;line-height:1.65}
+  .lesson-concept-card .course-script-markdown blockquote{margin:10px 0}
+  .course-equation-demo{border:1px solid rgba(62,139,255,.28);background:rgba(62,139,255,.045);padding:16px;margin:14px 0}
+  .course-equation-demo h4{font-size:15px;line-height:1.35;margin:6px 0 0;color:var(--text)}
+  .equation-demo-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;margin-top:14px}
+  .equation-demo-formula,.equation-demo-assumption{border:1px solid var(--line);background:#090C11;padding:12px;min-width:0}
+  .equation-demo-formula .course-script-markdown{padding:0;max-width:none}
+  .equation-demo-formula .course-script-markdown .katex-display{margin:8px 0 0}
+  .equation-demo-assumption p,.equation-demo-bottom p{margin:7px 0 0;color:var(--text-2);font-size:12.8px;line-height:1.58}
+  .derivation-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}
+  .course-derivation-step{border:1px solid var(--line);background:#0B0E13;padding:11px}
+  .course-derivation-step span{display:block;color:var(--blue);font-size:11px;margin-bottom:7px}
+  .course-derivation-step p{margin:0;color:var(--text-2);font-size:12.4px;line-height:1.52}
+  /* Rich step-by-step proof (LaTeX per step) — single column so equations breathe */
+  .derivation-steps.derivation-steps--proof{display:flex;flex-direction:column;gap:9px}
+  .derivation-proof-step{display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start;border:1px solid var(--line);background:#0B0E13;border-radius:8px;padding:11px 13px}
+  .derivation-proof-step .step-no{color:var(--blue);font-size:12px;font-weight:700;padding-top:2px}
+  .derivation-proof-step .step-main{min-width:0}
+  .derivation-proof-step .step-label{color:var(--blue);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;font-weight:600;margin-bottom:2px}
+  .derivation-proof-step .step-main .course-script-markdown{padding:0;max-width:none}
+  .derivation-proof-step .step-main .course-script-markdown .katex-display{margin:4px 0;overflow-x:auto;overflow-y:hidden}
+  .derivation-proof-step .step-note{margin:4px 0 0;color:var(--text-2);font-size:12.2px;line-height:1.5}
+  .equation-demo-result{margin-top:12px;border:1px solid rgba(25,195,125,.35);background:rgba(25,195,125,.06);border-radius:8px;padding:11px 14px}
+  .equation-demo-result .course-script-markdown{padding:0;max-width:none}
+  .equation-demo-result .course-script-markdown .katex-display{margin:6px 0 0;overflow-x:auto;overflow-y:hidden}
+  .equation-demo-bottom{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  .equation-demo-bottom > div{border-top:1px solid var(--line);padding-top:10px}
+  /* Editorial long-form lead (NYT-grade prose column) with a per-theme accent + drop cap */
+  .lesson-editorial{margin:6px 0 16px;padding:20px 24px;border:1px solid var(--line);border-left:3px solid var(--blue);background:#0C1016;border-radius:10px}
+  .tone-red .lesson-editorial{border-left-color:var(--red)}
+  .tone-green .lesson-editorial{border-left-color:var(--green)}
+  .tone-amber .lesson-editorial{border-left-color:var(--amber)}
+  .lesson-editorial .course-script-markdown{padding:0;max-width:68ch}
+  .lesson-editorial .course-script-markdown p{font-size:15px;line-height:1.74;color:var(--text-2);margin:0 0 13px}
+  .lesson-editorial .course-script-markdown p:last-child{margin-bottom:0}
+  .lesson-editorial .course-script-markdown strong{color:var(--text);font-weight:600}
+  .lesson-editorial .course-script-markdown p:first-of-type::first-letter{font-size:2.6em;font-weight:700;float:left;line-height:.86;padding:5px 11px 0 0;color:var(--blue)}
+  .tone-red .lesson-editorial .course-script-markdown p:first-of-type::first-letter{color:var(--red)}
+  .tone-green .lesson-editorial .course-script-markdown p:first-of-type::first-letter{color:var(--green)}
+  .tone-amber .lesson-editorial .course-script-markdown p:first-of-type::first-letter{color:var(--amber)}
+  .course-market-widget{border:1px solid rgba(25,195,125,.22);background:rgba(25,195,125,.035)}
+  .course-market-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:10px}
+  .course-market-stats > div{border-top:1px solid var(--line);padding-top:8px}
+  .course-market-stats p{margin:3px 0 0;font-size:13px}
+  .course-market-sec{border-top:1px dashed var(--line);padding-top:10px}
+  @media (max-width:640px){ .course-market-stats{grid-template-columns:1fr 1fr} }
+  .lesson-widget-lab{padding:16px;margin:14px 0;border:1px solid rgba(255,255,255,.12)}
+  .lesson-widget-lab > .row p{font-size:12.5px;line-height:1.5;margin:5px 0 0}
+  .lesson-action-card{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border:1px solid rgba(25,195,125,.25);background:rgba(25,195,125,.04);padding:14px;margin-top:14px}
+  .lesson-action-card p{margin:7px 0 0;color:var(--text-2);font-size:13px;line-height:1.55}
+  .lesson-action-card svg{color:var(--green);flex-shrink:0}
+  .course-module-uiblocks{padding:18px 20px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.012)}
+  .course-module-uiblock-grid{display:grid;grid-template-columns:1fr;gap:12px}
+  .course-module-uiblock-grid > .panel{margin:0 !important;background:#0B0E13}
+  .course-module-uiblock-grid .data{margin-bottom:0}
+  .vol-heatmap-widget{overflow-x:auto}
+  .vol-heatmap-grid{display:grid;gap:3px;min-width:360px;align-items:stretch}
+  .vol-heatmap-label{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--mute);text-align:center;align-self:center}
+  .vol-heatmap-label.row{text-align:right;padding-right:8px}
+  .vol-heatmap-cell{min-height:30px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'JetBrains Mono',monospace;font-size:10.5px;border:1px solid rgba(255,255,255,.12)}
+  .ui-payoff-widget{min-width:0}
+  .payoff-widget-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+  .payoff-widget-stats div{border:1px solid var(--line);background:#080B10;padding:9px 10px;min-width:0}
+  .payoff-widget-stats span{display:block;color:var(--mute);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.08em;font-size:9.5px;margin-bottom:5px}
+  .payoff-widget-stats strong{display:block;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .course-module-formula{padding:18px 20px}
   .course-module-formula .course-script-markdown{padding:0;max-width:none}
   .course-module-formula .course-script-markdown h3{margin-top:0}
@@ -363,9 +438,12 @@
     .page-head{align-items:flex-start;gap:14px;flex-direction:column}
     .page-head > .row{width:100%;flex-wrap:wrap}
     .course-detail-layout{grid-template-columns:1fr}
-    .course-sidebar{position:static}
+    .course-sidebar{position:static;order:2}
+    .course-detail-layout > div:not(.course-sidebar){order:1}
     .course-module-reader-head{display:block}
     .course-module-reader-head > .row{margin-top:14px}
+    .lesson-situation-grid,.lesson-section-grid,.equation-demo-grid,.equation-demo-bottom{grid-template-columns:1fr}
+    .derivation-steps{grid-template-columns:1fr 1fr}
     .exercise-detail-grid{grid-template-columns:1fr}
     .exercise-side-stack{position:static}
     .generator-body{grid-template-columns:1fr}
@@ -406,6 +484,10 @@
     .desk-field:nth-child(2){border-top:1px solid var(--line)}
     .course-module-reader-head{padding:18px}
     .course-module-reader-head h2{font-size:20px}
+    .course-written-head{display:block}
+    .course-written-head > .row{margin-top:12px}
+    .derivation-steps{grid-template-columns:1fr}
+    .payoff-widget-stats{grid-template-columns:1fr 1fr}
     .course-script-hero{display:block;padding:18px}
     .course-script-hero .btn{margin-top:14px}
     .course-script-markdown{padding:18px}

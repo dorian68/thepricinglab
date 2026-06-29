@@ -5,6 +5,12 @@ import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import { useAuth } from '../contexts/AuthContext';
 import { useToolRegister } from '../agent/toolControl';
+import { runPython } from './pyodideRunner';
+import { getDerivation } from './derivations';
+import { loadDeskSeries, pickCourseSeries, SYMBOL_ALIAS } from './marketSeries';
+import { getLessonProse } from './lessonProse';
+import { getCourseLayout, showMarketOnLesson } from './courseLayouts';
+import AgentRoomReal from '../agent/AgentRoomReal';
 import {
   GENERATOR_PRESETS,
   PRACTICE_COURSE_EXTENSIONS,
@@ -15,8 +21,10 @@ import {
   getExerciseById,
   getPracticeApiBase,
   loadGeneratedExercises,
+  platformApi,
   saveGeneratedExercise,
   startCheckout,
+  strategyApi,
 } from './practiceEngine';
 import './claude.css';
 
@@ -200,6 +208,11 @@ function nav(path) {
   window.history.pushState(null, '', path);
   window.dispatchEvent(new PopStateEvent('popstate'));
 }
+// Bridge the app router to the AG-UI agent: the `navigate` tool, the "Ouvrir le
+// pricer/visualizer" buttons, and cross-page set_tool_params all read window.nav.
+// Without this assignment they were silent no-ops (and the agent painted a fake
+// "Navigation done"). Same pushState+popstate the app already uses internally.
+if (typeof window !== 'undefined') window.nav = nav;
 function Link({to, children, className, style, onClick}) {
   return <RouterLink to={to} className={className} style={style} onClick={onClick}>{children}</RouterLink>;
 }
@@ -340,16 +353,24 @@ const COURSE_SCRIPT_SLUGS = {
   'stochastic': 'stochastic-calculus-for-hedging',
 };
 
+// Real teaching-chapter count per course (counted from the Hull-level scripts —
+// the 0-Hook → 8-Source-map structure, minus meta sections). Drives the catalog
+// card so the displayed module count is truthful, not a hardcoded guess.
+const CHAPTER_COUNTS = {
+  'black-scholes': 8, 'yield-curves': 8, 'greeks': 8, 'implied-vol': 8,
+  'vol-products': 8, 'hedging': 8, 'exotics': 8, 'monte-carlo': 8, 'stochastic': 8,
+};
+
 const TOOLS = [
   {id:'bs-pricer', name:'Black-Scholes Pricer', cat:'Calculators', tier:'free', desc:'Closed-form price + Greeks for European options.'},
   {id:'payoff', name:'Payoff Visualizer', cat:'Visualizers', tier:'free', desc:'Build multi-leg strategies, view P&L, breakevens, Greeks.'},
   {id:'mc', name:'Monte Carlo Simulator', cat:'Simulators', tier:'free', desc:'GBM paths, terminal distribution, VaR & ES.'},
   {id:'iv-calc', name:'Volatility Calculator', cat:'Calculators', tier:'free', desc:'Realized vol, rolling windows, multiple estimators.'},
   {id:'calib', name:'Model Calibration', cat:'Calculators', tier:'student', desc:'Fit Black, SABR, Heston to market smiles.'},
-  {id:'binomial', name:'Binomial Tree', cat:'Calculators', tier:'pro', desc:'Cox-Ross-Rubinstein for American + early exercise.'},
-  {id:'volsurface', name:'Vol Surface Explorer', cat:'Visualizers', tier:'pro', desc:'3D implied vol surface, slice by strike/tenor.'},
-  {id:'bond', name:'Bond Calculator', cat:'Calculators', tier:'pro', desc:'YTM, duration, convexity, scenario shifts.'},
-  {id:'curve', name:'Yield Curve Builder', cat:'Calculators', tier:'pro', desc:'Bootstrap from deposits, futures, swaps.'},
+  {id:'binomial', name:'Binomial Tree', cat:'Calculators', tier:'free', desc:'Cox-Ross-Rubinstein for American + early exercise.'},
+  {id:'volsurface', name:'Vol Surface Explorer', cat:'Visualizers', tier:'free', desc:'Implied vol surface, slice by strike/tenor.'},
+  {id:'bond', name:'Bond Calculator', cat:'Calculators', tier:'free', desc:'YTM, duration, convexity, scenario shifts.'},
+  {id:'curve', name:'Yield Curve Builder', cat:'Calculators', tier:'free', desc:'Bootstrap from deposits, futures, swaps.'},
 ];
 
 const TIER_BADGE = {
@@ -423,6 +444,7 @@ function Ticker() {
 }
 
 const NAV_ITEMS = [
+  {to:'/agent-room', label:'Agent Room'},
   {to:'/courses', label:'Courses'},
   {to:'/lab', label:'Trading Lab'},
   {to:'/tools', label:'Tools'},
@@ -826,6 +848,44 @@ function HeatmapChart({width=420, height=220, rows=10, cols=14, gen}) {
         </text>
       ))}
     </svg>
+  );
+}
+
+function VolHeatmap({matrix = [], rowLabels = [], colLabels = [], cell = 24}) {
+  const rows = matrix.length || 1;
+  const cols = Math.max(...matrix.map((row) => row.length), 1);
+  const flat = matrix.flat().map((value) => Number(value) || 0);
+  const min = Math.min(...flat), max = Math.max(...flat);
+  const colorFor = (value) => {
+    const t = (Number(value) - min) / ((max - min) || 1);
+    const r = Math.round(45 + 205 * t);
+    const g = Math.round(70 + 80 * (1 - t));
+    const b = Math.round(105 + 20 * (1 - t));
+    return `rgb(${r},${g},${b})`;
+  };
+  return (
+    <div className="vol-heatmap-widget">
+      <div className="vol-heatmap-grid" style={{gridTemplateColumns:`76px repeat(${cols}, minmax(${cell}px, 1fr))`}}>
+        <div></div>
+        {Array.from({length: cols}).map((_, idx) => (
+          <div key={`col-${idx}`} className="vol-heatmap-label">{colLabels[idx] || `T${idx + 1}`}</div>
+        ))}
+        {Array.from({length: rows}).map((_, r) => (
+          <React.Fragment key={`row-${r}`}>
+            <div className="vol-heatmap-label row">{rowLabels[r] || `K${r + 1}`}</div>
+            {Array.from({length: cols}).map((_, cIdx) => {
+              const value = Number(matrix[r]?.[cIdx] ?? 0);
+              return (
+                <div key={`${r}-${cIdx}`} className="vol-heatmap-cell" style={{background:colorFor(value)}}>
+                  {(value * 100).toFixed(1)}%
+                </div>
+              );
+            })}
+          </React.Fragment>
+        ))}
+      </div>
+      <div className="mono mute" style={{fontSize:11,marginTop:8}}>Smile/surface slice: darker red = higher implied volatility.</div>
+    </div>
   );
 }
 
@@ -1322,7 +1382,7 @@ function CourseCard({c}) {
           <span>·</span>
           <span>{c.duration}</span>
           <span>·</span>
-          <span>{c.modules} modules</span>
+          <span>{CHAPTER_COUNTS[c.id] ?? c.modules} modules</span>
         </div>
         <h3>{c.title}</h3>
         <div className="desc">{c.tagline}</div>
@@ -1441,10 +1501,45 @@ function ChartThumb({data, color}) {
   );
 }
 
+// ============== ENTITLEMENT GATING ==============
+const COURSE_TIER_PLAN = { Fundamentals:'free', Foundation:'free', Core:'free', Advanced:'student', Complex:'pro' };
+const PLAN_LABEL = { free:'Free', starter:'Starter', student:'Student', pro:'Professional' };
+function useEntitlement() {
+  let auth=null; try { auth=useAuth(); } catch { auth=null; }
+  return {
+    plan: auth?.plan || 'free',
+    isAuthed: !!auth?.isAuthenticated,
+    has: (required)=> required==='free' ? true : (auth?.hasPlan ? auth.hasPlan(required) : false),
+  };
+}
+function LockPanel({required, what='This content'}) {
+  return (
+    <div className="panel" style={{padding:48, textAlign:'center'}}>
+      <Icon name="lock" size={30} style={{color:'var(--red)'}}/>
+      <h2 className="mono" style={{fontSize:20,fontWeight:700,marginTop:16}}>{PLAN_LABEL[required]||required} plan required</h2>
+      <p className="text-2" style={{maxWidth:'46ch',margin:'10px auto 22px',fontSize:13.5}}>{what} is part of the {PLAN_LABEL[required]||required} tier. Upgrade to unlock it — your progress and account stay the same.</p>
+      <Link to="/pricing" className="btn btn-primary">See plans <Icon name="arrow-right" size={13}/></Link>
+    </div>
+  );
+}
+
 // ============== COURSE DETAIL ==============
+const _progressSent = new Set();
+export function recordProgressOnce(auth, kind, ref, score, meta) {
+  try {
+    const uid = auth?.user?.id || auth?.user?.email; if (!uid) return;
+    const key = `${kind}:${ref}`; if (_progressSent.has(key)) return; _progressSent.add(key);
+    const username = auth?.profile?.prenom || (auth?.user?.email ? auth.user.email.split('@')[0] : 'learner');
+    platformApi.recordProgress({ user_id: uid, username, kind, ref, score: score ?? null, meta: meta || {} });
+  } catch { /* progress is best-effort */ }
+}
 function CourseDetailPage({route}) {
   const id = route.parts[1] || 'black-scholes';
   const c = COURSES.find(x=>x.id===id) || COURSES[0];
+  let auth=null; try { auth = useAuth(); } catch { auth=null; }
+  const ent = useEntitlement();
+  const requiredPlan = COURSE_TIER_PLAN[c.tier] || 'free';
+  const locked = requiredPlan!=='free' && !ent.has(requiredPlan);
   const [tab, setTab] = useState('content');
   const [selectedModuleIndex, setSelectedModuleIndex] = useState(0);
   const scriptState = useCourseScript(c.id);
@@ -1458,10 +1553,15 @@ function CourseDetailPage({route}) {
     setTab('content');
   }, [c.id]);
 
+  useEffect(() => {
+    if (scriptState.status === 'ready') recordProgressOnce(auth, 'lesson', `${c.id}#L0`, 5, { course: c.id });
+  }, [scriptState.status, auth, c.id]);
+
   const openModule = useCallback((index) => {
     setSelectedModuleIndex(index);
     setTab('content');
-  }, []);
+    recordProgressOnce(auth, 'lesson', `${c.id}#L${index}`, 5, { course: c.id });
+  }, [auth, c.id]);
 
   return (
     <div className="container page">
@@ -1500,9 +1600,9 @@ function CourseDetailPage({route}) {
             ))}
           </div>
           {tab==='content' && <CourseContent c={c} scriptState={scriptState} scriptModel={scriptModel} selectedModuleIndex={selectedModuleIndex} onSelectModule={openModule} onOpenScript={()=>setTab('script')}/>}
-          {tab==='script' && <CourseScript c={c} scriptState={scriptState} scriptModel={scriptModel}/>}
-          {tab==='calc' && <CourseCalculator c={c}/>}
-          {tab==='exercises' && <CourseExercises c={c}/>}
+          {tab==='script' && (locked ? <LockPanel required={requiredPlan} what={`The full ${c.title} script`}/> : <CourseScript c={c} scriptState={scriptState} scriptModel={scriptModel}/>)}
+          {tab==='calc' && (locked ? <LockPanel required={requiredPlan} what="The interactive calculator"/> : <CourseCalculator c={c}/>)}
+          {tab==='exercises' && (locked ? <LockPanel required={requiredPlan} what="The graded exercises"/> : <CourseExercises c={c}/>)}
           {tab==='resources' && <CourseResources c={c} scriptModel={scriptModel}/>}
         </div>
       </div>
@@ -1548,6 +1648,7 @@ function parseCourseScript(markdown = '') {
     modules: parseScriptModules(clean),
     writtenLessons: parseWrittenLessons(clean),
     formulas: parseScriptFormulas(clean),
+    uiBlocks: parseCourseUiBlocks(clean),
     labs: parseNumberedSection(clean, 'Labs pratiques a inclure'),
     exerciseBank: parseBulletSection(clean, "Banque d'exercices rattaches"),
     teacherScript: parseNumberedSection(clean, 'Script enseignant'),
@@ -1557,44 +1658,88 @@ function parseCourseScript(markdown = '') {
   };
 }
 
+// New Hull-structure courses use top-level "## Chapter" headings (0 Hook, 1
+// Intuition, 2 Theory…) instead of the old "### Module N" scaffold. Split on
+// H2 so the sidebar + Content reader reflect the SAME enriched curriculum as
+// the Script tab. Meta/front-matter sections are skipped.
+const _SKIP_H2 = /^(promesse|niveau cible|public|prerequis|objectifs|positionnement|legende|provenance|source\s*map|sources?\b|table des|sommaire)/i;
+function parseH2Chapters(markdown = '') {
+  return splitMarkdownHeadingBlocks(markdown, /^##\s+(.+?)\s*\r?\n/gm).reduce((out, block) => {
+    const title = block.title.replace(/^\d+\s*[·.)\-:]*\s*/, '').trim();
+    const body = block.body.trim();
+    if (_SKIP_H2.test(title) || body.length < 40) return out;
+    out.push({ number: out.length + 1, title, body });
+    return out;
+  }, []);
+}
+
 function parseWrittenLessons(markdown) {
   const section = markdownSection(markdown, 'Cours redige');
-  const matches = [...section.matchAll(/^### Lecon\s+(\d+)\s+-\s+(.+?)\s*\r?\n([\s\S]*?)(?=^### Lecon\s+\d+\s+-|\s*$)/gm)];
-  return matches.map((match)=>({
-    number: Number(match[1]),
-    title: match[2].trim(),
-    body: match[3].trim(),
-  }));
+  const blocks = splitMarkdownHeadingBlocks(section, /^### Lecon\s+(\d+)\s+-\s+(.+?)\s*\r?\n/gm);
+  if (blocks.length) {
+    return blocks.map((block)=>({ number: Number(block.number), title: block.title.trim(), body: block.body.trim() }));
+  }
+  return parseH2Chapters(markdown);  // Hull-structure fallback
 }
 
 function parseScriptModules(markdown) {
   const section = markdownSection(markdown, 'Deroule pratique');
-  const matches = [...section.matchAll(/^### Module\s+(\d+)\s+-\s+(.+?)\s*\r?\n([\s\S]*?)(?=^### Module\s+\d+\s+-|\s*$)/gm)];
-  return matches.map((match) => {
-    const fields = parseDeskBullets(match[3]);
-    return {
-      number: Number(match[1]),
-      title: match[2].trim(),
-      fields,
-      objective: fields['Objectif pratique'] || '',
-      situation: fields['Situation de desk'] || '',
-      notion: fields['Notion utile'] || '',
-      activity: fields.Activite || '',
-      deliverable: fields['Livrable apprenant'] || '',
-      raw: match[3].trim(),
-    };
-  });
+  const blocks = splitMarkdownHeadingBlocks(section, /^### Module\s+(\d+)\s+-\s+(.+?)\s*\r?\n/gm);
+  if (blocks.length) {
+    return blocks.map((block) => {
+      const fields = parseDeskBullets(block.body);
+      return {
+        number: Number(block.number), title: block.title.trim(), fields,
+        objective: fields['Objectif pratique'] || '', situation: fields['Situation de desk'] || '',
+        notion: fields['Notion utile'] || '', activity: fields.Activite || '',
+        deliverable: fields['Livrable apprenant'] || '', raw: block.body.trim(),
+      };
+    });
+  }
+  // Hull-structure fallback: each chapter is a module; the rich body renders in
+  // the Content reader (markdown + LaTeX + UIBLOCKs), keeping the layout intact.
+  return parseH2Chapters(markdown).map((ch)=>({
+    number: ch.number, title: ch.title, fields: {}, objective: '', situation: '',
+    notion: '', activity: '', deliverable: '', raw: ch.body,
+  }));
 }
 
 function parseScriptFormulas(markdown) {
   const section = markdownSection(markdown, 'Formules de desk');
-  const matches = [...section.matchAll(/^### F(\d+)\s+-\s+(.+?)\s*\r?\n\$\$\s*\r?\n([\s\S]*?)\r?\n\$\$\s*\r?\n([\s\S]*?)(?=^### F\d+\s+-|\s*$)/gm)];
-  return matches.map((match) => ({
-    number: Number(match[1]),
-    title: match[2].trim(),
-    expression: match[3].trim(),
-    usage: (match[4].match(/Usage desk:\s*(.+)/i)?.[1] || match[4].replace(/^-\s*/, '')).trim(),
-  }));
+  const formulaBlocks = splitMarkdownHeadingBlocks(section, /^### F(\d+)\s+-\s+(.+?)\s*\r?\n/gm);
+  if (formulaBlocks.length) {
+    return formulaBlocks.map((block) => {
+      const expression = block.body.match(/\$\$\s*([\s\S]*?)\s*\$\$/)?.[1]?.trim() || '';
+      const rest = block.body.replace(/\$\$\s*[\s\S]*?\s*\$\$/, '').trim();
+      return {
+        number: Number(block.number), title: block.title.trim(), expression,
+        usage: (rest.match(/Usage desk:\s*(.+)/i)?.[1] || rest.replace(/^-\s*/, '')).trim(),
+      };
+    }).filter((formula) => formula.expression);
+  }
+  // Hull-structure fallback: harvest the display equations ($$…$$) directly.
+  const blocks = [...markdown.matchAll(/\$\$\s*([\s\S]*?)\s*\$\$/g)].map(b=>b[1].trim()).filter(e=>e.length>2);
+  const seen = new Set();
+  return blocks.filter(e=>{ if(seen.has(e)) return false; seen.add(e); return true; })
+    .slice(0, 8).map((expression, i)=>({ number: i+1, title: `Key equation ${i+1}`, expression, usage: '' }));
+}
+
+function splitMarkdownHeadingBlocks(markdown = '', headingRegex) {
+  const matches = [...markdown.matchAll(headingRegex)];
+  return matches.map((match, index) => {
+    const next = matches[index + 1];
+    return {
+      number: match.length > 2 ? Number(match[1]) : index + 1,
+      title: (match.length > 2 ? match[2] : match[1] || '').trim(),
+      body: markdown.slice((match.index || 0) + match[0].length, next?.index ?? markdown.length).trim(),
+    };
+  });
+}
+
+function parseCourseUiBlocks(markdown = '') {
+  return [...markdown.matchAll(/```uiblock\s*([\s\S]*?)```/g)]
+    .map((match, index) => ({...parseUiBlock(match[1]), number: index + 1, raw: match[1]}))
+    .filter((block) => block.type);
 }
 
 function parseDeskBullets(block = '') {
@@ -1680,7 +1825,7 @@ function CourseSidebar({c, scriptModel, selectedModuleIndex = 0, onSelectModule,
     ? scriptModel.modules.map((module,idx)=>({
         n: String(idx + 1).padStart(2, '0'),
         t: module.title,
-        d: module.deliverable || module.objective || 'Desk deliverable',
+        d: normalizeCourseMicrocopy(module.deliverable || module.objective || 'Livrable de desk'),
       }))
     : (blueprint?.lessons || blueprint?.modules || [
         {n:'01', t:'Desk setup', d:'Inputs, market context and first calculation'},
@@ -1695,13 +1840,13 @@ function CourseSidebar({c, scriptModel, selectedModuleIndex = 0, onSelectModule,
   return (
     <div className="course-sidebar">
       <div className="panel" style={{padding:16, marginBottom:16}}>
-        <div className="label" style={{marginBottom:10}}>Curriculum status</div>
+        <div className="label" style={{marginBottom:10}}>Your progress</div>
         <div className="row between" style={{marginBottom:6}}>
-          <span className="mono" style={{fontSize:18,fontWeight:700}}>OPEN</span>
-          <span className="mono mute" style={{fontSize:11}}>{unlockedCount} / {unlockedCount} modules</span>
+          <span className="mono" style={{fontSize:18,fontWeight:700}}>Module {Math.min(selectedModuleIndex+1, unlockedCount)}</span>
+          <span className="mono mute" style={{fontSize:11}}>of {unlockedCount}</span>
         </div>
         <div style={{height:3,background:'var(--line)',borderRadius:0}}>
-          <div style={{height:'100%',width:'100%',background:'var(--red)'}}></div>
+          <div style={{height:'100%',width:`${unlockedCount?Math.round((Math.min(selectedModuleIndex+1,unlockedCount))/unlockedCount*100):0}%`,background:'var(--red)'}}></div>
         </div>
       </div>
       <div className="panel">
@@ -1731,6 +1876,90 @@ function CourseSidebar({c, scriptModel, selectedModuleIndex = 0, onSelectModule,
   );
 }
 
+function HedgingContent(props = {}) {
+  // Real delta-gamma-vega-theta scenario P&L attribution — a genuine desk tool.
+  // Units: delta = € per +1% spot; gamma = € per (1%)^2; vega = € per +1 vol pt; theta = € per day.
+  // A course block may supply engine-priced book Greeks via params {delta,gamma,vega,theta,
+  // dSpotPct,dVolPts,dDays}; otherwise fall back to the §2.6 stoch-calc calendar defaults
+  // (short 1000 ATM 1m / long 1000 ATM 1y, x100, delta-hedged): short-gamma, long-vega, positive-theta.
+  const num0 = (v, d) => (Number.isFinite(+v) ? +v : d);
+  const [g, setG] = useState({
+    delta: num0(props.delta, 0), gamma: num0(props.gamma, -4998.5),
+    vega: num0(props.vega, 26066.2), theta: num0(props.theta, 2715.3),
+  });
+  const [sc, setSc] = useState({
+    dS: num0(props.dSpotPct, -2), dVol: num0(props.dVolPts, 3), days: num0(props.dDays, 1),
+  });
+  const num = (e) => parseFloat(e.target.value) || 0;
+  const pnl = {
+    Delta: g.delta * sc.dS,
+    Gamma: 0.5 * g.gamma * sc.dS * sc.dS,
+    Vega: g.vega * sc.dVol,
+    Theta: g.theta * sc.days,
+  };
+  const total = pnl.Delta + pnl.Gamma + pnl.Vega + pnl.Theta;
+  const parts = Object.entries(pnl);
+  const maxAbs = Math.max(1, ...parts.map(([, v]) => Math.abs(v)));
+  const dom = parts.slice().sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]))[0][0];
+  const eur = (x) => (x >= 0 ? '+' : '−') + '€' + Math.abs(Math.round(x)).toLocaleString();
+  const field = (obj, set, k, label, suffix) => (
+    <div>
+      <div className="mono mute" style={{ fontSize: 11, marginBottom: 4 }}>{label}</div>
+      <input value={obj[k]} onChange={(e) => set((p) => ({ ...p, [k]: num(e) }))}
+        style={{ width: '100%', background: '#0A0C10', border: '1px solid var(--line-2)', padding: '7px 9px', borderRadius: 3, color: 'var(--text)', fontFamily: "'JetBrains Mono',monospace", fontSize: 12 }} />
+    </div>
+  );
+  return (
+    <div className="col" style={{ gap: 18 }}>
+      <div className="panel" style={{ padding: 24 }}>
+        <div className="section-eyebrow" style={{ margin: 0 }}>// Lesson 3.1 · Delta-Gamma-Vega-Theta</div>
+        <h2 className="mono" style={{ fontSize: 22, fontWeight: 700, marginTop: 10 }}>Scenario P&L attribution.</h2>
+        <p className="text-2" style={{ fontSize: 13.5, lineHeight: 1.7 }}>A second-order Taylor expansion of the book P&L. Enter your aggregate Greeks and a market scenario; the desk reads the dominant exposure before deciding the hedge.</p>
+        <div className="panel-2 mono" style={{ padding: 16, margin: '12px 0', fontSize: 13, textAlign: 'center' }}>ΔP&L ≈ Δ·dS + ½·Γ·dS² + ν·dσ + Θ·dt</div>
+      </div>
+      <div className="grid-2">
+        <div className="panel" style={{ padding: 20 }}>
+          <div className="label" style={{ marginBottom: 12 }}>Book Greeks</div>
+          <div className="grid-2" style={{ gap: 12 }}>
+            {field(g, setG, 'delta', 'Delta (€ / +1% spot)')}
+            {field(g, setG, 'gamma', 'Gamma (€ / 1%²)')}
+            {field(g, setG, 'vega', 'Vega (€ / vol pt)')}
+            {field(g, setG, 'theta', 'Theta (€ / day)')}
+          </div>
+          <div className="label" style={{ margin: '18px 0 12px' }}>Market scenario</div>
+          <div className="grid-3" style={{ gap: 12 }}>
+            {field(sc, setSc, 'dS', 'Spot move (%)')}
+            {field(sc, setSc, 'dVol', 'Vol move (pts)')}
+            {field(sc, setSc, 'days', 'Days elapsed')}
+          </div>
+        </div>
+        <div className="panel" style={{ padding: 20 }}>
+          <div className="row between" style={{ marginBottom: 12 }}>
+            <div className="label">P&L attribution</div>
+            <span className="badge" style={{ background: 'rgba(255,46,69,.08)', color: 'var(--red)' }}>Dominant: {dom}</span>
+          </div>
+          {parts.map(([k, v]) => (
+            <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0' }}>
+              <span className="mono" style={{ fontSize: 12, width: 56, color: 'var(--mute)' }}>{k}</span>
+              <div style={{ flex: 1, height: 8, background: 'var(--line)', borderRadius: 4, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: Math.min(100, Math.abs(v) / maxAbs * 100) + '%', background: v >= 0 ? 'var(--green)' : 'var(--red)' }} />
+              </div>
+              <span className="mono" style={{ fontSize: 12, width: 96, textAlign: 'right', color: v >= 0 ? 'var(--green)' : 'var(--red)' }}>{eur(v)}</span>
+            </div>
+          ))}
+          <div className="row between" style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--line)' }}>
+            <span className="mono" style={{ fontWeight: 700 }}>Total P&L</span>
+            <span className="mono" style={{ fontWeight: 700, fontSize: 18, color: total >= 0 ? 'var(--green)' : 'var(--red)' }}>{eur(total)}</span>
+          </div>
+          <div className="mono mute" style={{ fontSize: 11.5, marginTop: 12, lineHeight: 1.5 }}>
+            Hedge read: neutralise <b>{dom}</b> first. To flatten delta, trade {Math.round(-g.delta).toLocaleString()} € of the underlying per 1%; gamma/vega need options, not spot.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CourseContent({c, scriptState, scriptModel, selectedModuleIndex, onSelectModule, onOpenScript}) {
   const blueprint = getCourseBlueprint(c.id);
   if (blueprint) {
@@ -1752,6 +1981,7 @@ function CourseContent({c, scriptState, scriptModel, selectedModuleIndex, onSele
   if (c.id === 'implied-vol') return <IVContent/>;
   if (c.id === 'exotics') return <ExoticsContent/>;
   if (c.id === 'monte-carlo') return <MCContent/>;
+  if (c.id === 'hedging') return <HedgingContent/>;
   // generic fallback
   return <GenericContent c={c}/>;
 }
@@ -1807,12 +2037,287 @@ function CourseScript({c, scriptState, scriptModel}) {
   );
 }
 
+// Parse a ```uiblock fenced spec (type: / title: / params: {…}) into an object.
+function parseUiBlock(text='') {
+  const out = { type:'', title:'', params:{} };
+  const mt = text.match(/type:\s*([a-z_]+)/i); if (mt) out.type = mt[1].trim();
+  const ti = text.match(/title:\s*(.+)/i); if (ti) out.title = ti[1].trim();
+  const mp = text.match(/params:\s*(\{[\s\S]*\})/i);
+  if (mp) { try { out.params = JSON.parse(mp[1].replace(/([{,]\s*)([a-zA-Z_][\w]*)\s*:/g,'$1"$2":').replace(/'/g,'"')); } catch(e){ out.params = {}; } }
+  return out;
+}
+
+const RAG_API = (import.meta.env.VITE_TPL_RAG_API_URL || 'http://127.0.0.1:8000').replace(/\/+$/,'');
+
+const TONE_COLOR = { blue:'var(--blue)', amber:'var(--amber)', green:'var(--green)', red:'var(--red)' };
+
+// Real price history. Tries the backend market API first (live AAPL etc.); when
+// no backend is reachable, falls back to the bundled farmed series so the chart
+// still renders genuine history offline. Renders through the real LineChart.
+function UIPriceChart({ symbol='AAPL', points=140 }) {
+  const [data,setData] = useState(null);
+  useEffect(()=>{
+    let ok=true;
+    fetch(`${RAG_API}/market/history/${encodeURIComponent(symbol)}?points=${points}`)
+      .then(r=>r.ok?r.json():null)
+      .then(j=>{
+        if(!ok) return;
+        if(j&&Array.isArray(j.series)&&j.series.length){
+          const closes=j.series.map(s=>s.close);
+          setData({label:symbol, closes, src:`${(j.rows||closes.length).toLocaleString()} real bars`});
+        } else throw new Error('no-backend');
+      })
+      .catch(()=>{ loadDeskSeries().then(b=>{
+        if(!ok) return;
+        const key=SYMBOL_ALIAS[symbol]||'SPX';
+        const s=b.series?.[key];
+        if(s&&s.points?.length) setData({label:s.label, closes:s.points.map(p=>p.c), src:s.source, range:[s.points[0].d, s.points[s.points.length-1].d]});
+      }); });
+    return ()=>{ok=false;};
+  },[symbol,points]);
+  if(!data) return <div className="mute mono" style={{fontSize:12,padding:14}}>Chargement de l'historique de prix reel…</div>;
+  const series=[{name:data.label,color:'var(--blue)',data:data.closes.map((y,i)=>({x:i,y}))}];
+  const last=data.closes[data.closes.length-1];
+  return (<div><LineChart series={series} xAxis={false} height={160}/><div className="mono mute" style={{fontSize:11,marginTop:6}}>{data.label} · {data.src}{data.range?` · ${data.range[0]} → ${data.range[1]}`:''} · dernier {fmt(last)}</div></div>);
+}
+
+// A genuine real-market anchor for each course: the live-history line of the most
+// relevant asset (price / implied vol / yield / credit spread) plus a secondary
+// sparkline and a stat strip — all from the bundled farmed cache, no backend.
+function CourseMarketWidget({ slug }) {
+  const [bundle,setBundle] = useState(null);
+  useEffect(()=>{ let ok=true; loadDeskSeries().then(b=>{ if(ok) setBundle(b); }); return ()=>{ok=false;}; },[]);
+  const pick = pickCourseSeries(slug);
+  if(!pick) return null;
+  const color = TONE_COLOR[pick.tone] || 'var(--blue)';
+  if(!bundle) return <div className="panel" style={{padding:16,margin:'14px 0'}}><div className="mute mono" style={{fontSize:12}}>Chargement des donnees de marche reelles…</div></div>;
+  const prim = bundle.series?.[pick.primary];
+  if(!prim || !prim.points?.length) return null;
+  const sec = pick.secondary ? bundle.series?.[pick.secondary] : null;
+  const closes = prim.points.map(p=>p.c);
+  const first=closes[0], last=closes[closes.length-1];
+  const lo=Math.min(...closes), hi=Math.max(...closes);
+  const chgPct=((last-first)/(Math.abs(first)||1))*100;
+  const isRate = prim.unit==='%';
+  const chgLabel = isRate ? `${(last-first>=0?'+':'')}${((last-first)*100).toFixed(0)} bp` : `${chgPct>=0?'+':''}${chgPct.toFixed(1)}%`;
+  const series=[{name:prim.label,color,data:closes.map((y,i)=>({x:i,y}))}];
+  const d0=prim.points[0].d, d1=prim.points[prim.points.length-1].d;
+  return (
+    <div className="panel course-market-widget" style={{padding:16,margin:'14px 0'}}>
+      <div className="row between" style={{marginBottom:10,alignItems:'flex-start',gap:12}}>
+        <div>
+          <div className="label">Donnee de marche reelle</div>
+          <h4 className="mono" style={{margin:'4px 0 0',fontSize:14}}>{prim.label}</h4>
+        </div>
+        <span className="badge" style={{background:'rgba(25,195,125,.08)',color:'var(--green)'}}>farmed cache · {prim.source}</span>
+      </div>
+      <LineChart series={series} xAxis={false} height={160}/>
+      <div className="course-market-stats">
+        <div><div className="label">Periode</div><p className="mono">{d0} → {d1}</p></div>
+        <div><div className="label">Dernier</div><p className="mono">{fmt(last)}{isRate?'%':''}</p></div>
+        <div><div className="label">Variation</div><p className="mono" style={{color:(last-first)>=0?'var(--green)':'var(--red)'}}>{chgLabel}</p></div>
+        <div><div className="label">Min / Max</div><p className="mono">{fmt(lo)} / {fmt(hi)}</p></div>
+      </div>
+      {sec && sec.points?.length>0 && (
+        <div className="row between course-market-sec" style={{marginTop:10,alignItems:'center',gap:12}}>
+          <div><div className="label">{sec.label}</div><p className="mono mute" style={{margin:'2px 0 0',fontSize:11}}>dernier {fmt(sec.points[sec.points.length-1].c)}{sec.unit==='%'?'%':''}</p></div>
+          <Spark data={sec.points.map(p=>p.c)} width={140} height={30} color={(TONE_COLOR[pick.tone==='green'?'amber':'green'])} fill/>
+        </div>
+      )}
+      <p className="mute" style={{fontSize:12,lineHeight:1.5,marginTop:10}}>{pick.read}</p>
+    </div>
+  );
+}
+
+function UIScenarioTable(props) {
+  const { rows, cols, cells, rowLabel } = props;
+  // Generic engine-fed grid: a course supplies explicit rows/cols/cells (real
+  // rate-shock / VaR / KRD01 numbers) instead of the Black-Scholes option grid.
+  if (Array.isArray(rows) && Array.isArray(cols) && Array.isArray(cells)) {
+    return (<table className="data"><thead><tr><th>{rowLabel||''}</th>{cols.map((c,i)=><th key={i} className="num">{c}</th>)}</tr></thead>
+      <tbody>{rows.map((r,i)=><tr key={i}><td className="symbol">{r}</td>{(cells[i]||[]).map((v,j)=>{ const neg=String(v).trim().startsWith('-'); return <td key={j} className="num" style={neg?{color:'var(--red)'}:undefined}>{String(v)}</td>; })}</tr>)}</tbody></table>);
+  }
+  const { spot=100, strike=100, vol=0.2, T=0.25, kind='call' } = props;
+  const ss=[-0.2,-0.1,0,0.1,0.2], vs=[-0.05,0,0.05];
+  const px=(s,v)=>bsPrice({S:spot*(1+s),K:strike,r:0.02,sigma:Math.max(0.01,vol+v),T,type:kind}).price;
+  return (<table className="data"><thead><tr><th>vol \ spot</th>{ss.map(s=><th key={s} className="num">{(s>=0?'+':'')+(s*100)}%</th>)}</tr></thead>
+    <tbody>{vs.map(v=><tr key={v}><td className="symbol">{(v>=0?'+':'')+(v*100)} pts</td>{ss.map(s=><td key={s} className="num">{fmt(px(s,v))}</td>)}</tr>)}</tbody></table>);
+}
+
+// --- Credit (CDS) interactive blocks -------------------------------------
+// A genuine single-name CDS risk panel: CS01, carry, PV of premium leg and
+// jump-to-default, all from the same closed forms the deterministic engine
+// (family cds_cs01) uses. Sign is shown from the protection BUYER's view.
+function CDSScenario({ notional=50000000, spread_bp=120, riskyAnnuity=4.2, recovery=40, shock_bp=25, side='buyer' }) {
+  const [g, setG] = useState({ notional, spread_bp, riskyAnnuity, recovery });
+  const [sc, setSc] = useState({ shock_bp });
+  const num = (e) => parseFloat(e.target.value) || 0;
+  const N = g.notional, R = g.recovery/100;
+  const cs01 = g.riskyAnnuity * N * 1e-4;          // EUR / bp
+  const coupon = g.spread_bp * 1e-4 * N;           // EUR / year
+  const pvPrem = coupon * g.riskyAnnuity;          // EUR
+  const jtd = (1 - R) * N;                          // EUR (loss to seller / gain to buyer)
+  const mtm = cs01 * sc.shock_bp;                  // protection BUYER gains when spread widens
+  const sgn = side === 'seller' ? -1 : 1;
+  const rows = [
+    ['CS01 (EUR / bp)', cs01, false],
+    ['MtM du choc (CS01 x ' + sc.shock_bp + ' bp)', sgn * mtm, true],
+    ['Carry annuel (coupon)', sgn * -coupon, true],   // buyer PAYS the coupon
+    ['PV jambe de prime', pvPrem, false],
+    ['Jump-to-default', sgn * jtd, true],
+  ];
+  const maxAbs = Math.max(1, ...rows.map(([, v]) => Math.abs(v)));
+  const eur = (x) => (x >= 0 ? '+' : '−') + '€' + Math.abs(Math.round(x)).toLocaleString();
+  const field = (obj, set, k, label) => (
+    <div>
+      <div className="mono mute" style={{ fontSize: 11, marginBottom: 4 }}>{label}</div>
+      <input value={obj[k]} onChange={(e) => set((p) => ({ ...p, [k]: num(e) }))}
+        style={{ width: '100%', background: '#0A0C10', border: '1px solid var(--line-2)', padding: '7px 9px', borderRadius: 3, color: 'var(--text)', fontFamily: "'JetBrains Mono',monospace", fontSize: 12 }} />
+    </div>
+  );
+  return (
+    <div className="grid-2">
+      <div className="panel" style={{ padding: 20 }}>
+        <div className="label" style={{ marginBottom: 12 }}>Ticket CDS ({side === 'seller' ? 'vendeur' : 'acheteur'} de protection)</div>
+        <div className="grid-2" style={{ gap: 12 }}>
+          {field(g, setG, 'notional', 'Notionnel (EUR)')}
+          {field(g, setG, 'spread_bp', 'Spread (bp)')}
+          {field(g, setG, 'riskyAnnuity', 'Risky annuity (RPV01)')}
+          {field(g, setG, 'recovery', 'Recovery (%)')}
+        </div>
+        <div className="label" style={{ margin: '18px 0 12px' }}>Scenario marche</div>
+        <div className="grid-2" style={{ gap: 12 }}>
+          {field(sc, setSc, 'shock_bp', 'Ecartement de spread (bp)')}
+        </div>
+      </div>
+      <div className="panel" style={{ padding: 20 }}>
+        <div className="row between" style={{ marginBottom: 12 }}>
+          <div className="label">Risque & P&L</div>
+          <span className="badge" style={{ background: 'rgba(255,46,69,.08)', color: 'var(--red)' }}>JtD: {eur(sgn * jtd)}</span>
+        </div>
+        {rows.map(([k, v, signed]) => (
+          <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 0' }}>
+            <span className="mono" style={{ fontSize: 11, width: 150, color: 'var(--mute)' }}>{k}</span>
+            <div style={{ flex: 1, height: 8, background: 'var(--line)', borderRadius: 4, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: Math.min(100, Math.abs(v) / maxAbs * 100) + '%', background: (signed ? v >= 0 : true) ? 'var(--green)' : 'var(--red)' }} />
+            </div>
+            <span className="mono" style={{ fontSize: 12, width: 120, textAlign: 'right', color: signed ? (v >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--text)' }}>{signed ? eur(v) : '€' + Math.round(v).toLocaleString()}</span>
+          </div>
+        ))}
+        <div className="mono mute" style={{ fontSize: 11, marginTop: 10, lineHeight: 1.5 }}>CS01 = RPV01 × notionnel × 1bp · JtD = (1−R) × notionnel · signe = {side === 'seller' ? 'vendeur' : 'acheteur'} de protection.</div>
+      </div>
+    </div>
+  );
+}
+
+function CDSScenarioTable({ notional=50000000, spread_bp=120, riskyAnnuity=4.2, recovery=40, shocks_bp=[-50,-25,0,25,50,100,200], side='buyer' }) {
+  const N = notional, R = recovery/100, sgn = side === 'seller' ? -1 : 1;
+  const cs01 = riskyAnnuity * N * 1e-4;
+  const coupon = spread_bp * 1e-4 * N;
+  const jtd = (1 - R) * N;
+  const eur = (x) => (x >= 0 ? '+' : '−') + '€' + Math.abs(Math.round(x)).toLocaleString();
+  return (
+    <div>
+      <table className="data"><thead><tr>
+        <th>Choc spread</th><th className="num">ΔMtM (CS01×Δs)</th><th className="num">Carry annuel</th><th className="num">Net 1 an</th>
+      </tr></thead>
+      <tbody>{shocks_bp.map((s) => {
+        const mtm = sgn * cs01 * s;
+        const carry = sgn * -coupon;       // buyer pays carry
+        return (<tr key={s}><td className="symbol">{(s>=0?'+':'')+s} bp</td>
+          <td className="num" style={{color: mtm>=0?'var(--green)':'var(--red)'}}>{eur(mtm)}</td>
+          <td className="num" style={{color: carry>=0?'var(--green)':'var(--red)'}}>{eur(carry)}</td>
+          <td className="num" style={{color: (mtm+carry)>=0?'var(--green)':'var(--red)'}}>{eur(mtm+carry)}</td></tr>);
+      })}</tbody></table>
+      <div className="mono mute" style={{ fontSize: 11, marginTop: 8, lineHeight: 1.5 }}>CS01 = €{Math.round(cs01).toLocaleString()}/bp · jump-to-default = {eur(sgn*jtd)} (domine tout choc de spread) · vue {side === 'seller' ? 'vendeur' : 'acheteur'} de protection.</div>
+    </div>
+  );
+}
+
+function UICorrMatrix({ labels = [], matrix = [] }) {
+  const col = (v) => { const x = Math.max(-1, Math.min(1, Number(v) || 0)), a = Math.abs(x);
+    return x >= 0 ? `rgba(46,204,113,${0.10 + 0.55 * a})` : `rgba(255,46,69,${0.10 + 0.55 * a})`; };
+  return (<table className="data" style={{ fontSize: 11 }}><thead><tr><th></th>{labels.map((l, i) => <th key={i} className="num">{l}</th>)}</tr></thead>
+    <tbody>{matrix.map((row, i) => <tr key={i}><td className="symbol">{labels[i]}</td>{row.map((v, j) => <td key={j} className="num" style={{ background: col(v), color: 'var(--text)' }}>{Number(v).toFixed(2)}</td>)}</tr>)}</tbody></table>);
+}
+
+function UIPayoffChart({ spot=100, strike=100, kind='call', premium=0, qty=1, title='' }) {
+  const S0 = Math.max(1e-6, Number(spot) || 100);
+  const K = Math.max(1e-6, Number(strike) || S0);
+  const q = Number(qty) || 1;
+  const prem = Number(premium) || 0;
+  const side = String(kind || '').toLowerCase().includes('put') ? 'put' : 'call';
+  const lo = Math.min(S0, K) * 0.55;
+  const hi = Math.max(S0, K) * 1.55;
+  const xs = Array.from({ length: 81 }, (_, i) => lo + (hi - lo) * i / 80);
+  const payoffValue = (x) => q * ((side === 'put' ? Math.max(K - x, 0) : Math.max(x - K, 0)) - prem);
+  const payoff = xs.map((x) => ({ x, y: payoffValue(x) }));
+  const breakevens = [];
+  for (let i = 1; i < payoff.length; i += 1) {
+    const a = payoff[i - 1], b = payoff[i];
+    if (Math.abs(a.y) < 1e-8) breakevens.push(a.x);
+    if (a.y * b.y < 0) breakevens.push(a.x - a.y * (b.x - a.x) / (b.y - a.y));
+  }
+  const legs = [{ id: 'course-payoff', K, side: 'long', type: side, qty: q, prem }];
+  const maxGain = Math.max(...payoff.map((p) => p.y));
+  const maxLoss = Math.min(...payoff.map((p) => p.y));
+  return (
+    <div className="ui-payoff-widget">
+      <PayoffChart payoff={payoff} breakevens={breakevens.slice(0, 3)} legs={legs}/>
+      <div className="payoff-widget-stats">
+        <div><span>Produit</span><strong>{title.toLowerCase().includes('barrier') ? 'Payoff conditionnel' : `${side.toUpperCase()} vanilla`}</strong></div>
+        <div><span>Spot</span><strong>{fmt(S0, 2)}</strong></div>
+        <div><span>Strike</span><strong>{fmt(K, 2)}</strong></div>
+        <div><span>P&L min / max</span><strong>{fmt(maxLoss, 2)} / {fmt(maxGain, 2)}</strong></div>
+      </div>
+    </div>
+  );
+}
+
+function UIBlock({ spec }) {
+  const { type, title, params = {} } = spec;
+  const isCDS = params && params.kind === 'cds';
+  const body = (() => {
+    switch(type){
+      case 'greeks_scenario': return isCDS ? <CDSScenario {...params}/> : <HedgingContent {...params}/>;
+      case 'payoff': return <UIPayoffChart {...params} title={title}/>;
+      case 'monte_carlo': return (params && (params.mode==='var_pnl' || params.histVaR!=null)) ? <VarMCContent {...params}/> : <MCContent/>;
+      case 'vol_smile': return <VolHeatmap matrix={params.matrix||TR_VOLHEAT} rowLabels={['80%','100%','120%','','']} colLabels={['1W','1M','3M','6M','1Y']} cell={20}/>;
+      case 'price_chart': return <UIPriceChart symbol={params.symbol||'AAPL'} points={params.points||140}/>;
+      case 'scenario_table': case 'pnl_grid': case 'rate_shock_table': case 'stress_table':
+        return isCDS ? <CDSScenarioTable {...params}/> : <UIScenarioTable {...params}/>;
+      case 'equation': return <LatexMarkdown content={`$$\n${params.latex||params.expression||''}\n$$`}/>;
+      case 'corr_matrix': case 'covariance_matrix': return <UICorrMatrix {...params}/>;
+      default: return <div className="mono mute" style={{fontSize:12}}>UI block: {type}</div>;
+    }
+  })();
+  return (
+    <div className="panel" style={{padding:18, margin:'18px 0'}}>
+      {title && <div className="row between" style={{marginBottom:12}}><div className="label">{title}</div><span className="badge" style={{background:'rgba(62,139,255,.08)',color:'var(--blue)'}}>interactive</span></div>}
+      {body}
+    </div>
+  );
+}
+const TR_VOLHEAT = [[0.18,0.30,0.45,0.58,0.66],[0.28,0.46,0.66,0.82,0.74],[0.40,0.66,0.95,0.78,0.55],[0.30,0.50,0.70,0.60,0.42],[0.22,0.36,0.50,0.44,0.30]];
+
 function LatexMarkdown({content}) {
+  const md = stripNoiseCitations(stripFrontmatter(content || ''));
+  const parts = [];
+  const re = /```uiblock\s*([\s\S]*?)```/g;
+  let last = 0, m;
+  while ((m = re.exec(md))) {
+    if (m.index > last) parts.push({ t:'md', v: md.slice(last, m.index) });
+    parts.push({ t:'block', v: m[1] });
+    last = re.lastIndex;
+  }
+  if (last < md.length) parts.push({ t:'md', v: md.slice(last) });
+  if (!parts.length) parts.push({ t:'md', v: md });
   return (
     <div className="course-script-markdown">
-      <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-        {stripFrontmatter(content)}
-      </ReactMarkdown>
+      {parts.map((p,i)=> p.t==='block'
+        ? <UIBlock key={i} spec={parseUiBlock(p.v)}/>
+        : <ReactMarkdown key={i} remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>{p.v}</ReactMarkdown>
+      )}
     </div>
   );
 }
@@ -1820,6 +2325,43 @@ function LatexMarkdown({content}) {
 function stripFrontmatter(markdown = '') {
   return markdown.replace(/^---\s*[\s\S]*?\s*---\s*/, '');
 }
+
+// Both demanding personas flagged the same #1 trust-killer: inline
+// "Les sources le confirment _[extrait]_ : « … » [Sx]" clauses that quote
+// unrelated, low-relevance corpus chunks (book index pages, off-topic textbooks)
+// as if they substantiated the lesson. The verified derivations + engine numbers
+// carry the trust instead. We excise ONLY that specific noise pattern at render
+// time (the markdown files — and the backend quality gate — are untouched).
+function stripNoiseCitations(text = '') {
+  return String(text)
+    .replace(/\s*Les sources?\s+(?:le|la|les)\s+confir?ment[\s\S]*?\[S\d+\]\s*\.?/gi, '')
+    .replace(/\s*_?\[extrait\]_?\s*:\s*«[\s\S]*?»\s*\[S\d+\]\s*\.?/gi, '')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\n{3,}/g, '\n\n');
+}
+
+// Generic, byte-identical "philosophy wall" paragraphs both personas flagged as
+// "a text wall wearing a costume" — they recur in 21-96 of the 96 lessons with
+// only the concept noun swapped. We drop them at render so each lesson keeps its
+// bespoke lead + the concept/ticket-specific paragraphs (the rigorous proof and
+// real-market widget below carry the substance). Concept-bearing frames
+// ("En pratique, la lecon consiste a…", "Concretement, l'exercice consiste a…",
+// "L'objectif de cette lecon…", "La notion de … sert…") are deliberately KEPT.
+const _LESSON_BOILERPLATE = new RegExp('^(?:' + [
+  '\\*\\*(?:Micro-cas a traiter|Checkpoint de maitrise)\\.\\*\\*',
+  'Un etudiant tres forme doit voir',
+  "Sur le desk, la question n'est jamais",
+  'Decision attendue\\s*:\\s*produire le livrable',
+  'Le niveau Hull consiste a ne pas accepter',
+  'Le jeune professionnel doit aussi savoir parler',
+  'La bonne analyse commence par la decomposition',
+  'Le controle minimal tient en une phrase',
+  'Le cours doit vous amener a un reflexe',
+  'Avant de passer a la lecon suivante',
+  'Un apprenant doit savoir quelle source croire',
+  'Le desk refuse un chiffre qui ne peut pas etre',
+  'Un entretien quant demande la derivation',
+].join('|') + ')', 'i');
 
 function PracticeCourseContent({c, blueprint, scriptState, scriptModel, selectedModuleIndex = 0, onSelectModule, onOpenScript}) {
   const modules = scriptModel?.modules?.length
@@ -1836,6 +2378,7 @@ function PracticeCourseContent({c, blueprint, scriptState, scriptModel, selected
   const safeIndex = Math.min(Math.max(selectedModuleIndex, 0), Math.max(modules.length - 1, 0));
   const activeModule = modules[safeIndex];
   const formulas = scriptModel?.formulas || [];
+  const uiBlocks = scriptModel?.uiBlocks || [];
   const labs = scriptModel?.labs?.length ? scriptModel.labs : blueprint.labs.map(([lab, task])=>`${lab}: ${task}`);
   const facts = scriptModel?.facts?.slice(0, 6) || [];
   const supports = scriptModel?.supports?.length ? scriptModel.supports : blueprint.resources;
@@ -1844,16 +2387,16 @@ function PracticeCourseContent({c, blueprint, scriptState, scriptModel, selected
   return (
     <div className="col" style={{gap:18}}>
       <div className="panel" style={{padding:24}}>
-        <div className="section-eyebrow" style={{margin:0}}>// Practice-first curriculum</div>
+        <div className="section-eyebrow" style={{margin:0}}>// Parcours pratique salle de marche</div>
         <h2 className="mono" style={{fontSize:24,fontWeight:700,marginTop:10,marginBottom:12}}>{blueprint.deskRole}</h2>
         <p className="text-2" style={{fontSize:13.5,lineHeight:1.75,marginTop:0,maxWidth:'82ch'}}>
-          {blueprint.deskPromise} The module starts from a market task, introduces only the minimum theory needed,
-          then finishes with a calculation, a risk interpretation and a desk action.
+          {blueprint.deskPromise} Chaque module part d'un ticket ou d'un risque de marche, introduit la theorie utile,
+          puis force un calcul, un controle, une lecture de risque et une action de desk.
         </p>
         <div className="row" style={{gap:8,flexWrap:'wrap',marginTop:16}}>
-          <span className="badge badge-green">All modules open</span>
-          {blueprint.workflow.map((step,idx)=>(
-            <span key={step} className="badge">{String(idx + 1).padStart(2,'0')} · {step}</span>
+          <span className="badge badge-green">Modules ouverts</span>
+          {(modules.length ? modules : blueprint.workflow).slice(0, 6).map((step,idx)=>(
+            <span key={step.title || step} className="badge">{String(idx + 1).padStart(2,'0')} · {step.title || step}</span>
           ))}
         </div>
       </div>
@@ -1870,37 +2413,21 @@ function PracticeCourseContent({c, blueprint, scriptState, scriptModel, selected
         module={activeModule}
         writtenLesson={scriptModel?.writtenLessons?.[safeIndex]}
         formula={formulas[safeIndex % Math.max(formulas.length, 1)]}
+        uiBlocks={selectModuleUiBlocks(uiBlocks, safeIndex)}
         moduleCount={modules.length}
         selectedModuleIndex={safeIndex}
         onOpenScript={onOpenScript}
       />
 
-      <div className="grid-2">
-        <div className="panel course-module-switcher">
-          <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
-            <div className="label">Modules du cours</div>
-            <span className="badge">{modules.length} open</span>
-          </div>
-          <div className="course-module-list">
-            {modules.map((module,idx)=>(
-              <button key={`${module.number}-${module.title}`} type="button" className={idx===safeIndex ? 'active' : ''} onClick={()=>onSelectModule?.(idx)}>
-                <span className="mono">{String(idx + 1).padStart(2,'0')}</span>
-                <div>
-                  <strong>{module.title}</strong>
-                  <small>{module.deliverable || module.objective || 'Desk output'}</small>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
+      <div>
         <div className="panel" style={{padding:18}}>
-          <div className="label" style={{marginBottom:14}}>What the learner produces</div>
+          <div className="label" style={{marginBottom:14}}>Ce que l'apprenant produit</div>
           <div className="col" style={{gap:10}}>
             {[
-              ['Market read', 'Inputs, assumptions and missing data are made explicit.'],
-              ['Calculation', 'Numbers are shown with units and signs, not hidden behind prose.'],
-              ['Risk view', 'The learner identifies the exposure that matters on a desk.'],
-              ['Action', 'Every lesson ends with hedge, monitor, reduce, quote or escalate.'],
+              ['Lecture marche', 'Inputs, hypotheses et donnees manquantes sont explicites.'],
+              ['Calcul', 'Les chiffres ont des unites, des signes et des controles.'],
+              ['Vue risque', "L'apprenant identifie l'exposition qui compte vraiment."],
+              ['Action', 'Chaque lecon finit par quote, hedge, monitor, reduce ou escalate.'],
             ].map(([title,desc])=>(
               <div key={title} className="row" style={{gap:12,alignItems:'flex-start',padding:'9px 0',borderTop:title!=='Market read'?'1px solid var(--line)':'none'}}>
                 <Icon name="check" size={13} style={{color:'var(--green)',marginTop:2}}/>
@@ -1918,7 +2445,7 @@ function PracticeCourseContent({c, blueprint, scriptState, scriptModel, selected
         <div className="panel formula-bank-preview">
           <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
             <div className="label">Formules de desk</div>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={onOpenScript}>Full derivation <Icon name="arrow-right" size={13}/></button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={onOpenScript}>Derivation complete <Icon name="arrow-right" size={13}/></button>
           </div>
           <div className="formula-bank-list">
             {formulas.length ? formulas.map((formula)=>(
@@ -1937,7 +2464,7 @@ function PracticeCourseContent({c, blueprint, scriptState, scriptModel, selected
         <div className="panel">
           <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
             <div className="label">Labs pratiques</div>
-            <Link to="/exercises" className="btn btn-outline btn-sm">Open exercises <Icon name="arrow-right" size={13}/></Link>
+            <Link to="/exercises" className="btn btn-outline btn-sm">Cas pratiques <Icon name="arrow-right" size={13}/></Link>
           </div>
           <div className="course-lab-list">
             {labs.map((lab,idx)=>(
@@ -1950,19 +2477,6 @@ function PracticeCourseContent({c, blueprint, scriptState, scriptModel, selected
         </div>
       </div>
 
-      <div className="grid-3">
-        {[
-          {label:'Course role', value: blueprint.deskRole, icon:'briefcase'},
-          {label:'Practice assets', value: `${labs.length} labs`, icon:'clipboard-check'},
-          {label:'Source base', value: `${scriptModel?.sources?.length || blueprint.resources.length} sources`, icon:'database'},
-        ].map((item)=>(
-          <div key={item.label} className="panel" style={{padding:18}}>
-            <Icon name={item.icon} size={18} style={{color:'var(--red)'}}/>
-            <div className="label" style={{marginTop:14}}>{item.label}</div>
-            <div className="mono" style={{fontWeight:700,fontSize:15,marginTop:6}}>{item.value}</div>
-          </div>
-        ))}
-      </div>
 
       <div className="grid-2">
         <div className="panel" style={{padding:18}}>
@@ -1992,7 +2506,28 @@ function PracticeCourseContent({c, blueprint, scriptState, scriptModel, selected
   );
 }
 
-function CourseModuleReader({c, module, writtenLesson, formula, moduleCount, selectedModuleIndex, onOpenScript}) {
+function selectModuleUiBlocks(uiBlocks = [], selectedModuleIndex = 0) {
+  if (!uiBlocks.length) return [];
+  const practicalBlocks = uiBlocks.filter((block) => block.type !== 'equation');
+  const primary = practicalBlocks[selectedModuleIndex % Math.max(practicalBlocks.length, 1)] || uiBlocks[selectedModuleIndex % uiBlocks.length];
+  const equation = uiBlocks.find((block) => block.type === 'equation');
+  const picked = [primary, equation].filter(Boolean);
+  return picked.filter((block, index) => picked.findIndex((item) => item.number === block.number) === index).slice(0, 2);
+}
+
+function normalizeCourseMicrocopy(value = '') {
+  const text = String(value || '').trim();
+  if (/^Risk snapshot\.?$/i.test(text)) return 'Note de risque: facteur dominant, unite, controle, action.';
+  if (text === 'Desk note') return 'Note de desk: resultat, controle, limite, decision.';
+  if (text === 'Desk deliverable') return 'Livrable de desk verifiable.';
+  return text;
+}
+
+function courseWordCount(text = '') {
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+function CourseModuleReader({c, module, writtenLesson, formula, uiBlocks = [], moduleCount, selectedModuleIndex, onOpenScript}) {
   if (!module) {
     return (
       <div className="panel course-script-state">
@@ -2003,12 +2538,13 @@ function CourseModuleReader({c, module, writtenLesson, formula, moduleCount, sel
   }
 
   const fields = [
-    ['Situation de desk', module.situation || 'Start from a real market task and identify the missing data.', 'activity'],
-    ['Objectif pratique', module.objective || 'Produce a calculation usable by a trader or risk manager.', 'target'],
-    ['Notion utile', module.notion || c.topics.join(', '), 'sigma'],
-    ['Activite', module.activity || 'Calculate, check signs and write the desk action.', 'calculator'],
-    ['Livrable', module.deliverable || 'Risk snapshot', 'clipboard-check'],
+    ['Situation de desk', normalizeCourseMicrocopy(module.situation || "Partir d'une tache de marche concrete et isoler les donnees manquantes."), 'activity'],
+    ['Objectif pratique', normalizeCourseMicrocopy(module.objective || 'Produire un calcul exploitable par trader, risk ou structuring.'), 'target'],
+    ['Notion utile', normalizeCourseMicrocopy(module.notion || c.topics.join(', ')), 'sigma'],
+    ['Activite', normalizeCourseMicrocopy(module.activity || "Calculer, verifier les signes et rediger l'action de desk."), 'calculator'],
+    ['Livrable', normalizeCourseMicrocopy(module.deliverable || 'Note de quote/risque avec decision'), 'clipboard-check'],
   ];
+  const lessonWords = courseWordCount(writtenLesson?.body || '');
 
   return (
     <div className="panel course-module-reader">
@@ -2019,6 +2555,8 @@ function CourseModuleReader({c, module, writtenLesson, formula, moduleCount, sel
           <p className="text-2">{module.objective || module.situation || 'Module pratique construit depuis les sources de la bibliotheque.'}</p>
         </div>
         <div className="row" style={{gap:8,flexWrap:'wrap'}}>
+          {lessonWords > 0 && <span className="badge">{lessonWords} mots</span>}
+          {uiBlocks.length > 0 && <span className="badge badge-blue">{uiBlocks.length} UI blocks</span>}
           <button type="button" className="btn btn-outline btn-sm" onClick={onOpenScript}>Script complet <Icon name="file-text" size={13}/></button>
           <Link to="/exercises" className="btn btn-primary btn-sm">Exercice <Icon name="arrow-right" size={13}/></Link>
         </div>
@@ -2029,10 +2567,15 @@ function CourseModuleReader({c, module, writtenLesson, formula, moduleCount, sel
         ))}
       </div>
       {writtenLesson?.body && (
-        <div className="course-written-lesson">
-          <div className="label" style={{marginBottom:10}}>Cours redige</div>
-          <LatexMarkdown content={writtenLesson.body}/>
-        </div>
+        <CourseWrittenLessonExperience
+          c={c}
+          module={module}
+          writtenLesson={writtenLesson}
+          formula={formula}
+          uiBlocks={uiBlocks}
+          lessonWords={lessonWords}
+          onOpenScript={onOpenScript}
+        />
       )}
       {formula && (
         <div className="course-module-formula">
@@ -2040,6 +2583,275 @@ function CourseModuleReader({c, module, writtenLesson, formula, moduleCount, sel
           <LatexMarkdown content={`### ${formula.title}\n$$\n${formula.expression}\n$$\n${formula.usage}`}/>
         </div>
       )}
+    </div>
+  );
+}
+
+function CourseWrittenLessonExperience({c, module, writtenLesson, formula, uiBlocks = [], lessonWords = 0, onOpenScript}) {
+  const courseSlug = COURSE_SCRIPT_SLUGS[c.id] || c.id;
+  const bespokeProse = getLessonProse(courseSlug, writtenLesson.number);
+  const sections = bespokeProse ? buildBespokeSections(bespokeProse) : buildLessonSections(writtenLesson.body);
+  const equationDemo = buildEquationDemo(c, module, formula);
+  const actionText = normalizeCourseMicrocopy(module.deliverable || module.activity || 'Note de quote/risque avec decision');
+  const layout = getCourseLayout(courseSlug);
+  const tone = layout?.tone || 'blue';
+  const showMarket = showMarketOnLesson(courseSlug, writtenLesson.number);
+  const narrative = bespokeProse?.narrative;
+  return (
+    <div className={`course-written-lesson course-written-lesson-cockpit tone-${tone}`}>
+      <div className="course-written-head">
+        <div>
+          <div className="label">Cours redige</div>
+          <h3 className="mono course-written-title">Lecon {writtenLesson.number} - {writtenLesson.title}</h3>
+          <p className="mute">{layout?.hero ? `Fil du cours: ${layout.hero}.` : 'Lecture guidee: situation, intuition, demonstration, widget, action.'}</p>
+        </div>
+        <div className="row" style={{gap:8,flexWrap:'wrap'}}>
+          <span className="badge">{lessonWords} mots</span>
+          <span className="badge badge-blue">cockpit</span>
+        </div>
+      </div>
+
+      {narrative && (
+        <div className="lesson-editorial">
+          <LatexMarkdown content={narrative}/>
+        </div>
+      )}
+
+      <div className="lesson-situation-grid">
+        <div className="lesson-situation-card">
+          <div className="label">Mise en situation</div>
+          <p>{normalizeCourseMicrocopy(module.situation || "Le desk demande une decision chiffrable avant d'envoyer le niveau au client.")}</p>
+        </div>
+        <div className="lesson-situation-card">
+          <div className="label">Question de valorisation</div>
+          <p>{normalizeCourseMicrocopy(module.objective || "Transformer la notion en prix, risque, controle et action.")}</p>
+        </div>
+        <div className="lesson-situation-card">
+          <div className="label">Livrable desk</div>
+          <p>{actionText}</p>
+        </div>
+      </div>
+
+      {!narrative && sections.length > 0 && (
+        <div className="lesson-section-grid">
+          {sections.map((section) => (
+            <div key={section.title} className="lesson-concept-card">
+              <div className="lesson-card-head">
+                <Icon name={section.icon} size={14}/>
+                <span>{section.title}</span>
+              </div>
+              <LatexMarkdown content={section.content}/>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {equationDemo && <EquationDemo demo={equationDemo}/>}
+
+      {showMarket && <CourseMarketWidget slug={courseSlug}/>}
+
+      {uiBlocks.length > 0 && (
+        <div className="course-module-uiblocks lesson-widget-lab">
+          <div className="row between" style={{marginBottom:12}}>
+            <div>
+              <div className="label">Lab interactif de marche</div>
+              <p className="mute">Le widget met la notion en risque, prix, P&L ou scenario manipulable.</p>
+            </div>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={onOpenScript}>Tous les blocs <Icon name="arrow-right" size={13}/></button>
+          </div>
+          <div className="course-module-uiblock-grid">
+            {uiBlocks.map((block) => <UIBlock key={`${block.number}-${block.type}`} spec={block}/>)}
+          </div>
+        </div>
+      )}
+
+      <div className="lesson-action-card">
+        <div>
+          <div className="label">Decision attendue</div>
+          <p>Conclure par un resultat, une unite, un controle, une limite et une action: quote, hedge, monitor, reduce, reject ou escalate.</p>
+        </div>
+        <Icon name="clipboard-check" size={18}/>
+      </div>
+    </div>
+  );
+}
+
+function buildLessonSections(body = '') {
+  const paragraphs = body
+    .split(/\n\s*\n/)
+    .map((item) => stripNoiseCitations(item).trim())
+    .filter(Boolean)
+    .filter((p) => !_LESSON_BOILERPLATE.test(p));
+  const buckets = [
+    { title: 'Intuition marche', icon: 'activity', items: paragraphs.slice(0, 2) },
+    { title: 'Mecanisme quantitatif', icon: 'sigma', items: paragraphs.slice(2, 4) },
+    { title: 'Mise en pratique et controle', icon: 'target', items: paragraphs.slice(4) },
+  ];
+  return buckets
+    .filter((bucket) => bucket.items.length)
+    .map((bucket) => ({...bucket, content: bucket.items.join('\n\n')}));
+}
+
+// Bespoke per-lesson sections (lessonProse.js) — three concept-specific cards
+// that replace the templated body when authored, same shape as buildLessonSections.
+function buildBespokeSections(prose) {
+  return [
+    { title: 'Intuition marche', icon: 'activity', content: prose.intuition },
+    { title: 'Mecanisme quantitatif', icon: 'sigma', content: prose.mechanism },
+    { title: 'Mise en pratique et controle', icon: 'target', content: prose.practice },
+  ].filter((s) => s.content);
+}
+
+function buildEquationDemo(c, module, formula) {
+  if (!formula?.expression) return null;
+  // Prefer a rigorous, formula-specific proof when one is authored; otherwise
+  // fall back to the generic family-level outline (no regression).
+  const slug = COURSE_SCRIPT_SLUGS[c.id] || c.id;
+  const real = getDerivation(slug, formula);
+  if (real) {
+    return {
+      title: formula.title,
+      expression: real.expression,
+      assumption: real.assumption,
+      steps: real.steps,
+      result: real.result,
+      desk: real.desk,
+      limit: real.limit,
+      proof: true,
+    };
+  }
+  const family = inferEquationFamily(c.id, `${module.title} ${module.notion} ${formula.title} ${formula.expression}`);
+  const library = {
+    option: {
+      assumption: 'Sous-jacent lognormal, taux et volatilite constants, marche sans arbitrage, payoff europeen.',
+      steps: ['Ecrire le payoff actualise sous la mesure risque-neutre.', 'Remplacer la dynamique du sous-jacent par sa loi lognormale.', 'Standardiser le seuil de payoff avec d1 et d2.', 'Separer valeur forward attendue et strike actualise pour obtenir le prix.'],
+      desk: 'Le prix devient defendable car chaque input du ticket a une place: spot, strike, maturite, taux, dividende et vol.',
+      limit: 'La formule est locale au modele: smile, dividendes discrets, liquidite et exercice anticipe doivent etre controles.'
+    },
+    rates: {
+      assumption: 'Courbe de discount factors construite, cash-flows dates, conventions de year fraction et signe payer/receiver fixes.',
+      steps: ['Actualiser chaque cash-flow avec le discount factor de sa date.', 'Regrouper la jambe fixe dans une annuite de swap.', 'Imposer PV fixe = PV flottante pour obtenir le taux par.', 'Bumper la courbe de 1 bp pour lire DV01 et P&L de taux.'],
+      desk: 'La valorisation explique directement quel bucket de courbe porte le risque.',
+      limit: 'Interpolation, collateral, basis et convexity peuvent dominer si les conventions ne sont pas celles du ticket.'
+    },
+    credit: {
+      assumption: 'Survie, recovery, risky annuity et spread de credit fixes au niveau du ticket.',
+      steps: ['Ecrire la jambe de prime comme spread multiplie par risky annuity.', 'Ecrire la jambe de protection comme perte en cas de defaut actualisee.', 'Lineariser la variation de valeur par 1 bp de spread.', 'Comparer CS01, carry et jump-to-default avant de decider.'],
+      desk: 'Le trader voit si le risque vient du carry, du mark-to-market ou du defaut saute.',
+      limit: 'La linearisation CS01 casse pour larges chocs, restructuration, wrong-way risk ou recovery instable.'
+    },
+    var: {
+      assumption: 'Distribution de P&L, horizon, niveau de confiance et matrice de correlation fixes.',
+      steps: ['Transformer les positions en sensibilites aux facteurs.', 'Propager la variance via covariance/correlation.', 'Lire le quantile de perte au niveau de confiance.', 'Comparer VaR, expected shortfall et stress avant escalation.'],
+      desk: 'La mesure devient utile seulement si elle identifie le facteur et la limite a escalader.',
+      limit: 'Normalite, correlation stable et historique representatif sont des hypotheses fortes en regime de stress.'
+    },
+    montecarlo: {
+      assumption: 'Dynamique stochastique, payoff, discounting, nombre de chemins et graine de simulation controles.',
+      steps: ['Simuler les chemins sous la mesure de pricing.', 'Evaluer le payoff sur chaque trajectoire.', 'Actualiser puis moyenner les payoffs.', 'Calculer erreur standard et intervalle de confiance.'],
+      desk: "Le prix n'est utilisable que si l'incertitude Monte Carlo est petite face au bid/ask ou au seuil de decision.",
+      limit: 'Discretisation, variance, rare events et model risk doivent etre suivis avant de citer un prix.'
+    },
+    bond: {
+      assumption: 'Cash-flows, yield, frequence, convention de prix et courbe de taux controles.',
+      steps: ['Actualiser chaque coupon et le principal.', 'Sommer les valeurs presentes pour obtenir le prix.', 'Deriver le prix par rapport au yield pour duration.', 'Ajouter le terme de convexite pour les grands chocs.'],
+      desk: 'Duration et convexite transforment un mouvement de taux en P&L explicable.',
+      limit: 'Optionnalite, spread de credit, accrued interest et liquidite peuvent deformer la lecture yield-only.'
+    },
+    stochastic: {
+      assumption: 'Processus SDE specifie, fonction de valeur derivable, volatilite et mesure de pricing claires.',
+      steps: ['Partir de la dynamique du facteur de risque.', 'Appliquer Ito pour separer drift, delta et gamma.', 'Construire le portefeuille hedge pour annuler le risque aleatoire local.', 'Lire l equation de pricing ou de P&L hedgee.'],
+      desk: 'La demonstration relie le symbole mathematique au ticket hedgeable.',
+      limit: 'Les hypotheses de continuite, liquidite et rebalancement continu ne tiennent pas telles quelles en production.'
+    },
+    generic: {
+      assumption: 'Inputs, conventions, unite de choc et signe de position fixes avant le calcul.',
+      steps: ['Identifier la variable d etat et le payoff ou cash-flow.', 'Ecrire la valeur comme prix, esperance actualisee ou approximation de sensibilite.', 'Isoler les termes qui changent sous choc.', 'Conclure avec unite, controle et action de desk.'],
+      desk: 'La formule n est utile que si elle produit un chiffre defendable et une decision.',
+      limit: 'Une formule sans conventions ni controle d ordre de grandeur ne doit pas etre envoyee au desk.'
+    },
+  };
+  const item = library[family] || library.generic;
+  return {
+    title: formula.title,
+    expression: formula.expression,
+    assumption: item.assumption,
+    steps: item.steps,
+    desk: item.desk,
+    limit: item.limit,
+  };
+}
+
+function inferEquationFamily(courseId, text = '') {
+  const t = `${courseId} ${text}`.toLowerCase();
+  if (/black|option|greek|vol|smile|barrier|autocall|payoff|delta|vega|gamma/.test(t)) return 'option';
+  if (/swap|curve|rate|dv01|discount|forward/.test(t)) return 'rates';
+  if (/credit|cds|cs01|recovery|spread/.test(t)) return 'credit';
+  if (/var|expected shortfall|stress|correlation/.test(t)) return 'var';
+  if (/monte|simulation|gbm|confidence/.test(t)) return 'montecarlo';
+  if (/bond|duration|convexity|ytm/.test(t)) return 'bond';
+  if (/stochastic|ito|sde|girsanov/.test(t)) return 'stochastic';
+  return 'generic';
+}
+
+function EquationDemo({demo}) {
+  const steps = Array.isArray(demo.steps) ? demo.steps : [];
+  const isProof = steps.length > 0 && typeof steps[0] === 'object';
+  return (
+    <div className="course-equation-demo">
+      <div className="row between" style={{gap:12,alignItems:'flex-start'}}>
+        <div>
+          <div className="label">Demonstration mathematique</div>
+          <h4 className="mono">{demo.title}</h4>
+        </div>
+        <span className="badge badge-blue">{isProof ? 'preuve pas a pas' : 'valuation proof'}</span>
+      </div>
+      <div className="equation-demo-grid">
+        <div className="equation-demo-formula">
+          <div className="label">Equation a etablir</div>
+          <LatexMarkdown content={`$$\n${demo.expression}\n$$`}/>
+        </div>
+        <div className="equation-demo-assumption">
+          <div className="label">Hypotheses</div>
+          <p>{demo.assumption}</p>
+        </div>
+      </div>
+      <div className={`derivation-steps${isProof ? ' derivation-steps--proof' : ''}`}>
+        {steps.map((step, idx) => isProof ? (
+          <div key={idx} className="derivation-proof-step">
+            <span className="step-no mono">{String(idx + 1).padStart(2, '0')}</span>
+            <div className="step-main">
+              {step.label && <div className="step-label">{step.label}</div>}
+              {step.math && <LatexMarkdown content={`$$\n${step.math}\n$$`}/>}
+              {step.note && <p className="step-note">{step.note}</p>}
+            </div>
+          </div>
+        ) : (
+          <div key={idx} className="course-derivation-step">
+            <span className="mono">{String(idx + 1).padStart(2, '0')}</span>
+            <p>{step}</p>
+          </div>
+        ))}
+      </div>
+      {demo.result && (
+        <div className="equation-demo-result">
+          <div className="row between" style={{alignItems:'center',marginBottom:4}}>
+            <div className="label" style={{margin:0}}>Resultat — formule etablie</div>
+            <span className="mono" style={{color:'var(--green)',fontSize:12}}>QED</span>
+          </div>
+          <LatexMarkdown content={`$$\n${demo.result}\n$$`}/>
+        </div>
+      )}
+      <div className="equation-demo-bottom">
+        <div>
+          <div className="label">Lecture desk</div>
+          <p>{demo.desk}</p>
+        </div>
+        <div>
+          <div className="label">Limite</div>
+          <p>{demo.limit}</p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -2080,6 +2892,18 @@ function BSContent() {
   const params = {S, K, r:r/100, sigma:sigma/100, T:T/365};
   const call = bsPrice({...params, type:'call'});
   const put  = bsPrice({...params, type:'put'});
+  // Real Cox-Ross-Rubinstein binomial — converges to BS as steps grow. Computed
+  // live from the same inputs (no fabricated numbers).
+  const binom = useMemo(()=>{
+    const rr=r/100, sg=sigma/100, TT=Math.max(T/365,1e-6);
+    const crr=(N)=>{
+      const dt=TT/N, u=Math.exp(sg*Math.sqrt(dt)), d=1/u, p=(Math.exp(rr*dt)-d)/(u-d), disc=Math.exp(-rr*dt);
+      const v=[]; for(let i=0;i<=N;i++) v[i]=Math.max(S*Math.pow(u,N-i)*Math.pow(d,i)-K,0);
+      for(let st=N;st>0;st--) for(let i=0;i<st;i++) v[i]=disc*(p*v[i]+(1-p)*v[i+1]);
+      return v[0];
+    };
+    return [10,50,250].map(N=>({N, price: crr(N)}));
+  },[S,K,r,sigma,T]);
   const sweep = useMemo(()=>{
     const arr = [];
     for (let s=S*0.4; s<=S*1.6; s += (S*1.2)/40) {
@@ -2175,15 +2999,16 @@ function BSContent() {
             <span className="badge">Binomial vs BS</span>
           </div>
           <table className="data">
-            <thead><tr><th>Method</th><th>Steps</th><th className="num">Price</th><th className="num">Δ vs BS</th><th className="num">ms</th></tr></thead>
+            <thead><tr><th>Method</th><th>Steps</th><th className="num">Price</th><th className="num">Δ vs BS</th></tr></thead>
             <tbody>
-              <tr><td className="symbol">Black-Scholes</td><td>—</td><td className="num">{fmt(call.price)}</td><td className="num">0.0000</td><td className="num">0.01</td></tr>
-              <tr><td className="symbol">CRR Binomial</td><td>50</td><td className="num">{fmt(call.price+0.082)}</td><td className="num green">+0.082</td><td className="num">0.41</td></tr>
-              <tr><td className="symbol">CRR Binomial</td><td>500</td><td className="num">{fmt(call.price+0.011)}</td><td className="num green">+0.011</td><td className="num">3.20</td></tr>
-              <tr><td className="symbol">CRR Binomial</td><td>5000</td><td className="num">{fmt(call.price+0.0012)}</td><td className="num green">+0.001</td><td className="num">42.1</td></tr>
-              <tr><td className="symbol">Monte Carlo</td><td>100k paths</td><td className="num">{fmt(call.price-0.027)}</td><td className="num red">-0.027</td><td className="num">128.4</td></tr>
+              <tr><td className="symbol">Black-Scholes</td><td>closed form</td><td className="num">{fmt(call.price)}</td><td className="num">0.0000</td></tr>
+              {binom.map((b)=>{ const d=b.price-call.price; return (
+                <tr key={b.N}><td className="symbol">CRR Binomial</td><td>{b.N}</td><td className="num">{fmt(b.price)}</td>
+                  <td className={"num "+(Math.abs(d)<5e-4?'':(d>=0?'green':'red'))}>{(d>=0?'+':'')+d.toFixed(4)}</td></tr>
+              );})}
             </tbody>
           </table>
+          <div className="mono mute" style={{fontSize:11,marginTop:8}}>Live CRR binomial → converges to Black-Scholes as steps grow.</div>
         </div>
         <div className="panel" style={{padding:20}}>
           <div className="label" style={{marginBottom:10}}>Python · Implementation</div>
@@ -2249,14 +3074,15 @@ function GreeksContent() {
       <div className="panel" style={{padding:24}}>
         <div className="row between">
           <div className="label">Lesson video</div>
-          <span className="badge">14:32</span>
+          <span className="badge">Live tool</span>
         </div>
         <div style={{aspectRatio:'16/7', background:'#06080B', border:'1px solid var(--line)', marginTop:14, display:'grid', placeItems:'center', position:'relative'}}>
           <div style={{textAlign:'center'}}>
             <div style={{width:60,height:60,borderRadius:30,border:'1px solid var(--red)',display:'grid',placeItems:'center',margin:'0 auto'}}>
-              <Icon name="play" size={24} style={{color:'var(--red)'}}/>
+              <Icon name="sliders" size={22} style={{color:'var(--red)'}}/>
             </div>
-            <div className="mono mute" style={{fontSize:11,marginTop:14,letterSpacing:'.08em'}}>INTERACTIVE LESSON · GREEKS RISK PANEL</div>
+            <div className="mono mute" style={{fontSize:11,marginTop:14,letterSpacing:'.08em'}}>GREEKS RISK PANEL</div>
+            <Link to="/tools" className="btn btn-outline btn-sm" style={{marginTop:12}}>Open the live pricing tools ›</Link>
           </div>
         </div>
       </div>
@@ -2281,7 +3107,7 @@ function YCContent() {
         <div className="panel-2 mono" style={{padding:18, fontSize:13.5, marginTop:10}}>P(0, τₙ) = (1 − y(τₙ) · Σ P(0, τᵢ)) / (1 + y(τₙ))</div>
       </div>
       <div className="grid-2">
-        <ChartFrame title="Zero-coupon curve" subtitle="USD swap mid · 23-May-2026">
+        <ChartFrame title="Zero-coupon curve" subtitle="illustrative shape (synthetic)">
           <LineChart width={500} height={240} series={[{name:'Z', color:'#3E8BFF', data:zero, fillOpacity:0.08}]}/>
         </ChartFrame>
         <ChartFrame title="Instantaneous forwards" subtitle="dF / dτ">
@@ -2291,7 +3117,7 @@ function YCContent() {
       <div className="panel">
         <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
           <div className="label">Quoted instruments</div>
-          <span className="badge">USD · MID</span>
+          <span className="badge">illustrative</span>
         </div>
         <table className="data">
           <thead><tr><th>Tenor</th><th>Type</th><th className="num">Quote</th><th className="num">DF</th><th className="num">Z-rate</th><th className="num">Fwd 3M</th></tr></thead>
@@ -2324,7 +3150,7 @@ function IVContent() {
       <div className="panel" style={{padding:24}}>
         <div className="section-eyebrow" style={{margin:0}}>// Lesson 2.1 · The Smile</div>
         <h2 className="mono" style={{fontSize:22, fontWeight:700, marginTop:10}}>Implied volatility is not flat.</h2>
-        <p className="text-2" style={{fontSize:13.5,lineHeight:1.7}}>Equity-index options exhibit a persistent negative skew. Below: the smile across maturities for SPX as of 23-May-2026 (mid).</p>
+        <p className="text-2" style={{fontSize:13.5,lineHeight:1.7}}>Equity-index options exhibit a persistent negative skew. Below: the smile across maturities for a typical equity index (illustrative shape).</p>
       </div>
       <div className="grid-2">
         <ChartFrame title="Volatility smile · SPX" subtitle="By tenor">
@@ -2423,6 +3249,22 @@ function MCContent() {
     }
     return bins.map((b,i)=>({x:60+i*4, y:b}));
   },[]);
+  // Real Monte-Carlo call price (Box-Muller GBM) + standard error, vs BS — all
+  // computed live, no fabricated figures.
+  const mc = useMemo(()=>{
+    const S0=100,K=100,r=0.02,sigma=0.20,T=1,N=20000;
+    const disc=Math.exp(-r*T), drift=(r-0.5*sigma*sigma)*T, vol=sigma*Math.sqrt(T);
+    let sum=0,sum2=0;
+    for(let i=0;i<N;i++){
+      const u1=Math.random()||1e-9,u2=Math.random();
+      const z=Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);
+      const pay=disc*Math.max(S0*Math.exp(drift+vol*z)-K,0);
+      sum+=pay; sum2+=pay*pay;
+    }
+    const mean=sum/N, se=Math.sqrt(Math.max(0,sum2/N-mean*mean)/N);
+    const bs=bsPrice({S:S0,K,r,sigma,T,type:'call'}).price;
+    return {mean,se,lo:mean-1.96*se,hi:mean+1.96*se,bs,N};
+  },[]);
   return (
     <div className="col" style={{gap:18}}>
       <div className="panel" style={{padding:24}}>
@@ -2448,12 +3290,89 @@ function MCContent() {
         </ChartFrame>
       </div>
       <div className="grid-3">
-        <Stat label="Mean Price" value={fmt(6.18,3)}/>
-        <Stat label="Std Error" value="±0.012" sub="100k paths"/>
-        <Stat label="95% CI" value="[6.156, 6.204]"/>
-        <Stat label="VaR 99%" value="-3.41" sub="1-day" accent="var(--red)"/>
-        <Stat label="Expected Shortfall" value="-4.82" sub="1-day · 99%" accent="var(--red)"/>
+        <Stat label="MC Mean Price" value={fmt(mc.mean,3)} sub={`${(mc.N/1000)}k paths`}/>
+        <Stat label="Std Error" value={`±${fmt(mc.se,3)}`}/>
+        <Stat label="95% CI" value={`[${fmt(mc.lo,3)}, ${fmt(mc.hi,3)}]`}/>
+        <Stat label="Black-Scholes ref" value={fmt(mc.bs,3)} accent="var(--blue)"/>
+        <Stat label="MC − BS" value={fmt(mc.mean-mc.bs,3)} sub="convergence check"/>
         <Stat label="Convergence" value="O(1/√n)"/>
+      </div>
+    </div>
+  );
+}
+
+// VaR/ES Monte-Carlo P&L distribution, tied to the real ^GSPC return sample.
+// The histogram is the parametric (Gaussian) P&L model the desk *assumes*
+// (P&L = V·σ·Z, σ the realised ^GSPC 252d vol); the vertical markers are the
+// engine-computed empirical VaR/ES on the 24,737 real ^GSPC returns plus the
+// worst realised day. The point made visual: the Gaussian model is a thin
+// spike near zero while the real tail sprawls far to the left (fat tails).
+function VarMCContent(props) {
+  const V = props.V || 10000000;
+  const sigma = props.sigma || 0.00788;
+  const conf = props.confidence || 0.99;
+  const paramVaR = props.paramVaR || V*sigma*2.3263479;
+  const paramES  = props.paramES  || V*sigma*0.0266521/(1-conf);
+  const histVaR  = props.histVaR  || 348606;
+  const histES   = props.histES   || 521990;
+  const worst    = props.worst    || 2289973;      // 1987-10-19 loss on the book
+  const worstLbl = props.worstLabel || '1987';
+  const N = 20000;
+  const sim = useMemo(()=>{
+    let x = 987654321;
+    const rnd = () => { x = (x*1664525+1013904223) % 4294967296; return x/4294967296; };
+    const xmin = -2400000, xmax = 300000, NB = 80, bw = (xmax-xmin)/NB;
+    const bins = Array(NB).fill(0);
+    const pnls = [];
+    for (let i=0;i<N;i++){
+      const u1 = rnd()||1e-9, u2 = rnd();
+      const z = Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);
+      const p = V*sigma*z; pnls.push(p);
+      const idx = Math.floor((p-xmin)/bw);
+      if (idx>=0 && idx<NB) bins[idx]++;
+    }
+    pnls.sort((a,b)=>a-b);
+    const simVaR = -pnls[Math.floor((1-conf)*N)];   // empirical 99% loss of the sim
+    return { bins, xmin, xmax, NB, bw, simVaR };
+  },[V,sigma,conf]);
+
+  const W=760, Hh=210, ML=8, MR=8, MT=10, MB=42;
+  const pw = W-ML-MR, ph = Hh-MT-MB;
+  const xpix = v => ML + (v - sim.xmin)/(sim.xmax - sim.xmin) * pw;
+  const ymax = Math.max(...sim.bins);
+  const ypix = c => MT + (1 - c/ymax) * ph;
+  const k = v => (v>=0?'+':'−') + '$' + Math.abs(Math.round(v/1000)) + 'k';
+  const mk = (v, color, label, up) => (
+    <g>
+      <line x1={xpix(-v)} y1={MT} x2={xpix(-v)} y2={MT+ph} stroke={color} strokeWidth="1.5" strokeDasharray="3 2"/>
+      <text x={xpix(-v)} y={up?MT+10:MT+ph-4} fill={color} fontSize="9.5" textAnchor="middle" fontFamily="'JetBrains Mono',monospace">{label}</text>
+    </g>
+  );
+  return (
+    <div className="col" style={{gap:14}}>
+      <div className="mono mute" style={{fontSize:11.5, lineHeight:1.5}}>
+        Histogramme = {N.toLocaleString()} P&amp;L simulés sous le modèle <b>gaussien</b> (P&amp;L = V·σ·Z, σ = {(sigma*100).toFixed(3)}%/j, la vol 252j réelle du ^GSPC). Repères verticaux = VaR/ES <b>empiriques</b> calculées sur les 24&nbsp;737 rendements ^GSPC réels (§3.3) + le pire jour réalisé. La cloche gaussienne est un pic étroit ; la vraie queue est loin à gauche.
+      </div>
+      <svg viewBox={`0 0 ${W} ${Hh}`} width="100%" height={Hh} style={{display:'block',fontFamily:"'JetBrains Mono',monospace"}}>
+        <line x1={ML} y1={MT+ph} x2={W-MR} y2={MT+ph} stroke="#2C3340"/>
+        {sim.bins.map((c,i)=> c>0 && (
+          <rect key={i} x={xpix(sim.xmin+i*sim.bw)} y={ypix(c)} width={Math.max(1,pw/sim.NB-0.5)} height={MT+ph-ypix(c)} fill="#3E8BFF" opacity="0.55"/>
+        ))}
+        {mk(paramVaR, '#3E8BFF', 'VaR param '+k(-paramVaR), true)}
+        {mk(histVaR, '#F5A623', 'VaR hist '+k(-histVaR), false)}
+        {mk(histES, '#FF7A1A', 'ES hist '+k(-histES), true)}
+        {mk(worst, '#FF2E45', worstLbl+' '+k(-worst), false)}
+        {[-2000000,-1500000,-1000000,-500000,0].map(t=>(
+          <text key={t} x={xpix(t)} y={Hh-6} fill="#7C8493" fontSize="9" textAnchor="middle">{(t/1e6).toFixed(1)}M</text>
+        ))}
+      </svg>
+      <div className="grid-3">
+        <Stat label="VaR param. 99% (gaussien)" value={'$'+Math.round(paramVaR).toLocaleString()} sub="modèle simulé" accent="var(--blue)"/>
+        <Stat label="VaR sim. (contrôle)" value={'$'+Math.round(sim.simVaR).toLocaleString()} sub={`${(N/1000)}k tirages → ≈ VaR param.`}/>
+        <Stat label="VaR hist. 99% (réel ^GSPC)" value={'$'+Math.round(histVaR).toLocaleString()} sub="24 737 rendements"/>
+        <Stat label="ES hist. 99% (réel ^GSPC)" value={'$'+Math.round(histES).toLocaleString()} sub={`ES/VaR = ${(histES/histVaR).toFixed(2)}`}/>
+        <Stat label="Pire jour réalisé" value={'−$'+Math.round(worst).toLocaleString()} sub="19/10/1987 (−22.9%)" accent="var(--red)"/>
+        <Stat label="Sous-estimation queue" value={(histVaR/paramVaR).toFixed(1)+'×'} sub="hist / paramétrique"/>
       </div>
     </div>
   );
@@ -2641,6 +3560,248 @@ function ToolsIndex() {
   );
 }
 
+// ---------- Math: implied vol (Newton + bisection fallback) ----------
+function impliedVol({S,K,r,q=0,T,price,type='call'}){
+  const intrinsic = type==='call' ? Math.max(S*Math.exp(-q*T)-K*Math.exp(-r*T),0) : Math.max(K*Math.exp(-r*T)-S*Math.exp(-q*T),0);
+  if (!(price>intrinsic+1e-8)) return {sigma:NaN, iters:0, ok:false, reason:'price below intrinsic'};
+  let sigma=0.2;
+  for (let i=1;i<=100;i++){
+    const o = bsPrice({S,K,r,q,sigma,T,type});
+    const vega = o.vega*100; // bsPrice vega is per 1 vol point; here per unit vol
+    const diff = o.price - price;
+    if (Math.abs(diff)<1e-7) return {sigma, iters:i, ok:true};
+    if (vega<1e-9) break;
+    sigma -= diff/vega;
+    if (sigma<=0||sigma>5) sigma = Math.min(Math.max(sigma,1e-3),5);
+  }
+  // bisection fallback
+  let lo=1e-3, hi=5;
+  for (let i=0;i<100;i++){
+    const mid=(lo+hi)/2;
+    const pm = bsPrice({S,K,r,q,sigma:mid,T,type}).price;
+    if (Math.abs(pm-price)<1e-7) return {sigma:mid, iters:i, ok:true};
+    if (pm>price) hi=mid; else lo=mid;
+  }
+  return {sigma:(lo+hi)/2, iters:100, ok:true};
+}
+
+function ToolInputs({title='Inputs', fields, children}) {
+  return (
+    <div className="panel" style={{padding:18, alignSelf:'start'}}>
+      <div className="label" style={{marginBottom:14}}>{title}</div>
+      {fields.map(([lbl,val,min,max,step,setter,unit])=>(
+        <div key={lbl} className="field" style={{marginBottom:16}}>
+          <div className="row between">
+            <span className="mono mute" style={{fontSize:11,letterSpacing:'.08em'}}>{lbl}</span>
+            <div className="row" style={{gap:6}}>
+              <input value={val} onChange={e=>{const v=parseFloat(e.target.value); if(!isNaN(v))setter(v);}} style={{width:74,padding:'4px 8px',background:'#0A0C10',border:'1px solid var(--line-2)',color:'var(--text)',fontFamily:"'JetBrains Mono',monospace",fontSize:12,borderRadius:3,outline:'none',textAlign:'right'}}/>
+              <span className="mono mute" style={{fontSize:11,width:16}}>{unit}</span>
+            </div>
+          </div>
+          {min!=null && <input type="range" min={min} max={max} step={step} value={val} onChange={e=>setter(+e.target.value)}/>}
+        </div>
+      ))}
+      {children}
+    </div>
+  );
+}
+function ResultRow({k,v,accent}) {
+  return <div className="row between" style={{padding:'7px 0',borderTop:'1px solid var(--line)'}}>
+    <span className="mono mute" style={{fontSize:11.5}}>{k}</span>
+    <span className="mono" style={{fontSize:13,fontWeight:600,color:accent||'var(--text)'}}>{v}</span>
+  </div>;
+}
+function ToolHead({slug,name,sub}) {
+  return <PageHead crumb={<><Link to="/tools">tools</Link><i>›</i><span>{slug}</span></>} title={name} sub={sub} right={<span className="badge badge-green">Live compute</span>}/>;
+}
+
+// Real Python execution (Pyodide). First run downloads the runtime (~10MB) then caches.
+function PyCodeCell({initial='', label='exercise.py', minHeight=260}) {
+  const [code,setCode] = useState(initial);
+  const [out,setOut] = useState('');
+  const [busy,setBusy] = useState(false);
+  const [err,setErr] = useState(false);
+  useEffect(()=>{ setCode(initial); }, [initial]);
+  const run = async () => {
+    setBusy(true); setErr(false);
+    setOut('Loading Python runtime (first run downloads Pyodide, ~10MB)…');
+    const r = await runPython(code);
+    setOut((r.stdout || '') + (r.error ? ('\n' + r.error) : '') || '(no output)');
+    setErr(!r.ok); setBusy(false);
+  };
+  return (
+    <div className="panel" style={{padding:0}}>
+      <div className="row between" style={{padding:'10px 14px',borderBottom:'1px solid var(--line)'}}>
+        <div className="row" style={{gap:12}}>
+          <span className="badge">Python 3.11 · Pyodide</span>
+          <span className="mono mute" style={{fontSize:11}}>{label}</span>
+        </div>
+        <div className="row" style={{gap:6}}>
+          <button className="btn btn-ghost btn-sm" onClick={()=>setCode(initial)}><Icon name="rotate-ccw" size={12}/> Reset</button>
+          <button className="btn btn-primary btn-sm" onClick={run} disabled={busy}><Icon name="play" size={12}/> {busy?'Running…':'Run'}</button>
+        </div>
+      </div>
+      <textarea value={code} onChange={(e)=>setCode(e.target.value)} spellCheck={false}
+        style={{width:'100%',minHeight,background:'#0A0C10',color:'var(--text)',border:'none',borderBottom:'1px solid var(--line)',fontFamily:"'JetBrains Mono',monospace",fontSize:12.5,lineHeight:1.6,padding:14,resize:'vertical',outline:'none'}}/>
+      <div style={{padding:'10px 14px'}}>
+        <div className="mono mute" style={{fontSize:10.5,letterSpacing:'.1em',marginBottom:6}}>OUTPUT</div>
+        <pre className="code" style={{margin:0,maxHeight:240,overflow:'auto',color:err?'var(--red)':'var(--text-2)',whiteSpace:'pre-wrap'}}><code>{out || '— run the code to see output —'}</code></pre>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Binomial tree (Cox-Ross-Rubinstein), American early exercise ----------
+function crrPrice({S,K,r,q,sigma,T,steps,type,american}){
+  const dt=T/steps, u=Math.exp(sigma*Math.sqrt(dt)), d=1/u;
+  const p=(Math.exp((r-q)*dt)-d)/(u-d), disc=Math.exp(-r*dt);
+  if (p<=0||p>=1) return {price:NaN};
+  const val=new Array(steps+1);
+  for (let i=0;i<=steps;i++){ const ST=S*Math.pow(u,steps-i)*Math.pow(d,i); val[i]=type==='call'?Math.max(ST-K,0):Math.max(K-ST,0); }
+  for (let n=steps-1;n>=0;n--){
+    for (let i=0;i<=n;i++){
+      let v=disc*(p*val[i]+(1-p)*val[i+1]);
+      if (american){ const ST=S*Math.pow(u,n-i)*Math.pow(d,i); const ex=type==='call'?Math.max(ST-K,0):Math.max(K-ST,0); v=Math.max(v,ex); }
+      val[i]=v;
+    }
+  }
+  return {price:val[0], u, d, p};
+}
+function BinomialTreeTool(){
+  const [S,setS]=useState(100),[K,setK]=useState(100),[r,setR]=useState(3),[q,setQ]=useState(0),[sigma,setSigma]=useState(25),[T,setT]=useState(365),[steps,setSteps]=useState(200);
+  const [type,setType]=useState('put'),[american,setAmerican]=useState(true);
+  const p={S,K,r:r/100,q:q/100,sigma:sigma/100,T:T/365};
+  const am=crrPrice({...p,steps,type,american:true}).price;
+  const eu=crrPrice({...p,steps,type,american:false}).price;
+  const bs=bsPrice({...p,type}).price;
+  const conv=useMemo(()=>{const a=[];for(let n=5;n<=Math.min(steps,300);n+=5){a.push({x:n,y:+crrPrice({...p,steps:n,type,american}).price.toFixed(4)});}return a;},[S,K,r,q,sigma,T,steps,type,american]);
+  return (
+    <div className="container page">
+      <ToolHead slug="binomial tree" name="Binomial Tree (CRR)" sub="Cox-Ross-Rubinstein lattice — American & European, with early-exercise premium."/>
+      <div style={{display:'grid',gridTemplateColumns:'320px 1fr 320px',gap:14}}>
+        <ToolInputs fields={[['Spot S',S,10,500,1,setS,'$'],['Strike K',K,10,500,1,setK,'$'],['Rate r',r,-2,15,0.1,setR,'%'],['Yield q',q,0,12,0.1,setQ,'%'],['Vol σ',sigma,1,120,0.5,setSigma,'%'],['Maturity T',T,1,1825,1,setT,'d'],['Steps',steps,5,500,5,setSteps,'n']]}>
+          <div className="label" style={{marginBottom:8}}>Option</div>
+          <div className="toggle" style={{width:'100%',marginBottom:10}}>{['call','put'].map(t=><button key={t} className={type===t?'on':''} onClick={()=>setType(t)} style={{flex:1}}>{t}</button>)}</div>
+          <div className="toggle" style={{width:'100%'}}>{[['true','American'],['false','European']].map(([k,l])=><button key={k} className={String(american)===k?'on':''} onClick={()=>setAmerican(k==='true')} style={{flex:1}}>{l}</button>)}</div>
+        </ToolInputs>
+        <ChartFrame title="Convergence vs steps" subtitle="lattice price stabilises as steps increase">
+          <LineChart width={620} height={260} series={[{name:'price',color:'#FF2E45',data:conv,fillOpacity:0.1}]}/>
+        </ChartFrame>
+        <div className="panel" style={{padding:18,alignSelf:'start'}}>
+          <div className="label" style={{marginBottom:6}}>Results</div>
+          <ResultRow k="American price" v={fmt(am,4)} accent="var(--red)"/>
+          <ResultRow k="European price" v={fmt(eu,4)}/>
+          <ResultRow k="Black-Scholes" v={fmt(bs,4)}/>
+          <ResultRow k="Early-exercise premium" v={fmt(am-eu,4)} accent={am-eu>1e-4?'var(--amber)':'var(--text-2)'}/>
+          <div className="mute" style={{fontSize:11.5,marginTop:12,lineHeight:1.5}}>{am-eu>1e-4? 'Early exercise is worth something here (typical for American puts / dividend-paying calls).' : 'No early-exercise premium — American ≈ European for these inputs.'}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Bond calculator: price, duration, convexity, DV01 ----------
+function bondAnalytics({face,coupon,freq,years,ytm}){
+  const n=Math.round(years*freq), c=face*coupon/freq, y=ytm/freq;
+  let price=0, dur=0, conv=0;
+  for(let t=1;t<=n;t++){ const cf=c+(t===n?face:0); const df=Math.pow(1+y,-t); const pv=cf*df; price+=pv; dur+=t*pv; conv+=t*(t+1)*pv; }
+  const macaulay=(dur/price)/freq;
+  const modified=macaulay/(1+y);
+  const convexity=(conv/price)/(freq*freq*Math.pow(1+y,2));
+  const dv01=modified*price*1e-4;
+  return {price,macaulay,modified,convexity,dv01,n};
+}
+function BondCalcTool(){
+  const [face,setFace]=useState(100),[coupon,setCoupon]=useState(5),[freq,setFreq]=useState(2),[years,setYears]=useState(10),[ytm,setYtm]=useState(4),[shock,setShock]=useState(25);
+  const a=bondAnalytics({face,coupon:coupon/100,freq,years,ytm:ytm/100});
+  const aShock=bondAnalytics({face,coupon:coupon/100,freq,years,ytm:(ytm+shock/100)/100});
+  const approx=-a.modified*(shock/1e4)+0.5*a.convexity*Math.pow(shock/1e4,2);
+  const curve=useMemo(()=>{const arr=[];for(let yv=Math.max(0.1,ytm-4);yv<=ytm+4;yv+=0.2){arr.push({x:+yv.toFixed(2),y:+bondAnalytics({face,coupon:coupon/100,freq,years,ytm:yv/100}).price.toFixed(3)});}return arr;},[face,coupon,freq,years,ytm]);
+  return (
+    <div className="container page">
+      <ToolHead slug="bond calculator" name="Bond Calculator" sub="Price, Macaulay & modified duration, convexity, DV01 and scenario shifts."/>
+      <div style={{display:'grid',gridTemplateColumns:'320px 1fr 320px',gap:14}}>
+        <ToolInputs fields={[['Face',face,1,1000,1,setFace,''],['Coupon',coupon,0,15,0.1,setCoupon,'%'],['Freq/yr',freq,1,12,1,setFreq,'×'],['Years',years,0.5,40,0.5,setYears,'y'],['YTM',ytm,0.1,20,0.05,setYtm,'%'],['Rate shock',shock,-200,200,5,setShock,'bp']]}/>
+        <ChartFrame title="Price vs yield" subtitle="convex, downward-sloping price/yield relationship">
+          <LineChart width={620} height={260} series={[{name:'price',color:'#FF2E45',data:curve,fillOpacity:0.1}]}/>
+        </ChartFrame>
+        <div className="panel" style={{padding:18,alignSelf:'start'}}>
+          <div className="label" style={{marginBottom:6}}>Analytics</div>
+          <ResultRow k="Clean price" v={fmt(a.price,3)} accent="var(--red)"/>
+          <ResultRow k="Macaulay duration" v={fmt(a.macaulay,3)+' y'}/>
+          <ResultRow k="Modified duration" v={fmt(a.modified,3)}/>
+          <ResultRow k="Convexity" v={fmt(a.convexity,2)}/>
+          <ResultRow k="DV01" v={fmt(a.dv01,4)+' / bp'}/>
+          <div className="hairline" style={{margin:'12px 0'}}></div>
+          <div className="label" style={{marginBottom:6}}>Shock {shock>=0?'+':''}{shock}bp</div>
+          <ResultRow k="Repriced (exact)" v={fmt(aShock.price,3)}/>
+          <ResultRow k="ΔP exact" v={fmt(aShock.price-a.price,3)}/>
+          <ResultRow k="ΔP/P dur+convex" v={fmtPct(approx,3)} accent="var(--amber)"/>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Yield curve builder: bootstrap par swaps ----------
+function bootstrapCurve(nodes){ // nodes: [{t, rate}] annual par swaps, sorted
+  const dfs=[]; let cum=0; const out=[];
+  for(const nd of nodes){ const s=nd.rate; const df=(1-s*cum)/(1+s); dfs.push(df); cum+=df; const zero=Math.pow(df,-1/nd.t)-1; out.push({t:nd.t,par:s,df,zero}); }
+  for(let i=1;i<out.length;i++){ out[i].fwd=dfs[i-1]/dfs[i]-1; }
+  return out;
+}
+function YieldCurveTool(){
+  const [r1,setR1]=useState(3.0),[r2,setR2]=useState(3.2),[r3,setR3]=useState(3.35),[r5,setR5]=useState(3.55),[r10,setR10]=useState(3.8);
+  const nodes=[{t:1,rate:r1/100},{t:2,rate:r2/100},{t:3,rate:r3/100},{t:5,rate:r5/100},{t:10,rate:r10/100}];
+  const out=bootstrapCurve(nodes);
+  const zeroSeries=out.map(o=>({x:o.t,y:+(o.zero*100).toFixed(3)}));
+  const dfSeries=out.map(o=>({x:o.t,y:+o.df.toFixed(4)}));
+  return (
+    <div className="container page">
+      <ToolHead slug="yield curve builder" name="Yield Curve Builder" sub="Bootstrap discount factors, zero & forward rates from par swap quotes."/>
+      <div style={{display:'grid',gridTemplateColumns:'320px 1fr 360px',gap:14}}>
+        <ToolInputs title="Par swap rates" fields={[['1y',r1,0,10,0.05,setR1,'%'],['2y',r2,0,10,0.05,setR2,'%'],['3y',r3,0,10,0.05,setR3,'%'],['5y',r5,0,10,0.05,setR5,'%'],['10y',r10,0,10,0.05,setR10,'%']]}/>
+        <ChartFrame title="Zero curve" subtitle="annualised zero-coupon rates by maturity">
+          <LineChart width={640} height={260} series={[{name:'zero',color:'#FF2E45',data:zeroSeries,fillOpacity:0.1}]}/>
+        </ChartFrame>
+        <div className="panel" style={{padding:0,alignSelf:'start'}}>
+          <div className="label" style={{padding:'14px 16px'}}>Bootstrapped curve</div>
+          <table className="data"><thead><tr><th>Tenor</th><th className="num">DF</th><th className="num">Zero</th><th className="num">1y fwd</th></tr></thead>
+          <tbody>{out.map(o=><tr key={o.t}><td className="symbol">{o.t}y</td><td className="num">{fmt(o.df,4)}</td><td className="num">{fmt(o.zero*100,3)}%</td><td className="num">{o.fwd!=null?fmt(o.fwd*100,3)+'%':'—'}</td></tr>)}</tbody></table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Vol surface explorer: parametric skew, inverted to IV ----------
+function VolSurfaceTool(){
+  const [atm,setAtm]=useState(20),[skew,setSkew]=useState(-12),[smile,setSmile]=useState(40),[term,setTerm]=useState(3);
+  // total-variance flat term structure with a quadratic-in-logmoneyness smile
+  const ivAt=(k,T)=>{ const base=(atm/100)+(skew/100)*k+(smile/100)*k*k; const tt=base*(1+(term/100)*Math.log(Math.max(T,0.05))); return Math.max(0.02,tt); };
+  const tenors=[0.25,0.5,1,2,5];
+  const ks=useMemo(()=>{const a=[];for(let k=-0.4;k<=0.4;k+=0.04)a.push(+k.toFixed(3));return a;},[]);
+  const series=tenors.map((T,i)=>({name:`${T}y`,color:['#FF2E45','#FFB020','#3DA5FF','#36C26B','#B36BFF'][i],data:ks.map(k=>({x:k,y:+(ivAt(k,T)*100).toFixed(2)})),fill:false}));
+  return (
+    <div className="container page">
+      <ToolHead slug="vol surface explorer" name="Vol Surface Explorer" sub="Parametric implied-vol surface — slice the smile by tenor and log-moneyness."/>
+      <div style={{display:'grid',gridTemplateColumns:'320px 1fr',gap:14}}>
+        <ToolInputs title="Surface parameters" fields={[['ATM vol',atm,5,80,0.5,setAtm,'%'],['Skew',skew,-50,50,1,setSkew,'%/k'],['Smile (curv.)',smile,0,150,2,setSmile,'%/k²'],['Term slope',term,-30,30,1,setTerm,'%']]}>
+          <div className="mute" style={{fontSize:11.5,marginTop:6,lineHeight:1.5}}>σ(k,T) = ATM + skew·k + smile·k², k = ln(K/S), scaled in maturity. Each line is a tenor slice.</div>
+        </ToolInputs>
+        <ChartFrame title="Implied-vol smile slices" subtitle="vol (%) vs log-moneyness, per tenor" h={320}>
+          <LineChart width={760} height={320} series={series} fill={false}/>
+        </ChartFrame>
+      </div>
+    </div>
+  );
+}
+
+function GatedTool({required, name, children}) {
+  const ent = useEntitlement();
+  if (ent.has(required)) return children;
+  return <div className="container page"><ToolHead slug={name.toLowerCase()} name={name} sub="Premium tool."/><LockPanel required={required} what={`The ${name}`}/></div>;
+}
 function ToolDetailPage({id}) {
   const tool = TOOLS.find(t=>t.id===id);
   if (!tool) return <ToolNotFound/>;
@@ -2648,7 +3809,11 @@ function ToolDetailPage({id}) {
   if (id === 'payoff') return <PayoffVisualizerTool/>;
   if (id === 'mc') return <MonteCarloTool/>;
   if (id === 'iv-calc') return <IVCalcTool/>;
-  if (id === 'calib') return <CalibrationTool/>;
+  if (id === 'calib') return <GatedTool required="student" name="Smile Calibration"><CalibrationTool/></GatedTool>;
+  if (id === 'binomial') return <BinomialTreeTool/>;
+  if (id === 'bond') return <BondCalcTool/>;
+  if (id === 'curve') return <YieldCurveTool/>;
+  if (id === 'volsurface') return <VolSurfaceTool/>;
   if (tool.tier === 'pro') return <ProLockedTool tool={tool}/>;
   return <BSPricerTool/>;
 }
@@ -3295,105 +4460,83 @@ function IVCalcTool() {
 }
 
 // ============= CALIBRATION =============
+function solve3(A,b){ // Gaussian elimination for 3x3
+  const M=[[...A[0],b[0]],[...A[1],b[1]],[...A[2],b[2]]];
+  for(let i=0;i<3;i++){
+    let p=i; for(let r=i+1;r<3;r++) if(Math.abs(M[r][i])>Math.abs(M[p][i])) p=r;
+    [M[i],M[p]]=[M[p],M[i]];
+    if(Math.abs(M[i][i])<1e-12) return null;
+    for(let r=0;r<3;r++){ if(r!==i){ const f=M[r][i]/M[i][i]; for(let c=i;c<4;c++) M[r][c]-=f*M[i][c]; } }
+  }
+  return [M[0][3]/M[0][0],M[1][3]/M[1][1],M[2][3]/M[2][2]];
+}
+function fitQuadraticSmile(points, S0){ // sigma = a + b k + c k^2, k=ln(K/S0); least squares
+  let s0=points.length,s1=0,s2=0,s3=0,s4=0,ty=0,tky=0,tk2y=0;
+  for(const {K,iv} of points){ const k=Math.log(K/S0); const k2=k*k;
+    s1+=k; s2+=k2; s3+=k2*k; s4+=k2*k2; ty+=iv; tky+=k*iv; tk2y+=k2*iv; }
+  const A=[[s0,s1,s2],[s1,s2,s3],[s2,s3,s4]], b=[ty,tky,tk2y];
+  const sol=solve3(A,b); if(!sol) return {a:NaN,b:NaN,c:NaN,rmse:NaN,mae:NaN};
+  const [a,bb,c]=sol;
+  let se=0,ae=0; for(const {K,iv} of points){ const k=Math.log(K/S0); const m=a+bb*k+c*k*k; se+=(m-iv)**2; ae+=Math.abs(m-iv); }
+  return {a,b:bb,c,rmse:Math.sqrt(se/points.length),mae:ae/points.length, model:(K)=>{const k=Math.log(K/S0);return a+bb*k+c*k*k;}};
+}
 function CalibrationTool() {
-  const [model, setModel] = useState('SABR');
-  useToolRegister('calib', {model}, {model:setModel});
+  const S0=100;
+  const [points,setPoints]=useState([
+    {K:80,iv:0.262},{K:90,iv:0.221},{K:95,iv:0.205},{K:100,iv:0.192},
+    {K:105,iv:0.187},{K:110,iv:0.190},{K:120,iv:0.214},
+  ]);
+  const fit=useMemo(()=>fitQuadraticSmile(points,S0),[points]);
+  const setIv=(i,v)=>setPoints(ps=>ps.map((p,j)=>j===i?{...p,iv:v}:p));
+  const market=points.map(p=>({x:p.K,y:+(p.iv*100).toFixed(2)}));
+  const fitted=useMemo(()=>{const a=[];for(let K=78;K<=122;K+=1)a.push({x:K,y:+((fit.model?fit.model(K):0)*100).toFixed(2)});return a;},[fit]);
   return (
     <div className="container page">
-      <PageHead
-        crumb={<><Link to="/tools">tools</Link><i>›</i><span>model calibration</span></>}
-        title="Model Calibration"
-        sub="Fit Black, SABR or Heston parameters to a market volatility surface."
-        right={<><TierBadge tier="student"/></>}
-      />
-      <div style={{display:'grid',gridTemplateColumns:'1fr 360px',gap:14}}>
+      <ToolHead slug="model calibration" name="Smile Calibration (least-squares)" sub="Fit a quadratic-in-log-moneyness smile to market IV quotes — real closed-form least squares."/>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 340px',gap:14}}>
         <div className="col" style={{gap:14}}>
-          <div className="panel">
-            <div className="row between" style={{padding:'12px 16px', borderBottom:'1px solid var(--line)'}}>
-              <div className="label">Market vs Model</div>
-              <div className="toggle">
-                {['Black','SABR','Heston'].map(m=><button key={m} className={model===m?'on':''} onClick={()=>setModel(m)}>{m}</button>)}
-              </div>
-            </div>
-            <div style={{padding:14}}>
-              <LineChart width={760} height={280} series={[
-                {name:'Market', color:'#FF2E45', data:Array.from({length:30},(_,i)=>({x:80+i*1.5, y:0.18+0.12*((i-15)/15)**2 - 0.05*((i-15)/15) + 0.005*Math.sin(i)})), fill:false, strokeWidth:2},
-                {name:'Model', color:'#3E8BFF', data:Array.from({length:30},(_,i)=>({x:80+i*1.5, y:0.18+0.10*((i-15)/15)**2 - 0.05*((i-15)/15)})), fill:false, dashed:true},
-              ]}/>
-            </div>
-            <div className="row between" style={{padding:'10px 16px',borderTop:'1px solid var(--line)',background:'var(--panel-2)'}}>
-              <span className="mono mute" style={{fontSize:11}}>K range 80 → 125</span>
-              <span className="mono" style={{fontSize:11.5}}>RMSE <span className="green">0.0042</span> · MAE <span className="green">0.0031</span></span>
-            </div>
-          </div>
+          <ChartFrame title="Market vs fitted smile" subtitle="implied vol (%) vs strike">
+            <LineChart width={760} height={300} series={[
+              {name:'Fitted', color:'#3E8BFF', data:fitted, fill:false, dashed:true},
+              {name:'Market', color:'#FF2E45', data:market, fill:false, strokeWidth:2},
+            ]}/>
+          </ChartFrame>
           <div className="panel">
             <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
-              <div className="label">Market quotes · SPX Dec-26</div>
-              <span className="badge">23-May-2026 mid</span>
+              <div className="label">Market quotes (editable)</div>
+              <span className="badge">spot {S0}</span>
             </div>
             <table className="data">
-              <thead><tr><th>Strike</th><th className="num">Bid σ</th><th className="num">Ask σ</th><th className="num">Mid σ</th><th className="num">Model σ</th><th className="num">Residual</th></tr></thead>
+              <thead><tr><th>Strike</th><th className="num">Market σ</th><th className="num">Fitted σ</th><th className="num">Residual</th></tr></thead>
               <tbody>
-                {[80,90,95,100,105,110,120].map(k=>{
-                  const mid = 0.18+0.10*((k-100)/15)**2 - 0.05*((k-100)/15) + 0.003*Math.sin(k);
-                  const mdl = 0.18+0.10*((k-100)/15)**2 - 0.05*((k-100)/15);
-                  const res = mid - mdl;
-                  return <tr key={k}>
-                    <td className="symbol">{k}</td>
-                    <td className="num">{(mid-0.003).toFixed(4)}</td>
-                    <td className="num">{(mid+0.003).toFixed(4)}</td>
-                    <td className="num">{mid.toFixed(4)}</td>
-                    <td className="num">{mdl.toFixed(4)}</td>
+                {points.map((p,i)=>{ const m=fit.model?fit.model(p.K):0; const res=m-p.iv; return (
+                  <tr key={p.K}>
+                    <td className="symbol">{p.K}</td>
+                    <td className="num"><input value={p.iv} onChange={e=>{const v=parseFloat(e.target.value);if(!isNaN(v))setIv(i,v);}} style={{width:80,textAlign:'right',background:'#0A0C10',border:'1px solid var(--line-2)',color:'var(--text)',fontFamily:"'JetBrains Mono',monospace",fontSize:12,borderRadius:3,padding:'3px 6px'}}/></td>
+                    <td className="num">{m.toFixed(4)}</td>
                     <td className={"num "+(Math.abs(res)<0.005?'green':'amber')}>{res>=0?'+':''}{res.toFixed(4)}</td>
-                  </tr>;
-                })}
+                  </tr>
+                );})}
               </tbody>
             </table>
           </div>
         </div>
         <div className="col" style={{gap:14}}>
           <div className="panel" style={{padding:16}}>
-            <div className="label" style={{marginBottom:14}}>Calibrated Parameters · {model}</div>
-            {model==='SABR' && (
-              <table className="data" style={{border:'none'}}>
-                <tbody>
-                  <tr><td className="symbol">α (vol of vol)</td><td className="num">0.2841</td></tr>
-                  <tr><td className="symbol">β (CEV)</td><td className="num">0.5000</td></tr>
-                  <tr><td className="symbol">ρ (correlation)</td><td className="num">-0.6210</td></tr>
-                  <tr><td className="symbol">ν (vol-of-vol)</td><td className="num">0.4128</td></tr>
-                </tbody>
-              </table>
-            )}
-            {model==='Heston' && (
-              <table className="data" style={{border:'none'}}>
-                <tbody>
-                  <tr><td className="symbol">v₀</td><td className="num">0.0392</td></tr>
-                  <tr><td className="symbol">κ</td><td className="num">2.1502</td></tr>
-                  <tr><td className="symbol">θ</td><td className="num">0.0481</td></tr>
-                  <tr><td className="symbol">σ_v</td><td className="num">0.5816</td></tr>
-                  <tr><td className="symbol">ρ</td><td className="num">-0.7032</td></tr>
-                </tbody>
-              </table>
-            )}
-            {model==='Black' && (
-              <table className="data" style={{border:'none'}}>
-                <tbody>
-                  <tr><td className="symbol">σ (flat)</td><td className="num">0.1882</td></tr>
-                </tbody>
-              </table>
-            )}
-            <button className="btn btn-primary btn-sm" onClick={()=>notify(`${model} calibration refreshed.`)} style={{width:'100%',marginTop:14,justifyContent:'center'}}><Icon name="play" size={13}/> Re-calibrate</button>
+            <div className="label" style={{marginBottom:6}}>Calibrated parameters</div>
+            <ResultRow k="a (ATM level)" v={fmt(fit.a,4)} accent="var(--red)"/>
+            <ResultRow k="b (skew)" v={fmt(fit.b,4)}/>
+            <ResultRow k="c (curvature)" v={fmt(fit.c,4)}/>
+            <div className="hairline" style={{margin:'12px 0'}}></div>
+            <ResultRow k="RMSE" v={fmt(fit.rmse,5)} accent={fit.rmse<0.005?'var(--green)':'var(--amber)'}/>
+            <ResultRow k="MAE" v={fmt(fit.mae,5)} accent={fit.mae<0.005?'var(--green)':'var(--amber)'}/>
+            <div className="mute" style={{fontSize:11.5,marginTop:12,lineHeight:1.5}}>σ(K) = a + b·ln(K/S) + c·ln(K/S)². Closed-form normal-equations fit — edit any quote and the fit + residuals update live. (SABR/Heston need an iterative solver — that runs on the backend.)</div>
           </div>
           <div className="panel" style={{padding:16}}>
-            <div className="label" style={{marginBottom:10}}>Optimizer</div>
-            <table className="data" style={{border:'none'}}>
-              <tbody>
-                <tr><td className="symbol">Method</td><td className="num">L-BFGS-B</td></tr>
-                <tr><td className="symbol">Iterations</td><td className="num">28</td></tr>
-                <tr><td className="symbol">Wall time</td><td className="num">412 ms</td></tr>
-                <tr><td className="symbol">Loss (final)</td><td className="num">1.18e-5</td></tr>
-              </tbody>
-            </table>
+            <div className="label" style={{marginBottom:6}}>Method</div>
+            <ResultRow k="Estimator" v="Ordinary least squares"/>
+            <ResultRow k="Basis" v="1, k, k²"/>
+            <ResultRow k="Points" v={String(points.length)}/>
           </div>
         </div>
       </div>
@@ -3422,11 +4565,9 @@ function TradingLabPage({route}) {
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ trading lab</span></>}
         title="Trading Lab"
-        sub="Build, backtest and stress-test option strategies against historical and synthetic regimes."
+        sub="Backtest sur un vrai moteur (données réelles) dans l’onglet Backtest ; les Scénarios/Stratégies restent des simulations pédagogiques."
         right={<>
-          <span className="badge"><span className="dot dot-green"></span>SANDBOX</span>
-          <button className="btn btn-outline btn-sm" onClick={()=>notify('Saved runs opened in sandbox mode.')}><Icon name="folder-open" size={13}/> My runs (12)</button>
-          <button className="btn btn-primary btn-sm" onClick={()=>notify('New backtest run initialized.')}><Icon name="plus" size={13}/> New run</button>
+          <span className="badge"><span className="dot dot-green"></span>MOTEUR RÉEL · BACKTEST</span>
         </>}
       />
       <div className="tabs-bar">
@@ -3443,150 +4584,374 @@ function TradingLabPage({route}) {
   );
 }
 
+// Strategy choices for the OOS walk-forward. The plain in-sample backtest runs
+// the engine's full ensemble/router; the picker isolates one strategy OOS.
+const STRATEGY_CHOICES = [
+  ['ensemble', 'Ensemble (routeur moteur)', 'Combine toutes les sous-stratégies — réglage par défaut du moteur.'],
+  ['trend_following', 'Trend following', 'Suivi de tendance (croisement EMA + filtre ATR).'],
+  ['volatility_breakout', 'Volatility breakout', 'Cassures sur expansion de volatilité.'],
+  ['mean_reversion', 'Mean reversion', 'Retour à la moyenne intrabar.'],
+  ['regime_router', 'Regime router', "Routeur de régime — vise la RÉDUCTION DE DRAWDOWN, pas un surcroît d'alpha."],
+];
+const STRATEGY_HORIZONS = [['6000', 'Court (~6k barres 15m)'], ['15000', 'Moyen (~15k barres)'], ['40000', 'Long (~40k barres)']];
+const stratPct = (v) => (v == null || Number.isNaN(Number(v))) ? '—' : `${Number(v) >= 0 ? '+' : ''}${Number(v).toFixed(2)}%`;
+const stratNum = (v, d = 2) => (v == null || Number.isNaN(Number(v))) ? '—' : Number(v).toFixed(d);
+
 function BacktestPanel() {
-  const equity = useMemo(()=>{
-    let v = 100000;
-    return Array.from({length:252},(_,i)=>{
-      v *= 1 + 0.0006 + 0.013*(Math.sin(i*0.07)*0.5 + (Math.random()-0.5));
-      return {x:i, y:Math.round(v)};
+  // REAL backtest: drives the live trading engine through the FastAPI bridge
+  // (/strategy/instruments, /strategy/backtest, /strategy/walkforward). No
+  // numbers are synthesised on the client; if the backend is down we show an
+  // honest "backend requis" state.
+  const [meta, setMeta] = useState(null);     // { instruments, available, strategies }
+  const [metaErr, setMetaErr] = useState(false);
+  const [instrument, setInstrument] = useState('EURUSD');
+  const [strategy, setStrategy] = useState('ensemble');
+  const [capital, setCapital] = useState(5000);
+  const [maxBars, setMaxBars] = useState(15000);
+  const [res, setRes] = useState(null);
+  const [bh, setBh] = useState(null);         // real buy&hold return % or null
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState('');
+  const [wf, setWf] = useState(null);
+  const [wfLoading, setWfLoading] = useState(false);
+  const [wfErr, setWfErr] = useState('');
+
+  useEffect(() => {
+    let alive = true;
+    strategyApi.instruments().then((d) => {
+      if (!alive) return;
+      if (!d || !d.instruments) { setMetaErr(true); return; }
+      setMeta(d);
     });
-  },[]);
-  const dd = useMemo(()=>{
-    let peak = equity[0].y;
-    return equity.map(p=>{ if (p.y>peak) peak=p.y; return {x:p.x, y: (p.y/peak-1)*100}; });
-  },[equity]);
-  const trades = [
-    {dt:'2026-04-12', sym:'SPX',  st:'Bull Call Spread', qty:10, pnl:1218, win:true},
-    {dt:'2026-04-19', sym:'NDX',  st:'Iron Condor', qty:5, pnl:-412, win:false},
-    {dt:'2026-04-26', sym:'TSLA', st:'Long Straddle', qty:8, pnl:920, win:true},
-    {dt:'2026-05-03', sym:'NVDA', st:'Short Strangle', qty:6, pnl:1410, win:true},
-    {dt:'2026-05-10', sym:'AAPL', st:'Calendar Spread', qty:12, pnl:-208, win:false},
-    {dt:'2026-05-17', sym:'SPX',  st:'Iron Condor', qty:5, pnl:680, win:true},
-  ];
+    return () => { alive = false; };
+  }, []);
+
+  useEffect(() => {
+    const info = meta?.instruments?.find((i) => i.key === instrument);
+    if (info && info.capital) setCapital(info.capital);
+  }, [instrument, meta]);
+
+  const runBacktest = async () => {
+    setLoading(true); setErr(''); setWf(null); setWfErr(''); setBh(null);
+    try {
+      const data = await strategyApi.backtest({ instrument, maxBars, capital });
+      setRes(data);
+      const eq = data.equity || [];
+      if (eq.length > 1) {
+        const b = await strategyApi.buyHoldReturnPct(instrument, eq[0].t, eq[eq.length - 1].t);
+        setBh(b);
+      }
+    } catch (e) { setErr(e.message || String(e)); setRes(null); }
+    finally { setLoading(false); }
+  };
+
+  const runWalkforward = async () => {
+    setWfLoading(true); setWfErr('');
+    try {
+      const data = await strategyApi.walkforward({ instrument, strategy, maxBars });
+      setWf(data);
+    } catch (e) { setWfErr(e.message || String(e)); setWf(null); }
+    finally { setWfLoading(false); }
+  };
+
+  const instruments = meta?.instruments || [];
+  const m = res?.metrics || {};
+  // Real equity curve + underwater drawdown derived from the engine equity.
+  const eqSeries = useMemo(() => (res?.equity || []).map((p, i) => ({ x: i, y: p.v })), [res]);
+  const ddSeries = useMemo(() => {
+    const eq = res?.equity || []; let peak = -Infinity; const out = [];
+    eq.forEach((p, i) => { if (p.v > peak) peak = p.v; out.push({ x: i, y: peak > 0 ? +(((p.v / peak) - 1) * 100).toFixed(2) : 0 }); });
+    return out;
+  }, [res]);
+  const trades = res?.trades || [];
+  const cand = wf?.candidates?.[0] || null;
+  const dsr = cand?.test_deflated_sharpe;
+  const eqDates = res?.equity?.length ? `${res.equity[0].t} → ${res.equity[res.equity.length - 1].t}` : '';
+
+  // Honest verdict assembly (only from real returned numbers).
+  const verdicts = [];
+  if (res) {
+    if (bh != null) {
+      const beat = (m.return_pct ?? 0) > bh;
+      verdicts.push({
+        tone: beat ? 'ok' : 'bad',
+        text: beat
+          ? `Bat le buy&hold sur la fenêtre (${stratPct(m.return_pct)} vs ${stratPct(bh)}) — in-sample, hors frictions résiduelles.`
+          : `Ne bat pas le buy&hold sur la fenêtre (${stratPct(m.return_pct)} vs ${stratPct(bh)}).`,
+      });
+    } else {
+      verdicts.push({ tone: 'neutral', text: 'Benchmark buy&hold indisponible pour cette fenêtre (pas de comparaison affichée plutôt qu’un chiffre inventé).' });
+    }
+  }
+  if (wf) {
+    if (dsr != null) {
+      const sig = Number(dsr) >= 0.5;
+      verdicts.push({
+        tone: sig ? 'ok' : 'bad',
+        text: sig
+          ? `Edge OOS plausible : Sharpe déflaté ${stratNum(dsr, 3)} ≥ 0.5 (test out-of-sample).`
+          : `Edge non significatif (Sharpe déflaté ${stratNum(dsr, 3)} < 0.5, test OOS).`,
+      });
+    } else {
+      verdicts.push({ tone: 'bad', text: `Pas de verdict OOS exploitable — moteur : ${wf.decision || '?'}${wf.reason ? ` (${wf.reason})` : ''}.` });
+    }
+  }
+  const toneColor = (t) => t === 'ok' ? '#19C37D' : t === 'bad' ? '#FF2E45' : '#7C8493';
+
   return (
-    <div style={{display:'grid',gridTemplateColumns:'320px 1fr',gap:14}}>
+    <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 14 }}>
       {/* config */}
-      <div className="col" style={{gap:14, alignSelf:'start'}}>
-        <div className="panel" style={{padding:18}}>
-          <div className="label" style={{marginBottom:14}}>Configuration</div>
-          {[
-            ['Strategy','Iron Condor · ATM ±5%', 'select'],
-            ['Underlying','SPX', 'select'],
-            ['Period','2024-01-01 → 2026-05-23','text'],
-            ['Capital','$100,000','text'],
-            ['Fees','0.30 / contract','text'],
-            ['Slippage','0.5 ticks','text'],
-            ['Margin','Reg-T','select'],
-          ].map(([k,v])=>(
-            <div key={k} className="field" style={{marginBottom:12}}>
-              <span className="mono mute" style={{fontSize:11,letterSpacing:'.08em'}}>{k}</span>
-              <input defaultValue={v}/>
+      <div className="col" style={{ gap: 14, alignSelf: 'start' }}>
+        <div className="panel" style={{ padding: 18 }}>
+          <div className="row between" style={{ marginBottom: 14 }}>
+            <div className="label">Configuration</div>
+            <span className={'badge ' + (metaErr ? 'badge-red' : (meta?.available ? 'badge-green' : ''))}>
+              <span className={'dot ' + (metaErr ? 'dot-red' : 'dot-green')}></span>
+              {metaErr ? 'BACKEND HORS LIGNE' : (meta ? (meta.available ? 'MOTEUR EN LIGNE' : 'MOTEUR INDISPONIBLE') : 'CONNEXION…')}
+            </span>
+          </div>
+
+          <div className="field" style={{ marginBottom: 12 }}>
+            <span className="mono mute" style={{ fontSize: 11, letterSpacing: '.08em' }}>Instrument</span>
+            <select value={instrument} onChange={(e) => setInstrument(e.target.value)} disabled={!instruments.length}>
+              {instruments.length
+                ? instruments.map((i) => <option key={i.key} value={i.key}>{i.label} · {i.asset_class}</option>)
+                : <option value="EURUSD">EUR/USD</option>}
+            </select>
+          </div>
+
+          <div className="field" style={{ marginBottom: 6 }}>
+            <span className="mono mute" style={{ fontSize: 11, letterSpacing: '.08em' }}>Stratégie (walk-forward OOS)</span>
+            <select value={strategy} onChange={(e) => setStrategy(e.target.value)}>
+              {STRATEGY_CHOICES.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+            </select>
+          </div>
+          <div className="mute" style={{ fontSize: 11, marginBottom: 12 }}>
+            {STRATEGY_CHOICES.find((s) => s[0] === strategy)?.[2]}
+          </div>
+
+          <div className="field" style={{ marginBottom: 12 }}>
+            <span className="mono mute" style={{ fontSize: 11, letterSpacing: '.08em' }}>Capital</span>
+            <input type="number" value={capital} onChange={(e) => setCapital(Number(e.target.value) || 0)} />
+          </div>
+
+          <div className="field" style={{ marginBottom: 12 }}>
+            <span className="mono mute" style={{ fontSize: 11, letterSpacing: '.08em' }}>Horizon</span>
+            <select value={maxBars} onChange={(e) => setMaxBars(Number(e.target.value))}>
+              {STRATEGY_HORIZONS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+            </select>
+          </div>
+
+          <button className="btn btn-primary btn-sm" disabled={loading || metaErr} onClick={runBacktest} style={{ width: '100%', justifyContent: 'center', marginTop: 4 }}>
+            <Icon name="play" size={13} /> {loading ? 'Backtest en cours…' : 'Run backtest'}
+          </button>
+          <button className="btn btn-outline btn-sm" disabled={wfLoading || metaErr} onClick={runWalkforward} style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}>
+            <Icon name="activity" size={13} /> {wfLoading ? 'Walk-forward…' : 'Walk-forward (out-of-sample)'}
+          </button>
+          {strategy !== 'ensemble' && (
+            <div className="mute" style={{ fontSize: 11, marginTop: 8 }}>
+              Le backtest in-sample exécute le routeur/ensemble complet du moteur. La stratégie « {STRATEGY_CHOICES.find((s) => s[0] === strategy)?.[1]} » est isolée dans le walk-forward OOS.
             </div>
-          ))}
-          <button className="btn btn-primary btn-sm" onClick={()=>notify('Backtest refreshed with the current configuration.')} style={{width:'100%',justifyContent:'center',marginTop:8}}><Icon name="play" size={13}/> Run backtest</button>
+          )}
         </div>
-        <div className="panel" style={{padding:14}}>
-          <div className="label" style={{marginBottom:10}}>KPIs</div>
-          <table className="data" style={{border:'none'}}>
-            <tbody>
-              <tr><td className="symbol">Total Return</td><td className="num green">+18.42%</td></tr>
-              <tr><td className="symbol">Annualized</td><td className="num green">+9.21%</td></tr>
-              <tr><td className="symbol">Sharpe</td><td className="num">1.42</td></tr>
-              <tr><td className="symbol">Sortino</td><td className="num">2.18</td></tr>
-              <tr><td className="symbol">Max DD</td><td className="num red">-8.31%</td></tr>
-              <tr><td className="symbol">Win Rate</td><td className="num">62.8%</td></tr>
-              <tr><td className="symbol">Profit Factor</td><td className="num">1.81</td></tr>
-              <tr><td className="symbol"># Trades</td><td className="num">142</td></tr>
-            </tbody>
-          </table>
+
+        {/* metrics panel */}
+        <div className="panel" style={{ padding: 14 }}>
+          <div className="label" style={{ marginBottom: 10 }}>Métriques {res ? '(réelles)' : ''}</div>
+          {res ? (
+            <table className="data" style={{ border: 'none' }}>
+              <tbody>
+                <tr><td className="symbol">Return</td><td className={'num ' + ((m.return_pct ?? 0) >= 0 ? 'green' : 'red')}>{stratPct(m.return_pct)}</td></tr>
+                <tr><td className="symbol">Sharpe</td><td className="num">{stratNum(m.sharpe)}</td></tr>
+                <tr><td className="symbol">Sortino</td><td className="num">{stratNum(m.sortino)}</td></tr>
+                <tr><td className="symbol">Max DD</td><td className="num red">{stratPct(m.max_drawdown_pct != null ? -Math.abs(m.max_drawdown_pct) : null)}</td></tr>
+                <tr><td className="symbol">Profit factor</td><td className="num">{stratNum(m.profit_factor)}</td></tr>
+                <tr><td className="symbol">Hit ratio</td><td className="num">{m.hit_ratio != null ? `${(m.hit_ratio * 100).toFixed(1)}%` : '—'}</td></tr>
+                <tr><td className="symbol">Calmar</td><td className="num">{stratNum(m.calmar)}</td></tr>
+                <tr><td className="symbol">PSR</td><td className="num">{stratNum(m.psr, 3)}</td></tr>
+                <tr><td className="symbol"># Trades</td><td className="num">{stratNum(m.trades, 0)}</td></tr>
+              </tbody>
+            </table>
+          ) : (
+            <div className="mute" style={{ fontSize: 12 }}>
+              {loading ? 'Calcul du backtest sur données réelles…' : (metaErr ? 'Backend requis : aucune métrique tant que le moteur est hors ligne.' : 'Lance un backtest pour afficher des métriques réelles.')}
+            </div>
+          )}
         </div>
       </div>
-      {/* charts + trades */}
-      <div className="col" style={{gap:14}}>
-        <ChartFrame title="Equity curve" subtitle="Strategy P&L · USD" right={<><span className="mono mute" style={{fontSize:10.5}}>Init $100,000</span><span className="badge badge-green">+18,420 USD</span></>}>
-          <LineChart width={820} height={260} series={[
-            {name:'eq', color:'#FF2E45', data:equity, fillOpacity:0.1},
-          ]}/>
-        </ChartFrame>
-        <ChartFrame title="Drawdown" subtitle="Underwater curve · %">
-          <LineChart width={820} height={150} series={[{name:'dd', color:'#FFB020', data:dd, fillOpacity:0.15}]}/>
-        </ChartFrame>
-        <div className="panel">
-          <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
-            <div className="label">Trade log</div>
-            <div className="row" style={{gap:8}}>
-              <button className="btn btn-ghost btn-sm" onClick={()=>copyText(trades.map((t)=>`${t.dt},${t.sym},${t.st},${t.qty},${t.pnl}`).join('\n'), 'Trade log copied as CSV.')}>Export CSV</button>
-              <button className="btn btn-ghost btn-sm" onClick={()=>notify('Trade log filtered to current strategy.')} >Filter</button>
+
+      {/* charts + verdict + trades */}
+      <div className="col" style={{ gap: 14 }}>
+        {metaErr && (
+          <div className="panel" style={{ padding: 18, borderColor: '#FF2E45' }}>
+            <div className="label" style={{ color: '#FF2E45' }}>Backend requis</div>
+            <div className="mute" style={{ fontSize: 13, marginTop: 8 }}>
+              Le Trading Lab exécute un vrai moteur de backtest côté serveur ({strategyApi.base()}). Démarre le backend FastAPI pour lancer des backtests sur données réelles. Aucun chiffre n’est simulé ici.
             </div>
           </div>
-          <table className="data">
-            <thead><tr><th>Date</th><th>Symbol</th><th>Strategy</th><th className="num">Qty</th><th className="num">P&L</th><th>Result</th></tr></thead>
-            <tbody>
-              {trades.map((t,i)=>(
-                <tr key={i}>
-                  <td className="symbol">{t.dt}</td>
-                  <td>{t.sym}</td>
-                  <td>{t.st}</td>
-                  <td className="num">{t.qty}</td>
-                  <td className={"num "+(t.pnl>=0?'green':'red')}>{t.pnl>=0?'+':''}{t.pnl}</td>
-                  <td><span className={"badge "+(t.win?'badge-green':'badge-red')}>{t.win?'WIN':'LOSS'}</span></td>
-                </tr>
+        )}
+
+        {err && <div className="panel" style={{ padding: 14, borderColor: '#FF2E45' }}><span className="mono" style={{ color: '#FF2E45', fontSize: 12 }}>Backtest échoué : {err}</span></div>}
+
+        <ChartFrame
+          title="Equity curve (réelle)"
+          subtitle={res ? `${instrument} · moteur ensemble · ${eqDates} · capital ${capital.toLocaleString()}` : 'Lance un backtest pour générer la courbe d’equity à partir du moteur.'}
+          right={res ? <span className={'badge ' + ((m.net_pnl ?? 0) >= 0 ? 'badge-green' : 'badge-red')}>{(m.net_pnl ?? 0) >= 0 ? '+' : ''}{Number(m.net_pnl ?? 0).toLocaleString()} {instrument.endsWith('USD') ? 'USD' : ''}</span> : null}
+        >
+          {eqSeries.length > 1
+            ? <LineChart width={820} height={260} series={[{ name: 'eq', color: '#FF2E45', data: eqSeries, fillOpacity: 0.1 }]} xAxis={false} />
+            : <div className="mute" style={{ padding: 40, textAlign: 'center', fontSize: 12 }}>{loading ? 'Calcul…' : 'Aucune courbe — exécute un backtest.'}</div>}
+        </ChartFrame>
+
+        {eqSeries.length > 1 && (
+          <ChartFrame title="Drawdown" subtitle="Underwater curve · % (calculé sur l’equity réelle)">
+            <LineChart width={820} height={150} series={[{ name: 'dd', color: '#FFB020', data: ddSeries, fillOpacity: 0.15 }]} xAxis={false} />
+          </ChartFrame>
+        )}
+
+        {/* walk-forward OOS */}
+        {(wf || wfErr || wfLoading) && (
+          <div className="panel" style={{ padding: 16 }}>
+            <div className="row between" style={{ marginBottom: 10 }}>
+              <div className="label">Walk-forward — fenêtre TEST (out-of-sample)</div>
+              {wf && <span className={'badge ' + (wf.decision === 'deploy' || wf.decision === 'accept' ? 'badge-green' : 'badge-red')}>{wf.decision || '?'}{wf.reason ? ` · ${wf.reason}` : ''}</span>}
+            </div>
+            {wfLoading && <div className="mute" style={{ fontSize: 12 }}>Walk-forward sur données réelles (train / validation / test)…</div>}
+            {wfErr && <span className="mono" style={{ color: '#FF2E45', fontSize: 12 }}>Walk-forward échoué : {wfErr}</span>}
+            {wf && cand && (
+              <div className="grid-3" style={{ gap: 8 }}>
+                {[
+                  ['Test return', stratPct(cand.test_return_pct)],
+                  ['Sharpe déflaté', stratNum(cand.test_deflated_sharpe, 3)],
+                  ['Test max DD', stratPct(cand.test_max_drawdown_pct != null ? -Math.abs(cand.test_max_drawdown_pct) : null)],
+                  ['Test profit factor', stratNum(cand.test_profit_factor)],
+                  ['Test expectancy', stratNum(cand.test_expectancy)],
+                  ['Test trades', stratNum(cand.test_trades, 0)],
+                ].map(([k, v]) => (
+                  <div key={k} className="panel-2" style={{ padding: '8px 10px' }}>
+                    <div className="mono mute" style={{ fontSize: 10 }}>{k}</div>
+                    <div className="mono tnum" style={{ fontSize: 13, fontWeight: 600, marginTop: 2 }}>{v}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {wf && <div className="mute" style={{ fontSize: 11, marginTop: 8 }}>Stratégie testée : {wf.strategy} · params sélectionnés sur le train uniquement.</div>}
+          </div>
+        )}
+
+        {/* honest verdict strip */}
+        {verdicts.length > 0 && (
+          <div className="panel" style={{ padding: 16 }}>
+            <div className="label" style={{ marginBottom: 10 }}>Verdict honnête</div>
+            <div className="col" style={{ gap: 8 }}>
+              {verdicts.map((v, i) => (
+                <div key={i} className="row" style={{ gap: 8, alignItems: 'flex-start' }}>
+                  <span className="dot" style={{ background: toneColor(v.tone), marginTop: 6 }}></span>
+                  <span style={{ fontSize: 13, color: toneColor(v.tone) }}>{v.text}</span>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
+            <div className="mute" style={{ fontSize: 11, marginTop: 12, borderTop: '1px solid var(--line)', paddingTop: 10 }}>
+              Backtest éducatif, net de coûts — la performance passée ne garantit rien ; la plupart des stratégies ne battent pas un indice passif. Le walk-forward (test OOS) et le Sharpe déflaté sont les seuls juges crédibles d’un edge.
+            </div>
+          </div>
+        )}
+
+        {/* real trade log */}
+        {trades.length > 0 && (
+          <div className="panel">
+            <div className="row between" style={{ padding: '12px 16px', borderBottom: '1px solid var(--line)' }}>
+              <div className="label">Trade log (réel · {trades.length})</div>
+              <button className="btn btn-ghost btn-sm" onClick={() => copyText(trades.map((t) => `${t.opened_at},${t.symbol},${t.strategy},${t.direction},${t.pnl}`).join('\n'), 'Trade log copié en CSV.')}>Export CSV</button>
+            </div>
+            <table className="data">
+              <thead><tr><th>Ouverture</th><th>Stratégie</th><th>Sens</th><th className="num">P&L</th><th className="num">P&L %</th><th>Sortie</th><th>Résultat</th></tr></thead>
+              <tbody>
+                {trades.slice(0, 60).map((t, i) => (
+                  <tr key={i}>
+                    <td className="symbol">{String(t.opened_at).slice(0, 16)}</td>
+                    <td>{t.strategy}</td>
+                    <td>{t.direction === 1 ? 'Long' : t.direction === -1 ? 'Short' : t.direction}</td>
+                    <td className={'num ' + ((t.pnl ?? 0) >= 0 ? 'green' : 'red')}>{(t.pnl ?? 0) >= 0 ? '+' : ''}{Number(t.pnl ?? 0).toFixed(2)}</td>
+                    <td className={'num ' + ((t.pnl_pct ?? 0) >= 0 ? 'green' : 'red')}>{stratPct(t.pnl_pct)}</td>
+                    <td className="mute" style={{ fontSize: 11 }}>{t.exit_reason}</td>
+                    <td><span className={'badge ' + ((t.pnl ?? 0) >= 0 ? 'badge-green' : 'badge-red')}>{(t.pnl ?? 0) >= 0 ? 'WIN' : 'LOSS'}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
+// Deterministic Monte Carlo of a short-strangle over a 30d horizon. Premium is
+// priced with Black-Scholes at entry IV; P&L = premium - terminal option payoffs.
+// Real distribution -> expected P&L, Sharpe, worst path, win rate.
+function scenarioMC({mu, sigma, seed=1, n=2000, entryIV=0.18}){
+  const S0=100, T=30/252, Kc=105, Kp=95, M=400; // contract multiplier -> ~$100k book
+  const premium=(bsPrice({S:S0,K:Kc,r:0.02,sigma:entryIV,T,type:'call'}).price + bsPrice({S:S0,K:Kp,r:0.02,sigma:entryIV,T,type:'put'}).price)*M;
+  let s=(seed*2654435761>>>0)||1; const rnd=()=>{ s=(1103515245*s+12345)>>>0; return s/4294967296; };
+  const gauss=()=>{ let u=0,v=0; while(u===0)u=rnd(); while(v===0)v=rnd(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); };
+  const pnls=[]; let worst=Infinity, wins=0;
+  for(let i=0;i<n;i++){
+    const ST=S0*Math.exp((mu-0.5*sigma*sigma)*T+sigma*Math.sqrt(T)*gauss());
+    const pnl=premium - (Math.max(ST-Kc,0)+Math.max(Kp-ST,0))*M;
+    pnls.push(pnl); if(pnl<worst)worst=pnl; if(pnl>0)wins++;
+  }
+  const mean=pnls.reduce((a,b)=>a+b,0)/n;
+  const sd=Math.sqrt(pnls.reduce((a,b)=>a+(b-mean)**2,0)/n);
+  return { pnl:Math.round(mean), sharpe:sd>0?mean/sd:0, worst:Math.round(worst), win:Math.round(100*wins/n), volPnl:Math.round(sd), meanRet:mean/100000 };
+}
 function ScenariosPanel() {
-  const presets = [
-    {n:'Bullish drift', d:'Slow grind higher · σ=12%', pnl:+4280, sharpe:1.81, dd:-2.1, win:74},
-    {n:'Bearish drift', d:'Trend reversal · σ=15%', pnl:-2120, sharpe:0.42, dd:-9.4, win:48},
-    {n:'Vol spike', d:'+8 σ overnight', pnl:-6840, sharpe:-1.21, dd:-12.8, win:38},
-    {n:'Vol crush', d:'Post-event collapse', pnl:+8312, sharpe:2.94, dd:-1.2, win:82},
-    {n:'Time decay', d:'Sideways, 30d run', pnl:+1820, sharpe:1.62, dd:-0.8, win:71},
-    {n:'Rate shock', d:'+100bp parallel', pnl:-1840, sharpe:-0.81, dd:-6.4, win:42},
+  const presets=[
+    {n:'Bullish drift', d:'Slow grind higher · σ=12%', mu:0.15, sigma:0.12, seed:11},
+    {n:'Bearish drift', d:'Trend reversal · σ=15%', mu:-0.15, sigma:0.15, seed:22},
+    {n:'Vol spike', d:'Realised σ=45%', mu:0, sigma:0.45, seed:33},
+    {n:'Vol crush', d:'Realised σ=8%', mu:0, sigma:0.08, seed:44},
+    {n:'Time decay', d:'Sideways · σ=12%', mu:0, sigma:0.12, seed:55},
+    {n:'Rate shock', d:'Drift -5% · σ=20%', mu:-0.05, sigma:0.20, seed:66},
   ];
+  const rows=useMemo(()=>presets.map(p=>({...p, ...scenarioMC(p)})),[]);
   return (
     <div className="col" style={{gap:14}}>
       <div className="grid-3">
-        {presets.map(p=>(
+        {rows.map(p=>(
           <div key={p.n} className="panel" style={{padding:18}}>
             <div className="row between">
               <div className="mono" style={{fontWeight:700, fontSize:14}}>{p.n}</div>
-              <span className={"badge "+(p.pnl>=0?'badge-green':'badge-red')}>{p.pnl>=0?'+':''}{p.pnl}</span>
+              <span className={"badge "+(p.pnl>=0?'badge-green':'badge-red')}>{p.pnl>=0?'+':''}{p.pnl.toLocaleString()}</span>
             </div>
             <div className="mute" style={{fontSize:12,marginTop:6}}>{p.d}</div>
             <div className="grid-2" style={{gap:8,marginTop:14}}>
-              {[['Sharpe',p.sharpe],['Max DD',p.dd+'%'],['Win',p.win+'%'],['P&L',p.pnl]].map(([k,v])=>(
+              {[['Sharpe',p.sharpe.toFixed(2)],['Worst','$'+p.worst.toLocaleString()],['Win',p.win+'%'],['E[P&L]',p.pnl.toLocaleString()]].map(([k,v])=>(
                 <div key={k} className="panel-2" style={{padding:'8px 10px'}}>
                   <div className="mono mute" style={{fontSize:10}}>{k}</div>
                   <div className="mono tnum" style={{fontSize:13,fontWeight:600,marginTop:2}}>{v}</div>
                 </div>
               ))}
             </div>
-            <button className="btn btn-outline btn-sm" onClick={()=>notify(`${p.n} scenario queued.`)} style={{width:'100%',justifyContent:'center',marginTop:14}}>Run scenario</button>
           </div>
         ))}
       </div>
       <div className="panel">
         <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
-          <div className="label">Aggregate stress · Iron Condor SPX</div>
-          <span className="badge">6 scenarios · 1000 paths each</span>
+          <div className="label">Aggregate stress · Short Strangle (Kc 105 / Kp 95)</div>
+          <span className="badge">6 scenarios · 2000 paths each · live MC</span>
         </div>
         <table className="data">
-          <thead><tr><th>Scenario</th><th className="num">P&L</th><th className="num">Mean Return</th><th className="num">Vol of P&L</th><th className="num">Sharpe</th><th className="num">Worst Path</th></tr></thead>
+          <thead><tr><th>Scenario</th><th className="num">E[P&L]</th><th className="num">Mean Return</th><th className="num">Vol of P&L</th><th className="num">Sharpe</th><th className="num">Worst Path</th></tr></thead>
           <tbody>
-            {presets.map(p=>(
+            {rows.map(p=>(
               <tr key={p.n}>
                 <td className="symbol">{p.n}</td>
-                <td className={"num "+(p.pnl>=0?'green':'red')}>{p.pnl>=0?'+':''}{p.pnl}</td>
-                <td className={"num "+(p.pnl>=0?'green':'red')}>{((p.pnl/100000)*100).toFixed(2)}%</td>
-                <td className="num">{(Math.abs(p.pnl)/2400).toFixed(2)}%</td>
-                <td className="num">{p.sharpe}</td>
-                <td className="num red">{(p.dd*1.4).toFixed(2)}%</td>
+                <td className={"num "+(p.pnl>=0?'green':'red')}>{p.pnl>=0?'+':''}{p.pnl.toLocaleString()}</td>
+                <td className={"num "+(p.pnl>=0?'green':'red')}>{(p.meanRet*100).toFixed(2)}%</td>
+                <td className="num">{p.volPnl.toLocaleString()}</td>
+                <td className="num">{p.sharpe.toFixed(2)}</td>
+                <td className="num red">{p.worst.toLocaleString()}</td>
               </tr>
             ))}
           </tbody>
@@ -3653,21 +5018,28 @@ function StrategySketch({name}){
 }
 
 function PerformancePanel() {
-  const strategies = [
-    {n:'Iron Condor SPX', sharpe:1.42, pnl:+18420, win:62.8, dd:-8.3, runs:28},
-    {n:'Bull Call NDX', sharpe:1.12, pnl:+12180, win:54.2, dd:-12.1, runs:14},
-    {n:'Long Vol TSLA', sharpe:0.61, pnl:-3210, win:38.4, dd:-18.4, runs:9},
-    {n:'Calendar NVDA', sharpe:2.18, pnl:+22100, win:71.2, dd:-4.1, runs:18},
-    {n:'Short Strangle SPY', sharpe:1.61, pnl:+8210, win:68.4, dd:-9.8, runs:21},
-  ];
+  const strategies = useMemo(()=>{
+    const defs=[
+      {n:'Short Strangle SPX', mu:0.05, sigma:0.14, seed:101, runs:28},
+      {n:'Short Strangle NDX', mu:0.02, sigma:0.20, seed:202, runs:14},
+      {n:'Short Strangle TSLA', mu:0.0, sigma:0.42, seed:303, runs:9},
+      {n:'Short Strangle NVDA', mu:0.08, sigma:0.10, seed:404, runs:18},
+      {n:'Short Strangle SPY', mu:0.03, sigma:0.12, seed:505, runs:21},
+    ];
+    return defs.map(d=>{ const m=scenarioMC(d); return {n:d.n, sharpe:+m.sharpe.toFixed(2), pnl:m.pnl, win:m.win, dd:+((m.worst/100000)*100).toFixed(1), runs:d.runs}; });
+  },[]);
+  const totalPnL=strategies.reduce((a,s)=>a+s.pnl,0);
+  const avgSharpe=strategies.reduce((a,s)=>a+s.sharpe,0)/strategies.length;
+  const avgWin=strategies.reduce((a,s)=>a+s.win,0)/strategies.length;
+  const maxDD=Math.min(...strategies.map(s=>s.dd));
   return (
     <div className="col" style={{gap:14}}>
       <div className="grid-4">
         {[
-          {l:'Total P&L',v:'+57,700',c:'var(--green)'},
-          {l:'Avg Sharpe',v:'1.39',c:'var(--text)'},
-          {l:'Win Rate',v:'59.0%',c:'var(--text)'},
-          {l:'Max DD (port)',v:'-12.8%',c:'var(--red)'},
+          {l:'Total E[P&L]',v:(totalPnL>=0?'+':'')+totalPnL.toLocaleString(),c:totalPnL>=0?'var(--green)':'var(--red)'},
+          {l:'Avg Sharpe',v:avgSharpe.toFixed(2),c:'var(--text)'},
+          {l:'Win Rate',v:avgWin.toFixed(1)+'%',c:'var(--text)'},
+          {l:'Worst Path',v:maxDD.toFixed(1)+'%',c:'var(--red)'},
         ].map(s=><Stat key={s.l} label={s.l} value={s.v} accent={s.c}/>)}
       </div>
       <div className="panel">
@@ -3951,7 +5323,7 @@ function StaticExerciseDetail({ex}) {
         right={<>
           {ex.done && <span className="badge badge-green">Completed</span>}
           <button className="btn btn-outline btn-sm" onClick={()=>handleSave(ex.title)}><Icon name="bookmark" size={13}/> Save</button>
-          <button className="btn btn-primary btn-sm" onClick={()=>{setTab('output'); notify('Code executed against sample tests.')}}><Icon name="play" size={13}/> Run code</button>
+          <button className="btn btn-primary btn-sm" onClick={()=>setTab('code')}><Icon name="play" size={13}/> Run code</button>
         </>}
       />
       <div className="tabs-bar">
@@ -3992,19 +5364,7 @@ function StaticExerciseDetail({ex}) {
             </>
           )}
           {tab==='code' && (
-            <div className="panel exercise-readable-panel" style={{padding:0}}>
-              <div className="row between" style={{padding:'10px 14px',borderBottom:'1px solid var(--line)'}}>
-                <div className="row" style={{gap:14}}>
-                  <span className="badge">Python 3.11</span>
-                  <span className="mono mute" style={{fontSize:11}}>exercise.py · unsaved</span>
-                </div>
-                <div className="row" style={{gap:6}}>
-                  <button className="btn btn-ghost btn-sm" onClick={()=>notify('Starter code restored.')}><Icon name="rotate-ccw" size={12}/> Reset</button>
-                  <button className="btn btn-primary btn-sm" onClick={()=>{setTab('output'); notify('Code executed against sample tests.')}}><Icon name="play" size={12}/> Run</button>
-                </div>
-              </div>
-              <pre className="code exercise-code"><code>{ex.starterCode}</code></pre>
-            </div>
+            <PyCodeCell initial={ex.starterCode || '# Write your solution here\nprint("hello desk")'} label="exercise.py"/>
           )}
           {tab==='output' && (
             <div className="panel exercise-readable-panel">
@@ -4280,6 +5640,8 @@ function SurvivalPage({route}) {
 }
 
 function SurvivalIndex() {
+  const [board,setBoard] = useState(null);
+  useEffect(()=>{ platformApi.survivalLeaderboard(10).then(setBoard).catch(()=>setBoard([])); },[]);
   const waves = [
     {n:'Beginner', lvl:1, time:'60s', count:10, topics:['Definitions','Basic payoffs'], status:'completed'},
     {n:'Intermediate', lvl:2, time:'45s', count:15, topics:['Black-Scholes','Greeks'], status:'completed'},
@@ -4294,7 +5656,7 @@ function SurvivalIndex() {
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ survival</span></>}
         title={<>Survival Mode <span className="blink" style={{color:'var(--red)',marginLeft:10}}>●</span></>}
         sub="Pressure-tested. Timer running. Each wave gets faster and meaner. Make a mistake — drop a life. Run out of lives, run out of session."
-        right={<><span className="badge badge-red"><span className="dot dot-red"></span>LIVE · 38 players</span></>}
+        right={<><span className="badge badge-red"><span className="dot dot-red"></span>Timed mode</span></>}
       />
       <div className="grid-4" style={{marginBottom:18}}>
         <Stat label="Highest wave" value="Advanced" accent="var(--red)"/>
@@ -4342,26 +5704,17 @@ function SurvivalIndex() {
           <h2 className="section-title">All-time top 10</h2>
         </div>
         <div className="panel">
-          <table className="data">
-            <thead><tr><th>#</th><th>Player</th><th>Wave</th><th className="num">Score</th><th className="num">Streak</th><th className="num">Avg time</th><th>Country</th></tr></thead>
+          {board===null && <div className="mute" style={{padding:18}}>Loading leaderboard…</div>}
+          {board!==null && board.length===0 && <div className="mute" style={{padding:18}}>No runs yet. Play a wave to put your score on the board.</div>}
+          {board && board.length>0 && <table className="data">
+            <thead><tr><th>#</th><th>Player</th><th className="num">Best score</th><th className="num">Streak</th></tr></thead>
             <tbody>
-              {[
-                ['#1','@aurora_vol','Legendary',12421,89,'14.2s','FR'],
-                ['#2','@gamma_god','Master',11820,72,'15.8s','UK'],
-                ['#3','@quantfox','Master',11201,68,'16.1s','US'],
-                ['#4','@nu_oresund','Master',10982,64,'16.5s','DK'],
-                ['#5','@theta_burn','Expert',9418,52,'18.2s','DE'],
-                ['#6','@vega_neutral','Expert',9112,48,'19.0s','SG'],
-                ['#7','@itos_lemma','Expert',8941,46,'19.4s','JP'],
-                ['#8','@strangle_kid','Expert',8512,42,'20.1s','BR'],
-                ['#9','@cox_ross','Expert',8201,40,'20.4s','CA'],
-                ['#10','@you','Advanced',4218,18,'22.4s','GR'],
-              ].map(r=><tr key={r[1]} style={r[1]==='@you'?{color:'var(--red)'}:{}}>
-                <td className="symbol">{r[0]}</td><td>{r[1]}</td><td>{r[2]}</td>
-                <td className="num">{r[3].toLocaleString()}</td><td className="num">{r[4]}</td><td className="num">{r[5]}</td><td>{r[6]}</td>
+              {board.map(r=><tr key={r.username}>
+                <td className="symbol">#{r.rank}</td><td>@{r.username}</td>
+                <td className="num">{Number(r.score).toLocaleString()}</td><td className="num">{r.streak||0}</td>
               </tr>)}
             </tbody>
-          </table>
+          </table>}
         </div>
       </section>
     </div>
@@ -4369,15 +5722,22 @@ function SurvivalIndex() {
 }
 
 function SurvivalWave({wave}) {
+  let auth=null; try { auth=useAuth(); } catch { auth=null; }
   const [timer, setTimer] = useState(28);
-  const [progress, setProgress] = useState(7);
-  const [lives, setLives] = useState(2);
-  const [score, setScore] = useState(1842);
+  const [progress, setProgress] = useState(0);
+  const [lives, setLives] = useState(3);
+  const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
   const [selected, setSelected] = useState(null);
   const total = 20;
-  const correct = 'C';
+  const correct = 'D'; // ATM call delta = N(d1), d1=(0.02+0.02)/0.2=0.2 -> N(0.2)=0.579 ~ 0.58
   const waveName = (wave || 'advanced').replace(/-/g,' ');
   const prettyWave = waveName.charAt(0).toUpperCase() + waveName.slice(1);
+  const saveRun = (finalScore, finalStreak) => {
+    const username = auth?.profile?.prenom || (auth?.user?.email ? auth.user.email.split('@')[0] : 'guest');
+    platformApi.recordSurvival({ user_id: auth?.user?.id || null, username, wave: prettyWave, score: Math.round(finalScore), streak: finalStreak });
+    if (auth?.user) recordProgressOnce(auth, 'survival', `${prettyWave}-${Date.now()}`, Math.round(finalScore), { wave: prettyWave });
+  };
   useEffect(()=>{
     const id = setInterval(()=>setTimer(t=>selected?t:(t>0?t-1:30)),1000);
     return ()=>clearInterval(id);
@@ -4388,11 +5748,13 @@ function SurvivalWave({wave}) {
     if (key === correct) {
       const earned = Math.max(50, timer * 12);
       setScore((value)=>value + earned);
-      setProgress((value)=>Math.min(total, value + 1));
+      setStreak((s)=>s+1);
+      setProgress((value)=>{ const np = Math.min(total, value + 1); if (np>=total) saveRun(score+earned, streak+1); return np; });
       notify(`Correct. +${earned} pts.`);
     } else {
-      setLives((value)=>Math.max(0, value - 1));
-      notify('Wrong answer. One life removed.', 'warning');
+      setStreak(0);
+      setLives((value)=>{ const nl = Math.max(0, value - 1); if (nl===0) saveRun(score, streak); return nl; });
+      notify(lives-1<=0 ? 'Game over — score saved to the leaderboard.' : 'Wrong answer. One life removed.', 'warning');
     }
   };
   const nextQuestion = () => {
@@ -4460,10 +5822,9 @@ function SurvivalWave({wave}) {
           <div className="panel" style={{padding:16}}>
             <div className="label" style={{marginBottom:10}}>Session</div>
             <div className="col" style={{gap:8}}>
-              <div className="row between"><span className="mono mute" style={{fontSize:11}}>Streak</span><span className="mono" style={{fontSize:13,fontWeight:600}}>x7</span></div>
-              <div className="row between"><span className="mono mute" style={{fontSize:11}}>Multiplier</span><span className="mono red" style={{fontSize:13,fontWeight:600}}>x2.4</span></div>
+              <div className="row between"><span className="mono mute" style={{fontSize:11}}>Streak</span><span className="mono" style={{fontSize:13,fontWeight:600}}>x{streak}</span></div>
+              <div className="row between"><span className="mono mute" style={{fontSize:11}}>Lives</span><span className="mono red" style={{fontSize:13,fontWeight:600}}>{lives}</span></div>
               <div className="row between"><span className="mono mute" style={{fontSize:11}}>Score</span><span className="mono" style={{fontSize:13,fontWeight:600}}>{score.toLocaleString()}</span></div>
-              <div className="row between"><span className="mono mute" style={{fontSize:11}}>Rank live</span><span className="mono" style={{fontSize:13,fontWeight:600}}>#318</span></div>
             </div>
           </div>
           <div className="panel" style={{padding:16}}>
@@ -4486,8 +5847,11 @@ Object.assign(window, {TradingLabPage, ExercisesPage, SurvivalPage});
 
 // ============= COMMUNITY =============
 function CommunityPage({route}) {
+  let authName = null; try { const a=useAuth(); authName = a?.profile?.prenom || a?.user?.email || null; } catch { authName=null; }
   const sub = route.parts[1] || 'forum';
   const tabs = [['forum','Forum'],['projects','Projects'],['publications','Publications']];
+  const [composing,setComposing] = useState(false);
+  const [reloadKey,setReloadKey] = useState(0);
   return (
     <div className="container page">
       <PageHead
@@ -4495,72 +5859,69 @@ function CommunityPage({route}) {
         title="Community"
         sub="Forums, shared notebooks, projects and peer-reviewed publications."
         right={<>
-          <span className="badge"><span className="dot dot-green"></span>1,824 online</span>
-          <button className="btn btn-primary btn-sm" onClick={()=>submitStub('Community post draft')}><Icon name="plus" size={13}/> New post</button>
+          <button className="btn btn-primary btn-sm" onClick={()=>setComposing(c=>!c)}><Icon name="plus" size={13}/> New post</button>
         </>}
       />
       <div className="tabs-bar">
         {tabs.map(([k,l])=><Link key={k} to={"/community/"+k} className={"tab-btn "+(sub===k?'on':'')}>{l}</Link>)}
       </div>
-      {sub==='forum' && <ForumPanel/>}
+      {sub==='forum' && <ForumPanel composing={composing} setComposing={setComposing} authName={authName} reloadKey={reloadKey} onPosted={()=>setReloadKey(k=>k+1)}/>}
       {sub==='projects' && <ProjectsPanel/>}
       {sub==='publications' && <PublicationsPanel/>}
     </div>
   );
 }
 
-function ForumPanel() {
-  const [mode,setMode] = useState('Latest');
+function ForumPanel({composing, setComposing, authName, reloadKey, onPosted}) {
   const [query,setQuery] = useState('');
-  const topics = [
-    {t:'[PINNED] Read first: forum guidelines & code of conduct', tag:'Meta', r:0, v:8721, l:412, pinned:true, hot:false},
-    {t:'Heston calibration diverging on short maturities', tag:'Calibration', r:24, v:1218, l:48, hot:true},
-    {t:'Closed-form vega for barriers — anyone tried Lipton?', tag:'Exotics', r:18, v:842, l:32},
-    {t:'Negative IV from market call quotes — bid/ask filtering', tag:'Volatility', r:42, v:2418, l:118, hot:true},
-    {t:'QuantLib 1.34 segfault on macOS arm64', tag:'Tooling', r:7, v:312, l:14},
-    {t:'Best resource for SDE intuition?', tag:'Stochastic', r:38, v:1842, l:94},
-    {t:'Smile fit: SVI vs SABR for equity indices', tag:'Volatility', r:21, v:1102, l:58},
-    {t:'Variance swap PnL attribution — gamma vs vega', tag:'Vol Products', r:11, v:484, l:24},
-    {t:'Antithetic vs Sobol for path-dependent payoffs', tag:'Monte Carlo', r:16, v:712, l:38},
-  ];
-  const displayed = topics
-    .filter((topic) => {
-      const match = `${topic.t} ${topic.tag}`.toLowerCase().includes(query.trim().toLowerCase());
-      const modeMatch = mode === 'Unanswered' ? topic.r === 0 : true;
-      return match && modeMatch;
-    })
-    .sort((a,b) => mode === 'Top week' ? b.l - a.l : Number(b.pinned) - Number(a.pinned));
+  const [threads,setThreads] = useState(null);
+  const [form,setForm] = useState({ title:'', body:'', tag:'' });
+  const refetch = useCallback(()=>{ platformApi.listThreads('forum').then(setThreads).catch(()=>setThreads([])); },[]);
+  useEffect(()=>{ refetch(); },[refetch, reloadKey]);
+  const submitPost = async (event) => {
+    event.preventDefault();
+    if (!form.title.trim() || !form.body.trim()) { notify('Title and body are required.', 'error'); return; }
+    try {
+      await platformApi.createThread({ channel:'forum', title:form.title.trim(), body:form.body.trim(), author: authName||'anon', tags: form.tag?[form.tag]:[] });
+      setForm({ title:'', body:'', tag:'' }); setComposing&&setComposing(false);
+      notify('Posted to the forum.'); onPosted&&onPosted(); refetch();
+    } catch (e) { notify(`Could not post (${e.message}).`, 'error'); }
+  };
+  const vote = async (id) => { try { await platformApi.voteThread(id); refetch(); } catch { /* ignore */ } };
+  const list = threads || [];
+  const displayed = list.filter((t)=>`${t.title} ${(t.tags||[]).join(' ')}`.toLowerCase().includes(query.trim().toLowerCase()));
   return (
     <div style={{display:'grid',gridTemplateColumns:'1fr 320px',gap:14}}>
       <div className="panel">
+        {composing && (
+          <form className="col" style={{gap:10, padding:16, borderBottom:'1px solid var(--line)'}} onSubmit={submitPost}>
+            <input value={form.title} onChange={(e)=>setForm(f=>({...f,title:e.target.value}))} placeholder="Question or topic title"/>
+            <textarea rows={3} value={form.body} onChange={(e)=>setForm(f=>({...f,body:e.target.value}))} placeholder="Describe your question…"></textarea>
+            <div className="row" style={{gap:8}}>
+              <input value={form.tag} onChange={(e)=>setForm(f=>({...f,tag:e.target.value}))} placeholder="tag (e.g. volatility)" style={{flex:1}}/>
+              <button className="btn btn-primary btn-sm" type="submit">Post</button>
+            </div>
+          </form>
+        )}
         <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
-          <div className="row" style={{gap:10}}>
-            {['Latest','Top week','Unanswered'].map((t)=>(
-              <button key={t} className="btn btn-ghost btn-sm" onClick={()=>setMode(t)} style={mode===t?{color:'var(--text)',background:'var(--panel-2)'}:{}}>{t}</button>
-            ))}
-          </div>
+          <div className="mono mute" style={{fontSize:12}}>{list.length} topic{list.length===1?'':'s'}</div>
           <input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Search forum…" style={{background:'#0A0C10',border:'1px solid var(--line-2)',padding:'6px 10px',borderRadius:3,color:'var(--text)',fontFamily:"'JetBrains Mono',monospace",fontSize:12,width:200}}/>
         </div>
-        <table className="data">
-          <thead><tr><th>Topic</th><th>Category</th><th className="num">Views</th><th className="num">Replies</th><th className="num">Likes</th></tr></thead>
+        {threads===null && <div className="mute" style={{padding:18}}>Loading topics…</div>}
+        {threads!==null && list.length===0 && <div className="mute" style={{padding:18}}>No topics yet. Start the conversation with “New post”.</div>}
+        {list.length>0 && <table className="data">
+          <thead><tr><th>Topic</th><th>Tags</th><th className="num">Replies</th><th className="num">Votes</th></tr></thead>
           <tbody>
-            {displayed.map((t,i)=>(
-              <tr key={i}>
-                <td>
-                  <div className="row" style={{gap:10,alignItems:'center'}}>
-                    {t.pinned && <Icon name="pin" size={11} style={{color:'var(--amber)'}}/>}
-                    {t.hot && <span className="badge badge-red" style={{fontSize:9}}>HOT</span>}
-                    <span style={{fontWeight: t.pinned?700:500, color: t.pinned?'var(--amber)':'var(--text)'}}>{t.t}</span>
-                  </div>
-                </td>
-                <td><span className="badge">{t.tag}</span></td>
-                <td className="num">{t.v.toLocaleString()}</td>
-                <td className="num">{t.r}</td>
-                <td className="num">{t.l}</td>
+            {displayed.map((t)=>(
+              <tr key={t.id}>
+                <td><div style={{fontWeight:500}}>{t.title}</div><div className="mono mute" style={{fontSize:10.5,marginTop:2}}>by @{t.author}</div></td>
+                <td>{(t.tags||[]).map(tag=><span key={tag} className="badge" style={{marginRight:4}}>{tag}</span>)}</td>
+                <td className="num">{t.comment_count}</td>
+                <td className="num"><button className="btn btn-ghost btn-sm" onClick={()=>vote(t.id)} style={{padding:'2px 8px'}}>▲ {t.votes}</button></td>
               </tr>
             ))}
           </tbody>
-        </table>
+        </table>}
       </div>
       <div className="col" style={{gap:14, alignSelf:'start'}}>
         <div className="panel" style={{padding:16}}>
@@ -4701,17 +6062,24 @@ function BlogPage({route}) {
   if (slug) return <PostDetail slug={slug}/>;
   return <BlogIndex/>;
 }
+function blogDate(ts){ try { return new Date((ts||0)*1000).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); } catch { return ''; } }
+function mapBlog(p){ return { id:p.slug, title:p.title, excerpt:p.excerpt||'', author:p.author||'The Pricing Library', tag:(p.tags&&p.tags[0])||'Quant', date:blogDate(p.published_at), readTime:p.read_minutes?`${p.read_minutes} min`:'5 min' }; }
 function BlogIndex() {
   const [tag,setTag] = useState('All');
   const [query,setQuery] = useState('');
-  const categories = ['All','Options','Black-Scholes','Monte Carlo','Volatility','Quant Interview','Python'];
+  const [posts,setPosts] = useState(null);
+  useEffect(()=>{ platformApi.listBlog().then((d)=>setPosts((d||[]).map(mapBlog))).catch(()=>setPosts([])); },[]);
+  const all = posts || [];
+  const categories = ['All', ...Array.from(new Set(all.map(p=>p.tag)))];
   const normalizedQuery = query.trim().toLowerCase();
-  const matches = POSTS.filter((post) => {
+  const matches = all.filter((post) => {
     const inTag = tag === 'All' || post.tag === tag;
     const haystack = `${post.title} ${post.excerpt} ${post.tag} ${post.author}`.toLowerCase();
     return inTag && (!normalizedQuery || haystack.includes(normalizedQuery));
   });
-  const featured = matches[0] || POSTS[0];
+  if (posts===null) return <div className="container page"><div className="panel mute" style={{padding:24}}>Loading articles…</div></div>;
+  if (all.length===0) return <div className="container page"><PageHead crumb={<><Link to="/">/ home</Link><i>›</i><span>/ blog</span></>} title="The Pricing Letter" sub="Long-form quant essays."/><div className="panel" style={{padding:28,textAlign:'center'}}><div className="mono" style={{fontWeight:600}}>No articles yet.</div><div className="mute" style={{fontSize:13,marginTop:8}}>Start the platform backend and seed content to populate the blog.</div></div></div>;
+  const featured = matches[0] || all[0];
   const cards = matches.filter((post) => post.id !== featured.id);
   return (
     <div className="container page">
@@ -4721,7 +6089,7 @@ function BlogIndex() {
         sub="Long-form essays, deep dives and quant interview seeds — published weekly."
         right={<>
           <input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Search posts…" style={{background:'#0A0C10',border:'1px solid var(--line-2)',padding:'8px 10px',borderRadius:3,color:'var(--text)',fontFamily:"'JetBrains Mono',monospace",fontSize:12,width:220}}/>
-          <button className="btn btn-primary btn-sm" onClick={()=>submitStub('Blog subscription')}>Subscribe</button>
+          <button className="btn btn-primary btn-sm" onClick={async()=>{const e=window.prompt('Your email for The Pricing Letter:'); if(e&&/^\S+@\S+\.\S+$/.test(e)){try{await platformApi.subscribe(e,'blog-index');notify('Subscribed. Welcome aboard.');}catch(err){notify('Could not subscribe ('+err.message+').','error');}} else if(e){notify('Please enter a valid email.','warning');}}}>Subscribe</button>
         </>}
       />
       <div className="row" style={{gap:8,marginBottom:24,flexWrap:'wrap'}}>
@@ -4799,70 +6167,62 @@ function BlogThumb({tag}) {
   return <div className="mono red" style={{fontSize:48}}>σ</div>;
 }
 
-function PostDetail({slug}) {
-  const p = POSTS.find(x=>x.id===slug) || POSTS[0];
+function NewsletterSignup({source}) {
   const [email,setEmail] = useState('');
   const [subscribed,setSubscribed] = useState(false);
-  const subscribe = (event) => {
+  const [busy,setBusy] = useState(false);
+  const subscribe = async (event) => {
     event.preventDefault();
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      notify('Enter a valid email address.', 'warning');
-      return;
-    }
-    setSubscribed(true);
-    setEmail('');
-    notify('Subscription recorded.');
+    if (!/^\S+@\S+\.\S+$/.test(email)) { notify('Enter a valid email address.', 'warning'); return; }
+    setBusy(true);
+    try { await platformApi.subscribe(email, source||'blog'); setSubscribed(true); setEmail(''); notify('Subscribed. Welcome aboard.'); }
+    catch (e) { notify(`Could not subscribe (${e.message}).`, 'error'); }
+    finally { setBusy(false); }
   };
   return (
+    <div className="panel" style={{padding:24,marginTop:32}}>
+      <div className="row between" style={{marginBottom:14}}>
+        <div className="label">The Pricing Letter</div>
+        <span className="mono mute" style={{fontSize:11}}>1 / week</span>
+      </div>
+      <p className="text-2" style={{fontSize:13.5,marginTop:0}}>Long-form quant essays in your inbox. No spam, no upsells.</p>
+      {subscribed && <FormNotice>You are on the next issue list.</FormNotice>}
+      <form className="row" onSubmit={subscribe} style={{gap:8,marginTop:10}}>
+        <input value={email} onChange={(event)=>setEmail(event.target.value)} placeholder="you@desk.com" style={{flex:1, background:'#0A0C10',border:'1px solid var(--line-2)',color:'var(--text)',padding:'8px 10px',borderRadius:3,fontFamily:"'JetBrains Mono',monospace",fontSize:12.5,outline:'none'}}/>
+        <button className="btn btn-primary btn-sm" type="submit" disabled={busy}>{busy?'…':'Subscribe'}</button>
+      </form>
+    </div>
+  );
+}
+function PostDetail({slug}) {
+  const [p,setP] = useState(undefined); // undefined=loading, null=not found
+  const [related,setRelated] = useState([]);
+  useEffect(()=>{
+    let alive=true;
+    platformApi.getBlog(slug).then((d)=>{ if(alive) setP(d||null); }).catch(()=>{ if(alive) setP(null); });
+    platformApi.listBlog().then((d)=>{ if(alive) setRelated((d||[]).map(mapBlog).filter(x=>x.id!==slug).slice(0,3)); }).catch(()=>{});
+    return ()=>{ alive=false; };
+  },[slug]);
+  if (p===undefined) return <div className="container page"><div className="panel mute" style={{padding:24}}>Loading article…</div></div>;
+  if (p===null) return <div className="container page" style={{maxWidth:880}}><div className="crumb" style={{marginTop:24}}><Link to="/blog">/ blog</Link></div><div className="panel" style={{padding:28,marginTop:18,textAlign:'center'}}><div className="mono" style={{fontWeight:600}}>Article not found.</div><Link to="/blog" className="btn btn-outline" style={{marginTop:16}}>Back to blog</Link></div></div>;
+  const tag = (p.tags&&p.tags[0])||'Quant';
+  return (
     <div className="container page" style={{maxWidth:880}}>
-      <div className="crumb" style={{marginTop:24}}><Link to="/blog">/ blog</Link><i>›</i><span>{p.tag.toLowerCase()}</span></div>
+      <div className="crumb" style={{marginTop:24}}><Link to="/blog">/ blog</Link><i>›</i><span>{tag.toLowerCase()}</span></div>
       <div className="row" style={{gap:10,marginTop:14,marginBottom:18}}>
-        <span className="badge">{p.tag}</span>
-        <span className="mono mute" style={{fontSize:11}}>{p.date} · {p.readTime} · {p.author}</span>
+        <span className="badge">{tag}</span>
+        <span className="mono mute" style={{fontSize:11}}>{blogDate(p.published_at)} · {p.read_minutes?`${p.read_minutes} min`:'5 min'} · {p.author||'The Pricing Library'}</span>
       </div>
       <h1 className="mono" style={{fontSize:38,fontWeight:700,lineHeight:1.15,margin:'0 0 18px'}}>{p.title}</h1>
-      <p className="text-2" style={{fontSize:15,lineHeight:1.7,maxWidth:'62ch'}}>{p.excerpt}</p>
-      <div style={{margin:'32px 0', borderTop:'1px solid var(--line)', borderBottom:'1px solid var(--line)', padding:'32px 0'}}>
-        <p style={{fontSize:14.5,lineHeight:1.8, color:'var(--text-2)', maxWidth:'68ch'}}>
-          Most introductions to the volatility surface stop at the smile. This is fine for an interview answer, but it leaves a lot on the table the moment you trade.
-          In particular, vega — the sensitivity of an option's price to volatility — is rarely as flat across strikes as the textbook diagrams suggest.
-        </p>
-        <h3 className="mono" style={{fontSize:20,fontWeight:700,marginTop:36,marginBottom:12}}>1 · The closed-form expression</h3>
-        <p style={{fontSize:14.5,lineHeight:1.8, color:'var(--text-2)',maxWidth:'68ch'}}>
-          Recall that, under the Black-Scholes assumptions, vega is given by ν = S·e<sup>-qT</sup>·φ(d₁)·√T. The dependence on d₁ matters more than the textbook makes obvious — it is what makes vega largest at the money and decays as we move away in either direction.
-        </p>
-        <pre className="code" style={{margin:'24px 0', maxWidth:'68ch'}}><code>{`def vega(S, K, r, sigma, T, q=0):
-    d1 = (log(S/K) + (r - q + 0.5*sigma**2)*T) / (sigma*sqrt(T))
-    return S * exp(-q*T) * norm.pdf(d1) * sqrt(T) / 100`}</code></pre>
-        <p style={{fontSize:14.5,lineHeight:1.8, color:'var(--text-2)', maxWidth:'68ch'}}>
-          On the surface, dividing by 100 is a convention so vega quotes "per vol point". This matters when you compare with traded products like variance swaps, where the convention is different again.
-        </p>
-        <h3 className="mono" style={{fontSize:20,fontWeight:700,marginTop:36,marginBottom:12}}>2 · Vega along the smile</h3>
-        <ChartFrame title="Vega across strikes" subtitle="S=100, σ=20%, T=6m">
-          <LineChart width={620} height={240} series={[{name:'vega', color:'#FF2E45', data: Array.from({length:60},(_,i)=>{
-            const K = 60+i*1.4; const v = bsPrice({S:100,K,r:0.02,sigma:0.2,T:0.5,type:'call'}).vega; return {x:K,y:v};
-          }), fillOpacity:0.1}]}/>
-        </ChartFrame>
-        <p style={{fontSize:14.5,lineHeight:1.8, color:'var(--text-2)', maxWidth:'68ch',marginTop:24}}>
-          The bell-shape is symmetric only under flat vol. Once the smile bites, vega tilts: deep-OTM puts can carry vega per unit risk well above their ATM peers.
-        </p>
+      {p.excerpt && <p className="text-2" style={{fontSize:15,lineHeight:1.7,maxWidth:'62ch'}}>{p.excerpt}</p>}
+      <div className="course-md" style={{margin:'32px 0', borderTop:'1px solid var(--line)', borderBottom:'1px solid var(--line)', padding:'32px 0', maxWidth:'72ch'}}>
+        <LatexMarkdown content={p.body || '_No content._'}/>
       </div>
-      <div className="panel" style={{padding:24,marginTop:32}}>
-        <div className="row between" style={{marginBottom:14}}>
-          <div className="label">The Pricing Letter</div>
-          <span className="mono mute" style={{fontSize:11}}>1 / week · 14k subscribers</span>
-        </div>
-        <p className="text-2" style={{fontSize:13.5,marginTop:0}}>Long-form quant essays in your inbox, every Sunday. No spam, no upsells.</p>
-        {subscribed && <FormNotice>You are on the next issue list.</FormNotice>}
-        <form className="row" onSubmit={subscribe} style={{gap:8,marginTop:10}}>
-          <input value={email} onChange={(event)=>setEmail(event.target.value)} placeholder="you@desk.com" style={{flex:1, background:'#0A0C10',border:'1px solid var(--line-2)',color:'var(--text)',padding:'8px 10px',borderRadius:3,fontFamily:"'JetBrains Mono',monospace",fontSize:12.5,outline:'none'}}/>
-          <button className="btn btn-primary btn-sm" type="submit">Subscribe</button>
-        </form>
-      </div>
-      <div style={{marginTop:32}}>
+      <NewsletterSignup source={`blog:${slug}`}/>
+      {related.length>0 && <div style={{marginTop:32}}>
         <div className="label" style={{marginBottom:14}}>Related posts</div>
         <div className="grid-3">
-          {POSTS.filter(x=>x.id!==p.id).slice(0,3).map(rp=>(
+          {related.map(rp=>(
             <Link to={"/blog/"+rp.id} key={rp.id} className="panel" style={{padding:14,display:'block'}}>
               <span className="badge">{rp.tag}</span>
               <div className="mono" style={{fontWeight:700,marginTop:10}}>{rp.title}</div>
@@ -4870,14 +6230,28 @@ function PostDetail({slug}) {
             </Link>
           ))}
         </div>
-      </div>
+      </div>}
     </div>
   );
 }
 
 // ============= DASHBOARD =============
+function courseModules(courseId){ const c = COURSES.find(x=>x.id===courseId); return (c && c.modules) || 8; }
+function coursePct(courseId, lessonsDone){ return Math.min(100, Math.round((lessonsDone / courseModules(courseId)) * 100)); }
 function DashboardPage() {
+  let auth=null; try { auth = useAuth(); } catch { auth=null; }
+  const userId = auth?.user?.id || auth?.user?.email || null;
+  const plan = (auth?.profile?.plan || 'free').toUpperCase();
   const [tab,setTab] = useState('overview');
+  const [prog,setProg] = useState(null); // null=loading
+  useEffect(()=>{
+    if (!userId) { setProg({}); return; }
+    platformApi.getProgress(userId).then((d)=>setProg(d||{})).catch(()=>setProg({}));
+  },[userId]);
+  if (!userId) return (
+    <div className="container page"><PageHead crumb={<><Link to="/">/ home</Link><i>›</i><span>/ dashboard</span></>} title="Dashboard" sub="Your learning desk."/>
+      <div className="panel" style={{padding:28,textAlign:'center'}}><div className="mono" style={{fontWeight:600}}>Log in to see your dashboard.</div><Link to="/auth/login" className="btn btn-primary" style={{marginTop:16}}>Log in</Link></div></div>
+  );
   return (
     <div className="container page">
       <PageHead
@@ -4885,7 +6259,7 @@ function DashboardPage() {
         title="Dashboard"
         sub="Your learning desk · progress, achievements, recent activity."
         right={<>
-          <span className="badge"><span className="dot dot-green"></span>STUDENT</span>
+          <span className="badge"><span className="dot dot-green"></span>{plan}</span>
           <Link to="/pricing" className="btn btn-primary btn-sm">Upgrade <Icon name="arrow-right" size={13}/></Link>
         </>}
       />
@@ -4894,21 +6268,34 @@ function DashboardPage() {
           <button key={k} className={"tab-btn "+(tab===k?'on':'')} onClick={()=>setTab(k)}>{l}</button>
         ))}
       </div>
-      {tab==='overview' && <DashOverview/>}
-      {tab==='progress' && <DashProgress/>}
-      {tab==='quizzes' && <DashQuizzes/>}
-      {tab==='achievements' && <DashAchievements/>}
+      {prog===null && <div className="panel mute" style={{padding:24}}>Loading your activity…</div>}
+      {prog!==null && tab==='overview' && <DashOverview prog={prog}/>}
+      {prog!==null && tab==='progress' && <DashProgress prog={prog}/>}
+      {prog!==null && tab==='quizzes' && <DashQuizzes prog={prog}/>}
+      {prog!==null && tab==='achievements' && <DashAchievements prog={prog}/>}
     </div>
   );
 }
-function DashOverview() {
+function EmptyDash({what}) {
+  return <div className="panel" style={{padding:28,textAlign:'center'}}>
+    <div className="mono" style={{fontWeight:600}}>Nothing here yet.</div>
+    <div className="mute" style={{fontSize:13,marginTop:8}}>{what} As you study, open lessons and run exercises, your real activity appears here.</div>
+  </div>;
+}
+function DashOverview({prog}) {
+  const courses = prog.courses || [];
+  const quizzes = prog.quizzes || [];
+  const exercises = prog.exercises || [];
+  const lessonsDone = courses.reduce((s,c)=>s+c.lessons_done,0);
+  const quizzesPassed = quizzes.filter(q=>(q.score||0)>=50).length;
+  if (!(prog.events>0)) return <EmptyDash what="No activity recorded yet."/>;
   return (
     <>
       <div className="grid-4">
-        <Stat label="Modules done" value="12 / 28" sub="42.8%"/>
-        <Stat label="Learn time · 30d" value="48h 12m" sub="+18% wk"/>
-        <Stat label="Quizzes passed" value="36 / 42" sub="85.7%"/>
-        <Stat label="Badges" value="7" sub="Last: SVI Master"/>
+        <Stat label="Lessons done" value={String(lessonsDone)} sub={`${courses.length} courses`}/>
+        <Stat label="Activities" value={String(prog.events||0)} sub={`${prog.active_days||0} active days`}/>
+        <Stat label="Quizzes passed" value={`${quizzesPassed} / ${quizzes.length}`} sub={quizzes.length?`${Math.round(100*quizzesPassed/quizzes.length)}%`:'—'}/>
+        <Stat label="Avg score" value={prog.avg_score!=null?String(prog.avg_score):'—'} sub="all graded work"/>
       </div>
       <div style={{display:'grid',gridTemplateColumns:'1.4fr 1fr',gap:14,marginTop:18}}>
         <div className="panel">
@@ -4916,34 +6303,35 @@ function DashOverview() {
             <div className="label">Continue learning</div>
             <Link to="/courses" className="btn btn-ghost btn-sm">All courses ›</Link>
           </div>
-          {COURSES.slice(0,4).map((c,i)=>(
-            <Link to={"/courses/"+c.id} key={c.id} style={{display:'flex',padding:14, borderTop:i?'1px solid var(--line)':'none',gap:14,alignItems:'center'}}>
+          {(courses.length?courses:[]).slice(0,5).map((c,i)=>{
+            const meta = COURSES.find(x=>x.id===c.course); const pct = coursePct(c.course, c.lessons_done);
+            return (
+            <Link to={"/courses/"+c.course} key={c.course} style={{display:'flex',padding:14, borderTop:i?'1px solid var(--line)':'none',gap:14,alignItems:'center'}}>
               <div style={{width:48,height:48, border:'1px solid var(--line)', background:'#06080B',display:'grid',placeItems:'center'}}>
                 <Icon name="book-open" size={18} style={{color:'var(--red)'}}/>
               </div>
               <div style={{flex:1}}>
-                <div className="mono" style={{fontWeight:600}}>{c.title}</div>
+                <div className="mono" style={{fontWeight:600}}>{meta?meta.title:c.course}</div>
                 <div className="row" style={{gap:14,marginTop:4}}>
-                  <span className="mono mute" style={{fontSize:11}}>{c.tier} · {c.duration}</span>
-                  <span className="mono mute" style={{fontSize:11}}>{30+i*15}% complete</span>
+                  <span className="mono mute" style={{fontSize:11}}>{c.lessons_done} lessons</span>
+                  <span className="mono mute" style={{fontSize:11}}>{pct}% complete</span>
                 </div>
-                <div style={{height:2,marginTop:6,background:'var(--line)'}}>
-                  <div style={{height:'100%',width:(30+i*15)+'%',background:'var(--red)'}}></div>
-                </div>
+                <div style={{height:2,marginTop:6,background:'var(--line)'}}><div style={{height:'100%',width:pct+'%',background:'var(--red)'}}></div></div>
               </div>
               <Icon name="play" size={14} style={{color:'var(--red)'}}/>
             </Link>
-          ))}
+            );
+          })}
+          {!courses.length && <div className="mute" style={{padding:16}}>Open a course lesson to start tracking progress.</div>}
         </div>
         <div className="panel">
           <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
             <div className="label">Activity · 90d</div>
           </div>
           <div style={{padding:14}}>
-            <ActivityHeatmap/>
+            <ActivityHeatmap heat={prog.heatmap||[]} today={prog.today}/>
             <div className="row between" style={{marginTop:14}}>
-              <span className="mono mute" style={{fontSize:10.5}}>62 active days</span>
-              <span className="mono mute" style={{fontSize:10.5}}>longest streak · 14d</span>
+              <span className="mono mute" style={{fontSize:10.5}}>{prog.active_days||0} active days</span>
             </div>
           </div>
         </div>
@@ -4953,42 +6341,43 @@ function DashOverview() {
           <div className="label">Recent exercises</div>
           <Link to="/exercises" className="btn btn-ghost btn-sm">All exercises ›</Link>
         </div>
-        <table className="data">
-          <thead><tr><th>Exercise</th><th>Category</th><th>Level</th><th>Submitted</th><th className="num">Score</th><th>Status</th></tr></thead>
+        {exercises.length? <table className="data">
+          <thead><tr><th>Exercise</th><th>When</th><th className="num">Score</th><th>Status</th></tr></thead>
           <tbody>
-            {EXERCISES.slice(0,6).map(e=>(
-              <tr key={e.id}>
-                <td className="symbol">{e.title}</td>
-                <td>{e.cat}</td>
-                <td>{e.level}</td>
-                <td>{['2d','5d','1w','2w','3w','1mo'][EXERCISES.indexOf(e)%6]}</td>
-                <td className={"num "+(e.done?'green':'mute')}>{e.done?'94/100':'-'}</td>
-                <td>{e.done?<span className="badge badge-green">PASS</span>:<span className="badge">DRAFT</span>}</td>
+            {exercises.slice(0,8).map((e,i)=>(
+              <tr key={i}>
+                <td className="symbol">{e.ref||e.meta?.title||'Desk exercise'}</td>
+                <td>{new Date((e.created_at||0)*1000).toLocaleDateString()}</td>
+                <td className={"num "+((e.score||0)>=50?'green':'mute')}>{e.score!=null?`${e.score}`:'-'}</td>
+                <td>{(e.score||0)>=50?<span className="badge badge-green">PASS</span>:<span className="badge">TRIED</span>}</td>
               </tr>
             ))}
           </tbody>
-        </table>
+        </table> : <div className="mute" style={{padding:16}}>Generate or solve an exercise to populate this list.</div>}
       </div>
     </>
   );
 }
-function ActivityHeatmap() {
+function ActivityHeatmap({heat=[], today}) {
   const W = 14, H = 7;
+  const day = 86400;
+  const end = today || (Math.floor(Date.now()/1000/day)*day);
+  const counts = {}; heat.forEach(h=>{ counts[h.day]=h.count; });
+  const cells = Array.from({length:W*H}).map((_,i)=>{ const d = end - (W*H-1-i)*day; return counts[d]||0; });
+  const col = (v)=> v>=4?'#FF2E45':v>=2?'#7B1B26':v>=1?'#3A0E15':'#11141A';
   return (
     <svg viewBox={`0 0 ${W*14} ${H*14}`} width="100%" style={{display:'block'}}>
-      {Array.from({length:W*H}).map((_,i)=>{
-        const v = Math.random();
-        const c = v>0.85?'#FF2E45':v>0.65?'#7B1B26':v>0.4?'#3A0E15':v>0.2?'#1F1216':'#11141A';
-        return <rect key={i} x={(i%W)*14} y={Math.floor(i/W)*14} width="11" height="11" fill={c}/>;
-      })}
+      {cells.map((v,i)=><rect key={i} x={(i%W)*14} y={Math.floor(i/W)*14} width="11" height="11" fill={col(v)}/>)}
     </svg>
   );
 }
-function DashProgress() {
+function DashProgress({prog}) {
+  const map = {}; (prog.courses||[]).forEach(c=>{ map[c.course]=c.lessons_done; });
+  if (!(prog.events>0)) return <EmptyDash what="No course progress yet."/>;
   return (
     <div className="grid-3">
       {COURSES.map(c=>{
-        const pct = Math.floor(20 + Math.random()*70);
+        const done = map[c.id]||0; const pct = coursePct(c.id, done);
         return (
           <div key={c.id} className="panel" style={{padding:16}}>
             <div className="row between" style={{marginBottom:12}}>
@@ -5000,31 +6389,29 @@ function DashProgress() {
               <span className="mono mute" style={{fontSize:11}}>Progress</span>
               <span className="mono" style={{fontSize:12,fontWeight:600}}>{pct}%</span>
             </div>
-            <div style={{height:3,background:'var(--line)'}}>
-              <div style={{height:'100%',width:pct+'%',background:'var(--red)'}}></div>
-            </div>
+            <div style={{height:3,background:'var(--line)'}}><div style={{height:'100%',width:pct+'%',background:'var(--red)'}}></div></div>
           </div>
         );
       })}
     </div>
   );
 }
-function DashQuizzes() {
-  const qs = ['Options Fundamentals','Pricing Models','Greeks','Volatility','Exotic Options','Trading Strategies'];
+function DashQuizzes({prog}) {
+  const quizzes = prog.quizzes || [];
+  if (!quizzes.length) return <EmptyDash what="No quizzes taken yet."/>;
   return (
     <div className="grid-3">
-      {qs.map((q,i)=>{
-        const passed = i % 2 === 0;
+      {quizzes.map((q,i)=>{
+        const passed = (q.score||0)>=50;
         return (
-        <div key={q} className="panel" style={{padding:18}}>
+        <div key={i} className="panel" style={{padding:18}}>
           <div className="row between" style={{marginBottom:12}}>
             <span className="badge">Quiz</span>
-            <span className="mono mute" style={{fontSize:11}}>20 questions</span>
+            <span className="mono mute" style={{fontSize:11}}>{new Date((q.created_at||0)*1000).toLocaleDateString()}</span>
           </div>
-          <div className="mono" style={{fontWeight:700,fontSize:14,marginBottom:10}}>{q}</div>
+          <div className="mono" style={{fontWeight:700,fontSize:14,marginBottom:10}}>{q.ref||'Quiz'}</div>
           <div className="row between" style={{marginTop:14}}>
-            <span className="mono" style={{fontSize:12,color: passed?'var(--green)':'var(--amber)'}}>{passed?'PASSED ✓':'IN PROGRESS'}</span>
-            <button className="btn btn-outline btn-sm" onClick={()=>notify(`${q} quiz opened.`)}>Take quiz</button>
+            <span className="mono" style={{fontSize:12,color: passed?'var(--green)':'var(--amber)'}}>{passed?`PASSED · ${q.score}`:`SCORE ${q.score||0}`}</span>
           </div>
         </div>
         );
@@ -5032,16 +6419,20 @@ function DashQuizzes() {
     </div>
   );
 }
-function DashAchievements() {
+function DashAchievements({prog}) {
+  const courses = prog.courses || [];
+  const lessonsDone = courses.reduce((s,c)=>s+c.lessons_done,0);
+  const quizzesPassed = (prog.quizzes||[]).filter(q=>(q.score||0)>=50).length;
+  const exercises = (prog.exercises||[]).length;
   const ach = [
-    {n:'First Greek',d:'Computed your first delta',u:true,r:'common'},
-    {n:'BS Master',d:'Black-Scholes course completed',u:true,r:'rare'},
-    {n:'SVI Master',d:'Calibrated your first smile',u:true,r:'rare'},
-    {n:'Hot Streak',d:'10 exercises in a row',u:true,r:'epic'},
-    {n:'Pathfinder',d:'1M MC paths sampled',u:false,r:'epic'},
-    {n:'Volatility King',d:'Top 5 on Vol leaderboard',u:false,r:'legendary'},
-    {n:'Exotic Mind',d:'All Complex courses cleared',u:false,r:'legendary'},
-    {n:'Marathon',d:'30-day streak',u:false,r:'epic'},
+    {n:'First lesson',d:'Opened your first lesson',u:lessonsDone>=1,r:'common'},
+    {n:'Getting serious',d:'10 lessons completed',u:lessonsDone>=10,r:'rare'},
+    {n:'Quiz taker',d:'Passed your first quiz',u:quizzesPassed>=1,r:'common'},
+    {n:'Quiz master',d:'Passed 5 quizzes',u:quizzesPassed>=5,r:'rare'},
+    {n:'Practitioner',d:'Solved your first exercise',u:exercises>=1,r:'common'},
+    {n:'Hot streak',d:'10 exercises',u:exercises>=10,r:'epic'},
+    {n:'Consistent',d:'5 active days',u:(prog.active_days||0)>=5,r:'epic'},
+    {n:'Marathon',d:'30 active days',u:(prog.active_days||0)>=30,r:'legendary'},
   ];
   const rcol = {common:'var(--text-2)', rare:'var(--blue)', epic:'var(--magenta)', legendary:'var(--amber)'};
   return (
@@ -5227,7 +6618,7 @@ function AuthPage({route}) {
         setStatus('Logged in. Redirecting to your dashboard.');
       } else {
         const [prenom, ...rest] = name.trim().split(/\s+/);
-        await signUp(email, password, prenom || name.trim(), rest.join(' ') || '-');
+        await signUp(email, password, prenom || name.trim(), rest.join(' ') || '-', plan);
         setStatus(`Account created on the ${plan} plan. Check your email if confirmation is enabled.`);
       }
       setStatusType('success');
@@ -5337,62 +6728,65 @@ function AuthPage({route}) {
 }
 
 // ============= MISC PAGES =============
+function tierFor(rank){ return rank<=3?'Legendary':rank<=8?'Master':rank<=14?'Expert':'Advanced'; }
 function LeaderboardPage() {
-  const [range,setRange] = useState('All-time');
-  const rows = useMemo(() => Array.from({length:20},(_,i)=>({
-    n:['aurora_vol','gamma_god','quantfox','nu_oresund','theta_burn','vega_neutral','itos_lemma','strangle_kid','cox_ross','heston_99','sigma_dev','vol_carrier','quant_falcon','marathon_q','black_box','wiener_w','kelly_bet','sharpe_x','tail_risk','iv_seer'][i],
-    s:12421-i*341+Math.floor(Math.random()*40),
-    w:i<3?'Legendary':i<8?'Master':i<14?'Expert':'Advanced',
-    c:['FR','UK','US','DK','DE','SG','JP','BR','CA','GR','IN','CN','AU','NL','IE','SE','MX','CH','ES','IT'][i],
-    bd:7-Math.floor(i/3),
-  })), []);
-  const factor = range === 'Week' ? 0.18 : range === 'Q2 2026' ? 0.62 : 1;
-  const visibleRows = rows.map((row)=>({...row, s: Math.round(row.s * factor)})).sort((a,b)=>b.s-a.s);
+  const [rows,setRows] = useState(null); // null = loading
+  const [err,setErr] = useState(false);
+  useEffect(()=>{
+    let alive = true;
+    platformApi.leaderboard(50).then((data)=>{ if(alive){ setRows(data); } }).catch(()=>{ if(alive){ setErr(true); setRows([]); } });
+    return ()=>{ alive=false; };
+  },[]);
+  const visibleRows = rows || [];
   return (
     <div className="container page">
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ leaderboard</span></>}
         title="Leaderboard"
-        sub="Top performers across courses, exercises and Survival Mode."
-        right={<>
-          <div className="toggle">
-            {['All-time','Q2 2026','Week'].map((item)=>(
-              <button key={item} className={range===item?'on':''} onClick={()=>setRange(item)}>{item}</button>
-            ))}
-          </div>
-        </>}
+        sub="Live ranking by points earned across courses, exercises and Survival Mode."
       />
+      {rows===null && <div className="panel mute" style={{padding:24}}>Loading leaderboard…</div>}
+      {rows!==null && visibleRows.length===0 && (
+        <div className="panel" style={{padding:28, textAlign:'center'}}>
+          <div className="mono" style={{fontWeight:600,fontSize:15}}>No scores yet.</div>
+          <div className="mute" style={{fontSize:13,marginTop:8}}>
+            {err ? 'Leaderboard backend unreachable — start the platform API to see live rankings.'
+                 : 'Complete a lesson, exercise, quiz or Survival run and you will appear here in real time.'}
+          </div>
+        </div>
+      )}
+      {visibleRows.length>0 && <>
       <div className="grid-3" style={{marginBottom:18}}>
         {visibleRows.slice(0,3).map((r,i)=>(
-          <div key={r.n} className="panel" style={{padding:24, textAlign:'center', borderColor: i===0?'var(--amber)':'var(--line)'}}>
-            <div className="mono mute" style={{fontSize:11,letterSpacing:'.14em'}}>#{i+1}</div>
+          <div key={r.user_id||r.username} className="panel" style={{padding:24, textAlign:'center', borderColor: i===0?'var(--amber)':'var(--line)'}}>
+            <div className="mono mute" style={{fontSize:11,letterSpacing:'.14em'}}>#{r.rank}</div>
             <div style={{width:60,height:60,border:'1px solid '+(i===0?'var(--amber)':'var(--line-2)'),borderRadius:30,display:'grid',placeItems:'center',margin:'14px auto',color:i===0?'var(--amber)':'var(--text-2)'}}>
               <Icon name={i===0?'crown':'medal'} size={24}/>
             </div>
-            <div className="mono" style={{fontWeight:700,fontSize:16}}>@{r.n}</div>
-            <div className="mono mute" style={{fontSize:11,marginTop:4}}>{r.w} · {r.c}</div>
-            <div className="mono red" style={{fontSize:24,fontWeight:700,marginTop:14}}>{r.s.toLocaleString()}</div>
+            <div className="mono" style={{fontWeight:700,fontSize:16}}>@{r.username}</div>
+            <div className="mono mute" style={{fontSize:11,marginTop:4}}>{tierFor(r.rank)} · {r.events} activities</div>
+            <div className="mono red" style={{fontSize:24,fontWeight:700,marginTop:14}}>{Number(r.points).toLocaleString()}</div>
             <div className="mono mute" style={{fontSize:10.5,marginTop:4}}>points</div>
           </div>
         ))}
       </div>
       <div className="panel">
         <table className="data">
-          <thead><tr><th>#</th><th>Player</th><th>Wave</th><th>Country</th><th className="num">Badges</th><th className="num">Score</th></tr></thead>
+          <thead><tr><th>#</th><th>Player</th><th>Tier</th><th className="num">Activities</th><th className="num">Points</th></tr></thead>
           <tbody>
-            {visibleRows.map((r,i)=>(
-              <tr key={r.n}>
-                <td className="symbol">#{i+1}</td>
-                <td>@{r.n}</td>
-                <td>{r.w}</td>
-                <td>{r.c}</td>
-                <td className="num">{r.bd}</td>
-                <td className="num">{r.s.toLocaleString()}</td>
+            {visibleRows.map((r)=>(
+              <tr key={r.user_id||r.username}>
+                <td className="symbol">#{r.rank}</td>
+                <td>@{r.username}</td>
+                <td>{tierFor(r.rank)}</td>
+                <td className="num">{r.events}</td>
+                <td className="num">{Number(r.points).toLocaleString()}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      </>}
     </div>
   );
 }
@@ -5425,55 +6819,23 @@ function NotebooksPage() {
             </div>
           ))}
         </div>
-        <div className="panel">
-          <div className="row between" style={{padding:'10px 14px',borderBottom:'1px solid var(--line)'}}>
-            <div className="row" style={{gap:14}}>
-              <span className="mono" style={{fontWeight:600,fontSize:12.5}}>black-scholes-intro.ipynb</span>
-              <span className="badge badge-green">CONNECTED</span>
-            </div>
-            <div className="row" style={{gap:6}}>
-              <button className="btn btn-ghost btn-sm" onClick={()=>handleSave('Notebook')}><Icon name="save" size={12}/> Save</button>
-              <button className="btn btn-ghost btn-sm" onClick={()=>handleShare('Notebook')}><Icon name="share" size={12}/> Share</button>
-              <button className="btn btn-primary btn-sm" onClick={()=>notify('Notebook executed. Outputs are refreshed below.')}><Icon name="play" size={12}/> Run all</button>
-            </div>
-          </div>
-          <div style={{padding:14}}>
-            <div className="row" style={{gap:10,marginBottom:10}}>
-              <span className="mono mute" style={{fontSize:11,width:40,textAlign:'right'}}>In [1]</span>
-              <div className="panel-2" style={{flex:1, padding:'12px 14px'}}>
-                <pre className="code" style={{padding:0,border:'none',background:'transparent'}}><code>{`from math import log, sqrt, exp
-from scipy.stats import norm
+        <div className="col" style={{gap:14}}>
+          <div className="mono mute" style={{fontSize:11}}>black-scholes-intro.ipynb · runs real Python in your browser (Pyodide)</div>
+          <PyCodeCell label="black-scholes-intro.ipynb" minHeight={300} initial={`from math import log, sqrt, exp
+from statistics import NormalDist
+N = NormalDist().cdf
 
 def bs_call(S, K, r, sigma, T):
     d1 = (log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*sqrt(T))
     d2 = d1 - sigma*sqrt(T)
-    return S*norm.cdf(d1) - K*exp(-r*T)*norm.cdf(d2)`}</code></pre>
-              </div>
-            </div>
-            <div className="row" style={{gap:10,marginBottom:10}}>
-              <span className="mono mute" style={{fontSize:11,width:40,textAlign:'right'}}>In [2]</span>
-              <div className="panel-2" style={{flex:1, padding:'12px 14px'}}>
-                <pre className="code" style={{padding:0,border:'none',background:'transparent'}}><code>{`print(bs_call(100, 100, 0.02, 0.20, 0.5))`}</code></pre>
-              </div>
-            </div>
-            <div className="row" style={{gap:10,marginBottom:10}}>
-              <span className="mono mute" style={{fontSize:11,width:40,textAlign:'right'}}>Out [2]</span>
-              <div className="panel-2" style={{flex:1, padding:'12px 14px'}}>
-                <pre className="code mono" style={{padding:0,border:'none',background:'transparent',color:'var(--green)'}}><code>6.0401</code></pre>
-              </div>
-            </div>
-            <div className="row" style={{gap:10}}>
-              <span className="mono mute" style={{fontSize:11,width:40,textAlign:'right'}}>Out [3]</span>
-              <div className="panel-2" style={{flex:1, padding:14}}>
-                <LineChart width={600} height={200} series={[{name:'C',color:'#FF2E45',data:genCurve(50,(i,n)=>{
-                  const S=50+i*100/n,K=100,r=.02,sigma=.2,T=.5;
-                  const d1=(Math.log(S/K)+(r+.5*sigma*sigma)*T)/(sigma*Math.sqrt(T));
-                  const d2=d1-sigma*Math.sqrt(T);
-                  return S*normCdf(d1)-K*Math.exp(-r*T)*normCdf(d2);
-                }),fillOpacity:0.08}]}/>
-              </div>
-            </div>
-          </div>
+    return S*N(d1) - K*exp(-r*T)*N(d2)
+
+price = bs_call(100, 100, 0.02, 0.20, 0.5)
+print(f"BS call price = {price:.4f}")
+
+# price across spot
+for S in range(80, 121, 10):
+    print(f"S={S:3d}  call={bs_call(S, 100, 0.02, 0.20, 0.5):.4f}")`}/>
         </div>
       </div>
     </div>
@@ -5493,6 +6855,7 @@ function MentoringPage() {
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ mentoring</span></>}
         title="Mentoring"
         sub="Get unstuck. 1-on-1 sessions with practicing quants — pricing, code review, career."
+        right={<span className="badge">Bientôt · booking opens soon</span>}
       />
       <div className="grid-4">
         {[
@@ -5548,19 +6911,35 @@ function MentoringPage() {
 }
 
 function JobsPage() {
+  let authEmail = null; try { authEmail = useAuth()?.user?.email || null; } catch { authEmail = null; }
   const [tab,setTab] = useState('all');
   const [query,setQuery] = useState('');
-  const jobs = [
-    {co:'Greenwich Capital', role:'Junior Quant - Vol Trading', loc:'Paris', t:'Full-time', s:'£90k-110k', tag:'Vol'},
-    {co:'Helios Markets', role:'Derivatives Pricing Engineer', loc:'London', t:'Full-time', s:'£110k-140k', tag:'Pricing'},
-    {co:'Nordic Risk', role:'Risk Quant Intern', loc:'Stockholm', t:'Intern', s:'£3k/mo', tag:'Risk'},
-    {co:'Citadel-style fund', role:'Senior Quant Researcher', loc:'NY · Remote', t:'Remote', s:'$220k+', tag:'Research'},
-    {co:'Bridgewater-like', role:'Equity Vol Researcher', loc:'Remote', t:'Remote', s:'$180k+', tag:'Vol'},
-    {co:'Optiver-style', role:'Trader · Options Market Making', loc:'Amsterdam', t:'Full-time', s:'€90k+bonus', tag:'Trading'},
-  ];
-  const filtered = jobs.filter(j => {
-    const inTab = tab==='all' || (tab==='remote' && j.t==='Remote') || (tab==='intern' && j.t==='Intern');
-    const haystack = `${j.co} ${j.role} ${j.loc} ${j.t} ${j.tag}`.toLowerCase();
+  const [jobs,setJobs] = useState(null);
+  const [applied,setApplied] = useState({});
+  const [posting,setPosting] = useState(false);
+  const [form,setForm] = useState({ title:'', company:'', location:'', kind:'full-time', description:'' });
+  const refetch = useCallback(()=>{ platformApi.listJobs().then(setJobs).catch(()=>setJobs([])); },[]);
+  useEffect(()=>{ refetch(); },[refetch]);
+  const apply = async (j) => {
+    try {
+      await platformApi.applyJob(j.id, { applicant: authEmail || 'guest', note:`Applied via platform` });
+      setApplied((p)=>({...p,[j.id]:true}));
+      notify(`Application sent for ${j.title}.`);
+    } catch (e) { notify(`Could not apply (${e.message}).`, 'error'); }
+  };
+  const postJob = async (event) => {
+    event.preventDefault();
+    if (!form.title.trim() || !form.company.trim()) { notify('Title and company are required.', 'error'); return; }
+    try {
+      await platformApi.createJob({ ...form, tags:[], posted_by: authEmail || 'anon' });
+      setPosting(false); setForm({ title:'', company:'', location:'', kind:'full-time', description:'' });
+      notify('Job posted.'); refetch();
+    } catch (e) { notify(`Could not post (${e.message}).`, 'error'); }
+  };
+  const list = jobs || [];
+  const filtered = list.filter(j => {
+    const inTab = tab==='all' || (tab==='remote' && /remote/i.test(j.location||'')) || (tab==='intern' && /intern/i.test(j.kind||''));
+    const haystack = `${j.company} ${j.title} ${j.location} ${j.kind} ${(j.tags||[]).join(' ')}`.toLowerCase();
     return inTab && (!query.trim() || haystack.includes(query.trim().toLowerCase()));
   });
   return (
@@ -5568,45 +6947,89 @@ function JobsPage() {
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ jobs</span></>}
         title="Quant Jobs"
-        sub="Curated openings across pricing, risk, market making and research."
+        sub="Aggregated from top quant firms (Jane Street, Point72, IMC, Optiver…) and curated boards — trading, quant, structuring, risk."
         right={<>
           <input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Role or keyword…" style={{background:'#0A0C10',border:'1px solid var(--line-2)',padding:'8px 10px',borderRadius:3,color:'var(--text)',fontFamily:"'JetBrains Mono',monospace",fontSize:12,width:220}}/>
-          <button className="btn btn-primary btn-sm" onClick={()=>submitStub('Job posting draft')}><Icon name="plus" size={13}/> Post a job</button>
+          <button className="btn btn-primary btn-sm" onClick={()=>setPosting(p=>!p)}><Icon name="plus" size={13}/> Post a job</button>
         </>}
       />
+      {posting && (
+        <div className="panel" style={{padding:20, marginBottom:16}}>
+          <form className="grid-2" style={{gap:12}} onSubmit={postJob}>
+            <input value={form.title} onChange={(e)=>setForm(f=>({...f,title:e.target.value}))} placeholder="Role title"/>
+            <input value={form.company} onChange={(e)=>setForm(f=>({...f,company:e.target.value}))} placeholder="Company"/>
+            <input value={form.location} onChange={(e)=>setForm(f=>({...f,location:e.target.value}))} placeholder="Location (or Remote)"/>
+            <select value={form.kind} onChange={(e)=>setForm(f=>({...f,kind:e.target.value}))}>{['full-time','internship','remote','contract'].map(o=><option key={o}>{o}</option>)}</select>
+            <textarea value={form.description} onChange={(e)=>setForm(f=>({...f,description:e.target.value}))} placeholder="Short description" rows={2} style={{gridColumn:'1 / -1'}}></textarea>
+            <button className="btn btn-primary btn-sm" type="submit" style={{justifySelf:'start'}}>Publish job</button>
+          </form>
+        </div>
+      )}
       <div className="tabs-bar">
         {[['all','All'],['remote','Remote'],['intern','Internship']].map(([k,l])=>(
-          <button key={k} className={"tab-btn "+(tab===k?'on':'')} onClick={()=>setTab(k)}>{l} <span className="mute" style={{marginLeft:6}}>{k==='all'?jobs.length:jobs.filter(j=>(k==='remote'&&j.t==='Remote')||(k==='intern'&&j.t==='Intern')).length}</span></button>
+          <button key={k} className={"tab-btn "+(tab===k?'on':'')} onClick={()=>setTab(k)}>{l} <span className="mute" style={{marginLeft:6}}>{k==='all'?list.length:list.filter(j=>(k==='remote'&&/remote/i.test(j.location||''))||(k==='intern'&&/intern/i.test(j.kind||''))).length}</span></button>
         ))}
       </div>
       <div className="panel">
-        <table className="data">
-          <thead><tr><th>Company</th><th>Role</th><th>Location</th><th>Type</th><th className="num">Salary</th><th></th></tr></thead>
+        {jobs===null && <div className="mute" style={{padding:20}}>Loading jobs…</div>}
+        {jobs!==null && list.length===0 && <div className="mute" style={{padding:20}}>No openings yet. Be the first to post one — or start the platform backend.</div>}
+        {list.length>0 && <table className="data">
+          <thead><tr><th>Company</th><th>Role</th><th>Location</th><th>Type</th><th></th></tr></thead>
           <tbody>
-            {filtered.map((j,i)=>(
-              <tr key={i}>
-                <td className="symbol">{j.co}</td>
-                <td>{j.role} <span className="badge" style={{marginLeft:8}}>{j.tag}</span></td>
-                <td>{j.loc}</td>
-                <td>{j.t}</td>
-                <td className="num">{j.s}</td>
-                <td><button className="btn btn-outline btn-sm" onClick={()=>submitStub(`Application for ${j.role}`)}>Apply</button></td>
+            {filtered.map((j)=>(
+              <tr key={j.id}>
+                <td className="symbol">{j.company}{j.source && <span className="mute" style={{marginLeft:8,fontSize:10,textTransform:'uppercase',letterSpacing:'.08em'}}>· {j.source==='apify_linkedin'?'linkedin':j.source}</span>}</td>
+                <td>{j.title} {(j.tags||[]).slice(0,1).map(t=><span key={t} className="badge" style={{marginLeft:8}}>{t}</span>)}</td>
+                <td>{j.location||(j.remote?'Remote':'—')}</td>
+                <td>{j.kind||'—'}</td>
+                <td>{j.url
+                  ? <a className="btn btn-outline btn-sm" href={j.url} target="_blank" rel="noopener noreferrer" onClick={()=>{ try{ platformApi.applyJob(j.id,{applicant:authEmail||'guest',note:'Opened posting'}); }catch(e){} }}>Apply ↗</a>
+                  : <button className="btn btn-outline btn-sm" disabled={applied[j.id]} onClick={()=>apply(j)}>{applied[j.id]?'Applied ✓':'Apply'}</button>}</td>
               </tr>
             ))}
           </tbody>
-        </table>
+        </table>}
       </div>
     </div>
   );
 }
 
 function BugReportPage() {
+  let reporter = null; try { reporter = useAuth()?.user?.email || null; } catch { reporter = null; }
   const [sent, setSent] = useState(false);
-  const submit = (event) => {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [f, setF] = useState({ kind:'Calculator', severity:'Low', summary:'', steps:'', expected:'', actual:'' });
+  const set = (k)=>(e)=>setF((prev)=>({...prev,[k]:e.target.value}));
+  const submit = async (event) => {
     event.preventDefault();
-    setSent(true);
-    notify('Bug report queued.');
+    setError('');
+    if (!f.summary.trim()) { setError('Please give the bug a short title.'); return; }
+    setBusy(true);
+    try {
+      const detail = [
+        f.steps && `Steps to reproduce:\n${f.steps}`,
+        f.expected && `Expected:\n${f.expected}`,
+        f.actual && `Actual:\n${f.actual}`,
+      ].filter(Boolean).join('\n\n');
+      await platformApi.reportBug({ summary:f.summary.trim(), kind:f.kind, severity:f.severity, detail, reporter });
+      setSent(true);
+      notify('Bug report submitted. Thank you.');
+    } catch (e) {
+      setError(`Could not submit (${e.message}). Is the platform backend running?`);
+    } finally { setBusy(false); }
   };
+  if (sent) return (
+    <div className="container page" style={{maxWidth:680}}>
+      <PageHead crumb={<><Link to="/">/ home</Link><i>›</i><span>/ report a bug</span></>} title="Report a bug" sub="Help us harden the platform."/>
+      <div className="panel" style={{padding:32, textAlign:'center'}}>
+        <Icon name="check-circle" size={28}/>
+        <div className="mono" style={{fontWeight:700,fontSize:16,marginTop:10}}>Report received.</div>
+        <div className="mute" style={{fontSize:13,marginTop:8}}>It is stored in the platform database. Thank you for making the desk sharper.</div>
+        <button className="btn btn-outline" style={{marginTop:18}} onClick={()=>{ setSent(false); setF({kind:'Calculator',severity:'Low',summary:'',steps:'',expected:'',actual:''}); }}>Report another</button>
+      </div>
+    </div>
+  );
   return (
     <div className="container page" style={{maxWidth:680}}>
       <PageHead
@@ -5616,23 +7039,26 @@ function BugReportPage() {
       />
       <div className="panel" style={{padding:32}}>
         <form className="col" style={{gap:16}} onSubmit={submit}>
-          <FormNotice>{sent && 'Report captured. In production this can be sent to GitHub Issues, Supabase, or your support inbox.'}</FormNotice>
-          {[
-            ['Category',['select','Calculator','Lesson','UI','Account','Other']],
-            ['Priority',['select','Low','Medium','High','Critical']],
-            ['Title','text'],
-            ['Steps to reproduce','area'],
-            ['Expected behaviour','area'],
-            ['Actual behaviour','area'],
-          ].map(([l,t])=>(
-            <div key={l} className="field">
+          {error && <FormNotice type="error">{error}</FormNotice>}
+          <div className="field">
+            <span className="mono mute" style={{fontSize:10.5,letterSpacing:'.1em'}}>Category</span>
+            <select value={f.kind} onChange={set('kind')}>{['Calculator','Lesson','UI','Account','Other'].map(o=><option key={o}>{o}</option>)}</select>
+          </div>
+          <div className="field">
+            <span className="mono mute" style={{fontSize:10.5,letterSpacing:'.1em'}}>Priority</span>
+            <select value={f.severity} onChange={set('severity')}>{['Low','Medium','High','Critical'].map(o=><option key={o}>{o}</option>)}</select>
+          </div>
+          <div className="field">
+            <span className="mono mute" style={{fontSize:10.5,letterSpacing:'.1em'}}>Title</span>
+            <input value={f.summary} onChange={set('summary')} placeholder="Short summary of the bug"/>
+          </div>
+          {[['Steps to reproduce','steps'],['Expected behaviour','expected'],['Actual behaviour','actual']].map(([l,k])=>(
+            <div key={k} className="field">
               <span className="mono mute" style={{fontSize:10.5,letterSpacing:'.1em'}}>{l}</span>
-              {Array.isArray(t) ? <select>{t.slice(1).map(o=><option key={o}>{o}</option>)}</select> :
-               t==='area' ? <textarea rows={3}></textarea> :
-               <input placeholder=""/>}
+              <textarea rows={3} value={f[k]} onChange={set(k)}></textarea>
             </div>
           ))}
-          <button className="btn btn-primary" type="submit" style={{width:'100%',justifyContent:'center',marginTop:8}}>Submit report <Icon name="send" size={13}/></button>
+          <button className="btn btn-primary" type="submit" disabled={busy} style={{width:'100%',justifyContent:'center',marginTop:8,opacity:busy?0.7:1}}>{busy?'Submitting…':'Submit report'} <Icon name="send" size={13}/></button>
         </form>
       </div>
     </div>
@@ -5724,24 +7150,37 @@ function ApiDocsPage() {
 }
 
 function AdminPage() {
+  let auth=null; try { auth=useAuth(); } catch { auth=null; }
+  const isAdmin = (()=>{ try { return typeof auth?.isAdmin==='function' ? auth.isAdmin() : (auth?.profile?.role==='admin'); } catch { return false; } })();
+  const [counts,setCounts] = useState(null);
+  useEffect(()=>{ if(isAdmin) platformApi.health().then((d)=>setCounts(d?.counts||{})).catch(()=>setCounts({})); },[isAdmin]);
+  if (!auth?.isAuthenticated) return (
+    <div className="container page"><PageHead crumb={<><Link to="/">/ home</Link><i>›</i><span>/ admin</span></>} title="Admin" sub="Restricted area."/>
+      <div className="panel" style={{padding:28,textAlign:'center'}}><Icon name="lock" size={24}/><div className="mono" style={{fontWeight:600,marginTop:10}}>Sign in required.</div><Link to="/auth/login" className="btn btn-primary" style={{marginTop:16}}>Log in</Link></div></div>
+  );
+  if (!isAdmin) return (
+    <div className="container page"><PageHead crumb={<><Link to="/">/ home</Link><i>›</i><span>/ admin</span></>} title="Admin" sub="Restricted area."/>
+      <div className="panel" style={{padding:28,textAlign:'center'}}><Icon name="lock" size={24}/><div className="mono" style={{fontWeight:600,marginTop:10}}>Access denied.</div><div className="mute" style={{fontSize:13,marginTop:8}}>This area requires an admin role on your profile.</div></div></div>
+  );
+  const c = counts || {};
   return (
     <div className="container page">
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ admin</span></>}
         title={<>Admin Dashboard <span className="badge badge-red" style={{marginLeft:12,fontSize:9}}>RESTRICTED</span></>}
-        sub="Platform operations · users, content, infrastructure."
+        sub="Platform operations · live counts from the platform database."
       />
       <div className="grid-4">
         {[
-          {l:'Users',v:'14,218', c:''},
-          {l:'Active 30d',v:'4,812', c:''},
-          {l:'Paying',v:'1,841', c:'var(--green)'},
-          {l:'Churn 30d',v:'2.4%', c:'var(--red)'},
-          {l:'Revenue MRR',v:'$84,210', c:'var(--green)'},
-          {l:'DB size',v:'214 GB', c:''},
-          {l:'Errors 24h',v:'18', c:'var(--amber)'},
-          {l:'API calls 24h',v:'1.21M', c:''},
-        ].map(s=><Stat key={s.l} label={s.l} value={s.v} accent={s.c}/>)}
+          {l:'Forum threads',v:c.threads},
+          {l:'Comments',v:c.comments},
+          {l:'Jobs',v:c.jobs},
+          {l:'Applications',v:c.applications},
+          {l:'Bug reports',v:c.bug_reports, c:'var(--amber)'},
+          {l:'Subscribers',v:c.subscribers, c:'var(--green)'},
+          {l:'Blog posts',v:c.blog_posts},
+          {l:'Progress events',v:c.progress_events},
+        ].map(s=><Stat key={s.l} label={s.l} value={counts===null?'…':String(s.v ?? 0)} accent={s.c||''}/>)}
       </div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginTop:18}}>
         <div className="panel">
@@ -5809,12 +7248,12 @@ function PracticePage() {
       />
       <div className="grid-3">
         {[
-          {t:'Exercises',d:'Notebook-style coding tasks with grading.',ic:'code',to:'/exercises',n:'52 exercises'},
-          {t:'Quizzes',d:'Multiple choice — quick check on theory.',ic:'help-circle',to:'/dashboard',n:'6 categories'},
+          {t:'Exercises',d:'AI-generated desk exercises with worked solutions.',ic:'code',to:'/exercises',n:'AI generator'},
+          {t:'Quizzes',d:'Multiple choice — quick check on theory.',ic:'help-circle',to:'/dashboard',n:'by topic'},
           {t:'Survival Mode',d:'Pressure-tested questions. Timer running.',ic:'zap',to:'/survival',n:'6 waves'},
-          {t:'Weekly Challenge',d:'New problem every Sunday. Leaderboard.',ic:'trophy',to:'/challenge',n:'this week · DOC barrier'},
-          {t:'Leaderboard',d:'Where you stand. Global and by topic.',ic:'crown',to:'/leaderboard',n:'1,824 players'},
-          {t:'Pair Programming',d:'Live pair sessions with other learners.',ic:'users',to:'/community',n:'live · 18 rooms'},
+          {t:'Weekly Challenge',d:'A worked desk problem to practise on.',ic:'trophy',to:'/challenge',n:'preview'},
+          {t:'Leaderboard',d:'Where you stand. Global and by topic.',ic:'crown',to:'/leaderboard',n:'live ranking'},
+          {t:'Pair Programming',d:'Discuss problems with other learners.',ic:'users',to:'/community',n:'via community'},
         ].map(s=>(
           <Link to={s.to} key={s.t} className="panel" style={{padding:24, display:'block'}}>
             <Icon name={s.ic} size={22} style={{color:'var(--red)'}}/>
@@ -5837,8 +7276,8 @@ function ChallengePage() {
       <PageHead
         crumb={<><Link to="/practice">practice</Link><i>›</i><span>weekly challenge</span></>}
         title="Weekly Challenge"
-        sub="Submit by Sunday 23:59 UTC. Top 3 get XP, badge, and a feature in the newsletter."
-        right={<><span className="badge badge-red">CLOSES 4d 12h</span></>}
+        sub="A worked desk problem to practise on. (Live ranked challenges are coming soon.)"
+        right={<><span className="badge">Preview</span></>}
       />
       <div style={{display:'grid',gridTemplateColumns:'1fr 320px',gap:14}}>
         <div className="panel" style={{padding:32}}>
@@ -5894,10 +7333,505 @@ Object.assign(window, {
 
 
 // ===== src\app.jsx =====
+// ======================= AGENTIC TRADING ROOM (app shell) ===================
+// Standalone full-screen "desk cockpit" (intended for app.tradinglibrary.com).
+// Faithful to the product mockup; numbers come from real pricers, not the LLM.
+const AGR = {
+  bg:'#070A0F', panel:'#0C1118', panel2:'#0A0F15', line:'#171F2B', line2:'#222C3A',
+  red:'#F23645', redDim:'#7d1f29', green:'#2FBF71', greenDim:'#165236',
+  text:'#E6EAF1', mute:'#6F7B8C', dim:'#47525f', amber:'#E8B339', blue:'#4C7DFF',
+};
+const agrMono = "'JetBrains Mono','SF Mono',monospace";
+
+function AgentSVG({type, color}) {
+  const s = { width:26, height:26, fill:'none', stroke:color, strokeWidth:1.6, strokeLinecap:'round', strokeLinejoin:'round' };
+  const p = {
+    sales:<><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></>,
+    structurer:<><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="9" y="14" width="6" height="6" rx="1"/><path d="M7 10v2h10v-2M12 12v2"/></>,
+    data:<><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/></>,
+    quant:<><path d="M17 5H7l5 7-5 7h10"/></>,
+    pricing:<><path d="M4 19V5M4 19h16"/><path d="M7 16l3-4 3 2 4-7"/></>,
+    trader:<><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></>,
+    risk:<><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9.5 12l1.8 1.8 3.2-3.6"/></>,
+    report:<><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M9.5 12h6M9.5 15h6M9.5 9h3"/></>,
+  };
+  return <svg viewBox="0 0 24 24" style={s}>{p[type]}</svg>;
+}
+
+function AgentRoomTopNav() {
+  const items = ['DASHBOARD','MARKETS','PRODUCTS','LEARNING','TOOLS','AGENT ROOM'];
+  const [active] = useState('DASHBOARD');
+  return (
+    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',height:64,padding:'0 26px',borderBottom:`1px solid ${AGR.line}`,background:AGR.bg}}>
+      <div style={{display:'flex',alignItems:'center',gap:48}}>
+        <Link to="/" style={{display:'flex',alignItems:'center',gap:10,textDecoration:'none'}}>
+          <span style={{width:10,height:10,background:AGR.red,display:'inline-block'}}></span>
+          <span style={{fontFamily:agrMono,fontWeight:800,fontSize:13,letterSpacing:'.04em',color:AGR.text,lineHeight:1.05}}>THE PRICING<br/>LIBRARY</span>
+        </Link>
+        <div style={{display:'flex',gap:30}}>
+          {items.map(it=>(
+            <span key={it} style={{fontFamily:agrMono,fontSize:12,letterSpacing:'.06em',fontWeight:600,color:it===active?AGR.red:AGR.mute,cursor:'pointer',position:'relative',paddingBottom:22,paddingTop:22}}>
+              {it}{it===active && <span style={{position:'absolute',left:0,right:0,bottom:0,height:2,background:AGR.red}}></span>}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div style={{display:'flex',alignItems:'center',gap:20}}>
+        <Icon name="search" size={16} style={{color:AGR.mute}}/>
+        <span style={{position:'relative'}}><Icon name="bell" size={16} style={{color:AGR.mute}}/><span style={{position:'absolute',top:-2,right:-2,width:6,height:6,borderRadius:3,background:AGR.red}}></span></span>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <span style={{width:30,height:30,borderRadius:4,border:`1px solid ${AGR.line2}`,display:'grid',placeItems:'center',color:AGR.mute}}><Icon name="user" size={15}/></span>
+          <div style={{lineHeight:1.2}}><div style={{fontFamily:agrMono,fontSize:12,fontWeight:600,color:AGR.text}}>Alexandre D.</div><div style={{fontSize:10.5,color:AGR.mute}}>Student Plan</div></div>
+          <span style={{color:AGR.mute,fontSize:10}}>▾</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AgrPanel({children, style}) {
+  return <div style={{background:AGR.panel,border:`1px solid ${AGR.line}`,borderRadius:4,...style}}>{children}</div>;
+}
+
+function SpxPanel({live}) {
+  const spxPx = live?.spx!=null ? Number(live.spx).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '5,872.34';
+  const clock = live?.clock || '15:42:18';
+  // deterministic upward SPX series + theoretical mid (slightly below)
+  const data = useMemo(()=>{
+    let v=5630; const spx=[],th=[]; let s=12345;
+    const rnd=()=>{ s=(1103515245*s+12345)>>>0; return s/4294967296; };
+    for(let i=0;i<70;i++){ v += 4.2 + (rnd()-0.42)*42; spx.push({x:i,y:Math.round(v)}); th.push({x:i,y:Math.round(v-95-rnd()*40)}); }
+    return {spx,th};
+  },[]);
+  return (
+    <AgrPanel style={{padding:0,flex:1,display:'flex',flexDirection:'column'}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',padding:'14px 18px 6px'}}>
+        <div>
+          <div style={{fontFamily:agrMono,fontSize:11,color:AGR.mute,letterSpacing:'.06em',marginBottom:8}}>SPX · S&amp;P 500 INDEX</div>
+          <div style={{display:'flex',alignItems:'center',gap:10}}>
+            <span style={{fontFamily:agrMono,fontSize:26,fontWeight:700,color:AGR.text}}>{spxPx}</span>
+            <span style={{fontFamily:agrMono,fontSize:11,fontWeight:600,color:AGR.green,background:'rgba(47,191,113,.12)',padding:'2px 6px',borderRadius:3}}>+0.31%</span>
+          </div>
+        </div>
+        <div style={{display:'flex',gap:18,alignItems:'flex-start'}}>
+          <div style={{display:'flex',gap:14,fontFamily:agrMono,fontSize:10.5,color:AGR.mute,marginTop:4}}>
+            <span>O <span style={{color:AGR.text}}>5,814.2</span></span><span>H <span style={{color:AGR.text}}>5,879.3</span></span><span>L <span style={{color:AGR.text}}>5,782.1</span></span>
+          </div>
+          <span style={{fontFamily:agrMono,fontSize:10,color:AGR.green,letterSpacing:'.08em',display:'flex',alignItems:'center',gap:6}}><span style={{width:6,height:6,borderRadius:3,background:AGR.green}}></span>MARKET DATA LIVE {clock}</span>
+        </div>
+      </div>
+      <div style={{padding:'0 8px',flex:1}}>
+        <LineChart width={560} height={208} fill={false} series={[
+          {name:'SPX', color:AGR.red, data:data.spx, strokeWidth:1.8},
+          {name:'TH', color:AGR.blue, data:data.th, dashed:true},
+        ]}/>
+      </div>
+      <div style={{display:'flex',gap:20,padding:'4px 18px 12px',fontFamily:agrMono,fontSize:10.5}}>
+        <span style={{color:AGR.text}}><span style={{color:AGR.red}}>—</span> SPX</span>
+        <span style={{color:AGR.mute}}><span style={{color:AGR.blue}}>--</span> THEORETICAL (MID)</span>
+      </div>
+    </AgrPanel>
+  );
+}
+
+function VolSurfacePanel() {
+  const rows=['80%','100%','120%'], cols=['1M','6M','1Y','2Y'];
+  const heat=[[0.55,0.7,0.9,0.45],[0.85,1,0.95,0.6],[0.95,0.9,0.7,0.4]];
+  const cell=(v)=> v>=0.95?'#FF2733':v>=0.8?'#C42230':v>=0.6?'#7d1f29':v>=0.45?'#3a4a5a':'#26405a';
+  return (
+    <AgrPanel style={{padding:'14px 16px'}}>
+      <div style={{fontFamily:agrMono,fontSize:11,color:AGR.text,letterSpacing:'.05em',marginBottom:3}}>VOL SURFACE · SPX</div>
+      <div style={{fontFamily:agrMono,fontSize:10,color:AGR.mute,marginBottom:10}}>Strike × Tenor ◇</div>
+      <div style={{display:'flex',gap:8}}>
+        <div style={{display:'flex',flexDirection:'column',justifyContent:'space-around',fontFamily:agrMono,fontSize:9.5,color:AGR.mute,paddingTop:2,paddingBottom:14}}>
+          {rows.map(r=><span key={r}>{r}</span>)}
+        </div>
+        <div style={{flex:1}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:3}}>
+            {heat.flatMap((row,ri)=>row.map((v,ci)=><div key={ri+'-'+ci} style={{height:26,background:cell(v),borderRadius:2}}/>))}
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',fontFamily:agrMono,fontSize:9.5,color:AGR.mute,marginTop:5}}>{cols.map(c=><span key={c}>{c}</span>)}</div>
+        </div>
+      </div>
+    </AgrPanel>
+  );
+}
+
+function OrderBookPanel() {
+  const asks=[[386,'5,872.80'],[212,'5,872.60'],[171,'5,872.40'],[157,'5,872.20'],[293,'5,872.00']];
+  const bids=[['5,872.18',221],['5,872.00',497],['5,871.80',245],['5,871.60',445],['5,871.40',202]];
+  const maxA=Math.max(...asks.map(a=>a[0])), maxB=Math.max(...bids.map(b=>b[1]));
+  return (
+    <AgrPanel style={{padding:'14px 16px'}}>
+      <div style={{fontFamily:agrMono,fontSize:11,color:AGR.text,letterSpacing:'.05em',marginBottom:10}}>ORDER BOOK · SPX</div>
+      <div style={{display:'flex',justifyContent:'space-between',fontFamily:agrMono,fontSize:9.5,color:AGR.mute,marginBottom:6}}><span>BID</span><span>SIZE</span><span>ASK</span></div>
+      {asks.map((a,i)=>(
+        <div key={i} style={{position:'relative',display:'flex',justifyContent:'space-between',fontFamily:agrMono,fontSize:11,padding:'3px 4px'}}>
+          <span style={{position:'absolute',left:0,top:0,bottom:0,width:`${a[0]/maxA*55}%`,background:'rgba(242,54,69,.16)'}}></span>
+          <span></span><span style={{color:AGR.mute,zIndex:1}}>{a[0]}</span><span style={{color:AGR.red,zIndex:1}}>{a[1]}</span>
+        </div>
+      ))}
+      <div style={{display:'flex',justifyContent:'space-between',fontFamily:agrMono,fontSize:10.5,color:AGR.text,padding:'7px 4px',borderTop:`1px solid ${AGR.line}`,borderBottom:`1px solid ${AGR.line}`,margin:'5px 0'}}>
+        <span style={{color:AGR.mute}}>MID</span><span style={{fontWeight:700}}>5,872.34</span><span style={{color:AGR.mute}}>SPREAD 0.16</span>
+      </div>
+      {bids.map((b,i)=>(
+        <div key={i} style={{position:'relative',display:'flex',justifyContent:'space-between',fontFamily:agrMono,fontSize:11,padding:'3px 4px'}}>
+          <span style={{position:'absolute',right:0,top:0,bottom:0,width:`${b[1]/maxB*55}%`,background:'rgba(47,191,113,.13)'}}></span>
+          <span style={{color:AGR.green,zIndex:1}}>{b[0]}</span><span style={{color:AGR.mute,zIndex:1}}>{b[1]}</span><span></span>
+        </div>
+      ))}
+    </AgrPanel>
+  );
+}
+
+const AGENTS = [
+  {type:'sales', name:'Sales Agent', status:'Understanding', state:'active'},
+  {type:'structurer', name:'Structurer', status:'Proposing ideas', state:'done'},
+  {type:'data', name:'Market Data', status:'Loading data', state:'done'},
+  {type:'quant', name:'Quant Agent', status:'Modeling', state:'done'},
+  {type:'pricing', name:'Pricing Agent', status:'Pricing', state:'done'},
+  {type:'trader', name:'Trader Agent', status:'Quoting', state:'live'},
+  {type:'risk', name:'Risk Manager', status:'Validating', state:'idle'},
+  {type:'report', name:'Report Agent', status:'Preparing', state:'idle'},
+];
+// Deterministic desk parser: natural language -> structured request (the agents
+// orchestrate a workflow, they do NOT invent prices). Offline, no LLM needed.
+function parseMarketRequest(text){
+  const t=(text||'').toLowerCase();
+  let underlying='Crude Oil (WTI)', factor='oil';
+  if (/p[ée]trole|oil|wti|brent|crude|baril/.test(t)) {underlying='Crude Oil (WTI)';factor='oil';}
+  else if (/inflation|cpi|prix.*augment.*g[ée]n[ée]ral/.test(t)) {underlying='Inflation (CPI)';factor='inflation';}
+  else if (/credit|spread|cds|d[ée]faut|default/.test(t)) {underlying='Credit Spreads';factor='credit';}
+  else if (/taux|rate|rates|bond|obligation|swap|coupon|callable/.test(t)) {underlying='EUR Rates';factor='rates';}
+  else if (/\bgold\b|\bor\b|once/.test(t)) {underlying='Gold';factor='gold';}
+  else if (/eur|usd|fx|change|devise|dollar/.test(t)) {underlying='EUR/USD';factor='fx';}
+  const mM=t.match(/(\d+)\s*(mois|month)/), mY=t.match(/(\d+)\s*(ans?|years?|y\b)/);
+  const horizon=mM?`${mM[1]} Months`:mY?`${mY[1]} Years`:'5 Months';
+  let view='Price increase';
+  if (/baiss|fall|down|drop|decreas|chut|recul/.test(t)) view='Price decrease';
+  else if (/stable|sideways|range|flat|inchang|stagn/.test(t)) view='Range / stable';
+  else if (/augment|rise|monte|hauss|\bup\b|increas|widen|[ée]carte/.test(t)) view='Price increase';
+  let intention='Hedge / Express a view';
+  if (/explain|comprendre|understand|what is|c'est quoi|apprendre|how does|fonctionne/.test(t)) intention='Learn a concept';
+  else if (/price|pricer|quote|cote|combien|valoris/.test(t)) intention='Price a product';
+  else if (/hedge|couvr|prot[ée]g|peur|afraid|worried|inqui[eè]t/.test(t)) intention='Hedge / Express a view';
+  return {underlying, factor, horizon, view, intention, objective:'Protection / Opportunity'};
+}
+function ideasFor(parsed){
+  const f=parsed.factor, up=parsed.view==='Price increase';
+  const oil=[
+    {ic:'sales',n:'WTI Call Option ('+parsed.horizon.split(' ')[0]+'M)',d:'Long call option to benefit from rising oil prices.',cost:3.45,unit:'/ bbl',conf:'High',confC:AGR.green,tag:'PROTECTION',kind:'call',K:80},
+    {ic:'trader',n:'Bull Call Spread',d:'Call spread to reduce cost while keeping upside.',cost:1.85,unit:'/ bbl',conf:'High',confC:AGR.green,tag:'BALANCED',kind:'spread',K:80},
+    {ic:'risk',n:'Collar Strategy',d:'Call + protective put for downside protection.',cost:0.95,unit:'/ bbl',conf:'Medium',confC:AGR.amber,tag:'HEDGE',kind:'collar',K:80},
+  ];
+  const rates=[
+    {ic:'sales',n:'Payer Swap',d:'Pay fixed / receive float to gain if rates rise.',cost:0.00,unit:'/ par',conf:'High',confC:AGR.green,tag:'HEDGE',kind:'swap'},
+    {ic:'trader',n:'Interest-Rate Cap',d:'Cap option that pays when rates exceed the strike.',cost:1.20,unit:'%',conf:'High',confC:AGR.green,tag:'PROTECTION',kind:'cap'},
+    {ic:'risk',n:'Payer Swaption',d:'Option to enter a payer swap — convex rate protection.',cost:0.85,unit:'%',conf:'Medium',confC:AGR.amber,tag:'BALANCED',kind:'swaption'},
+  ];
+  const credit=[
+    {ic:'sales',n:'Buy CDS Protection',d:'Pays out if the reference credit widens / defaults.',cost:1.20,unit:'%',conf:'High',confC:AGR.green,tag:'PROTECTION',kind:'cds'},
+    {ic:'trader',n:'Short Credit-Linked Note',d:'Reduce spread exposure on the book.',cost:0.00,unit:'/ par',conf:'Medium',confC:AGR.amber,tag:'HEDGE',kind:'cln'},
+    {ic:'risk',n:'Index CDS Hedge',d:'Macro hedge via a liquid CDS index.',cost:0.65,unit:'%',conf:'High',confC:AGR.green,tag:'BALANCED',kind:'cds'},
+  ];
+  const generic=[
+    {ic:'sales',n:'Vanilla Option',d:'Directional option matching your view.',cost:3.45,unit:'',conf:'High',confC:AGR.green,tag:'VIEW',kind:'call',K:80},
+    {ic:'trader',n:'Option Spread',d:'Cheaper, capped-payoff alternative.',cost:1.85,unit:'',conf:'High',confC:AGR.green,tag:'BALANCED',kind:'spread',K:80},
+    {ic:'risk',n:'Structured Note',d:'Capital-protected exposure to the factor.',cost:0.95,unit:'',conf:'Medium',confC:AGR.amber,tag:'HEDGE',kind:'note'},
+  ];
+  if (f==='oil') return oil;
+  if (f==='rates') return rates;
+  if (f==='credit') return credit;
+  return generic;
+}
+
+function AgentPipeline({running, stage, desk}) {
+  const outputs = desk?.agents || [];
+  return (
+    <AgrPanel style={{padding:'16px 18px',marginTop:14}}>
+      <div style={{fontFamily:agrMono,fontSize:11,color:AGR.red,letterSpacing:'.08em',marginBottom:14}}>AGENT ROOM · {running?'TASK IN PROGRESS':(desk?'COMPLETE':'READY')}</div>
+      <div style={{display:'flex',alignItems:'stretch',gap:0}}>
+        {AGENTS.map((tpl,i)=>{
+          const a = running ? {...tpl, state:(i<stage?'done':i===stage?'live':'idle')} : tpl;
+          const out = outputs[i]?.output;
+          const col = a.state==='active'?AGR.text : a.state==='live'?AGR.red : a.state==='done'?AGR.text : AGR.dim;
+          const dot = a.state==='live'?AGR.red : a.state==='idle'?AGR.dim : AGR.green;
+          return (
+            <React.Fragment key={a.name}>
+              <div title={out||''} style={{flex:1,border:`1px solid ${a.state==='live'?'rgba(242,54,69,.4)':AGR.line}`,borderRadius:4,padding:'14px 10px',display:'flex',flexDirection:'column',alignItems:'center',gap:9,background:a.state==='live'?'rgba(242,54,69,.04)':'transparent',minWidth:0,cursor:out?'help':'default'}}>
+                <AgentSVG type={a.type} color={a.state==='idle'?AGR.dim:(a.state==='live'?AGR.red:AGR.text)}/>
+                <div style={{fontFamily:agrMono,fontSize:11,fontWeight:600,color:col,textAlign:'center'}}>{a.name}</div>
+                <div style={{display:'flex',alignItems:'center',gap:5}}>
+                  {a.state==='done'? <span style={{color:AGR.green,fontSize:10}}>✓</span> : <span style={{width:6,height:6,borderRadius:3,background:dot}}></span>}
+                  <span style={{fontFamily:agrMono,fontSize:9.5,color:AGR.mute}}>{a.status}</span>
+                </div>
+              </div>
+              {i<AGENTS.length-1 && <div style={{alignSelf:'center',width:14,height:1,background:AGR.line2}}></div>}
+            </React.Fragment>
+          );
+        })}
+      </div>
+      {desk && outputs.length>0 && (
+        <div style={{marginTop:12,borderTop:`1px solid ${AGR.line}`,paddingTop:10,display:'flex',flexDirection:'column',gap:4}}>
+          {outputs.map((o)=>(
+            <div key={o.key} style={{display:'flex',gap:8,fontSize:11,lineHeight:1.4}}>
+              <span style={{fontFamily:agrMono,color:AGR.red,minWidth:96,flexShrink:0}}>{o.name}</span>
+              <span style={{color:AGR.mute}}>{o.output}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </AgrPanel>
+  );
+}
+
+function PayoffMini({K=80,prem=3.45,kind='call'}){
+  const data=useMemo(()=>{const a=[];for(let x=58;x<=112;x+=1){
+    let y;
+    if(kind==='spread'){ const K2=K+10; y=Math.min(Math.max(x-K,0),K2-K)-prem; }
+    else if(kind==='collar'){ const Kp=K-8; y=Math.max(x-K,0)-Math.max(Kp-x,0)-prem; }
+    else if(kind==='swap'||kind==='cds'||kind==='cln'){ y=(x-K)*0.6; }
+    else { y=Math.max(x-K,0)-prem; }
+    a.push({x,y:+y.toFixed(3)});
+  } return a;},[K,prem,kind]);
+  return <LineChart width={360} height={150} fill={false} series={[{name:'payoff',color:AGR.red,data,strokeWidth:2}]} />;
+}
+
+function RfqCockpit({parsed, query, desk, live}) {
+  // REAL pricing: prefer the backend desk's pricer output; else compute locally
+  // with Black-Scholes. Agents orchestrate; the deterministic pricer computes.
+  const months = parseInt(parsed.horizon,10) || 5;
+  const T=months/12, S0=80, K=80, r=0.04, vol=0.1341;
+  const ideas = ideasFor(parsed);
+  const best = ideas[0];
+  const dp = desk?.pricing;
+  const isCall = dp ? dp.kind==='call' : best.kind==='call';
+  const prem = dp ? dp.est_price : (isCall ? bsPrice({S:S0,K,r,sigma:vol,T,type:'call'}).price : best.cost);
+  const breakeven = dp ? dp.break_even : (isCall ? K + prem : null);
+  const maxLoss = dp ? dp.max_loss : (isCall ? prem*100 : null);
+  const key=[['Underlying',parsed.underlying],['Horizon',parsed.horizon],['View',parsed.view],['Objective',parsed.objective]];
+  const label=(t)=> <div style={{fontFamily:agrMono,fontSize:11,color:AGR.mute}}>{t}</div>;
+  return (
+    <div style={{display:'grid',gridTemplateColumns:'1fr 1.15fr 1.1fr 0.85fr',gap:14,marginTop:14}}>
+      {/* 1. YOUR REQUEST */}
+      <AgrPanel style={{padding:18}}>
+        <div style={{fontFamily:agrMono,fontSize:12,fontWeight:700,color:AGR.text,marginBottom:14}}>1. YOUR REQUEST</div>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>{label('Natural Language')}<span style={{fontFamily:agrMono,fontSize:9.5,color:AGR.red,border:`1px solid ${AGR.redDim}`,borderRadius:3,padding:'1px 6px'}}>✎ Edit</span></div>
+        <p style={{fontSize:12.5,color:AGR.text,lineHeight:1.5,margin:'8px 0 18px'}}>{query}</p>
+        {label('Detected Intention')}
+        <div style={{fontFamily:agrMono,fontSize:13,fontWeight:600,color:AGR.red,margin:'6px 0 18px'}}>{parsed.intention}</div>
+        {label('Key Elements')}
+        <div style={{marginTop:8}}>
+          {key.map(([k,v])=>(
+            <div key={k} style={{display:'flex',justifyContent:'space-between',padding:'7px 0',borderTop:`1px solid ${AGR.line}`}}>
+              <span style={{fontFamily:agrMono,fontSize:11,color:AGR.mute}}>{k}</span>
+              <span style={{fontFamily:agrMono,fontSize:11.5,color:AGR.text,fontWeight:500}}>{v}</span>
+            </div>
+          ))}
+        </div>
+      </AgrPanel>
+      {/* 2. AGENT PROPOSALS */}
+      <AgrPanel style={{padding:18,display:'flex',flexDirection:'column'}}>
+        <div style={{fontFamily:agrMono,fontSize:12,fontWeight:700,color:AGR.text,marginBottom:4}}>2. AGENT PROPOSALS</div>
+        <div style={{fontSize:11.5,color:AGR.mute,marginBottom:12}}>Best Ideas for Your Scenario</div>
+        <div style={{display:'flex',flexDirection:'column',gap:10,flex:1}}>
+          {ideas.map((it,idx)=>(
+            <div key={it.n} style={{border:`1px solid ${idx===0?'rgba(242,54,69,.35)':AGR.line}`,borderRadius:4,padding:12,display:'flex',gap:12}}>
+              <span style={{width:34,height:34,borderRadius:4,border:`1px solid ${AGR.line2}`,display:'grid',placeItems:'center',flexShrink:0,color:AGR.mute}}><AgentSVG type={it.ic} color={AGR.mute}/></span>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontFamily:agrMono,fontSize:12.5,fontWeight:600,color:AGR.text}}>{it.n}</div>
+                <div style={{fontSize:11,color:AGR.mute,lineHeight:1.4,margin:'4px 0 8px'}}>{it.d}</div>
+                <span style={{fontFamily:agrMono,fontSize:8.5,letterSpacing:'.08em',color:AGR.mute,border:`1px solid ${AGR.line2}`,borderRadius:2,padding:'2px 6px'}}>{it.tag}</span>
+              </div>
+              <div style={{textAlign:'right',flexShrink:0}}>
+                <div style={{fontSize:10,color:AGR.mute}}>Est. Cost</div>
+                <div style={{fontFamily:agrMono,fontSize:13,fontWeight:700,color:AGR.text,margin:'2px 0 8px'}}>${it.cost.toFixed(2)} <span style={{fontSize:9,color:AGR.mute}}>{it.unit}</span></div>
+                <div style={{fontSize:10,color:AGR.mute}}>Confidence</div>
+                <div style={{fontFamily:agrMono,fontSize:11.5,fontWeight:600,color:it.confC}}>{it.conf}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button style={{marginTop:12,width:'100%',background:AGR.panel2,border:`1px solid ${AGR.line2}`,borderRadius:4,color:AGR.text,fontFamily:agrMono,fontSize:11.5,padding:'10px',cursor:'pointer'}}>See all 6 ideas →</button>
+      </AgrPanel>
+      {/* 3. QUICK VIEW */}
+      <AgrPanel style={{padding:18}}>
+        <div style={{fontFamily:agrMono,fontSize:12,fontWeight:700,color:AGR.text,marginBottom:2}}>3. QUICK VIEW <span style={{color:AGR.red}}>(BEST IDEA)</span></div>
+        <div style={{fontSize:11.5,color:AGR.mute,marginBottom:6}}>{best.n}</div>
+        <div style={{display:'flex',gap:14,fontFamily:agrMono,fontSize:9.5,color:AGR.mute,marginBottom:4}}><span><span style={{color:AGR.red}}>—</span> Payoff at Maturity</span><span><span style={{color:AGR.mute}}>--</span> Break-even</span></div>
+        <PayoffMini K={K} prem={prem} kind={best.kind}/>
+        <div style={{fontFamily:agrMono,fontSize:9,color:AGR.mute,textAlign:'center',marginTop:2}}>WTI Price (USD/bbl)</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:1,marginTop:12,background:AGR.line,border:`1px solid ${AGR.line}`,borderRadius:4,overflow:'hidden'}}>
+          {[['Est. Price',`$${Number(prem).toFixed(2)} ${(dp?dp.unit:best.unit)||''}`],['Break-even',isCall?`$${Number(breakeven).toFixed(2)}`:'—'],['Max Loss',isCall?`$${Math.round(maxLoss)}`:'Limited'],['Max Profit','Unlimited']].map(([k,v],i)=>(
+            <div key={k} style={{background:AGR.panel,padding:'10px 12px'}}>
+              <div style={{fontSize:10,color:i===3?AGR.red:AGR.mute}}>{k}</div>
+              <div style={{fontFamily:agrMono,fontSize:13,fontWeight:700,color:i===3?AGR.red:AGR.text,marginTop:3}}>{v}</div>
+            </div>
+          ))}
+        </div>
+        {desk?.quote && (
+          <div style={{display:'flex',justifyContent:'space-between',marginTop:10,padding:'8px 10px',border:`1px solid ${AGR.line}`,borderRadius:4,fontFamily:agrMono,fontSize:11}}>
+            <span style={{color:AGR.green}}>BID {desk.quote.bid}</span>
+            <span style={{color:AGR.mute}}>MID {desk.quote.mid}</span>
+            <span style={{color:AGR.red}}>ASK {desk.quote.ask}</span>
+          </div>
+        )}
+        <div style={{display:'flex',gap:8,marginTop:12}}>
+          <button style={{flex:1,background:AGR.panel2,border:`1px solid ${AGR.line2}`,borderRadius:4,color:AGR.text,fontFamily:agrMono,fontSize:11,padding:'10px',cursor:'pointer'}}>View Full Analysis</button>
+          <button style={{flex:1,background:AGR.red,border:'none',borderRadius:4,color:'#fff',fontFamily:agrMono,fontSize:11,fontWeight:600,padding:'10px',cursor:'pointer'}}>Price This Idea →</button>
+        </div>
+      </AgrPanel>
+      {/* 4. DESK SNAPSHOT */}
+      <AgrPanel style={{padding:18}}>
+        {(()=>{ const ld=live?.desk;
+        const pnl = ld? ld.pnl_today : 24580;
+        const pnlPos = pnl>=0;
+        const pnlClr = pnlPos?AGR.green:AGR.red;
+        const curve = ld?.pnl_curve && ld.pnl_curve.length>1 ? ld.pnl_curve : null;
+        let spark = "M0,28 L25,24 L50,26 L75,18 L100,20 L125,12 L150,15 L175,7 L200,4";
+        if (curve){ const lo=Math.min(...curve), hi=Math.max(...curve), rng=(hi-lo)||1; spark = curve.map((y,i)=>`${i===0?'M':'L'}${(i/(curve.length-1)*200).toFixed(1)},${(32-((y-lo)/rng)*30).toFixed(1)}`).join(' '); }
+        const rows = ld? [
+          ['DV01 (Total)', `${(ld.dv01/1e6).toFixed(2)}M`, AGR.text],
+          ['CS01 (Total)', `${Math.round(ld.cs01).toLocaleString()}`, AGR.text],
+          ['Risk Status', '● '+ld.risk_status, ld.risk_status==='GREEN'?AGR.green:(ld.risk_status==='AMBER'?AGR.amber:AGR.red)],
+          ['Active Positions', String(ld.positions), AGR.text],
+          ['Orders in Flight', String(ld.orders_in_flight), AGR.text],
+          ['Limit usage', `${Math.round(ld.limit_usage*100)}%`, AGR.text],
+        ] : [['DV01 (Total)','2.45M',AGR.text],['Risk Status','● GREEN',AGR.green],['Active Positions','12',AGR.text],['Orders in Flight','5',AGR.text]];
+        return (<>
+        <div style={{fontFamily:agrMono,fontSize:12,fontWeight:700,color:AGR.text,marginBottom:16}}>DESK SNAPSHOT {ld && <span style={{color:AGR.green,fontSize:9}}>● LIVE</span>}</div>
+        <div style={{fontSize:10.5,color:AGR.mute}}>PnL Today</div>
+        <div style={{fontFamily:agrMono,fontSize:22,fontWeight:700,color:pnlClr,margin:'4px 0 0'}}>{pnlPos?'+':'−'}${Math.abs(pnl).toLocaleString()}</div>
+        <div style={{fontFamily:agrMono,fontSize:11,color:pnlClr,marginBottom:4}}>{pnlPos?'+':''}{ld? `${((pnl/24580)*0.68).toFixed(2)}%` : '0.68%'}</div>
+        <svg viewBox="0 0 200 36" width="100%" height="32" style={{marginBottom:14}}><path d={spark} fill="none" stroke={pnlClr} strokeWidth="1.4"/></svg>
+        {rows.map(([k,v,c])=>(
+          <div key={k} style={{display:'flex',justifyContent:'space-between',padding:'9px 0',borderTop:`1px solid ${AGR.line}`}}>
+            <span style={{fontFamily:agrMono,fontSize:11,color:AGR.mute}}>{k}</span>
+            <span style={{fontFamily:agrMono,fontSize:12,fontWeight:600,color:c}}>{v}</span>
+          </div>
+        ))}
+        <button style={{marginTop:14,width:'100%',background:AGR.panel2,border:`1px solid ${AGR.line2}`,borderRadius:4,color:AGR.text,fontFamily:agrMono,fontSize:11.5,padding:'10px',cursor:'pointer'}}>Go to PnL &amp; Risk →</button>
+        </>); })()}
+      </AgrPanel>
+    </div>
+  );
+}
+
+function MarketWatch({live}) {
+  const lw = live?.market_watch || {};
+  const v=(n,def)=> lw[n]?.v ?? def;
+  const items=[['US 10Y',v('US 10Y','4.28%'),'-1.2bp',false],['US 2Y',v('US 2Y','3.89%'),'-0.8bp',false],['WTI',v('WTI','78.42'),'+1.32%',true],['BRENT',v('BRENT','82.15'),'+1.08%',true],['GOLD',v('GOLD','2,337.25'),'+0.45%',true],['EUR/USD',v('EUR/USD','1.0712'),'-0.12%',false],['SPX',v('SPX','5,872.34'),'+0.31%',true]];
+  return (
+    <div style={{display:'flex',alignItems:'center',gap:26,padding:'10px 26px',borderTop:`1px solid ${AGR.line}`,background:AGR.bg,overflowX:'auto'}}>
+      <span style={{fontFamily:agrMono,fontSize:10.5,color:AGR.red,letterSpacing:'.08em',flexShrink:0}}>MARKET WATCH</span>
+      {items.map(([n,v,c,up])=>(
+        <span key={n} style={{display:'flex',gap:7,fontFamily:agrMono,fontSize:11,flexShrink:0}}>
+          <span style={{color:AGR.mute}}>{n}</span><span style={{color:AGR.text}}>{v}</span><span style={{color:up?AGR.green:AGR.red}}>{c}</span>
+        </span>
+      ))}
+      <span style={{marginLeft:'auto',color:AGR.mute,flexShrink:0}}><Icon name="sliders-horizontal" size={13}/></span>
+    </div>
+  );
+}
+
+const AGR_EXAMPLES = ['Price a 5Y EUR Callable Note','Hedge rising rates','Inflation protection','More ▾'];
+// The Agentic Trading Room is now a REAL React page (AgentRoomReal) wired to the
+// backend desk agents (/agent/desk/run) + real market data, replacing the static
+// CDN/Babel design-kit iframe that used mock data.
+function AgentRoomPage() {
+  return <AgentRoomReal/>;
+}
+
+function AgentRoomPage_legacy() {
+  const [tab,setTab]=useState('RFQ COCKPIT');
+  const tabs=['RFQ COCKPIT','PRODUCT BUILDER','PRICING & RISK','SCENARIOS','REPORT CENTER'];
+  const DEFAULT_Q="J'ai peur que le pétrole augmente dans 5 mois, que me proposez-vous ?";
+  const [q,setQ]=useState(DEFAULT_Q);
+  const [submitted,setSubmitted]=useState(DEFAULT_Q);
+  const [parsed,setParsed]=useState(()=>parseMarketRequest(DEFAULT_Q));
+  const [desk,setDesk]=useState(null); // real multi-agent backend result
+  const [live,setLive]=useState(null); // live stateful trading-room snapshot
+  const [liveOn,setLiveOn]=useState(false); // default frame = the mockup; go live after the first Send
+  const [running,setRunning]=useState(false);
+  const [stage,setStage]=useState(AGENTS.length); // settled
+  // Once engaged, poll the LIVE trading-room state (time passes, books revalue).
+  useEffect(()=>{
+    if(!liveOn) return;
+    let alive=true;
+    const poll=()=>{ platformApi.deskState().then(s=>{ if(alive&&s) setLive(s); }).catch(()=>{}); };
+    poll();
+    const id=setInterval(poll, 1500);
+    return ()=>{ alive=false; clearInterval(id); };
+  },[liveOn]);
+  // Drive the agent pipeline forward while the real agents run.
+  useEffect(()=>{
+    if(!running) return;
+    if(stage>=AGENTS.length){ setRunning(false); return; }
+    const id=setTimeout(()=>setStage(s=>s+1), 480);
+    return ()=>clearTimeout(id);
+  },[running,stage]);
+  const run=async(text)=>{
+    const t=(text||'').trim(); if(!t) return;
+    setSubmitted(t); setParsed(parseMarketRequest(t)); setDesk(null); setTab('RFQ COCKPIT');
+    setStage(0); setRunning(true); setLiveOn(true);
+    // Run the REAL multi-agent desk AND book the resulting position into the live room.
+    const traded = await platformApi.deskTrade(t);
+    const result = traded?.result || await platformApi.deskRun(t);
+    if (result) { setDesk(result); if(result.parsed) setParsed(p=>({...p,...result.parsed})); }
+    if (traded?.snapshot) setLive(traded.snapshot);
+  };
+  return (
+    <div style={{background:AGR.bg,minHeight:'100vh',color:AGR.text}}>
+      <AgentRoomTopNav/>
+      <div style={{padding:'22px 26px 0'}}>
+        {/* HERO ROW */}
+        <div style={{display:'grid',gridTemplateColumns:'1.55fr 1fr 0.72fr',gap:16}}>
+          <div>
+            <div style={{fontFamily:agrMono,fontSize:11.5,color:AGR.red,letterSpacing:'.12em',marginBottom:20}}>AGENTIC TRADING ROOM · FIXED INCOME DESK</div>
+            <h1 style={{fontFamily:agrMono,fontSize:43,lineHeight:1.15,fontWeight:700,color:AGR.text,margin:'0 0 16px',letterSpacing:'-0.005em'}}>From any market question to a <span style={{color:AGR.red}}>desk-ready</span> answer.</h1>
+            <p style={{fontSize:14.5,color:AGR.mute,lineHeight:1.55,maxWidth:'46ch',margin:'0 0 24px'}}>Ask anything. Our agents structure, price, and analyze financial products for you.</p>
+            <form onSubmit={(e)=>{e.preventDefault();run(q);}} style={{display:'flex',gap:0,border:`1px solid ${AGR.line2}`,borderRadius:6,overflow:'hidden',background:AGR.panel2}}>
+              <input value={q} onChange={e=>setQ(e.target.value)} style={{flex:1,background:'transparent',border:'none',outline:'none',color:AGR.text,fontSize:12.5,padding:'13px 14px'}}/>
+              <button type="submit" style={{background:AGR.red,border:'none',color:'#fff',fontFamily:agrMono,fontSize:12,fontWeight:600,padding:'0 18px',display:'flex',alignItems:'center',gap:7,cursor:'pointer'}}>Send <Icon name="send" size={12}/></button>
+            </form>
+            <div style={{display:'flex',alignItems:'center',gap:8,marginTop:14,flexWrap:'wrap'}}>
+              <span style={{fontSize:11.5,color:AGR.mute}}>Try examples:</span>
+              {AGR_EXAMPLES.map(c=>(
+                <span key={c} onClick={()=>{ if(c!=='More ▾'){ setQ(c); run(c);} }} style={{fontFamily:agrMono,fontSize:10.5,color:AGR.text,border:`1px solid ${AGR.line2}`,borderRadius:3,padding:'5px 9px',cursor:'pointer'}}>{c}</span>
+              ))}
+            </div>
+          </div>
+          <SpxPanel live={live}/>
+          <div style={{display:'flex',flexDirection:'column',gap:14}}>
+            <VolSurfacePanel/>
+            <OrderBookPanel live={live}/>
+          </div>
+        </div>
+        <AgentPipeline running={running} stage={stage} desk={desk}/>
+        {/* TABS */}
+        <div style={{display:'flex',gap:26,borderBottom:`1px solid ${AGR.line}`,marginTop:18}}>
+          {tabs.map(t=>(
+            <span key={t} onClick={()=>setTab(t)} style={{fontFamily:agrMono,fontSize:11.5,letterSpacing:'.04em',fontWeight:600,color:t===tab?AGR.red:AGR.mute,padding:'10px 0',cursor:'pointer',borderBottom:t===tab?`2px solid ${AGR.red}`:'2px solid transparent'}}>{t}</span>
+          ))}
+        </div>
+        {tab==='RFQ COCKPIT' ? <RfqCockpit parsed={parsed} query={submitted} desk={desk} live={live}/> : (
+          <div style={{padding:'60px 0',textAlign:'center',color:AGR.mute,fontFamily:agrMono,fontSize:13}}>{tab} — coming next in the agentic desk build.</div>
+        )}
+      </div>
+      <div style={{marginTop:18}}><MarketWatch live={live}/></div>
+    </div>
+  );
+}
+
 // Main App and router
 function App() {
   const route = useHashRoute();
   const path = route.path;
+
+  // Agentic Trading Room is a standalone full-screen app shell (its own nav).
+  if (path.startsWith('/agent-room')) {
+    return <div data-screen-label="agent-room"><AgentRoomPage/></div>;
+  }
 
   let page;
   if (path==='' || path==='/') page = <HomePage/>;
@@ -5936,5 +7870,3 @@ function App() {
 }
 
 export default App;
-
-

@@ -1,0 +1,107 @@
+<!-- @dsCard group="Components" viewport="700x520" name="Core" subtitle="Buttons, badges, tabs, toggles, inputs, switches, stat cards" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="../../styles.css" />
+<style>
+  body { margin: 0; padding: 20px; background: var(--bg-canvas); }
+  .wrap { display: flex; flex-direction: column; gap: 18px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .sect { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 2px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script type="text/babel">
+const NS = window.ThePricingLibraryDesignSystem_f20ac6;
+const { Button, Badge, Tabs, SegmentedToggle, Input, Switch, StatCard, Panel, Sparkline } = NS;
+
+function Demo() {
+  const [tab, setTab] = React.useState('summary');
+  const [tf, setTf] = React.useState('3M');
+  const [on, setOn] = React.useState(true);
+  const spark = [3,4,3.5,5,4.6,6,5.4,7,6.6,8];
+  return (
+    <div className="wrap">
+      <div>
+        <div className="sect">Buttons</div>
+        <div className="row">
+          <Button variant="primary" iconRight={<span>→</span>}>Send Quote to Client</Button>
+          <Button variant="secondary">Export Analysis</Button>
+          <Button variant="ghost">Save to Watchlist</Button>
+          <Button variant="danger">Cancel RFQ</Button>
+          <Button variant="primary" disabled>Disabled</Button>
+          <Button variant="secondary" size="sm">1D</Button>
+        </div>
+      </div>
+
+      <div>
+        <div className="sect">Tags · Confidence · Risk · Status</div>
+        <div className="row">
+          <Badge kind="directional">Directional</Badge>
+          <Badge kind="balanced">Balanced</Badge>
+          <Badge kind="hedge">Hedge</Badge>
+          <Badge kind="structured">Structured</Badge>
+          <Badge kind="data-export">Data Export</Badge>
+        </div>
+        <div className="row" style={{marginTop:8}}>
+          <Badge kind="high">High</Badge>
+          <Badge kind="medium">Medium</Badge>
+          <Badge kind="approved" dot>Approved</Badge>
+          <Badge kind="live" dot>Live</Badge>
+          <Badge kind="in-progress">In Progress</Badge>
+          <Badge kind="locked">Locked</Badge>
+          <Badge tone="green" variant="outline">GREEN</Badge>
+          <Badge tone="amber" variant="outline">AMBER</Badge>
+        </div>
+      </div>
+
+      <div className="row" style={{justifyContent:'space-between'}}>
+        <div>
+          <div className="sect">Tabs</div>
+          <Tabs value={tab} onChange={setTab} items={[
+            {id:'summary',label:'Summary'},{id:'greeks',label:'Greeks'},
+            {id:'sens',label:'Sensitivities'},{id:'scen',label:'Scenarios'}]} />
+        </div>
+        <div>
+          <div className="sect">Segmented</div>
+          <SegmentedToggle value={tf} onChange={setTf} options={['1D','1W','1M','3M','1Y']} />
+        </div>
+        <div>
+          <div className="sect">Switch</div>
+          <Switch checked={on} onChange={setOn} label={on ? 'PRO MODE' : 'EDUCATIONAL'} />
+        </div>
+      </div>
+
+      <div>
+        <div className="sect">Input · RFQ prompt</div>
+        <Input as="textarea" accent rows={2}
+          placeholder="Ask in natural language…"
+          value={"J'ai peur que le pétrole augmente dans 5 mois, que me proposez-vous ?"}
+          suffix={<span>69 / 500</span>} />
+      </div>
+
+      <div>
+        <div className="sect">Stat cards</div>
+        <div className="grid4">
+          <StatCard label="Theo Price" value="3.45" unit="/bbl" />
+          <StatCard label="Bid" value="3.30" unit="/bbl" valueColor="var(--red-500)" accent />
+          <StatCard label="Ask" value="3.60" unit="/bbl" valueColor="var(--green-500)" />
+          <StatCard label="Daily PnL" value="+2,156" delta="+0.21%" deltaTone="positive"
+            chart={<Sparkline data={spark} tone="green" width={150} height={28} />} />
+        </div>
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<Demo />);
+</script>
+</body>
+</html>

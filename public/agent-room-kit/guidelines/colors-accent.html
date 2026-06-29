@@ -1,0 +1,30 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Accent — Red & Green" subtitle="Brand red (primary) and signal green (gains / live)" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { margin:0; padding:16px; background: var(--bg-canvas); }
+  .grp { display:grid; grid-template-columns: repeat(4,1fr); gap:8px; margin-bottom:8px; }
+  .sw { border-radius: var(--radius-md); height:54px; padding:7px; display:flex; flex-direction:column; justify-content:flex-end; }
+  .n { font-family: var(--font-mono); font-size:10px; font-weight:600; }
+  .h { font-family: var(--font-mono); font-size:9px; opacity:.7; }
+  .dark { color:#fff } .ondark { color:#0A0E14 }
+</style>
+</head>
+<body>
+<div class="grp">
+  <div class="sw dark" style="background:var(--red-700)"><span class="n">red-700</span><span class="h">#C8202F</span></div>
+  <div class="sw dark" style="background:var(--red-500)"><span class="n">red-500 ★</span><span class="h">#FF2E45</span></div>
+  <div class="sw ondark" style="background:var(--red-400)"><span class="n">red-400</span><span class="h">#FF5566</span></div>
+  <div class="sw ondark" style="background:var(--red-300)"><span class="n">red-300</span><span class="h">#FF7480</span></div>
+</div>
+<div class="grp">
+  <div class="sw ondark" style="background:var(--green-600)"><span class="n">green-600</span><span class="h">#22A75C</span></div>
+  <div class="sw ondark" style="background:var(--green-500)"><span class="n">green-500 ★</span><span class="h">#2ECC71</span></div>
+  <div class="sw ondark" style="background:var(--green-400)"><span class="n">green-400</span><span class="h">#34D27B</span></div>
+  <div class="sw ondark" style="background:var(--green-300)"><span class="n">green-300</span><span class="h">#6FE3A6</span></div>
+</div>
+</body>
+</html>

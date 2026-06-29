@@ -1,0 +1,24 @@
+<!-- @dsCard group="Spacing" viewport="700x150" name="Radius" subtitle="Sharp terminal corners — 4px panel radius is the signature" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { margin:0; padding:18px; background: var(--bg-canvas); }
+  .row { display:flex; gap:16px; align-items:flex-end; }
+  .box { width:72px; height:54px; background: var(--bg-panel-2); border:1px solid var(--border-strong); }
+  .n { font-family: var(--font-mono); font-size:9px; color: var(--text-muted); margin-top:6px; display:block; text-align:center; }
+</style>
+</head>
+<body>
+<div class="row">
+  <div><div class="box" style="border-radius:var(--radius-xs)"></div><span class="n">xs · 2px</span></div>
+  <div><div class="box" style="border-radius:var(--radius-sm)"></div><span class="n">sm · 3px</span></div>
+  <div><div class="box" style="border-radius:var(--radius-md); border-color:var(--red-500)"></div><span class="n">md · 4px ★</span></div>
+  <div><div class="box" style="border-radius:var(--radius-lg)"></div><span class="n">lg · 6px</span></div>
+  <div><div class="box" style="border-radius:var(--radius-xl)"></div><span class="n">xl · 8px</span></div>
+  <div><div class="box" style="border-radius:var(--radius-pill); width:54px"></div><span class="n">pill</span></div>
+</div>
+</body>
+</html>

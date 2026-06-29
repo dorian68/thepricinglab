@@ -1,6 +1,7 @@
 {
-  "generated_at": "2026-06-05T22:51:06+00:00",
-  "llm": "openai:gpt-4o-mini",
+  "generated_at": "2026-06-28T16:45:39+02:00",
+  "llm": "template",
+  "db_path": "C:\\Users\\Labry\\Documents\\THEPRICINGLIBRARY\\Tools\\pricinglibrary_rag_backend\\data\\pricinglibrary_rag.sqlite3",
   "document_count": 123,
   "courses": [
     {
@@ -16,7 +17,7 @@
       ],
       "level": "beginner",
       "path": "/course-scripts/vanilla-options-quote.md",
-      "source_count": 10
+      "source_count": 18
     },
     {
       "slug": "options-book-greeks-pnl",
@@ -32,7 +33,7 @@
       ],
       "level": "intermediate",
       "path": "/course-scripts/options-book-greeks-pnl.md",
-      "source_count": 10
+      "source_count": 18
     },
     {
       "slug": "rates-swaps-dv01",
@@ -47,7 +48,7 @@
       ],
       "level": "intermediate",
       "path": "/course-scripts/rates-swaps-dv01.md",
-      "source_count": 10
+      "source_count": 18
     },
     {
       "slug": "yield-curve-bootstrapping",
@@ -62,7 +63,7 @@
       ],
       "level": "intermediate",
       "path": "/course-scripts/yield-curve-bootstrapping.md",
-      "source_count": 10
+      "source_count": 18
     },
     {
       "slug": "implied-volatility-smile",
@@ -77,7 +78,7 @@
       ],
       "level": "intermediate",
       "path": "/course-scripts/implied-volatility-smile.md",
-      "source_count": 10
+      "source_count": 18
     },
     {
       "slug": "monte-carlo-pricing",
@@ -92,7 +93,7 @@
       ],
       "level": "advanced",
       "path": "/course-scripts/monte-carlo-pricing.md",
-      "source_count": 10
+      "source_count": 18
     },
     {
       "slug": "barrier-options-gap-risk",
@@ -107,7 +108,7 @@
       ],
       "level": "advanced",
       "path": "/course-scripts/barrier-options-gap-risk.md",
-      "source_count": 10
+      "source_count": 18
     },
     {
       "slug": "structured-products-autocall",
@@ -122,7 +123,7 @@
       ],
       "level": "advanced",
       "path": "/course-scripts/structured-products-autocall.md",
-      "source_count": 10
+      "source_count": 18
     },
     {
       "slug": "credit-derivatives-cds",
@@ -137,7 +138,7 @@
       ],
       "level": "intermediate",
       "path": "/course-scripts/credit-derivatives-cds.md",
-      "source_count": 10
+      "source_count": 18
     },
     {
       "slug": "market-risk-var-stress",
@@ -152,7 +153,7 @@
       ],
       "level": "intermediate",
       "path": "/course-scripts/market-risk-var-stress.md",
-      "source_count": 10
+      "source_count": 18
     },
     {
       "slug": "fixed-income-bonds-duration",
@@ -168,7 +169,7 @@
       ],
       "level": "beginner",
       "path": "/course-scripts/fixed-income-bonds-duration.md",
-      "source_count": 10
+      "source_count": 18
     },
     {
       "slug": "stochastic-calculus-for-hedging",
@@ -183,7 +184,7 @@
       ],
       "level": "expert",
       "path": "/course-scripts/stochastic-calculus-for-hedging.md",
-      "source_count": 10
+      "source_count": 18
     }
   ]
 }

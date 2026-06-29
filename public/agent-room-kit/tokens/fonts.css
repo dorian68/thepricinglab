@@ -1,0 +1,11 @@
+/* ============================================================
+   FONTS — The Pricing Library / Agentic Trading Room
+   Monospace-first terminal aesthetic.
+   - JetBrains Mono : the whole app — headings, numbers, labels,
+     nav, tickers. The terminal voice.
+   - IBM Plex Sans  : long-form description/body paragraphs only.
+   Loaded from Google Fonts CDN. To self-host, swap the @import
+   for local @font-face rules pointing at the binaries.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap');

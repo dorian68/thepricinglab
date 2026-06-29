@@ -1,0 +1,14 @@
+/* ============================================================
+   RADIUS — The Pricing Library / Agentic Trading Room
+   Sharp, terminal-like. 4px is the workhorse panel radius.
+   ============================================================ */
+
+:root {
+  --radius-none: 0px;
+  --radius-xs:   2px;   /* chips, ticks, progress bars */
+  --radius-sm:   3px;   /* buttons, inputs */
+  --radius-md:   4px;   /* PANELS — the signature radius */
+  --radius-lg:   6px;   /* large cards, modals */
+  --radius-xl:   8px;
+  --radius-pill: 999px; /* status pills, avatars */
+}
