@@ -1542,6 +1542,7 @@ function CourseDetailPage({route}) {
   const locked = requiredPlan!=='free' && !ent.has(requiredPlan);
   const [tab, setTab] = useState('content');
   const [selectedModuleIndex, setSelectedModuleIndex] = useState(0);
+  const contentTopRef = useRef(null);
   const scriptState = useCourseScript(c.id);
   const scriptModel = useMemo(
     () => scriptState.status === 'ready' ? parseCourseScript(scriptState.content) : null,
@@ -1561,6 +1562,12 @@ function CourseDetailPage({route}) {
     setSelectedModuleIndex(index);
     setTab('content');
     recordProgressOnce(auth, 'lesson', `${c.id}#L${index}`, 5, { course: c.id });
+    // Scroll the lesson content back to the top of the viewport: selecting a
+    // module only swaps state (not a route change), so without this the page
+    // keeps the previous scroll position and lands the reader mid/bottom-page.
+    requestAnimationFrame(() => {
+      contentTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   }, [auth, c.id]);
 
   return (
@@ -1587,7 +1594,7 @@ function CourseDetailPage({route}) {
           onOpenScript={()=>setTab('script')}
           onOpenResources={()=>setTab('resources')}
         />
-        <div>
+        <div ref={contentTopRef} style={{scrollMarginTop:16}}>
           <div className="tabs-bar">
             {[
               ['content','Content'],
