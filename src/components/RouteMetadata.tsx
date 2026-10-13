@@ -4,6 +4,11 @@ import routes from '../seo-routes.json';
 
 const site = 'https://thepricinglibrary.com';
 const fallback = routes[0];
+const courseAliases: Record<string, string> = {
+  'exotic-options': 'exotics',
+  'stochastic-calculus': 'stochastic',
+  'hedging-strategies': 'hedging',
+};
 const aliases: Record<string, string> = {
   '/survival-mode': '/survival',
   '/projects': '/community/projects',
@@ -13,6 +18,14 @@ const aliases: Record<string, string> = {
   '/tools/model-calibration': '/tools/calib',
   '/tools/payoff-visualizer': '/tools/payoff',
   '/courses/complex/exotic-options': '/courses/exotics',
+  '/blog/understanding-black-scholes-model': '/blog/understanding-vega',
+  '/blog/monte-carlo-vs-binomial-trees': '/blog/understanding-vega',
+  '/blog/quant-interview-questions': '/blog/understanding-vega',
+  '/blog/exotic-options-guide': '/blog/understanding-vega',
+  '/blog/implied-volatility-options-trading': '/blog/understanding-vega',
+  '/blog/yield-curves-guide': '/blog/understanding-vega',
+  '/blog/greeks-explained': '/blog/understanding-vega',
+  '/blog/vol-products': '/blog/understanding-vega',
 };
 
 export default function RouteMetadata() {
@@ -20,8 +33,8 @@ export default function RouteMetadata() {
 
   useEffect(() => {
     const requestedPath = pathname === '/' ? '/' : pathname.replace(/\/+$/, '');
-    const course = requestedPath.match(/^\/courses\/(?:fundamentals|advanced|complex)\/([^/]+)$/);
-    const path = aliases[requestedPath] ?? (course ? `/courses/${course[1]}` : requestedPath);
+    const course = requestedPath.match(/^\/courses\/(?:fundamentals\/|advanced\/|complex\/)?([^/]+)$/);
+    const path = aliases[requestedPath] ?? (course ? `/courses/${courseAliases[course[1]] ?? course[1]}` : requestedPath);
     const route = routes.find((item) => item.path === path) ?? fallback;
     const canonical = `${site}${path}`;
     document.title = route.title;

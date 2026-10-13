@@ -2,19 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://thepricinglibrary.com/</loc></url>
   <url><loc>https://thepricinglibrary.com/courses</loc></url>
-  <url><loc>https://thepricinglibrary.com/exercises</loc></url>
+  <url><loc>https://thepricinglibrary.com/tools</loc></url>
   <url><loc>https://thepricinglibrary.com/blog</loc></url>
   <url><loc>https://thepricinglibrary.com/pricing</loc></url>
+  <url><loc>https://thepricinglibrary.com/exercises</loc></url>
+  <url><loc>https://thepricinglibrary.com/community</loc></url>
   <url><loc>https://thepricinglibrary.com/jobs</loc></url>
   <url><loc>https://thepricinglibrary.com/mentoring</loc></url>
   <url><loc>https://thepricinglibrary.com/notebooks</loc></url>
   <url><loc>https://thepricinglibrary.com/leaderboard</loc></url>
-  <url><loc>https://thepricinglibrary.com/tools</loc></url>
-  <url><loc>https://thepricinglibrary.com/tools/bs-pricer</loc></url>
-  <url><loc>https://thepricinglibrary.com/tools/mc</loc></url>
-  <url><loc>https://thepricinglibrary.com/tools/iv-calc</loc></url>
-  <url><loc>https://thepricinglibrary.com/tools/calib</loc></url>
-  <url><loc>https://thepricinglibrary.com/tools/payoff</loc></url>
   <url><loc>https://thepricinglibrary.com/courses/black-scholes</loc></url>
   <url><loc>https://thepricinglibrary.com/courses/yield-curves</loc></url>
   <url><loc>https://thepricinglibrary.com/courses/greeks</loc></url>
@@ -22,17 +18,26 @@
   <url><loc>https://thepricinglibrary.com/courses/vol-products</loc></url>
   <url><loc>https://thepricinglibrary.com/courses/exotics</loc></url>
   <url><loc>https://thepricinglibrary.com/courses/monte-carlo</loc></url>
-  <url><loc>https://thepricinglibrary.com/blog/understanding-black-scholes-model</loc></url>
-  <url><loc>https://thepricinglibrary.com/blog/monte-carlo-vs-binomial-trees</loc></url>
-  <url><loc>https://thepricinglibrary.com/blog/quant-interview-questions</loc></url>
-  <url><loc>https://thepricinglibrary.com/blog/exotic-options-guide</loc></url>
-  <url><loc>https://thepricinglibrary.com/blog/implied-volatility-options-trading</loc></url>
-  <url><loc>https://thepricinglibrary.com/blog/yield-curves-guide</loc></url>
-  <url><loc>https://thepricinglibrary.com/blog/greeks-explained</loc></url>
-  <url><loc>https://thepricinglibrary.com/blog/vol-products</loc></url>
-  <url><loc>https://thepricinglibrary.com/community</loc></url>
-  <url><loc>https://thepricinglibrary.com/community/projects</loc></url>
-  <url><loc>https://thepricinglibrary.com/community/forum</loc></url>
+  <url><loc>https://thepricinglibrary.com/tools/bs-pricer</loc></url>
+  <url><loc>https://thepricinglibrary.com/tools/mc</loc></url>
+  <url><loc>https://thepricinglibrary.com/tools/iv-calc</loc></url>
+  <url><loc>https://thepricinglibrary.com/tools/calib</loc></url>
+  <url><loc>https://thepricinglibrary.com/tools/payoff</loc></url>
   <url><loc>https://thepricinglibrary.com/lab</loc></url>
   <url><loc>https://thepricinglibrary.com/survival</loc></url>
+  <url><loc>https://thepricinglibrary.com/community/projects</loc></url>
+  <url><loc>https://thepricinglibrary.com/community/forum</loc></url>
+  <url><loc>https://thepricinglibrary.com/courses/hedging</loc></url>
+  <url><loc>https://thepricinglibrary.com/courses/stochastic</loc></url>
+  <url><loc>https://thepricinglibrary.com/courses/rates-swaps</loc></url>
+  <url><loc>https://thepricinglibrary.com/courses/credit-derivatives</loc></url>
+  <url><loc>https://thepricinglibrary.com/courses/market-risk-var</loc></url>
+  <url><loc>https://thepricinglibrary.com/courses/structured-products</loc></url>
+  <url><loc>https://thepricinglibrary.com/courses/fixed-income-bonds</loc></url>
+  <url><loc>https://thepricinglibrary.com/blog/understanding-vega</loc></url>
+  <url><loc>https://thepricinglibrary.com/blog/monte-carlo-pitfalls</loc></url>
+  <url><loc>https://thepricinglibrary.com/blog/bs-from-scratch</loc></url>
+  <url><loc>https://thepricinglibrary.com/blog/vol-cones</loc></url>
+  <url><loc>https://thepricinglibrary.com/blog/quant-interview</loc></url>
+  <url><loc>https://thepricinglibrary.com/blog/python-numerics</loc></url>
 </urlset>

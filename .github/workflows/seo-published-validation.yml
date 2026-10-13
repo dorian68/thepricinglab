@@ -1,0 +1,21 @@
+name: Validate SEO on the published website
+on:
+  push:
+    branches: [seo/published-sitelinks-20261013]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit -p tsconfig.app.json
+      - run: npx eslint --no-ignore src/App.tsx src/components/RouteMetadata.tsx
+      - run: npm run build
