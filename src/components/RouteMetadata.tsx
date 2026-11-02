@@ -1,46 +1,25 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import routes from '../seo-routes.json';
+import { getRouteMetadata } from '../lib/route-metadata.mjs';
 
-const site = 'https://thepricinglibrary.com';
-const fallback = routes[0];
-const courseAliases: Record<string, string> = {
-  'exotic-options': 'exotics',
-  'stochastic-calculus': 'stochastic',
-  'hedging-strategies': 'hedging',
-};
-const aliases: Record<string, string> = {
-  '/survival-mode': '/survival',
-  '/projects': '/community/projects',
-  '/tools/black-scholes': '/tools/bs-pricer',
-  '/tools/monte-carlo': '/tools/mc',
-  '/tools/volatility-calculator': '/tools/iv-calc',
-  '/tools/model-calibration': '/tools/calib',
-  '/tools/payoff-visualizer': '/tools/payoff',
-  '/courses/complex/exotic-options': '/courses/exotics',
-  '/blog/understanding-black-scholes-model': '/blog/understanding-vega',
-  '/blog/monte-carlo-vs-binomial-trees': '/blog/understanding-vega',
-  '/blog/quant-interview-questions': '/blog/understanding-vega',
-  '/blog/exotic-options-guide': '/blog/understanding-vega',
-  '/blog/implied-volatility-options-trading': '/blog/understanding-vega',
-  '/blog/yield-curves-guide': '/blog/understanding-vega',
-  '/blog/greeks-explained': '/blog/understanding-vega',
-  '/blog/vol-products': '/blog/understanding-vega',
-};
+function setMeta(attribute: 'name' | 'property', key: string, content: string) {
+  const matches = [...document.querySelectorAll<HTMLMetaElement>(`meta[${attribute}="${key}"]`)];
+  const element = matches.shift() || document.createElement('meta');
+  element.setAttribute(attribute, key);
+  element.content = content;
+  if (!element.parentNode) document.head.appendChild(element);
+  matches.forEach((duplicate) => duplicate.remove());
+}
 
 export default function RouteMetadata() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    const requestedPath = pathname === '/' ? '/' : pathname.replace(/\/+$/, '');
-    const course = requestedPath.match(/^\/courses\/(?:fundamentals\/|advanced\/|complex\/)?([^/]+)$/);
-    const path = aliases[requestedPath] ?? (course ? `/courses/${courseAliases[course[1]] ?? course[1]}` : requestedPath);
-    const route = routes.find((item) => item.path === path) ?? fallback;
-    const canonical = `${site}${path}`;
+    const route = getRouteMetadata(pathname, routes);
     document.title = route.title;
-
-    const description = document.querySelector<HTMLMetaElement>('meta[name="description"]');
-    if (description) description.content = route.description;
+    setMeta('name', 'description', route.description);
+    setMeta('name', 'robots', route.robots);
 
     let link = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     if (!link) {
@@ -48,18 +27,27 @@ export default function RouteMetadata() {
       link.rel = 'canonical';
       document.head.appendChild(link);
     }
-    link.href = canonical;
+    link.href = route.canonical;
+    document.querySelectorAll('link[rel="canonical"]').forEach((duplicate) => {
+      if (duplicate !== link) duplicate.remove();
+    });
 
-    for (const [selector, value] of [
-      ['meta[property="og:url"]', canonical],
-      ['meta[name="twitter:url"]', canonical],
-      ['meta[property="og:title"]', route.title],
-      ['meta[name="twitter:title"]', route.title],
-      ['meta[property="og:description"]', route.description],
-      ['meta[name="twitter:description"]', route.description],
-    ] as const) {
-      const element = document.querySelector<HTMLMetaElement>(selector);
-      if (element) element.content = value;
+    setMeta('property', 'og:url', route.canonical);
+    setMeta('name', 'twitter:url', route.canonical);
+    setMeta('property', 'og:title', route.title);
+    setMeta('name', 'twitter:title', route.title);
+    setMeta('property', 'og:description', route.description);
+    setMeta('name', 'twitter:description', route.description);
+
+    const existing = document.getElementById('tpl-route-structured-data');
+    if (route.structuredData) {
+      const script = existing || document.createElement('script');
+      script.id = 'tpl-route-structured-data';
+      script.setAttribute('type', 'application/ld+json');
+      script.textContent = JSON.stringify(route.structuredData);
+      if (!script.parentNode) document.head.appendChild(script);
+    } else {
+      existing?.remove();
     }
   }, [pathname]);
 

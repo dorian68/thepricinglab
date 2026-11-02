@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
+import seoRoutes from '../seo-routes.json';
+import { getRouteMetadata, resolveApplicationPath as mapLegacyPath } from '../lib/route-metadata.mjs';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import { useAuth } from '../contexts/AuthContext';
@@ -89,98 +91,6 @@ function submitStub(label) {
 }
 
 // ---------- Routing ----------
-const COURSE_ROUTE_ALIASES = {
-  'black-scholes': 'black-scholes',
-  'yield-curves': 'yield-curves',
-  greeks: 'greeks',
-  'implied-vol': 'implied-vol',
-  'vol-products': 'vol-products',
-  'exotic-options': 'exotics',
-  exotics: 'exotics',
-  'monte-carlo': 'monte-carlo',
-  'stochastic-calculus': 'stochastic',
-  stochastic: 'stochastic',
-  'hedging-strategies': 'hedging',
-  hedging: 'hedging',
-};
-
-const TOOL_ROUTE_ALIASES = {
-  'black-scholes': 'bs-pricer',
-  'bs-pricer': 'bs-pricer',
-  'payoff-visualizer': 'payoff',
-  payoff: 'payoff',
-  'monte-carlo': 'mc',
-  mc: 'mc',
-  'model-calibration': 'calib',
-  calib: 'calib',
-  'volatility-calculator': 'iv-calc',
-  'iv-calc': 'iv-calc',
-  'vol-surface': 'volsurface',
-  volsurface: 'volsurface',
-};
-
-function normalizePath(rawPath) {
-  if (!rawPath || rawPath === '') return '/';
-  const path = rawPath.replace(/\/+$/, '');
-  return path || '/';
-}
-
-function mapLegacyPath(rawPath) {
-  const path = normalizePath(rawPath);
-  const parts = path.split('/').filter(Boolean);
-
-  if (path === '/login') return '/auth/login';
-  if (path === '/signup') return '/auth/signup';
-  if (path === '/bug-report') return '/bug';
-  if (path === '/api-docs') return '/api';
-  if (path === '/admin-login' || path === '/admin-dashboard') return '/admin';
-  if (path === '/exercices') return '/exercises';
-  if (path === '/survival-mode') return '/survival';
-  if (path.startsWith('/survival-mode/wave/')) return `/survival/${parts[2] || 'advanced'}`;
-  if (path.startsWith('/survival-mode/')) return `/survival/${parts[1] || 'advanced'}`;
-  if (path === '/labo-trading') return '/lab';
-  if (path === '/quant-pro-tools') return '/tools';
-  if (path === '/rapports') return '/dashboard';
-  if (path === '/vol-surface' || path === '/VolSurface') return '/tools/volsurface';
-  if (path === '/courses/fundamentals' || path === '/courses/advanced' || path === '/courses/complex') return '/courses';
-  if (path === '/quizzes') return '/dashboard';
-  if (path === '/projects') return '/community/projects';
-  if (path === '/community/notebook-workspace') return '/notebooks';
-  if (path.startsWith('/community/article/')) return '/community/publications';
-  if (path.startsWith('/community/strategy/')) return '/community/projects';
-
-  if (parts[0] === 'courses' && parts.length > 1) {
-    const slug = COURSE_ROUTE_ALIASES[parts[parts.length - 1]];
-    if (slug) return `/courses/${slug}`;
-  }
-
-  if (parts[0] === 'tools' && parts.length > 1) {
-    const slug = TOOL_ROUTE_ALIASES[parts[parts.length - 1]];
-    if (slug) return `/tools/${slug}`;
-  }
-
-  if (parts[0] === 'trading') {
-    const sub = parts[1] === 'exercises' ? 'exercises' : (parts[1] || 'backtest');
-    return `/lab/${sub}`;
-  }
-
-  if (parts[0] === 'community') {
-    const communityAliases = {
-      chat: 'forum',
-      forum: 'forum',
-      contribute: 'publications',
-      explore: 'publications',
-      playground: 'projects',
-      'strategy-builder': 'projects',
-      'pair-programming': 'forum',
-      'weekly-challenge': 'forum',
-    };
-    if (parts[1] && communityAliases[parts[1]]) return `/community/${communityAliases[parts[1]]}`;
-  }
-
-  return path;
-}
-
 function useHashRoute() {
   const location = useLocation();
   useEffect(() => {
@@ -605,8 +515,6 @@ function Footer() {
             <li><Link to="/pricing">Pricing</Link></li>
             <li><Link to="/community">Community</Link></li>
             <li><Link to="/bug">Report a bug</Link></li>
-            <li><Link to="/admin">Admin</Link></li>
-            <li><Link to="/404">Not Found</Link></li>
           </ul>
         </div>
       </div>
@@ -5864,8 +5772,10 @@ function App() {
   const route = useHashRoute();
   const path = route.path;
 
+  const seo = getRouteMetadata(path, seoRoutes);
   let page;
-  if (path==='' || path==='/') page = <HomePage/>;
+  if (seo.notFound) page = <NotFoundPage/>;
+  else if (path==='' || path==='/') page = <HomePage/>;
   else if (path.startsWith('/courses/')) page = <CourseDetailPage route={route}/>;
   else if (path==='/courses') page = <CoursesPage/>;
   else if (path.startsWith('/tools')) page = <ToolsPage route={route}/>;

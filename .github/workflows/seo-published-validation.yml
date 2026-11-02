@@ -1,7 +1,7 @@
 name: Validate SEO on the published website
 on:
   push:
-    branches: [seo/published-sitelinks-20261013]
+    branches: [seo/published-sitelinks-20261013, seo/sitelinks-geo-20261103]
 permissions:
   contents: read
 jobs:
@@ -18,4 +18,5 @@ jobs:
       - run: npm ci
       - run: npx tsc --noEmit -p tsconfig.app.json
       - run: npx eslint --no-ignore src/App.tsx src/components/RouteMetadata.tsx
+      - run: npm run smoke:seo
       - run: npm run build
