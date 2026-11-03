@@ -298,8 +298,8 @@ function TopStrip() {
     <div className="top-strip">
       <div className="top-strip-inner">
         <div className="row" style={{gap:14, flexShrink:0}}>
-          <span><span className="dot dot-green" style={{marginRight:6}}></span>MKT · OPEN</span>
-          <span className="mute">SESSION · NY</span>
+          <span><span className="dot dot-amber" style={{marginRight:6}}></span>ILLUSTRATIVE DATA</span>
+          <span className="mute">NOT LIVE</span>
           <span>{time}</span>
         </div>
         <Ticker />

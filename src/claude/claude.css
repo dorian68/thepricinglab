@@ -194,8 +194,10 @@
   .course-card .desc{color:var(--mute);font-size:12.5px;line-height:1.5}
   .course-card .foot{display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--line);margin-top:auto}
   .course-detail-layout{display:grid;grid-template-columns:280px minmax(0,1fr);gap:24px}
+  .course-detail-layout > *{min-width:0}
   .course-sidebar{position:sticky;top:84px;align-self:start}
   .course-lesson-item{width:100%;padding:10px 14px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:flex-start;text-align:left;background:transparent;border-left:2px solid transparent;cursor:pointer}
+  .course-lesson-item > div{min-width:0;overflow-wrap:anywhere}
   .course-lesson-item:hover{background:rgba(255,255,255,.02)}
   .course-lesson-item.active{background:rgba(255,46,69,.05);border-left-color:var(--red)}
   .course-lesson-title{font-size:12.5px;color:var(--text-2);font-weight:600;line-height:1.35}
@@ -362,7 +364,7 @@
     .nav-dashboard,.nav-login,.nav-signup{display:none}
     .page-head{align-items:flex-start;gap:14px;flex-direction:column}
     .page-head > .row{width:100%;flex-wrap:wrap}
-    .course-detail-layout{grid-template-columns:1fr}
+    .course-detail-layout{grid-template-columns:minmax(0,1fr)}
     .course-sidebar{position:static}
     .course-module-reader-head{display:block}
     .course-module-reader-head > .row{margin-top:14px}
