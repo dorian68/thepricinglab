@@ -144,7 +144,8 @@
   @keyframes pulse{70%{box-shadow:0 0 0 8px rgba(255,46,69,0)}100%{box-shadow:0 0 0 0 rgba(255,46,69,0)}}
 
   /* Hero */
-  .hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:0;border:1px solid var(--line);background:var(--panel);margin:24px 0}
+  .hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:0;border:1px solid var(--line);background:var(--panel);margin:24px 0}
+  .hero-grid > *,.hero-right > div,.hero-right > div > div{min-width:0}
   .hero-left{padding:48px 40px;border-right:1px solid var(--line);position:relative;overflow:hidden}
   .hero-eyebrow{display:flex;align-items:center;gap:10px;color:var(--mute);font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:18px}
   .hero-title{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:54px;line-height:1.04;letter-spacing:-.01em;margin:0 0 18px;color:var(--white)}
@@ -158,6 +159,8 @@
   .kpi .lbl{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-top:4px}
 
   .hero-right{display:flex;flex-direction:column}
+  .hero-right .row,.hero-right .term-toolbar{flex-wrap:wrap}
+  .hero-right .term-toolbar{gap:10px}
   .term-toolbar{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--line);background:#06080B;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mute)}
   .term-toolbar .tabs{display:flex;gap:0}
   .term-toolbar .tab{padding:5px 12px;border-right:1px solid var(--line);color:var(--mute)}
@@ -394,7 +397,7 @@
     .brand .mute,.brand span:nth-child(3){display:none}
     .news-strip{margin:14px 16px 0;flex-wrap:wrap;align-items:flex-start}
     .news-strip input{width:100% !important}
-    .hero-grid{grid-template-columns:1fr}
+    .hero-grid{grid-template-columns:minmax(0,1fr)}
     .hero-left{border-right:none;border-bottom:1px solid var(--line);padding:32px 22px}
     .hero-title{font-size:38px}
     .foot-grid{grid-template-columns:1fr 1fr}

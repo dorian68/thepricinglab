@@ -38,10 +38,13 @@ async function serve(directory) {
 
 const variants = { baseline: await serve(baselineDirectory), candidate: await serve(candidateDirectory) };
 const diagnoseHome = process.env.PRICING_HOME_DIAGNOSTICS === 'true';
+const validateHome = process.env.PRICING_HOME_VALIDATE === 'true';
 const summary = {
   candidateCommit: process.env.GITHUB_SHA,
   baselineCommit: process.env.PRICING_BASELINE_SHA || 'bbd3438437084808156f2dc95346f3f5de33791c',
-  scope: diagnoseHome
+  scope: validateHome
+    ? 'Targeted Home hero/demo and retained course/ticker checks in cloud Chrome at 320/412/768/1440 CSS pixels. No new Lighthouse or production score.'
+    : diagnoseHome
     ? 'Home diagnostics only; no Home correction or acceptance claimed. Existing bounded course/ticker checks retained. Cloud Chrome at 320/412/768/1440 CSS pixels; no Lighthouse or production score.'
     : 'Targeted rendered layout/trust-label comparison in cloud Chrome at 320/412/768/1440 CSS pixels. No new Lighthouse or production score.',
   variants: {},
@@ -92,9 +95,11 @@ async function inspect(variant) {
             anchors: [...document.querySelectorAll('a[href]')].map((node) => node.getAttribute('href')).sort(),
             courseText: document.querySelector('.container.page')?.innerText || null,
             mathCount: document.querySelectorAll('.katex').length,
+            heroCopy: document.querySelector('.hero-left')?.textContent || null,
+            demoLabels: measure('.hero-right .term-toolbar > .row:last-child > span'),
             topStrip: measure('.top-strip-inner > .row:first-child > span'),
             home: [
-              '.hero-grid', '.hero-left', '.hero-title', '.hero-sub', '.hero-eyebrow', '.hero-ctas',
+              '.hero-grid', '.hero-left', '.hero-title', '.hero-sub', '.hero-eyebrow', '.hero-ctas', '.hero-ctas .btn',
               '.kpi-row', '.kpi', '.hero-right', '.hero-right > div', '.hero-right .row', '.hero-right svg',
               '.section-head', '.grid-4', '.grid-3', '.foot-grid', '.foot-bottom', '.news-strip',
             ].flatMap(measure),
@@ -122,7 +127,7 @@ async function inspect(variant) {
         result.rows.push(row);
         const id = `${variant}-${route === '/' ? 'home' : 'black-scholes'}-${width}`;
         await page.screenshot({ path: path.join(reports, id + '.png') });
-        if (route === '/' && diagnoseHome) {
+        if (route === '/' && (diagnoseHome || validateHome)) {
           await page.screenshot({ path: path.join(reports, id + '-full.png'), fullPage: true });
           await (await page.$('.hero-grid')).screenshot({ path: path.join(reports, id + '-hero.png') });
         }
@@ -131,6 +136,15 @@ async function inspect(variant) {
           assert.deepEqual(row.topStrip.slice(0, 2).map((item) => item.text), ['ILLUSTRATIVE DATA', 'NOT LIVE']);
           for (const label of row.topStrip) assert.ok(label.left >= -1 && label.right <= row.viewport + 1, `${width}px: ticker label clipped`);
           for (const bar of row.tabs) assert.ok(bar.left >= -1 && bar.right <= row.viewport + 1, `${width}px: course tabs leave viewport`);
+          if (route === '/' && validateHome) {
+            assert.ok(row.documentWidth <= row.viewport + 1, `${width}px: Home document leaves viewport`);
+            assert.deepEqual(row.demoLabels.map((label) => label.text), ['● DEMO', 'ILLUSTRATIVE']);
+            for (const label of row.demoLabels) assert.ok(label.left >= -1 && label.right <= row.viewport + 1, `${width}px: demo label clipped`);
+            for (const element of row.home.filter((item) => /^(\.hero|\.kpi)/.test(item.selector))) {
+              assert.ok(element.left >= -1 && element.right <= row.viewport + 1, `${width}px: ${element.selector} leaves viewport`);
+              assert.ok(element.scrollWidth <= element.clientWidth + 1, `${width}px: ${element.selector} clips content`);
+            }
+          }
           for (const element of row.course) {
             assert.ok(element.left >= -1 && element.right <= row.viewport + 1, `${width}px: ${element.selector} leaves viewport`);
             if (element.selector === '.course-detail-layout' && element.overflowX === 'visible') {
@@ -165,7 +179,7 @@ try {
   for (const variant of ['baseline', 'candidate']) { activeVariant = variant; await inspect(variant); }
   for (const candidate of summary.variants.candidate.rows) {
     const baseline = summary.variants.baseline.rows.find((row) => row.width === candidate.width && row.route === candidate.route);
-    for (const field of ['title', 'headings', 'canonical', 'robots', 'anchors', 'courseText', 'mathCount']) {
+    for (const field of ['title', 'headings', 'canonical', 'robots', 'anchors', 'courseText', 'heroCopy', 'mathCount']) {
       assert.deepEqual(candidate[field], baseline[field], `${candidate.width}px ${candidate.route}: ${field} changed`);
     }
   }

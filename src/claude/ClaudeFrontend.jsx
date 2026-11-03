@@ -903,8 +903,8 @@ function HeroBlock() {
             <span className="mute">K=5900 · T=30d</span>
           </div>
           <div className="row" style={{gap:10}}>
-            <span className="green">● LIVE</span>
-            <span className="mute">15:42:18</span>
+            <span className="amber">● DEMO</span>
+            <span className="mute">ILLUSTRATIVE</span>
           </div>
         </div>
         <div style={{display:'grid', gridTemplateColumns:'1.4fr 1fr', gap:0, flex:1}}>

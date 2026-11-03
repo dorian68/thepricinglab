@@ -22,10 +22,13 @@ test('all route bodies and their course/article/pricing content remain unchanged
   assert.deepEqual([...after.keys()].sort(), [...before.keys()].sort());
   for (const [name, content] of before) {
     // The inherited market-status labels are now explicitly illustrative.
-    const expected = name === 'TopStrip' ? content
+    let expected = name === 'TopStrip' ? content
       .replace('MKT · OPEN', 'ILLUSTRATIVE DATA')
       .replace('SESSION · NY', 'NOT LIVE')
       .replace('className="dot dot-green"', 'className="dot dot-amber"') : content;
+    if (name === 'HeroBlock') expected = expected
+      .replace('<span className="green">● LIVE</span>', '<span className="amber">● DEMO</span>')
+      .replace('<span className="mute">15:42:18</span>', '<span className="mute">ILLUSTRATIVE</span>');
     if (!['Icon', 'LatexMarkdown'].includes(name)) assert.equal(after.get(name), expected, name);
   }
 });

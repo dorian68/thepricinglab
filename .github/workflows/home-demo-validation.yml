@@ -33,10 +33,10 @@ jobs:
         working-directory: ${{ runner.temp }}/pricing-baseline
       - name: Install ephemeral headless cloud tools
         run: npm install --prefix "$RUNNER_TEMP/pricing-layout-tools" --no-audit --no-fund --ignore-scripts puppeteer-core@25.16.0 chrome-launcher@1.2.2
-      - name: Diagnose exact Home element bounds and preserve course checks
+      - name: Validate exact Home element bounds and preserve course checks
         env:
           PRICING_BASELINE_SHA: 261e0ee4bc8159e8c749e7be22db508d6231721b
-          PRICING_HOME_DIAGNOSTICS: 'true'
+          PRICING_HOME_VALIDATE: 'true'
         run: node scripts/audit-mobile-layout.mjs "$RUNNER_TEMP/pricing-layout-tools" "$RUNNER_TEMP/pricing-baseline/dist" dist "$RUNNER_TEMP/pricing-home"
       - uses: actions/upload-artifact@v4
         if: always()
