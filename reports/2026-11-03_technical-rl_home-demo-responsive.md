@@ -61,3 +61,11 @@ absolute decorative sigma may remain clipped inside the panel as before.
 Those copy/action rectangles must also stay inside the CTA panel itself, whose
 overflow is hidden, in addition to the viewport. Element captures of the final
 CTA and Community header accompany the full-page and hero captures.
+
+Run `41670020731` at `471e3f0` passed the 320/412px rendered checks, then correctly
+failed the 768px hero non-clipping gate. Its measured hero-left is 360.578px wide,
+leaving 279.578px for content after padding. The four KPI tracks total 359.875px,
+and the last KPI extends to 426.875px beyond its hero-left edge at 387.578px.
+Title, description and hero links themselves are within bounds. The targeted
+follow-up makes the KPI row two columns below the existing 1080px breakpoint;
+all four values and labels remain present. No clipping exception is introduced.

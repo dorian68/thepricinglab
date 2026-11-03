@@ -361,6 +361,7 @@
 
   /* Mobile nav hide */
   @media (max-width:1080px){
+    .hero-grid .kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))}
     .nav-links{display:none}
     .nav-right .lang-switch{display:none}
     .mobile-menu-btn{display:inline-flex}
