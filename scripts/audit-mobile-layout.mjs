@@ -132,6 +132,9 @@ async function inspect(variant) {
         if (route === '/' && (diagnoseHome || validateHome)) {
           await page.screenshot({ path: path.join(reports, id + '-full.png'), fullPage: true });
           await (await page.$('.hero-grid')).screenshot({ path: path.join(reports, id + '-hero.png') });
+          await (await page.$('.hero-grid ~ section:last-child > .panel')).screenshot({ path: path.join(reports, id + '-final-cta.png') });
+          const sectionHeaders = await page.$$('.section-head');
+          await sectionHeaders.at(-1).screenshot({ path: path.join(reports, id + '-community-header.png') });
         }
         if (route !== '/') await (await page.$('.course-sidebar')).screenshot({ path: path.join(reports, id + '-sidebar.png') });
         if (variant === 'candidate') {
@@ -147,6 +150,12 @@ async function inspect(variant) {
               // The final panel intentionally clips its decorative absolute sigma.
               // Its actual copy, heading and action rectangles are checked separately.
               if (element.selector !== '.home-final-cta') assert.ok(element.scrollWidth <= element.clientWidth + 1, `${width}px: ${element.selector} clips content`);
+            }
+            const finalPanel = row.home.find((item) => item.selector === '.home-final-cta');
+            assert.ok(finalPanel, 'Missing final CTA panel measurement');
+            for (const element of row.home.filter((item) => item.selector.startsWith('.home-final-cta '))) {
+              assert.ok(element.left >= finalPanel.left - 1 && element.right <= finalPanel.right + 1,
+                `${width}px: final CTA copy/action leaves its clipping panel`);
             }
           }
           for (const element of row.course) {

@@ -58,3 +58,6 @@ screens. Text, prices, links and logic remain unchanged and the AST contract
 permits only those exact class additions. The final CTA's heading, copy, action
 row and individual links receive explicit non-clipping and viewport checks; its
 absolute decorative sigma may remain clipped inside the panel as before.
+Those copy/action rectangles must also stay inside the CTA panel itself, whose
+overflow is hidden, in addition to the viewport. Element captures of the final
+CTA and Community header accompany the full-page and hero captures.
