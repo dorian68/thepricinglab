@@ -71,6 +71,12 @@ export default defineConfig(({ mode }) => ({
           if (/\/node_modules\/(react|react-dom|react-router|react-router-dom|scheduler)\//.test(normalized)) {
             return 'react-vendor';
           }
+          // Stable shared dependencies must not inflate the application entry.
+          if (normalized.includes('/node_modules/@supabase/')) return 'auth-vendor';
+          if (normalized.includes('/node_modules/@tanstack/')) return 'query-vendor';
+          if (/\/node_modules\/(i18next|react-i18next|i18next-browser-languagedetector)\//.test(normalized)) {
+            return 'i18n-vendor';
+          }
           if (normalized.includes('/node_modules/katex/')) return 'katex';
           return undefined;
         }

@@ -35,7 +35,8 @@ a project dependency.
 - Use the same named Lucide icons as inline SVGs instead of downloading the
   whole icon font. Preserve the existing icon names, sizes, styles and CSS class
   hooks; mark the decorative SVGs as hidden from assistive technology.
-- Keep React dependencies cacheable and isolate the deferred KaTeX chunk.
+- Keep React, authentication, translation and query dependencies cacheable in
+  stable chunks, and isolate the deferred KaTeX chunk.
 
 No course, article, catalogue, price, metadata manifest or sitemap is rewritten.
 No hosting migration, analytics configuration change or production publication
@@ -74,6 +75,13 @@ window, Computer Use call or local preview server is part of this work. Heavy
 compilations and browser audits run on GitHub Actions.
 
 ## Release status
+
+The first Linux run, `41662053259` at `74fa08a`, passed TypeScript, targeted lint,
+eight SEO groups, four preservation groups and the production build. It correctly
+rejected an approximately 686.77 kB minified application entry against the unchanged
+500,000-byte chunk budget. Baseline builds and browser measurements were skipped.
+The dependency split above addresses that measured failure; the next exact-commit
+run must pass the same gates before any performance result is accepted.
 
 This file describes the candidate contract, not a completed deployment. The
 exact-run artifacts and its final conclusion are authoritative for local-scope
