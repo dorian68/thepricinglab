@@ -48,7 +48,7 @@ let activeRoute = '';
 let activeWidth = 0;
 
 async function inspect(variant) {
-  const chrome = await chromeLauncher.launch({ chromeFlags: ['--headless', '--no-sandbox', '--disable-dev-shm-usage'] });
+  const chrome = await chromeLauncher.launch({ logLevel: 'error', chromeFlags: ['--headless', '--no-sandbox', '--disable-dev-shm-usage'] });
   const browser = await puppeteer.connect({ browserURL: `http://127.0.0.1:${chrome.port}` });
   const page = await browser.newPage();
   const origin = variants[variant].origin;
@@ -75,7 +75,8 @@ async function inspect(variant) {
           const measure = (selector) => [...document.querySelectorAll(selector)].map((node) => {
             const bounds = node.getBoundingClientRect();
             return { selector, text: node.textContent.trim(), left: bounds.left, right: bounds.right,
-              width: bounds.width, clientWidth: node.clientWidth, scrollWidth: node.scrollWidth };
+              width: bounds.width, clientWidth: node.clientWidth, scrollWidth: node.scrollWidth,
+              overflowX: getComputedStyle(node).overflowX };
           });
           return {
             viewport, documentWidth: document.documentElement.scrollWidth,
@@ -104,7 +105,11 @@ async function inspect(variant) {
           for (const label of row.topStrip) assert.ok(label.left >= -1 && label.right <= row.viewport + 1, `${width}px: ticker label clipped`);
           for (const element of row.course) {
             assert.ok(element.left >= -1 && element.right <= row.viewport + 1, `${width}px: ${element.selector} leaves viewport`);
-            assert.ok(element.scrollWidth <= element.clientWidth + 1, `${width}px: ${element.selector} clips content`);
+            if (element.selector === '.course-detail-layout' && element.overflowX === 'visible') {
+              // Existing tabs use negative margins. Their visible overhang is valid
+              // only while it stays inside the viewport; panels/text may not clip.
+              assert.ok(element.left + element.scrollWidth <= row.viewport + 1, `${width}px: visible course grid content leaves viewport`);
+            } else assert.ok(element.scrollWidth <= element.clientWidth + 1, `${width}px: ${element.selector} clips content`);
           }
           if (route !== '/') assert.ok(row.documentWidth <= row.viewport + 1, `${width}px: course page has horizontal document overflow`);
         }

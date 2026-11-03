@@ -27,6 +27,18 @@ grid/panels/buttons/text within the viewport without clipping, and retain all fo
 selectable modules. Titles, headings, canonical/robots tags, links, course text
 and mathematics must match the baseline. Captures and element bounds are retained.
 
+The first run (`41665799147`, `3466ee3`) failed before rendering because Chrome
+did not publish its debugging port. Its second attempt rendered both versions and
+measured the 320px baseline document at 502px, with its sidebar extending to
+485.73px. The candidate document is 320px and its sidebar/panels/buttons/text are
+within the viewport without clipping. That attempt stopped at an overbroad grid
+scrollWidth assertion: the existing tabs' negative margins produce 16px of
+visible overhang, ending at 310px, inside the 320px viewport. The corrected check
+requires that visible grid content stay inside the viewport, while retaining
+strict non-clipping checks for every sidebar/panel/button/text block and the
+document-width gate. Chromium launch errors are now logged, and artifacts are
+uniquely named by commit and run attempt.
+
 This is a targeted presentation check; it does not rerun the six Lighthouse
 measurements, claim new production metrics, certify every course or infer any
 sitelink probability. No local browser, preview server, GUI or Computer Use is
