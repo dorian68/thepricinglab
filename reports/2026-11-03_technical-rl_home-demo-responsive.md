@@ -46,3 +46,15 @@ four widths, plus explicit visible demo labels. Hero copy, metadata, links and
 course mathematics must match the baseline. Full-page and hero captures are
 available for independent business review. A new exact-commit run is required
 before any corrected Home acceptance is claimed.
+
+The first product run, `41669137017` at `63cbe85`, passed all static/build/loading
+gates. At 320px the hero is now 266px wide with a 222px title and no clip, but the
+strict document-width gate exposed a remaining 367px document: the Home Community
+header action ends at 367.16px. The final CTA's nonwrapping action row also places
+its buttons outside its panel, where inherited overflow hiding conceals them.
+The follow-up correction adds two exact layout hooks (`home-page` and
+`home-final-cta`), wraps Home section headings, and stacks the final CTA on narrow
+screens. Text, prices, links and logic remain unchanged and the AST contract
+permits only those exact class additions. The final CTA's heading, copy, action
+row and individual links receive explicit non-clipping and viewport checks; its
+absolute decorative sigma may remain clipped inside the panel as before.

@@ -854,7 +854,7 @@ Object.assign(window, {ChartFrame, LineChart, HeatmapChart, Spark, BarChart, Ord
 // ============== HOME ==============
 function HomePage() {
   return (
-    <div>
+    <div className="home-page">
       <NewsletterStrip/>
       <div className="container">
         <HeroBlock/>
@@ -1153,7 +1153,7 @@ function CommunityPreview() {
 function FinalCTA() {
   return (
     <section className="section">
-      <div className="panel" style={{padding:'48px 40px', display:'flex', justifyContent:'space-between', alignItems:'center', gap:30, position:'relative', overflow:'hidden'}}>
+      <div className="panel home-final-cta" style={{padding:'48px 40px', display:'flex', justifyContent:'space-between', alignItems:'center', gap:30, position:'relative', overflow:'hidden'}}>
         <div style={{position:'absolute', right:-40, top:-40, opacity:0.06, fontFamily:"'JetBrains Mono',monospace", fontSize:280, fontWeight:700, color:'#FF2E45'}}>σ</div>
         <div style={{position:'relative', maxWidth:'60ch'}}>
           <div className="section-eyebrow" style={{margin:0}}>// 05 · Get on the desk</div>

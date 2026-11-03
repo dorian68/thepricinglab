@@ -101,6 +101,8 @@ async function inspect(variant) {
             home: [
               '.hero-grid', '.hero-left', '.hero-title', '.hero-sub', '.hero-eyebrow', '.hero-ctas', '.hero-ctas .btn',
               '.kpi-row', '.kpi', '.hero-right', '.hero-right > div', '.hero-right .row', '.hero-right svg',
+              '.home-final-cta', '.home-final-cta > div:nth-child(2)', '.home-final-cta > .row',
+              '.home-final-cta h2', '.home-final-cta p', '.home-final-cta a',
               '.section-head', '.grid-4', '.grid-3', '.foot-grid', '.foot-bottom', '.news-strip',
             ].flatMap(measure),
             overflowCandidates: [...document.querySelectorAll('body *')]
@@ -140,9 +142,11 @@ async function inspect(variant) {
             assert.ok(row.documentWidth <= row.viewport + 1, `${width}px: Home document leaves viewport`);
             assert.deepEqual(row.demoLabels.map((label) => label.text), ['● DEMO', 'ILLUSTRATIVE']);
             for (const label of row.demoLabels) assert.ok(label.left >= -1 && label.right <= row.viewport + 1, `${width}px: demo label clipped`);
-            for (const element of row.home.filter((item) => /^(\.hero|\.kpi)/.test(item.selector))) {
+            for (const element of row.home.filter((item) => /^(\.hero|\.kpi|\.home-final-cta|\.section-head)/.test(item.selector))) {
               assert.ok(element.left >= -1 && element.right <= row.viewport + 1, `${width}px: ${element.selector} leaves viewport`);
-              assert.ok(element.scrollWidth <= element.clientWidth + 1, `${width}px: ${element.selector} clips content`);
+              // The final panel intentionally clips its decorative absolute sigma.
+              // Its actual copy, heading and action rectangles are checked separately.
+              if (element.selector !== '.home-final-cta') assert.ok(element.scrollWidth <= element.clientWidth + 1, `${width}px: ${element.selector} clips content`);
             }
           }
           for (const element of row.course) {

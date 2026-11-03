@@ -400,6 +400,9 @@
     .hero-grid{grid-template-columns:minmax(0,1fr)}
     .hero-left{border-right:none;border-bottom:1px solid var(--line);padding:32px 22px}
     .hero-title{font-size:38px}
+    .home-page .section-head{flex-wrap:wrap;gap:14px}
+    .home-page .home-final-cta{flex-direction:column;align-items:stretch !important;padding:28px 22px !important}
+    .home-page .home-final-cta > .row{flex-wrap:wrap}
     .foot-grid{grid-template-columns:1fr 1fr}
     .foot-bottom{align-items:flex-start;flex-direction:column;gap:10px}
     .kpi-row{grid-template-columns:1fr 1fr}

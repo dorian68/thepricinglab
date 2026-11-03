@@ -29,6 +29,8 @@ test('all route bodies and their course/article/pricing content remain unchanged
     if (name === 'HeroBlock') expected = expected
       .replace('<span className="green">● LIVE</span>', '<span className="amber">● DEMO</span>')
       .replace('<span className="mute">15:42:18</span>', '<span className="mute">ILLUSTRATIVE</span>');
+    if (name === 'HomePage') expected = expected.replace('    <div>', '    <div className="home-page">');
+    if (name === 'FinalCTA') expected = expected.replace('<div className="panel"', '<div className="panel home-final-cta"');
     if (!['Icon', 'LatexMarkdown'].includes(name)) assert.equal(after.get(name), expected, name);
   }
 });
