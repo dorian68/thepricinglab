@@ -88,6 +88,7 @@ async function inspect(variant) {
             courseText: document.querySelector('.container.page')?.innerText || null,
             mathCount: document.querySelectorAll('.katex').length,
             topStrip: measure('.top-strip-inner > .row:first-child > span'),
+            tabs: measure('.course-detail-layout .tabs-bar'),
             course: [
               ...measure('.course-detail-layout'), ...measure('.course-sidebar'),
               ...measure('.course-sidebar > .panel'), ...measure('.course-lesson-item'),
@@ -103,6 +104,7 @@ async function inspect(variant) {
         if (variant === 'candidate') {
           assert.deepEqual(row.topStrip.slice(0, 2).map((item) => item.text), ['ILLUSTRATIVE DATA', 'NOT LIVE']);
           for (const label of row.topStrip) assert.ok(label.left >= -1 && label.right <= row.viewport + 1, `${width}px: ticker label clipped`);
+          for (const bar of row.tabs) assert.ok(bar.left >= -1 && bar.right <= row.viewport + 1, `${width}px: course tabs leave viewport`);
           for (const element of row.course) {
             assert.ok(element.left >= -1 && element.right <= row.viewport + 1, `${width}px: ${element.selector} leaves viewport`);
             if (element.selector === '.course-detail-layout' && element.overflowX === 'visible') {

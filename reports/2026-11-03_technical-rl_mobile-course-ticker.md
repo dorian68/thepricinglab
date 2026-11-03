@@ -36,7 +36,9 @@ scrollWidth assertion: the existing tabs' negative margins produce 16px of
 visible overhang, ending at 310px, inside the 320px viewport. The corrected check
 requires that visible grid content stay inside the viewport, while retaining
 strict non-clipping checks for every sidebar/panel/button/text block and the
-document-width gate. Chromium launch errors are now logged, and artifacts are
+document-width gate. The real tab-bar rectangle is measured too, so overhang on
+either the left or the right must stay inside the viewport. Chromium launch errors
+are now logged, and artifacts are
 uniquely named by commit and run attempt.
 
 This is a targeted presentation check; it does not rerun the six Lighthouse
