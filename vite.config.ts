@@ -59,13 +59,21 @@ export default defineConfig(({ mode }) => ({
     // Force pre-bundling to reduce file watching
     force: true
   },
-  // Reduce build complexity
+  // Keep the anonymous entry small; render course mathematics only on demand.
   build: {
-    target: 'esnext',
-    minify: false,
+    target: 'es2020',
+    minify: 'esbuild',
+    manifest: true,
     rollupOptions: {
       output: {
-        manualChunks: undefined
+        manualChunks(id) {
+          const normalized = id.replaceAll('\\', '/');
+          if (/\/node_modules\/(react|react-dom|react-router|react-router-dom|scheduler)\//.test(normalized)) {
+            return 'react-vendor';
+          }
+          if (normalized.includes('/node_modules/katex/')) return 'katex';
+          return undefined;
+        }
       }
     }
   }

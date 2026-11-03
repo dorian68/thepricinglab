@@ -8,6 +8,8 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "smoke:seo": "node --test tests/seo-contract.test.mjs",
+    "test:loading": "node --test tests/loading-contract.test.mjs",
+    "smoke:loading": "node scripts/check-loading-contract.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },

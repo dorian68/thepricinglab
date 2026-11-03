@@ -1,0 +1,43 @@
+name: Validate homepage loading performance
+on:
+  push:
+    branches: [perf/home-loading-20261103]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npx tsc --noEmit -p tsconfig.app.json
+      - run: npx eslint --no-ignore src/App.tsx src/components/RouteMetadata.tsx src/main.tsx vite.config.ts
+      - run: npm run smoke:seo
+      - run: npm run test:loading
+      - run: npm run build
+      - run: npm run smoke:loading -- dist "$RUNNER_TEMP/pricing-performance/candidate-loading.json"
+      - name: Prepare the exact validated baseline
+        run: git worktree add --detach "$RUNNER_TEMP/pricing-baseline" afba39d327f39f7058ba7bdc489d3b70059c0c1b
+      - run: npm ci --no-audit --no-fund
+        working-directory: ${{ runner.temp }}/pricing-baseline
+      - run: npm run build
+        working-directory: ${{ runner.temp }}/pricing-baseline
+      - name: Install ephemeral cloud audit tools
+        run: npm install --prefix "$RUNNER_TEMP/pricing-audit-tools" --no-audit --no-fund --ignore-scripts lighthouse@13.6.0 chrome-launcher@1.2.2
+      - name: Compare six Lighthouse runs and the public journeys in headless Chrome
+        run: node scripts/audit-loading-preview.mjs "$RUNNER_TEMP/pricing-audit-tools" "$RUNNER_TEMP/pricing-baseline/dist" dist "$RUNNER_TEMP/pricing-performance"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pricing-loading-${{ github.sha }}
+          path: ${{ runner.temp }}/pricing-performance
+          retention-days: 7

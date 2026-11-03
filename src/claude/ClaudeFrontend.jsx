@@ -1,10 +1,8 @@
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import seoRoutes from '../seo-routes.json';
 import { getRouteMetadata, resolveApplicationPath as mapLegacyPath } from '../lib/route-metadata.mjs';
-import rehypeKatex from 'rehype-katex';
-import remarkMath from 'remark-math';
+import SiteIcon from './SiteIcon';
 import { useAuth } from '../contexts/AuthContext';
 import {
   GENERATOR_PRESETS,
@@ -24,6 +22,7 @@ import './claude.css';
 // ===== src\lib.jsx =====
 // Shared utilities, mock data, and small UI atoms
 const { useState, useEffect, useMemo, useRef, useCallback } = React;
+const MarkdownMath = React.lazy(() => import('./MarkdownMath'));
 
 function notify(message, type = 'success') {
   window.dispatchEvent(new CustomEvent('tpl:notify', { detail: { message, type } }));
@@ -114,7 +113,7 @@ function Link({to, children, className, style, onClick}) {
 
 // ---------- Lucide icon ----------
 function Icon({name, size=14, style, className}) {
-  return <i className={"icon icon-"+name+" "+(className||'')} style={{fontSize:size, lineHeight:1, ...style}} />;
+  return <SiteIcon name={name} size={size} style={style} className={className}/>;
 }
 
 // ---------- Math: Black-Scholes ----------
@@ -1716,9 +1715,9 @@ function CourseScript({c, scriptState, scriptModel}) {
 function LatexMarkdown({content}) {
   return (
     <div className="course-script-markdown">
-      <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-        {stripFrontmatter(content)}
-      </ReactMarkdown>
+      <React.Suspense fallback={<p className="mono mute" role="status">Loading course content…</p>}>
+        <MarkdownMath>{stripFrontmatter(content)}</MarkdownMath>
+      </React.Suspense>
     </div>
   );
 }
