@@ -83,6 +83,15 @@ rejected an approximately 686.77 kB minified application entry against the uncha
 The dependency split above addresses that measured failure; the next exact-commit
 run must pass the same gates before any performance result is accepted.
 
+The second run, `41663245694` at `feb6558`, passed those static gates. Its six
+Lighthouse samples were produced, but browser acceptance stopped at the last
+baseline route, `/courses/not-a-course`: the unchanged 404 UI uses divs rather
+than an H1. The corrected journey checks the actual `RESOURCE NOT FOUND` message,
+both recovery links and noindex there, while retaining the H1 requirement for the
+six ordinary pages. Failure diagnostics now preserve the active route, HTML and
+screenshot. Preliminary measurements from that failed campaign are not a final
+technical verdict.
+
 This file describes the candidate contract, not a completed deployment. The
 exact-run artifacts and its final conclusion are authoritative for local-scope
 technical acceptance. Business review, synchronisation to the hosting project,

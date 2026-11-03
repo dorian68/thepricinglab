@@ -115,6 +115,9 @@ async function journeys(variant) {
   });
   await page.setViewport({ width: 412, height: 823, deviceScaleFactor: 1.75, isMobile: true, hasTouch: true });
   const rows = [];
+  const journey = { rows, errors, failures, status: 'RUNNING' };
+  summary.journeys[variant] = journey;
+  let activeRoute = '/';
   try {
     for (const [id, route, noindex] of [
       ['home', '/', false], ['courses', '/courses', false],
@@ -122,8 +125,15 @@ async function journeys(variant) {
       ['article', '/blog/bs-from-scratch', false], ['pricing', '/pricing', false],
       ['login', '/auth/login', true], ['missing-course', '/courses/not-a-course', true],
     ]) {
+      activeRoute = route;
       await page.goto(origin + route, { waitUntil: 'networkidle2', timeout: 45000 });
-      await page.waitForSelector('h1', { timeout: 20000 });
+      if (id === 'missing-course') {
+        // The unchanged baseline 404 uses divs, not an h1. Verify its real error UI.
+        await page.waitForFunction(() => [...document.querySelectorAll('.container.page .mono')]
+          .some((node) => node.textContent.trim() === 'RESOURCE NOT FOUND'), { timeout: 20000 });
+        assert.ok(await page.$('.container.page a[href="/"]'), `${variant}: missing 404 home recovery link`);
+        assert.ok(await page.$('.container.page a[href="/bug"]'), `${variant}: missing broken-link reporting link`);
+      } else await page.waitForSelector('h1', { timeout: 20000 });
       await page.waitForFunction((expected) => document.querySelector('link[rel="canonical"]')?.href === expected,
         { timeout: 20000 }, `https://thepricinglibrary.com${route}`);
       if (id === 'black-scholes') {
@@ -134,6 +144,8 @@ async function journeys(variant) {
       const row = await page.evaluate(() => ({
         title: document.title,
         headings: [...document.querySelectorAll('h1')].map((node) => node.textContent.trim()),
+        notFoundMessage: [...document.querySelectorAll('.container.page .mono')]
+          .find((node) => node.textContent.trim() === 'RESOURCE NOT FOUND')?.textContent.trim() || null,
         canonical: [...document.querySelectorAll('link[rel="canonical"]')].map((node) => node.href),
         robots: [...document.querySelectorAll('meta[name="robots"]')].map((node) => node.content),
         anchors: [...document.querySelectorAll('a[href]')].map((node) => node.getAttribute('href')).sort(),
@@ -153,6 +165,7 @@ async function journeys(variant) {
     }
 
     // Exercise an actual client-side navigation with the mobile drawer.
+    activeRoute = '/ → /courses';
     await page.goto(origin + '/', { waitUntil: 'networkidle2', timeout: 45000 });
     await page.click('.mobile-menu-btn');
     await page.click('.mobile-drawer-link[href="/courses"]');
@@ -160,7 +173,13 @@ async function journeys(variant) {
     assert.equal(await page.$('.mobile-drawer'), null, 'Mobile menu did not close');
     assert.equal(errors.length, 0, `${variant}: uncaught browser errors: ${errors.join('; ')}`);
     assert.deepEqual(failures, [], `${variant}: first-party HTTP failures`);
-    return { rows, mobileNavigation: 'PASS', errors, failures };
+    Object.assign(journey, { mobileNavigation: 'PASS', status: 'PASS' });
+    return journey;
+  } catch (error) {
+    Object.assign(journey, { status: 'FAIL', activeRoute, error: error.message });
+    await writeFile(path.join(reports, `${variant}-journey-failure.html`), await page.content());
+    await page.screenshot({ path: path.join(reports, `${variant}-journey-failure-mobile.png`) });
+    throw new Error(`${variant} journey ${activeRoute}: ${error.message}`, { cause: error });
   } finally { await browser.disconnect(); await chrome.kill(); }
 }
 
@@ -171,7 +190,7 @@ try {
   for (const variant of ['baseline', 'candidate']) summary.journeys[variant] = await journeys(variant);
   for (const candidate of summary.journeys.candidate.rows) {
     const baseline = summary.journeys.baseline.rows.find((row) => row.id === candidate.id);
-    for (const field of ['title', 'headings', 'canonical', 'robots', 'anchors']) {
+    for (const field of ['title', 'headings', 'notFoundMessage', 'canonical', 'robots', 'anchors']) {
       assert.deepEqual(candidate[field], baseline[field], `${candidate.id}: ${field} changed`);
     }
     if (candidate.id === 'black-scholes') assert.equal(candidate.mathCount, baseline.mathCount, 'Course mathematics changed');
