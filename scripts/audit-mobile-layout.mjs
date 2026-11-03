@@ -37,10 +37,13 @@ async function serve(directory) {
 }
 
 const variants = { baseline: await serve(baselineDirectory), candidate: await serve(candidateDirectory) };
+const diagnoseHome = process.env.PRICING_HOME_DIAGNOSTICS === 'true';
 const summary = {
   candidateCommit: process.env.GITHUB_SHA,
-  baselineCommit: 'bbd3438437084808156f2dc95346f3f5de33791c',
-  scope: 'Targeted rendered layout/trust-label comparison in cloud Chrome at 320/412/768/1440 CSS pixels. No new Lighthouse or production score.',
+  baselineCommit: process.env.PRICING_BASELINE_SHA || 'bbd3438437084808156f2dc95346f3f5de33791c',
+  scope: diagnoseHome
+    ? 'Home diagnostics only; no Home correction or acceptance claimed. Existing bounded course/ticker checks retained. Cloud Chrome at 320/412/768/1440 CSS pixels; no Lighthouse or production score.'
+    : 'Targeted rendered layout/trust-label comparison in cloud Chrome at 320/412/768/1440 CSS pixels. No new Lighthouse or production score.',
   variants: {},
 };
 let activeVariant = '';
@@ -74,9 +77,11 @@ async function inspect(variant) {
           const viewport = document.documentElement.clientWidth;
           const measure = (selector) => [...document.querySelectorAll(selector)].map((node) => {
             const bounds = node.getBoundingClientRect();
+            const css = getComputedStyle(node);
             return { selector, text: node.textContent.trim(), left: bounds.left, right: bounds.right,
               width: bounds.width, clientWidth: node.clientWidth, scrollWidth: node.scrollWidth,
-              overflowX: getComputedStyle(node).overflowX };
+              overflowX: css.overflowX, display: css.display, gridTemplateColumns: css.gridTemplateColumns,
+              minWidth: css.minWidth, flexWrap: css.flexWrap, fontSize: css.fontSize };
           });
           return {
             viewport, documentWidth: document.documentElement.scrollWidth,
@@ -88,6 +93,23 @@ async function inspect(variant) {
             courseText: document.querySelector('.container.page')?.innerText || null,
             mathCount: document.querySelectorAll('.katex').length,
             topStrip: measure('.top-strip-inner > .row:first-child > span'),
+            home: [
+              '.hero-grid', '.hero-left', '.hero-title', '.hero-sub', '.hero-eyebrow', '.hero-ctas',
+              '.kpi-row', '.kpi', '.hero-right', '.hero-right > div', '.hero-right .row', '.hero-right svg',
+              '.section-head', '.grid-4', '.grid-3', '.foot-grid', '.foot-bottom', '.news-strip',
+            ].flatMap(measure),
+            overflowCandidates: [...document.querySelectorAll('body *')]
+              .filter((node) => !node.closest('.ticker'))
+              .map((node) => {
+                const bounds = node.getBoundingClientRect();
+                const css = getComputedStyle(node);
+                return { element: node.tagName + '.' + (node.getAttribute('class') || ''),
+                  parent: node.parentElement?.tagName + '.' + (node.parentElement?.getAttribute('class') || ''),
+                  text: node.textContent.trim().slice(0, 100), left: bounds.left, right: bounds.right,
+                  width: bounds.width, clientWidth: node.clientWidth, scrollWidth: node.scrollWidth,
+                  overflowX: css.overflowX, display: css.display, minWidth: css.minWidth,
+                  gridTemplateColumns: css.gridTemplateColumns, flexWrap: css.flexWrap };
+              }).filter((node) => node.width > 0 && (node.left < -1 || node.right > viewport + 1)),
             tabs: measure('.course-detail-layout .tabs-bar'),
             course: [
               ...measure('.course-detail-layout'), ...measure('.course-sidebar'),
@@ -100,6 +122,10 @@ async function inspect(variant) {
         result.rows.push(row);
         const id = `${variant}-${route === '/' ? 'home' : 'black-scholes'}-${width}`;
         await page.screenshot({ path: path.join(reports, id + '.png') });
+        if (route === '/' && diagnoseHome) {
+          await page.screenshot({ path: path.join(reports, id + '-full.png'), fullPage: true });
+          await (await page.$('.hero-grid')).screenshot({ path: path.join(reports, id + '-hero.png') });
+        }
         if (route !== '/') await (await page.$('.course-sidebar')).screenshot({ path: path.join(reports, id + '-sidebar.png') });
         if (variant === 'candidate') {
           assert.deepEqual(row.topStrip.slice(0, 2).map((item) => item.text), ['ILLUSTRATIVE DATA', 'NOT LIVE']);
