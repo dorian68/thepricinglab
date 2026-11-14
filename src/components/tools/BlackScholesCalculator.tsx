@@ -9,6 +9,7 @@ import { Calculator, Info } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { safeTranslate } from "@/utils/translationUtils";
 import ToolPageLayout from './ToolPageLayout';
+import { blackScholesOption } from '@/lib/blackScholes.mjs';
 
 type Greek = 'delta' | 'gamma' | 'vega' | 'theta' | 'rho';
 type OptionGreeks = Record<Greek, number>;
@@ -48,23 +49,10 @@ const BlackScholesCalculator = () => {
   const [selectedGreeks, setSelectedGreeks] = useState<Greek[]>(['delta', 'gamma']);
   
   const calculateBlackScholes = (s: number, k: number, v: number, r: number, t: number): OptionGreeks & { callPrice: number; putPrice: number } => {
-    const normCDF = (x: number): number => {
-      const t = 1 / (1 + 0.2316419 * Math.abs(x));
-      const d = 0.3989423 * Math.exp(-x * x / 2);
-      const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
-      return x > 0 ? 1 - p : p;
-    };
-    const normPDF = (x: number): number => (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x);
-    const d1 = (Math.log(s / k) + (r + v * v / 2) * t) / (v * Math.sqrt(t));
-    const d2 = d1 - v * Math.sqrt(t);
-    const callPrice = s * normCDF(d1) - k * Math.exp(-r * t) * normCDF(d2);
-    const putPrice = k * Math.exp(-r * t) * normCDF(-d2) - s * normCDF(-d1);
-    const delta = normCDF(d1);
-    const gamma = normPDF(d1) / (s * v * Math.sqrt(t));
-    const vega = s * Math.sqrt(t) * normPDF(d1) / 100;
-    const theta = (-s * v * normPDF(d1)) / (2 * Math.sqrt(t)) - r * k * Math.exp(-r * t) * normCDF(d2);
-    const rho = k * t * Math.exp(-r * t) * normCDF(d2) / 100;
-    return { delta, gamma, vega, theta, rho, callPrice, putPrice };
+    const common = { spot: s, strike: k, maturityYears: t, riskFreeRate: r, dividendYield: 0, volatility: v };
+    const call = blackScholesOption({ ...common, optionType: 'call' });
+    const put = blackScholesOption({ ...common, optionType: 'put' });
+    return { ...call.greeks, callPrice: call.price, putPrice: put.price };
   };
 
   const calculate = () => {

@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import { Sparkles, X } from 'lucide-react';
 import { useAgent } from './AgentProvider';
 import { suggestionsFor } from './appContext';
 import { AgentUIBlockRenderer } from './uiblocks';
@@ -167,7 +168,7 @@ export default function AgentDock() {
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? "Fermer l'assistant" : "Ouvrir l'assistant"}
       >
-        <i className={`icon ${open ? 'icon-x' : 'icon-sparkles'}`} />
+        {open ? <X size={18} aria-hidden="true" /> : <Sparkles size={18} aria-hidden="true" />}
         {!open && <span className="agui-fab-dot" />}
       </button>
 
@@ -184,6 +185,9 @@ export default function AgentDock() {
               </button>
             </div>
           </header>
+          <div className="agui-trust-note">
+            Réponse pédagogique : un chiffre est vérifiable lorsqu’un bloc de calcul ou une source est attaché. Sans source, traite la réponse comme une piste à contrôler.
+          </div>
 
           <div className="agui-list" ref={listRef} onScroll={onScroll}>
             {messages.length === 0 ? (

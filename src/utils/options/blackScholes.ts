@@ -12,7 +12,9 @@ export function normCDF(x: number): number {
 
   // Save the sign
   const sign = x < 0 ? -1 : 1;
-  x = Math.abs(x);
+  // A&S 7.1.26 approximates erf(x); Φ(z) = 0.5 × (1 + erf(z / √2)).
+  // The former implementation omitted √2 and materially overstated option values.
+  x = Math.abs(x) / Math.SQRT2;
 
   // A&S formula 7.1.26
   const t = 1.0 / (1.0 + p * x);
@@ -84,9 +86,10 @@ export function blackScholes(
   if (position === 'short') {
     price = -price;
     delta = -delta;
+    gamma = -gamma;
+    vega = -vega;
     theta = -theta;
     rho = -rho;
-    // Gamma and Vega don't change sign for short positions in their conventional representation
   }
 
   return {

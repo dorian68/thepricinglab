@@ -1,6 +1,7 @@
 
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useSafeNavigate } from '@/security/useSafeNavigate';
 import { useTranslation } from "react-i18next";
 import { 
   X, Home, BookOpen, Dumbbell, Users, CreditCard, Wrench, FileText, Bug, BarChart3, LogOut
@@ -26,7 +27,7 @@ interface MobileNavProps {
 const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
   const { t } = useTranslation();
   const { user, profile, signOut, isAuthenticated, isLoading } = useAuth();
-  const navigate = useNavigate();
+  const navigate = useSafeNavigate();
 
   const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
 

@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useNavigate } from "react-router-dom";
+import { useSafeNavigate } from '@/security/useSafeNavigate';
 import { BookOpen, Code, Save, X, Plus, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +27,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { v4 as uuidv4 } from 'uuid';
 
 const Contribute = () => {
-  const navigate = useNavigate();
+  const navigate = useSafeNavigate();
   const { profile } = useAuth();
   const { toast } = useToast();
   

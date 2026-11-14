@@ -1,8 +1,8 @@
 
 import { type User } from '@supabase/supabase-js'
 
-export type UserPlan = 'freemium' | 'basic' | 'pro' | 'admin'
-export type UserRole = 'student' | 'pro' | 'admin'
+export type UserPlan = 'free' | 'starter' | 'student' | 'pro'
+export type UserRole = 'user' | 'moderator' | 'admin'
 
 export interface UserProfile {
   id: string

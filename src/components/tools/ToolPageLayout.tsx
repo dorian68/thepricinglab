@@ -2,7 +2,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, BookOpen } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useSafeNavigate } from '@/security/useSafeNavigate';
 import MethodologySection, { type MethodologyItem } from './MethodologySection';
 import RelatedResources, { type RelatedResource } from './RelatedResources';
 
@@ -52,7 +52,7 @@ const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
   bottomCta,
   children,
 }) => {
-  const navigate = useNavigate();
+  const navigate = useSafeNavigate();
 
   return (
     <>
@@ -63,7 +63,7 @@ const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
       </Helmet>
 
       {/* Hero */}
-      <header className="py-10 md:py-14 px-6 border-b border-border">
+      <header data-page-title={title} data-page-description={metaDescription} className="py-10 md:py-14 px-6 border-b border-border">
         <div className="max-w-5xl mx-auto">
           <h1 className="text-2xl md:text-4xl font-bold terminal-text mb-3">{headline}</h1>
           <p className="text-base md:text-lg text-primary font-medium mb-2">{valueProp}</p>

@@ -6,8 +6,8 @@ import { useLocation } from 'react-router-dom';
 import { runAgUI } from './aguiClient';
 import { buildAppContext } from './appContext';
 import { setToolParams } from './toolControl';
-import { ALLOWED_BLOCKS } from './uiblocks';
-import { getPracticeApiBase } from '../claude/practiceEngine';
+import { ALLOWED_BLOCKS } from './allowedBlocks';
+import { getPlatformAccessToken, getPracticeApiBase } from '../claude/practiceEngine';
 import { useAuth } from '../contexts/AuthContext';
 
 const STORAGE_KEY = 'tpl.agui.threads.v1';
@@ -147,7 +147,7 @@ export function AgentProvider({ children }) {
     const controller = new AbortController();
     abortRef.current = controller;
     try {
-      await runAgUI(getPracticeApiBase(), input, (ev) => handleEvent(ev, asstId), controller.signal);
+      await runAgUI(getPracticeApiBase(), input, (ev) => handleEvent(ev, asstId), controller.signal, getPlatformAccessToken());
     } catch (e) {
       if (e.name !== 'AbortError') {
         updateMsg(asstId, (m) => ({

@@ -8,6 +8,16 @@ import { Strategy as TradingStrategy, OptionLeg, UnderlyingAsset, StructuredProd
 export function adaptCommunityToTradingStrategy(communityStrategy: CommunityStrategy): TradingStrategy {
   // Extract strategy data or use defaults
   const strategyData = communityStrategy.strategyData || {};
+  const legacyLegs = Array.isArray(strategyData.instruments)
+    ? strategyData.instruments
+      .filter((instrument: any) => instrument?.type === 'option')
+      .map((instrument: any) => ({
+        strike: instrument.strike,
+        type: instrument.optionType,
+        position: instrument.position,
+        quantity: instrument.quantity,
+      }))
+    : [];
   
   const result: TradingStrategy = {
     id: communityStrategy.id.toString(),
@@ -15,19 +25,19 @@ export function adaptCommunityToTradingStrategy(communityStrategy: CommunityStra
     category: strategyData.category || "vanilla", // Default category
     description: communityStrategy.summary || "",
     parameters: {
-      spotPrice: strategyData.spotPrice || 100,
-      volatility: strategyData.volatility || 0.2,
-      timeToMaturity: strategyData.timeToMaturity || 1.0,
-      interestRate: strategyData.interestRate || 0.05,
-      dividendYield: strategyData.dividendYield || 0,
-      legs: strategyData.legs || [
+      spotPrice: strategyData.spotPrice ?? strategyData.underlyingPrice ?? 100,
+      volatility: strategyData.volatility ?? 0.2,
+      timeToMaturity: strategyData.timeToMaturity ?? (strategyData.daysToExpiry != null ? strategyData.daysToExpiry / 365 : 1.0),
+      interestRate: strategyData.interestRate ?? 0.05,
+      dividendYield: strategyData.dividendYield ?? 0,
+      legs: strategyData.legs ?? (legacyLegs.length ? legacyLegs : [
         {
           strike: 100,
           type: "call",
           position: "long",
           quantity: 1
         }
-      ]
+      ])
     },
     isDraft: communityStrategy.isDraft || false
   };

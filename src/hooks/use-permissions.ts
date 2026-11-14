@@ -30,19 +30,20 @@ const ROLE_FEATURES: Record<UserRole, Feature[]> = {
 }
 
 export const usePermissions = () => {
-  const { profile, user } = useAuth()
+  const { profile, isAdmin } = useAuth()
 
   const hasPermission = useCallback((feature: Feature): boolean => {
-    if (!profile) return false
+    if (isAdmin()) return true
+    if (!profile || feature === 'admin_dashboard') return false
     
     // Check by role (from database profile)
-    if (profile.role && ROLE_FEATURES[profile.role]?.includes(feature)) {
+    if (profile.role && profile.role !== 'admin' && ROLE_FEATURES[profile.role]?.includes(feature)) {
       return true
     }
     
     // Fallback to plan-based permissions
-    return PLAN_FEATURES[profile.plan].includes(feature)
-  }, [profile])
+    return profile.plan !== 'admin' && PLAN_FEATURES[profile.plan].includes(feature)
+  }, [profile, isAdmin])
 
   const requirePermission = useCallback((feature: Feature): boolean => {
     const hasAccess = hasPermission(feature)
@@ -54,12 +55,12 @@ export const usePermissions = () => {
   }, [hasPermission])
 
   const isProUser = useCallback((): boolean => {
-    return profile?.role === 'pro' || profile?.role === 'admin' || profile?.plan === 'pro' || profile?.plan === 'admin'
-  }, [profile])
+    return isAdmin() || profile?.role === 'pro' || profile?.plan === 'pro'
+  }, [profile, isAdmin])
 
   const isAdminUser = useCallback((): boolean => {
-    return profile?.role === 'admin'
-  }, [profile])
+    return isAdmin()
+  }, [isAdmin])
 
   return {
     hasPermission,

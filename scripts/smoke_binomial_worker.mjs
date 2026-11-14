@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+
+const workerUrl = new URL('../src/workers/binomial.worker.mjs', import.meta.url);
+const source = await readFile(workerUrl, 'utf8');
+assert.match(source, /import \{ analyzeBinomial \} from '\.\.\/lib\/binomial\.mjs'/);
+for (const forbidden of ['fetch(', 'XMLHttpRequest', 'document.', 'window.', 'Math.random', 'Date.now']) assert.equal(source.includes(forbidden), false);
+console.log('[STEP 1] worker isolation · [STATUS] ok · [OUTPUT] canonical import and no network/DOM/ambient randomness');
+const messages = [];
+globalThis.self = { onmessage: null, postMessage: (message) => messages.push(message) };
+await import(`${workerUrl.href}?smoke=${process.pid}`);
+const input = { schemaVersion: 'tpl.binomial.input.v1', spot: 100, strike: 100, volatility: 0.2, maturityYears: 1, dayCount: 'ACT/365F', riskFreeRate: 0.05, dividendYield: 0, steps: 200, optionType: 'put', exerciseStyle: 'american', currency: 'USD', quantity: 1, contractMultiplier: 100, position: 'long' };
+await globalThis.self.onmessage({ data: { type: 'analyze', requestId: 'run-1', input } });
+assert.equal(messages[0].type, 'result'); assert.equal(messages[0].requestId, 'run-1'); assert.ok(messages[0].result.earlyExercise.exercisedNodeCount > 0);
+console.log(`[STEP 2] worker success · [STATUS] ok · [OUTPUT] request preserved; analysis=${messages[0].result.analysisId.slice(0, 12)}; exercise frontier retained`);
+await globalThis.self.onmessage({ data: { type: 'analyze', requestId: 'run-2', input: { ...input, volatility: 0.01, riskFreeRate: 0.15, steps: 5 } } });
+assert.equal(messages[1].type, 'error'); assert.equal(messages[1].requestId, 'run-2'); assert.match(messages[1].error, /outside \[0,1\]/); assert.equal('result' in messages[1], false);
+console.log('[STEP 3] worker failure · [STATUS] ok · [OUTPUT] invalid probability returns scoped error and no stale result');
+await globalThis.self.onmessage({ data: { type: 'noop', requestId: 'run-3' } });
+assert.deepEqual(messages[2], { type: 'error', requestId: 'run-3', error: 'Invalid binomial worker request.' });
+delete globalThis.self;
+console.log('[STEP 4] protocol rejection · [STATUS] ok · [OUTPUT] unsupported message rejected deterministically');
+console.log('[VERDICT] PASS · F-CAL-7 CRR worker isolates O(N²) backward induction from the UI');

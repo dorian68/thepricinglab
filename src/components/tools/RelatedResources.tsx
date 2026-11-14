@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useSafeNavigate } from '@/security/useSafeNavigate';
 import { ArrowRight, BookOpen, Wrench, FileText } from 'lucide-react';
 
 export interface RelatedResource {
@@ -30,7 +30,7 @@ const RelatedResources: React.FC<RelatedResourcesProps> = ({
   resources,
   title = 'Related Resources',
 }) => {
-  const navigate = useNavigate();
+  const navigate = useSafeNavigate();
 
   return (
     <div>

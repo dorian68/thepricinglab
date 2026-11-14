@@ -1,0 +1,13 @@
+# ThePricingLibrary volatility-surface example
+# Units: maturity=years; impliedVol=decimal (0.20 = 20%); strike and forward use the same units; weight must be positive
+strike,maturity,impliedVol,forward,weight
+80,0.25,0.2875,100,1
+90,0.25,0.2440,100,1
+100,0.25,0.2050,100,2
+110,0.25,0.1940,100,1
+120,0.25,0.2015,100,1
+80,1.00,0.2730,100,1
+90,1.00,0.2350,100,1
+100,1.00,0.2070,100,2
+110,1.00,0.1980,100,1
+120,1.00,0.2050,100,1

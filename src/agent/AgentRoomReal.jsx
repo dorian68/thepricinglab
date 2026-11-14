@@ -1,4 +1,4 @@
-// Agent Room — REAL, backend-wired RFQ Cockpit (iteration 1).
+// Agent Room — backend-wired RFQ Cockpit (iteration 1).
 //
 // Replaces the static design-kit iframe (public/agent-room-kit/.../index.html)
 // with a real React page in the app build. The flagship "RFQ Cockpit" turns a
@@ -8,10 +8,10 @@
 //   - the live multi-agent desk result from POST /agent/desk/run (real agents,
 //     real pricer), with an honest "backend requis" state when unreachable,
 //   - Structurer product approaches (Call / Spread / Collar / Future /
-//     Structured Note) with REAL mini payoff curves + Black-Scholes prices
-//     computed on REAL market data,
-//   - a Market Context panel (real /market/history with desk-series.json
-//     offline fallback) and a bottom market-watch ticker (real bundled values).
+//     Structured Note) with deterministic mini payoff curves + Black-Scholes
+//     prices computed on displayed inputs,
+//   - a Market Context panel that can use a configured /market/history feed,
+//     otherwise a clearly dated desk-series.json reference snapshot.
 //
 // No CDN/Babel. Uses the app's CSS tokens / JetBrains Mono dark-desk aesthetic.
 
@@ -19,6 +19,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { platformApi, getPracticeApiBase } from '../claude/practiceEngine';
 import { loadDeskSeries } from '../claude/marketSeries';
+import { BLACK_SCHOLES_INPUT_SCHEMA, blackScholesOption, normCdf as canonicalNormCdf, normalizeBlackScholesInput, solveImpliedVolatility } from '../lib/blackScholes.mjs';
 
 /* ------------------------------------------------------------------ tokens */
 const T = {
@@ -34,27 +35,11 @@ function Icon({ name, size = 14, color, style }) {
 }
 
 /* ------------------------------------------------------------ real pricing */
-function normCdf(x) {
-  const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
-  const sign = x < 0 ? -1 : 1;
-  x = Math.abs(x) / Math.SQRT2;
-  const t = 1 / (1 + p * x);
-  const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
-  return 0.5 * (1 + sign * y);
-}
-// Genuine Black-Scholes (same formula as the app's ClaudeFrontend bsPrice).
+const normCdf = canonicalNormCdf;
+// Compatibility adapter for desk consumers; all BSM math delegates to F-CAL10.
 function bsPrice({ S, K, r, q = 0, sigma, T: tt, type = 'call' }) {
-  if (tt <= 0 || sigma <= 0) {
-    const intr = type === 'call' ? Math.max(S - K, 0) : Math.max(K - S, 0);
-    return { price: intr, delta: 0, vega: 0 };
-  }
-  const d1 = (Math.log(S / K) + (r - q + 0.5 * sigma * sigma) * tt) / (sigma * Math.sqrt(tt));
-  const d2 = d1 - sigma * Math.sqrt(tt);
-  const eqT = Math.exp(-q * tt), erT = Math.exp(-r * tt);
-  let price, delta;
-  if (type === 'call') { price = S * eqT * normCdf(d1) - K * erT * normCdf(d2); delta = eqT * normCdf(d1); }
-  else { price = K * erT * normCdf(-d2) - S * eqT * normCdf(-d1); delta = eqT * (normCdf(d1) - 1); }
-  return { price, delta, d1, d2 };
+  const option = blackScholesOption({ spot: S, strike: K, maturityYears: tt, riskFreeRate: r, dividendYield: q, volatility: sigma, optionType: type });
+  return { price: option.price, ...option.greeks, d1: option.d1 ?? 0, d2: option.d2 ?? 0 };
 }
 
 const fmt = (n, d = 2) => (isFinite(n) ? Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }) : '—');
@@ -98,22 +83,15 @@ function black76ImpliedVol({ F, K, r, T: tt, price, type = 'call' }) {
   }
   return 0.5 * (lo + hi);
 }
-// Same inversion for Black-Scholes / Garman–Kohlhagen (equity / FX): q = 0 for
-// equity/crypto, q = foreign rate for FX. Mirrors how optionApproaches prices
-// those classes (bsPrice on the spot), so the recovered vol is self-consistent.
+// Black-Scholes / Garman–Kohlhagen inversion delegates to the strict F-CAL10
+// bounded solver; q = 0 for equity/crypto and q = foreign rate for FX.
 function bsImpliedVol({ S, K, r, q = 0, T: tt, price, type = 'call' }) {
-  if (!(price > 0) || !(S > 0) || !(K > 0) || !(tt > 0)) return null;
-  const intrinsic = type === 'call'
-    ? Math.max(S * Math.exp(-q * tt) - K * Math.exp(-r * tt), 0)
-    : Math.max(K * Math.exp(-r * tt) - S * Math.exp(-q * tt), 0);
-  if (price <= intrinsic + 1e-9) return null;
-  let lo = 0.001, hi = 5.0;
-  if (bsPrice({ S, K, r, q, sigma: hi, T: tt, type }).price < price) return null;
-  for (let i = 0; i < 60; i++) {
-    const m = 0.5 * (lo + hi);
-    if (bsPrice({ S, K, r, q, sigma: m, T: tt, type }).price < price) lo = m; else hi = m;
+  try {
+    const input = normalizeBlackScholesInput({ schemaVersion: BLACK_SCHOLES_INPUT_SCHEMA, quoteMode: 'market_price', optionType: type, spot: S, strike: K, maturityYears: tt, dayCount: 'ACT/365F', riskFreeRate: r, dividendYield: q, volatility: null, marketPrice: price, currency: 'EUR', position: 'long', quantity: 1, multiplier: 1, shocks: { spotPct: 0, volPoints: 0, days: 0 } });
+    return solveImpliedVolatility(input).volatility;
+  } catch {
+    return null;
   }
-  return 0.5 * (lo + hi);
 }
 // Continuous annuity (PV of 1 unit/yr) at yield y over T years — drives DV01/CS01.
 function annuityFactor(y, T) { return y > 1e-9 ? (1 - Math.exp(-y * T)) / y : T; }
@@ -402,34 +380,12 @@ const tag = { fontFamily: MONO, fontSize: 9.5, letterSpacing: '.08em', color: T.
 
 /* ============================================================ TOP NAV */
 function TopNav({ apiReachable }) {
-  const items = ['DASHBOARD', 'MARKETS', 'PRODUCTS', 'LEARNING', 'TOOLS', 'AGENT ROOM'];
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 60, padding: '0 24px', borderBottom: `1px solid ${T.line}`, background: T.bg }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 40 }}>
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-          <span style={{ width: 10, height: 10, background: T.red, display: 'inline-block' }} />
-          <span style={{ fontFamily: MONO, fontWeight: 800, fontSize: 12.5, letterSpacing: '.04em', color: T.text, lineHeight: 1.05 }}>THE PRICING<br />LIBRARY</span>
-        </Link>
-        <div style={{ display: 'flex', gap: 26 }}>
-          {items.map((it) => {
-            const active = it === 'AGENT ROOM';
-            const to = it === 'AGENT ROOM' ? '/agent-room' : it === 'TOOLS' ? '/tools' : it === 'LEARNING' ? '/courses' : it === 'DASHBOARD' ? '/dashboard' : '/';
-            return (
-              <Link key={it} to={to} style={{ fontFamily: MONO, fontSize: 11.5, letterSpacing: '.06em', fontWeight: 600, color: active ? T.red : T.mute, textDecoration: 'none', position: 'relative', padding: '20px 0' }}>
-                {it}{active && <span style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 2, background: T.red }} />}
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontFamily: MONO, fontSize: 10.5 }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: apiReachable ? T.green : T.amber }}>
-          <span style={{ width: 6, height: 6, borderRadius: 3, background: apiReachable ? T.green : T.amber }} />
-          {apiReachable ? 'DESK API EN LIGNE' : 'DESK API HORS-LIGNE'}
-        </span>
-      </div>
-    </div>
-  );
+  const items = [['/dashboard','Dashboard'],['/courses','Courses'],['/tools','Tools'],['/agent-room','Agent desk']];
+  return <header className="agent-room-topnav">
+    <Link to="/" aria-label="The Pricing Library home"><img src="/brand/thepricinglibrary.svg" width="841" height="401" alt="The Pricing Library" style={{width:112,height:'auto',display:'block'}}/></Link>
+    <nav aria-label="Desk navigation">{items.map(([to,label])=><Link key={to} to={to} aria-current={to==='/agent-room'?'page':undefined}>{label}</Link>)}</nav>
+    <span className="agent-room-api-status" role="status" style={{color:apiReachable===true?T.green:T.amber}}>{apiReachable===true?'Desk disponible':apiReachable===false?'Desk indisponible':'Vérification du desk…'}</span>
+  </header>;
 }
 
 /* ============================================================ TICKER */
@@ -445,7 +401,7 @@ function Ticker({ rows }) {
           <span style={{ color: r.up ? T.green : T.red }}>{r.chg}</span>
         </span>
       ))}
-      <span style={{ marginLeft: 'auto', flexShrink: 0, color: T.dim, fontFamily: MONO, fontSize: 9.5 }}>séries réelles · desk-series.json</span>
+      <span style={{ marginLeft: 'auto', flexShrink: 0, color: T.dim, fontFamily: MONO, fontSize: 9.5 }}>snapshots datés · desk-series.json</span>
     </div>
   );
 }
@@ -453,15 +409,22 @@ function Ticker({ rows }) {
 /* ============================================================ MARKET CTX */
 function MarketContext({ factor, ctxData }) {
   const c = FACTOR_CTX[factor] || FACTOR_CTX.equity;
-  const { points, last, prev, source, date } = ctxData;
+  const { points, last, prev, source, date, provenance } = ctxData;
   const chg = (last != null && prev) ? ((last - prev) / prev) * 100 : null;
   const up = (chg || 0) >= 0;
+  const status = provenance?.status || (source === 'bundled' ? 'offline_snapshot' : source === 'reference' ? 'reference_input' : 'backend_history');
+  const sourceLabel = provenance?.source || (source === 'bundled' ? 'desk-series.json' : source === 'reference' ? 'course input' : 'backend /market/history');
+  const asOf = provenance?.as_of_date || date || 'not available';
+  const unit = provenance?.unit || c.unit || 'native';
+  const limitations = Array.isArray(provenance?.limitations)
+    ? provenance.limitations.join(' · ')
+    : (provenance?.limitations || 'illustrative context only; not an executable quote or investment signal');
   return (
-    <Panel title="Market Context" live={source === 'live'}>
+    <Panel title="Market Context">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
         <span style={{ fontFamily: MONO, fontSize: 13, color: T.text }}>{c.label}</span>
         <span style={{ fontFamily: MONO, fontSize: 9.5, color: source === 'live' ? T.green : source === 'bundled' ? T.blue : T.amber }}>
-          {source === 'live' ? 'live · farmé' : source === 'bundled' ? `réel · ${date}` : 'référence'}
+          {source === 'live' ? 'backend history' : source === 'bundled' ? 'dated snapshot' : 'reference input'}
         </span>
       </div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, margin: '4px 0 8px' }}>
@@ -472,11 +435,21 @@ function MarketContext({ factor, ctxData }) {
       <AreaChart points={points} color={up ? T.green : T.red} />
       {source === 'reference' && (
         <div style={{ marginTop: 8, fontFamily: MONO, fontSize: 10, color: T.amber, lineHeight: 1.4 }}>
-          Historique live requis : {c.label} n'est pas dans la tranche hors-ligne. Démarre le backend pour la série réelle.
+          Série live indisponible : {c.label} n'est pas dans le snapshot hors-ligne. Démarre le backend pour une série actualisée.
         </div>
       )}
+      <div data-market-provenance="true" style={{ marginTop: 9, paddingTop: 8, borderTop: `1px solid ${T.line}`, fontFamily: MONO, fontSize: 9.5, color: T.dim, lineHeight: 1.45 }}>
+        Source : {sourceLabel} · statut : {status} · as-of : {asOf} · unité : {unit}<br />
+        Limites : {limitations}
+      </div>
     </Panel>
   );
+}
+
+function marketValueLabel(source) {
+  if (source === 'live') return 'backend history';
+  if (source === 'bundled') return 'dated snapshot';
+  return 'reference input';
 }
 
 /* ============================================================ MAIN PAGE */
@@ -524,21 +497,35 @@ export default function AgentRoomReal() {
     const c = FACTOR_CTX[parsed.factor] || FACTOR_CTX.equity;
     const base = getPracticeApiBase();
     (async () => {
-      // 1) bundled offline REAL series first — renders instantly, no 404 noise.
+      // 1) bundled dated series first — renders instantly, no 404 noise.
       let haveReal = false;
       let refLast = Number.isFinite(c.refSpot) ? c.refSpot : null; // trustworthy magnitude anchor
       if (c.bundled) {
         const bundle = await loadDeskSeries();
-        const p = bundle?.series?.[c.bundled]?.points;
+        const bundledSeries = bundle?.series?.[c.bundled];
+        const p = bundledSeries?.points;
         if (p && p.length > 2 && alive) {
           const closes = p.map((x) => x.c);
           refLast = closes[closes.length - 1];
-          setCtxData({ points: closes, last: refLast, prev: closes[closes.length - 2], source: 'bundled', date: p[p.length - 1].d });
+          const asOfDate = p[p.length - 1].d;
+          setCtxData({
+            points: closes, last: refLast, prev: closes[closes.length - 2], source: 'bundled', date: asOfDate,
+            provenance: {
+              source: bundledSeries.source || 'desk-series.json', status: 'offline_snapshot', as_of_date: asOfDate,
+              unit: bundledSeries.unit || c.unit || 'native', limitations: 'historical reference only; not an executable quote or investment signal',
+            },
+          });
           haveReal = true;
         }
       }
       // 2) honest reference only when no real series exists for this factor
-      if (!haveReal && alive) setCtxData({ points: null, last: c.refSpot, prev: c.refSpot, source: 'reference' });
+      if (!haveReal && alive) setCtxData({
+        points: null, last: c.refSpot, prev: c.refSpot, source: 'reference',
+        provenance: {
+          source: 'course reference input', status: 'reference_input', as_of_date: 'not applicable',
+          unit: c.unit || 'native', limitations: 'illustrative input only; not observed market data',
+        },
+      });
       // 3) live upgrade — ONLY if the backend actually serves the market API
       //    (avoids a /market/history 404 on the stateless desk build).
       if (!(await marketApiAvailable(base))) return;
@@ -553,7 +540,14 @@ export default function AgentRoomReal() {
           const liveLast = closes[closes.length - 1];
           const sane = !(Number.isFinite(refLast) && refLast > 0) || (liveLast > refLast * 0.25 && liveLast < refLast * 4);
           if (closes.length > 2 && alive && sane) {
-            setCtxData({ points: closes, last: closes[closes.length - 1], prev: closes[closes.length - 2], source: 'live' });
+            const fallbackDate = j.series?.[j.series.length - 1]?.date || 'not available';
+            setCtxData({
+              points: closes, last: closes[closes.length - 1], prev: closes[closes.length - 2], source: 'live',
+              provenance: j.provenance || {
+                source: `backend:${c.api}`, status: 'provider_refresh_cached', as_of_date: fallbackDate,
+                unit: c.unit || 'provider-native price unit', limitations: 'daily historical OHLCV; not an executable quote or investment signal',
+              },
+            });
           }
         }
       } catch { /* offline — bundled/reference already shown */ }
@@ -577,11 +571,11 @@ export default function AgentRoomReal() {
     setBusy(false);
   };
 
-  // real approaches priced on the market-context spot (live/bundled/reference)
+  // approaches priced on the displayed market-context spot
   const c = FACTOR_CTX[parsed.factor] || FACTOR_CTX.equity;
-  // Real spot (bundled/live/reference). The 100 is only a sub-second pre-load
+  // The 100 is only a sub-second pre-load
   // guard so the payoff SVGs never draw NaN before the real series resolves; it
-  // is never displayed (Market Context shows the real value or '—').
+  // and is never displayed as market data (Market Context shows the value or '—').
   const spot = Number.isFinite(ctxData.last) ? ctxData.last : (Number.isFinite(c.refSpot) ? c.refSpot : 100);
   const tt = Math.max((parsed.months || 5) / 12, 1 / 12);
 
@@ -651,17 +645,20 @@ export default function AgentRoomReal() {
         : parsed.view },
   ];
 
-  const tabs = [['RFQ', 'RFQ Cockpit'], ['AGENTS', 'Agent Room'], ['TRADER', 'Trader View']];
+  // Only the delivered RFQ cockpit is exposed in the paid experience. The
+  // future Agent Room/Trader View tabs stay hidden until their workflows are
+  // implemented and tested end to end.
+  const tabs = [['RFQ', 'RFQ Cockpit']];
 
   return (
-    <div style={{ minHeight: '100vh', background: T.bg, color: T.text, display: 'flex', flexDirection: 'column' }}>
-      <TopNav apiReachable={apiUp !== false} />
+    <div className="agent-room-shell" lang="fr" style={{ minHeight: '100vh', background: T.bg, color: T.text, display: 'flex', flexDirection: 'column' }}>
+      <TopNav apiReachable={apiUp} />
 
       {/* tab bar */}
       <div style={{ display: 'flex', gap: 4, padding: '0 24px', borderBottom: `1px solid ${T.line}`, background: T.bg }}>
         {tabs.map(([id, lbl]) => (
           <button key={id} onClick={() => setTab(id)} style={{ background: 'transparent', border: 'none', borderBottom: `2px solid ${tab === id ? T.red : 'transparent'}`, color: tab === id ? T.text : T.mute, fontFamily: MONO, fontSize: 12, fontWeight: 600, padding: '14px 14px', cursor: 'pointer' }}>
-            {lbl}{id !== 'RFQ' && <span style={{ color: T.dim, fontSize: 9, marginLeft: 6 }}>à venir</span>}
+            {lbl}
           </button>
         ))}
       </div>
@@ -680,14 +677,14 @@ export default function AgentRoomReal() {
               </p>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 320px', gap: 16, alignItems: 'start' }}>
+            <div className="agent-room-layout">
               {/* main column */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
                 {/* 1. request */}
                 <Panel title="1. Votre requête" right={<span style={tag}>langage naturel</span>}>
                   <form onSubmit={(e) => { e.preventDefault(); run(q); }} style={{ display: 'flex', gap: 0, border: `1px solid ${T.line2}`, borderRadius: 6, overflow: 'hidden', background: T.panel2 }}>
-                    <textarea value={q} onChange={(e) => setQ(e.target.value)} rows={2} style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', resize: 'none', color: T.text, fontFamily: MONO, fontSize: 12.5, padding: '12px 14px', lineHeight: 1.5 }} />
-                    <button type="submit" disabled={busy} style={{ alignSelf: 'stretch', width: 52, background: T.red, border: 'none', color: '#fff', cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1, display: 'grid', placeItems: 'center' }}>
+                    <textarea aria-label="Votre question au desk" value={q} onChange={(e) => setQ(e.target.value)} rows={2} style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', resize: 'none', color: T.text, fontFamily: MONO, fontSize: 12.5, padding: '12px 14px', lineHeight: 1.5 }} />
+                    <button type="submit" aria-label="Envoyer la requête au desk" disabled={busy} style={{ alignSelf: 'stretch', width: 52, background: T.red, border: 'none', color: '#fff', cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1, display: 'grid', placeItems: 'center' }}>
                       <Icon name={busy ? 'loader-2' : 'send'} size={16} color="#fff" />
                     </button>
                   </form>
@@ -702,7 +699,7 @@ export default function AgentRoomReal() {
 
                 {/* 2. interpretation */}
                 <Panel title="2. Interprétation de la RFQ" right={<span style={tag}>{desk ? 'Sales Agent · ' + desk.desk : 'analyse locale'}</span>}>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10 }}>
+                  <div className="agent-room-interpretation">
                     {interp.map((cd) => (
                       <div key={cd.t} style={{ background: T.inset, border: `1px solid ${T.line}`, borderRadius: 6, padding: 11 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8, color: T.mute }}>
@@ -744,16 +741,16 @@ export default function AgentRoomReal() {
                       : parsed.factor === 'credit'
                         ? `CDS : prime = spread ${fmt(spot, 2)}% (${(spot * 100).toFixed(0)} bp p.a.) ; CS01 = annuité risquée × notionnel × 1bp ; JTD = (1−R) × notionnel (R=40%), notionnel 1,000,000 €.`
                         : parsed.factor === 'fx'
-                          ? `Options FX en Garman–Kohlhagen (r_USD=4%, r_EUR=3%) sur le spot ${ctxData.source === 'reference' ? 'de référence' : 'réel'} ${fmt(spot, 4)}, vol ${volTag} ${volPct}%, T=${tt.toFixed(2)}a.${reconNote}`
+                          ? `Options FX en Garman–Kohlhagen (r_USD=4%, r_EUR=3%) sur le spot ${marketValueLabel(ctxData.source)} ${fmt(spot, 4)}, vol ${volTag} ${volPct}%, T=${tt.toFixed(2)}a.${reconNote}`
                           : (parsed.factor === 'oil' || parsed.factor === 'gold')
-                            ? `Payoffs et primes calculés en Black-76 sur le forward ${fmt(spot * Math.exp(0.04 * tt), spot < 10 ? 4 : 2)}${c.unit ? ' ' + c.unit : ''} (spot ${ctxData.source === 'reference' ? 'de référence' : 'réel'} ${fmt(spot, spot < 10 ? 4 : 2)}, r=4%, T=${tt.toFixed(2)}a), vol ${volTag} ${volPct}%.${reconNote}`
-                            : `Payoffs et primes calculés en Black-Scholes sur le spot ${ctxData.source === 'reference' ? 'de référence' : 'réel'} ${fmt(spot, spot < 10 ? 4 : 2)}${c.unit ? ' ' + c.unit : ''}, vol ${volTag} ${volPct}%, T=${tt.toFixed(2)}a, r=4%.${reconNote}`}
+                            ? `Payoffs et primes calculés en Black-76 sur le forward ${fmt(spot * Math.exp(0.04 * tt), spot < 10 ? 4 : 2)}${c.unit ? ' ' + c.unit : ''} (spot ${marketValueLabel(ctxData.source)} ${fmt(spot, spot < 10 ? 4 : 2)}, r=4%, T=${tt.toFixed(2)}a), vol ${volTag} ${volPct}%.${reconNote}`
+                            : `Payoffs et primes calculés en Black-Scholes sur le spot ${marketValueLabel(ctxData.source)} ${fmt(spot, spot < 10 ? 4 : 2)}${c.unit ? ' ' + c.unit : ''}, vol ${volTag} ${volPct}%, T=${tt.toFixed(2)}a, r=4%.${reconNote}`}
                   </div>
                 </Panel>
 
                 {/* 4. selected detail + desk quote */}
                 <Panel title={`4. Détail — ${approaches[sel]?.name}`} right={<span style={tag}>Quick view</span>}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: 16 }}>
+                  <div className="agent-room-results">
                     <div style={{ background: T.bg, borderRadius: 4, border: `1px solid ${T.line}`, padding: 8 }}>
                       <PayoffChart pay={approaches[sel].pay} lo={spot * 0.6} hi={spot * 1.4} spot={spot} h={150} />
                       <div style={{ textAlign: 'center', fontFamily: MONO, fontSize: 9, color: T.mute, marginTop: 4 }}>{c.label} {c.unit && `(${c.unit})`} — payoff à maturité</div>
@@ -781,7 +778,7 @@ export default function AgentRoomReal() {
                 </Panel>
 
                 {/* agent pipeline (real backend) */}
-                <Panel title="Pipeline multi-agents" right={<span style={tag}>{desk ? 'live · ' + desk.desk + ' desk' : 'backend requis'}</span>}>
+                <Panel title="Pipeline multi-agents" right={<span style={tag}>{desk ? 'backend · ' + desk.desk + ' desk' : 'backend requis'}</span>}>
                   {desk?.agents?.length ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                       {desk.agents.map((ag) => (
@@ -805,7 +802,7 @@ export default function AgentRoomReal() {
                 <MarketContext factor={parsed.factor} ctxData={ctxData} />
                 <Panel title="Notes du desk">
                   <div style={{ fontSize: 11.5, color: T.mute, lineHeight: 1.5 }}>
-                    {desk?.report?.client_summary || (desk?.pricing_result?.hedge_hint) || "Soumettez une requête pour obtenir l'analyse du desk. Hors-ligne, les payoffs et primes restent calculés sur des données de marché réelles."}
+                    {desk?.report?.client_summary || (desk?.pricing_result?.hedge_hint) || "Soumettez une requête pour obtenir l'analyse du desk. Hors-ligne, les payoffs et primes restent calculés sur le snapshot historique daté ou les inputs affichés."}
                   </div>
                   {desk?.model_choice && (
                     <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${T.line}`, fontFamily: MONO, fontSize: 10.5, color: T.mute }}>
@@ -831,11 +828,9 @@ export default function AgentRoomReal() {
         ) : (
           <div style={{ display: 'grid', placeItems: 'center', minHeight: 420 }}>
             <div style={{ textAlign: 'center', maxWidth: 520 }}>
-              <div style={{ fontFamily: MONO, fontSize: 13, fontWeight: 700, color: T.text, marginBottom: 10 }}>{tab === 'AGENTS' ? 'Agent Room' : 'Trader View'} — à venir</div>
+              <div style={{ fontFamily: MONO, fontSize: 13, fontWeight: 700, color: T.text, marginBottom: 10 }}>RFQ Cockpit only</div>
               <p style={{ fontSize: 12.5, color: T.mute, lineHeight: 1.6 }}>
-                {tab === 'AGENTS'
-                  ? "La carte du workflow multi-agents (pipeline animé, logs temps réel) arrive dans une prochaine itération. Le pipeline réel du desk est déjà visible dans le RFQ Cockpit après soumission d'une requête."
-                  : "La vue trader (gestion de quote, order book, hedging, P&L live) sera câblée sur /agent/desk/state et /agent/desk/trade dans une prochaine itération. Aucune donnée fictive n'est affichée ici."}
+                This release exposes the delivered RFQ Cockpit and its backend desk pipeline. No additional desk surface is advertised here.
               </p>
               <button onClick={() => setTab('RFQ')} style={{ marginTop: 14, background: T.red, border: 'none', borderRadius: 4, color: '#fff', fontFamily: MONO, fontSize: 12, fontWeight: 600, padding: '9px 16px', cursor: 'pointer' }}>← Retour au RFQ Cockpit</button>
             </div>

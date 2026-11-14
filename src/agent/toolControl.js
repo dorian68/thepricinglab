@@ -82,6 +82,5 @@ export function useToolRegister(id, params, setters) {
     };
     const getParams = () => paramsRef.current;
     return registerTool(id, { apply, getParams });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 }

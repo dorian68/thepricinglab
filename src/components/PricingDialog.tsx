@@ -70,9 +70,9 @@ const PricingDialog = ({ trigger }: PricingDialogProps) => {
         st('pricing.pro.features.exclusive', 'Exclusive content for professionals'),
         st('pricing.pro.features.advanced', 'Advanced volatility modeling'),
         st('pricing.pro.features.exotic', 'Exotic derivatives pricing'),
-        st('pricing.pro.features.workshops', 'Monthly live workshops'),
-        st('pricing.pro.features.certification', 'Course completion certificates'),
-        st('pricing.pro.features.community', '1-on-1 expert sessions')
+        st('pricing.pro.features.workshops', 'Structured desk scenarios'),
+        st('pricing.pro.features.certification', 'Reproducible evidence exports'),
+        st('pricing.pro.features.community', 'Bounded community Q&A')
       ],
       cta: st('pricing.pro.cta', 'Choose Pro Plan'),
       href: "/signup?plan=pro",

@@ -77,10 +77,9 @@ const Navbar = () => {
     { href: "/bug-report", label: t('navbar.bugReport', 'Signaler un bug'), icon: HelpCircle },
   ];
 
-  const { user, signOut, isAuthenticated, profile } = useAuth();
+  const { user, signOut, isAuthenticated, profile, isAdmin: hasSignedAdminClaim } = useAuth();
 
-  // Check if user is admin
-  const isAdmin = user?.user_metadata?.role === 'admin';
+  const isAdmin = hasSignedAdminClaim();
 
   return (
     <>

@@ -6,7 +6,7 @@ const TOOL_TITLES = {
   'bs-pricer': 'Black-Scholes Pricer',
   payoff: 'Payoff Visualizer',
   mc: 'Monte Carlo Simulator',
-  'iv-calc': 'Implied / Realized Vol',
+  'iv-calc': 'Realized Volatility & Data Quality',
   calib: 'Model Calibration',
   volsurface: 'Volatility Surface',
 };
@@ -15,11 +15,11 @@ const COURSE_CONCEPTS = {
   'black-scholes': 'Modèle de Black-Scholes',
   greeks: 'Les Greeks',
   'implied-vol': 'Volatilité implicite',
-  'vol-products': 'Produits de volatilité',
+  'vol-products': 'Volatilité implicite (URL historique)',
   exotics: 'Options exotiques',
   'monte-carlo': 'Méthodes de Monte Carlo',
   stochastic: 'Calcul stochastique',
-  hedging: 'Stratégies de couverture',
+  hedging: 'Les Greeks (URL historique)',
   'yield-curves': 'Courbes de taux',
 };
 

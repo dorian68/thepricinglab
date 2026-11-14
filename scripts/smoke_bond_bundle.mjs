@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import { readdir, readFile } from 'node:fs/promises';
+import path from 'node:path';
+
+const assets = path.resolve('dist/assets');
+const shell = await readFile(path.resolve('src/claude/ClaudeFrontend.jsx'), 'utf8');
+const lab = await readFile(path.resolve('src/components/tools/BondLab.tsx'), 'utf8');
+const files = (await readdir(assets)).filter((file) => file.endsWith('.js'));
+const sources = await Promise.all(files.map(async (file) => ({ file, source: await readFile(path.join(assets, file), 'utf8') })));
+const components = sources.filter(({ file }) => file.startsWith('BondLab-'));
+const workers = sources.filter(({ file }) => file.startsWith('bond.worker-'));
+assert.equal(components.length, 1, `expected one BondLab chunk, got ${components.map(({ file }) => file).join(', ') || 'none'}`);
+assert.equal(workers.length, 1, `expected one bond worker, got ${workers.map(({ file }) => file).join(', ') || 'none'}`);
+for (const marker of ['Fixed-Rate Bond Pricing & Risk Lab', 'Clean + accrued = dirty', 'Exact central DV01', 'Cash flows CSV', 'Scenarios CSV']) assert.ok(components[0].source.includes(marker), `missing ${marker}`);
+for (const marker of ['fixed_rate_bullet_bond', 'ACT/ACT ICMA', 'YIELD_SOLVED_FROM_CLEAN_PRICE', 'Selected shock moves yield outside']) assert.ok(workers[0].source.includes(marker), `worker missing ${marker}`);
+const all = sources.map(({ source }) => source).join('\n');
+for (const legacy of ['cash-flow beta', 'Price, Macaulay & modified duration, convexity, DV01 and scenario shifts.']) assert.ok(!all.includes(legacy), `legacy bond path remains in bundle: ${legacy}`);
+assert.match(shell, /const BondLabTool = React\.lazy/); assert.match(shell, /bond: <React\.Suspense[\s\S]*?<BondLabTool\/>/);
+assert.doesNotMatch(shell, /function bondAnalytics\(/); assert.doesNotMatch(shell, /function BondCalcTool\(/);
+assert.match(lab, /normalizeBondInput\(input\)/); assert.ok(lab.indexOf('normalizeBondInput(input)') < lab.indexOf('new Worker('));
+console.log(`[STEP 1] production bundle · [STATUS] ok · [INPUT] ${files.length} JavaScript assets · [OUTPUT] component=${components[0].file} (${components[0].source.length} bytes); worker=${workers[0].file} (${workers[0].source.length} bytes); one lazy fail-closed Starter route`);
+console.log('[VERDICT] PASS · F-CAL-8 ships one worker-backed fixed-rate bond lab with both legacy active routes absent');

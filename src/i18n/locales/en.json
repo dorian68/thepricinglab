@@ -244,7 +244,7 @@
       "startCourse": "Start Learning",
       "signUp": "Sign Up",
       "tagline": "FROM FUNDAMENTALS TO ADVANCED MODELS",
-      "terminal": "TRADING TERMINAL ACTIVATED"
+      "terminal": "DETERMINISTIC DEMO · NO LIVE QUOTE"
     },
     "approach": {
       "title": "Our Innovative Approach",
@@ -265,7 +265,7 @@
       },
       "certified": {
         "title": "Industry Relevance",
-        "description": "Curriculum designed in partnership with quantitative analysts from top investment banks."
+        "description": "Curriculum built around documented pricing and risk methods; no institutional affiliation is implied."
       }
     },
     "curriculum": {
@@ -306,28 +306,13 @@
       }
     },
     "testimonials": {
-      "title": "What Our Users Say",
-      "description": "Hear from professionals and students who have transformed their quantitative finance skills with our platform.",
-      "alexandre": {
-        "quote": "The practical approach to option pricing models helped me ace my interviews for a quant role at a major investment bank.",
-        "author": "Alexandre D.",
-        "position": "Derivatives Trader, Paris"
-      },
-      "sarah": {
-        "quote": "Finally a platform that explains volatility surfaces in a way that made sense to me. The interactive tools are game-changing.",
-        "author": "Sarah M.",
-        "position": "Risk Manager, London"
-      },
-      "thomas": {
-        "quote": "As someone transitioning from academia to finance, this platform bridged the gap between mathematical theory and actual implementation.",
-        "author": "Thomas K.",
-        "position": "PhD Student, ETH Zurich"
-      },
-      "joinCta": "Join Our Community"
+      "title": "Customer evidence pending",
+      "description": "Verified customer interviews will be published after the target-user pilot. No invented testimonials are shown.",
+      "joinCta": "Read the pilot protocol"
     },
     "cta": {
       "title": "Ready to Become a Quant Master?",
-      "description": "Join thousands of professionals and students who are leveling up their quantitative finance skills.",
+      "description": "Start with a free preview and inspect the methodology, assumptions, and reproducible examples.",
       "subscribe": "Choose a Plan",
       "explore": "Explore Courses"
     }
@@ -566,9 +551,9 @@
       "basicTools": "Basic Trading Tools",
       "advancedTools": "Advanced Trading Tools",
       "notebooks": "Interactive Notebooks",
-      "certificates": "Course Certificates",
-      "linkedinIntegration": "LinkedIn Integration",
-      "performanceReports": "Performance Reports",
+      "certificates": "Evidence exports",
+      "linkedinIntegration": "Course progress",
+      "performanceReports": "Run history",
       "projectChallenges": "Project Challenges",
       "gptAssistant": "AI Assistant"
     },
@@ -610,9 +595,9 @@
         "exclusive": "Exclusive content for professionals",
         "advanced": "Advanced volatility modeling",
         "exotic": "Exotic derivatives pricing",
-        "workshops": "Monthly live workshops",
-        "certification": "Course completion certificates",
-        "community": "1-on-1 expert sessions"
+        "workshops": "Structured desk scenarios",
+        "certification": "Reproducible evidence exports",
+        "community": "Bounded community Q&A"
       }
     },
     "hero": {
@@ -623,7 +608,7 @@
     "cta": {
       "title": "Start Your Learning Journey",
       "highlight": "Today",
-      "description": "Join thousands of professionals mastering quantitative finance.",
+      "description": "Inspect the free preview, then choose a plan when the commercial gates are open.",
       "start": "Get Started",
       "try": "Try Free Demo"
     },

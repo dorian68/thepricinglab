@@ -1,6 +1,7 @@
 
 import React, { Suspense, useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
+import { useSafeNavigate } from '@/security/useSafeNavigate';
 import ModernNavbar from './ModernNavbar';
 import Footer from './Footer';
 import NewsletterBanner from './NewsletterBanner';
@@ -13,7 +14,7 @@ const AppShell: React.FC = () => {
   // Initialize the translation hook to ensure i18n is properly loaded
   const { t, i18n } = useTranslation();
   const { isAuthenticated, profile, isLoading } = useAuth();
-  const navigate = useNavigate();
+  const navigate = useSafeNavigate();
 
   useEffect(() => {
     if (i18n && !i18n.isInitialized) {

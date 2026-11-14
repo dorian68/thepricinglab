@@ -18,7 +18,7 @@ const PricingCTA = () => {
           <span className="text-finance-accent">{st('pricing.cta.highlight', 'Today')}</span>
         </h2>
         <p className="text-[#8E9196] text-lg mb-8">
-          {st('pricing.cta.description', 'Join thousands of professionals mastering quantitative finance.')}
+          {st('pricing.cta.description', 'Inspect the free preview, then choose a plan when the commercial gates are open.')}
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
           <Button variant="finance" size="lg" asChild>

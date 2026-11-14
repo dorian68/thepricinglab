@@ -1,6 +1,7 @@
 
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useSafeNavigate } from '@/security/useSafeNavigate';
 import { useTranslation } from "react-i18next";
 import { 
   BookOpen, Dumbbell, Users, Wrench, FileText, BarChart3, LogOut
@@ -26,7 +27,7 @@ const DesktopNav = () => {
   const { t } = useTranslation()
   const { user, profile, signOut, isAuthenticated, isLoading } = useAuth()
   const { isProUser, isAdminUser } = usePermissions()
-  const navigate = useNavigate()
+  const navigate = useSafeNavigate()
 
   const st = (key: string, defaultValue: string) => safeTranslate(t, key, defaultValue);
 

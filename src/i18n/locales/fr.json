@@ -222,7 +222,7 @@
       "startCourse": "Commencer à apprendre",
       "signUp": "S'inscrire",
       "tagline": "DES FONDAMENTAUX AUX MODÈLES AVANCÉS",
-      "terminal": "TRADING TERMINAL ACTIVATED"
+      "terminal": "DÉMO DÉTERMINISTE · PAS DE COTE LIVE"
     },
     "approach": {
       "title": "Notre Approche Innovante",
@@ -243,7 +243,7 @@
       },
       "certified": {
         "title": "Pertinence Industrielle",
-        "description": "Programme conçu en partenariat avec des analystes quantitatifs des plus grandes banques d'investissement."
+        "description": "Programme construit autour de méthodes documentées de pricing et de risque ; aucune affiliation institutionnelle n'est revendiquée."
       }
     },
     "curriculum": {
@@ -284,28 +284,13 @@
       }
     },
     "testimonials": {
-      "title": "Ce que Disent Nos Utilisateurs",
-      "description": "Écoutez les professionnels et étudiants qui ont transformé leurs compétences en finance quantitative avec notre plateforme.",
-      "alexandre": {
-        "quote": "L'approche pratique des modèles d'évaluation d'options m'a aidé à réussir mes entretiens pour un poste de quant dans une grande banque d'investissement.",
-        "author": "Alexandre D.",
-        "position": "Trader de Produits Dérivés, Paris"
-      },
-      "sarah": {
-        "quote": "Enfin une plateforme qui explique les surfaces de volatilité d'une manière qui a du sens pour moi. Les outils interactifs changent la donne.",
-        "author": "Sarah M.",
-        "position": "Risk Manager, Londres"
-      },
-      "thomas": {
-        "quote": "En tant que personne passant de l'académie à la finance, cette plateforme a comblé le fossé entre théorie mathématique et implémentation réelle.",
-        "author": "Thomas K.",
-        "position": "Doctorant, ETH Zurich"
-      },
-      "joinCta": "Rejoignez Notre Communauté"
+      "title": "Preuves clients en attente",
+      "description": "Les entretiens clients vérifiés seront publiés après le pilote auprès des utilisateurs cibles. Aucun témoignage inventé n'est affiché.",
+      "joinCta": "Lire le protocole pilote"
     },
     "cta": {
       "title": "Prêt à Devenir un Maître Quant ?",
-      "description": "Rejoignez des milliers de professionnels et d'étudiants qui améliorent leurs compétences en finance quantitative.",
+      "description": "Commencez par l'aperçu gratuit et vérifiez la méthode, les hypothèses et les exemples reproductibles.",
       "subscribe": "Choisir un Forfait",
       "explore": "Explorer les Cours"
     }
@@ -545,9 +530,9 @@
       "basicTools": "Outils de trading basiques",
       "advancedTools": "Outils de trading avancés",
       "notebooks": "Notebooks interactifs",
-      "certificates": "Certificats de cours",
-      "linkedinIntegration": "Intégration LinkedIn",
-      "performanceReports": "Rapports de performance",
+      "certificates": "Exports de preuves",
+      "linkedinIntegration": "Progression des cours",
+      "performanceReports": "Historique des runs",
       "projectChallenges": "Défis de projets",
       "gptAssistant": "Assistant IA"
     },
@@ -589,9 +574,9 @@
         "exclusive": "Contenu exclusif pour les professionnels",
         "advanced": "Modélisation avancée de la volatilité",
         "exotic": "Pricing de produits dérivés exotiques",
-        "workshops": "Ateliers en direct mensuels",
-        "certification": "Certificats de fin de cours",
-        "community": "Sessions 1-à-1 avec des experts"
+        "workshops": "Scénarios desk structurés",
+        "certification": "Exports de preuves reproductibles",
+        "community": "Q&A communautaire borné"
       }
     },
     "hero": {
@@ -602,7 +587,7 @@
     "cta": {
       "title": "Commencez votre voyage d'apprentissage",
       "highlight": "aujourd'hui",
-      "description": "Rejoignez des milliers de professionnels qui maîtrisent la finance quantitative.",
+      "description": "Inspectez l'aperçu gratuit, puis choisissez un forfait lorsque les contrôles commerciaux seront ouverts.",
       "start": "Commencer",
       "try": "Essayer la démo gratuite"
     },

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useSafeNavigate } from '@/security/useSafeNavigate';
 import { Badge } from "@/components/ui/badge";
 import {
   MessageSquare,
@@ -242,7 +243,7 @@ const polls = [
 
 const Community = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const navigate = useSafeNavigate();
   const [activeTab, setActiveTab] = useState("forum");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);

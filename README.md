@@ -122,6 +122,22 @@ npm run dev
 
 Prerequisites: Node.js 18+ (see `.node-version`)
 
+Local testing opens at `http://127.0.0.1:5173` as **Admin local · test** by
+default. Python and the dependencies of `../../Tools/pricinglibrary_rag_backend`
+must be installed. Vite starts the real loopback API automatically; no signup,
+email confirmation or provider key is needed. The bottom test bar lets you
+switch to a persistent visitor session or the real login form, then return to
+admin. Test progress and forum posts persist in `.local-preview/data`, separately
+from online accounts. The existing local reference corpus is read-only.
+
+To use the normal authentication flow for the entire development server in
+PowerShell, set `$env:TPL_LOCAL_ADMIN='false'` before `npm run dev`. An explicit
+public `--host` also disables local admin. `npm run build` and `npm run preview`
+always use normal authentication and contain no local test-session mechanism.
+
+Verification: `npm run smoke:local-admin`, `npm run smoke:local-admin:browser`,
+and, after a build, `npm run smoke:local-admin:production`.
+
 ---
 
 ## 📂 Project Architecture

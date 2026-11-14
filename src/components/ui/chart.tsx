@@ -87,6 +87,63 @@ interface BarChartProps {
   color?: string;
 }
 
+interface ComparisonLineChartProps {
+  data: Array<{ x: string | number; market: number; model: number }>;
+  xLabel?: string;
+  yLabel?: string;
+  marketLabel?: string;
+  modelLabel?: string;
+}
+
+export const ComparisonLineChart: React.FC<ComparisonLineChartProps> = ({
+  data,
+  xLabel,
+  yLabel,
+  marketLabel = 'Market',
+  modelLabel = 'Model',
+}) => {
+  const chartData = data.map((item) => ({
+    name: item.x,
+    [marketLabel]: item.market,
+    [modelLabel]: item.model,
+  }));
+  const finiteValues = data
+    .flatMap((item) => [item.market, item.model])
+    .filter((value) => Number.isFinite(value));
+  const minimum = finiteValues.length > 0 ? Math.min(...finiteValues) : 0;
+  const maximum = finiteValues.length > 0 ? Math.max(...finiteValues) : 1;
+  const span = maximum - minimum;
+  const padding = span > 1e-8
+    ? span * 0.15
+    : Math.max(Math.abs((minimum + maximum) / 2) * 0.02, 0.1);
+  const yDomain: [number, number] = [minimum - padding, maximum + padding];
+
+  return (
+    <Chart>
+      <RechartsLineChart data={chartData} margin={{ top: 14, right: 16, bottom: 20, left: 12 }}>
+        <CartesianGrid stroke="#444" strokeDasharray="3 3" />
+        <XAxis dataKey="name" label={xLabel ? { value: xLabel, position: 'insideBottom', offset: -10 } : undefined} />
+        <YAxis
+          domain={yDomain}
+          tickFormatter={(value: number) => value.toFixed(2)}
+          width={48}
+          label={yLabel ? { value: yLabel, angle: -90, position: 'insideLeft' } : undefined}
+        />
+        <Tooltip />
+        <Legend
+          verticalAlign="top"
+          align="right"
+          height={28}
+          iconType="line"
+          wrapperStyle={{ fontSize: '11px' }}
+        />
+        <Line type="monotone" dataKey={marketLabel} stroke="#22c55e" strokeWidth={2} dot isAnimationActive={false} />
+        <Line type="monotone" dataKey={modelLabel} stroke="#8884d8" strokeWidth={2} dot={false} isAnimationActive={false} />
+      </RechartsLineChart>
+    </Chart>
+  );
+};
+
 export const BarChart: React.FC<BarChartProps> = ({ 
   data, 
   xLabel, 

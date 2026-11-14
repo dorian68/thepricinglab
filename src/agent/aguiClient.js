@@ -1,9 +1,9 @@
 // Minimal AG-UI SSE client (fetch streaming) — parses `data:` events and
 // forwards each parsed AG-UI event to onEvent. Supports AbortController.
-export async function runAgUI(base, input, onEvent, signal) {
+export async function runAgUI(base, input, onEvent, signal, accessToken) {
   const res = await fetch(`${base}/agent/ag-ui/run`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+    headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream', ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) },
     body: JSON.stringify(input),
     signal,
   });

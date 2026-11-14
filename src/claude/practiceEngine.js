@@ -1,14 +1,20 @@
-const GENERATED_EXERCISES_KEY = 'tpl.generated.exercises.v1';
+import { PRACTICE_COURSE_EXTENSIONS as CANONICAL_PRACTICE_COURSE_EXTENSIONS } from './courseManifest.js';
+import { buildOfflineReference } from './exerciseFallback.mjs';
+import { clearExerciseMemory, readExerciseCache, writeExerciseCache, ownerExerciseKey } from './exerciseCache.mjs';
+const GENERATED_EXERCISES_KEY = import.meta.env.DEV && typeof window !== 'undefined'
+  && window.__TPL_LOCAL_PREVIEW_ENABLED__ && window.__TPL_LOCAL_PREVIEW_MODE__ !== 'real'
+  ? 'tpl.localPreview.generated.exercises.v1' : 'tpl.generated.exercises.v1';
 
-export const PRACTICE_COURSE_EXTENSIONS = [
+/* legacy extension snapshot retained only for migration reference; active UI uses the canonical manifest
+const LEGACY_PRACTICE_COURSE_EXTENSIONS = [
   {
     id: 'rates-swaps',
     title: 'Rates Swaps & DV01',
     tier: 'Fundamentals',
     level: 'L2',
-    duration: '4h 10m',
-    modules: 7,
-    badge: 'free',
+    duration: '3h 30m',
+    modules: 9,
+    badge: 'starter',
     tagline: 'Quote, value and hedge an interest-rate swap from par rate to DV01.',
     topics: ['Par rate', 'Annuity', 'DV01', 'Curve shock'],
     accent: '#3E8BFF',
@@ -18,7 +24,7 @@ export const PRACTICE_COURSE_EXTENSIONS = [
     title: 'Credit Derivatives & CS01',
     tier: 'Advanced',
     level: 'L3',
-    duration: '4h 40m',
+    duration: '3h 30m',
     modules: 8,
     badge: 'student',
     tagline: 'Turn CDS spreads into carry, CS01 and spread-shock P&L decisions.',
@@ -30,8 +36,8 @@ export const PRACTICE_COURSE_EXTENSIONS = [
     title: 'Market Risk & VaR',
     tier: 'Advanced',
     level: 'L3',
-    duration: '5h 00m',
-    modules: 8,
+    duration: '3h 40m',
+    modules: 9,
     badge: 'student',
     tagline: 'Estimate loss limits, stress moves and escalation decisions from desk data.',
     topics: ['Parametric VaR', 'Expected shortfall', 'Stress testing', 'Limits'],
@@ -42,7 +48,7 @@ export const PRACTICE_COURSE_EXTENSIONS = [
     title: 'Structured Products Desk',
     tier: 'Complex',
     level: 'L4',
-    duration: '6h 20m',
+    duration: '4h 10m',
     modules: 10,
     badge: 'pro',
     tagline: 'Build autocallable and barrier payoffs like a structuring analyst.',
@@ -54,12 +60,162 @@ export const PRACTICE_COURSE_EXTENSIONS = [
     title: 'Fixed Income Bonds',
     tier: 'Fundamentals',
     level: 'L2',
-    duration: '3h 30m',
-    modules: 6,
-    badge: 'free',
+    duration: '3h 10m',
+    modules: 8,
+    badge: 'starter',
     tagline: 'Price bonds, compute duration and explain rate-shock P&L.',
     topics: ['Clean price', 'YTM', 'Duration', 'Convexity'],
     accent: '#19C37D',
+  },
+]; */
+
+// Kept as a compatibility export for older callers; the active catalogue uses
+// the canonical manifest and never reads the legacy copy above.
+export const PRACTICE_COURSE_EXTENSIONS = CANONICAL_PRACTICE_COURSE_EXTENSIONS;
+
+// Canonical deterministic Survival Mode question bank. These are hypothetical
+// teaching cases, not market observations; every answer is reproducible from
+// the displayed inputs and the explanation states the relevant convention.
+export const SURVIVAL_QUESTIONS = [
+  {
+    id: 'survival-bs-delta', topic: 'Black-Scholes',
+    prompt: 'For an at-the-money European call with σ = 20% and T = 1y, what is the approximate Delta?',
+    context: 'S = 100, K = 100, r = 2%, q = 0. Pick the closest value.',
+    options: [['A', '0.42'], ['B', '0.50'], ['C', '0.54'], ['D', '0.58']], correct: 'D',
+    explanation: 'd1 = (0.02 + 0.5 × 0.20²) / 0.20 = 0.20, so N(d1) ≈ 0.58.',
+  },
+  {
+    id: 'survival-bs-price', topic: 'Black-Scholes',
+    prompt: 'What is the Black-Scholes price of the same one-year ATM call?',
+    context: 'S = K = 100, r = 2%, q = 0, σ = 20%.',
+    options: [['A', '6.12'], ['B', '8.92'], ['C', '10.45'], ['D', '12.00']], correct: 'B',
+    explanation: 'The risk-neutral Black-Scholes call price is approximately 8.92 currency units.',
+  },
+  {
+    id: 'survival-parity', topic: 'Parity',
+    prompt: 'Using put-call parity, what put price matches a call priced at 8.92?',
+    context: 'S = K = 100, r = 2%, q = 0, T = 1y; ignore transaction costs.',
+    options: [['A', '5.13'], ['B', '6.94'], ['C', '8.92'], ['D', '10.90']], correct: 'B',
+    explanation: 'P = C − S + K·exp(−rT) = 8.92 − 100 + 98.02 ≈ 6.94.',
+  },
+  {
+    id: 'survival-delta-hedge', topic: 'Greeks',
+    prompt: 'How many shares should a desk sell to delta-hedge long calls initially?',
+    context: '1,000 calls, multiplier 100 shares, Delta = 0.54; long calls have positive delta.',
+    options: [['A', '5,400'], ['B', '54,000'], ['C', '100,540'], ['D', '540,000']], correct: 'B',
+    explanation: 'Long delta is 1,000 × 100 × 0.54 = 54,000 shares, so the hedge sells 54,000.',
+  },
+  {
+    id: 'survival-gamma-pnl', topic: 'Greeks',
+    prompt: 'What is the second-order gamma P&L in the displayed scenario?',
+    context: 'Gamma = −80,000 EUR per (1% spot move)²; spot move = −2%.',
+    options: [['A', '−80,000 EUR'], ['B', '−160,000 EUR'], ['C', '−320,000 EUR'], ['D', '+160,000 EUR']], correct: 'B',
+    explanation: 'Gamma P&L = 0.5 × (−80,000) × (−2)² = −160,000 EUR.',
+  },
+  {
+    id: 'survival-vega-pnl', topic: 'Greeks',
+    prompt: 'What is the vega P&L for a three-point volatility increase?',
+    context: 'Vega = +120,000 EUR per volatility point; vol shock = +3 points.',
+    options: [['A', '+40,000 EUR'], ['B', '+120,000 EUR'], ['C', '+360,000 EUR'], ['D', '−360,000 EUR']], correct: 'C',
+    explanation: 'Vega P&L = 120,000 × 3 = +360,000 EUR.',
+  },
+  {
+    id: 'survival-payer-pv', topic: 'Rates',
+    prompt: 'What is the approximate PV of this payer swap?',
+    context: 'Notional 100m EUR, fixed 3.20%, par 3.00%, annuity 4.55.',
+    options: [['A', '−910,000 EUR'], ['B', '−455,000 EUR'], ['C', '+455,000 EUR'], ['D', '+910,000 EUR']], correct: 'A',
+    explanation: 'Payer PV ≈ (par − fixed) × annuity × notional = (3.00% − 3.20%) × 4.55 × 100m = −910,000 EUR.',
+  },
+  {
+    id: 'survival-swap-dv01', topic: 'Rates',
+    prompt: 'What is the approximate DV01 of the same payer swap?',
+    context: 'Notional 100m EUR and annuity 4.55; DV01 is stated per basis point.',
+    options: [['A', '4,550 EUR/bp'], ['B', '45,500 EUR/bp'], ['C', '455,000 EUR/bp'], ['D', '4,550,000 EUR/bp']], correct: 'B',
+    explanation: 'DV01 ≈ 100m × 4.55 × 0.0001 = 45,500 EUR/bp.',
+  },
+  {
+    id: 'survival-swap-shock', topic: 'Rates',
+    prompt: 'What is the payer swap P&L for a +10bp parallel move?',
+    context: 'Payer DV01 = +45,500 EUR/bp; use the local linear approximation.',
+    options: [['A', '−455,000 EUR'], ['B', '−45,500 EUR'], ['C', '+45,500 EUR'], ['D', '+455,000 EUR']], correct: 'D',
+    explanation: 'P&L ≈ DV01 × 10 = 45,500 × 10 = +455,000 EUR; a payer benefits when rates rise.',
+  },
+  {
+    id: 'survival-df-one-year', topic: 'Yield curves',
+    prompt: 'What discount factor follows from a one-year annual par rate of 3%?',
+    context: 'Use the simple annual par-coupon convention shown in the exercise.',
+    options: [['A', '0.9709'], ['B', '0.9700'], ['C', '1.0300'], ['D', '0.9389']], correct: 'A',
+    explanation: 'DF(1Y) = 1 / (1 + 0.03) = 0.9708738, which rounds to 0.9709.',
+  },
+  {
+    id: 'survival-df-two-year', topic: 'Yield curves',
+    prompt: 'What is the bootstrapped two-year discount factor?',
+    context: 'DF(1Y) = 0.9708738 and the two-year annual par rate is 3.20%.',
+    options: [['A', '0.9709'], ['B', '0.9584'], ['C', '0.9389'], ['D', '0.9057']], correct: 'C',
+    explanation: 'DF2 = (1 − 0.032 × DF1) / 1.032 = 0.9388876, which rounds to 0.9389.',
+  },
+  {
+    id: 'survival-bond-dv01', topic: 'Bonds',
+    prompt: 'What is the approximate DV01 of this long bond position?',
+    context: 'Market value 25m EUR; modified duration 6.8; DV01 is per 1bp.',
+    options: [['A', '1,700 EUR/bp'], ['B', '17,000 EUR/bp'], ['C', '170,000 EUR/bp'], ['D', '1,700,000 EUR/bp']], correct: 'B',
+    explanation: 'DV01 = 25m × 6.8 × 0.0001 = 17,000 EUR/bp.',
+  },
+  {
+    id: 'survival-bond-shock', topic: 'Bonds',
+    prompt: 'What is the linear P&L for a +25bp yield shock on the long bond?',
+    context: 'DV01 = 17,000 EUR/bp; ignore convexity for this small-shock estimate.',
+    options: [['A', '−425,000 EUR'], ['B', '−42,500 EUR'], ['C', '+42,500 EUR'], ['D', '+425,000 EUR']], correct: 'A',
+    explanation: 'A long bond loses when yields rise: −17,000 × 25 = −425,000 EUR.',
+  },
+  {
+    id: 'survival-var', topic: 'Market risk',
+    prompt: 'What is the one-day 95% parametric VaR?',
+    context: 'Portfolio 20m EUR; daily volatility 2%; one-sided z-score 1.645.',
+    options: [['A', '329,000 EUR'], ['B', '400,000 EUR'], ['C', '658,000 EUR'], ['D', '1,645,000 EUR']], correct: 'C',
+    explanation: 'VaR = 20m × 0.02 × 1.645 = 658,000 EUR; this is not a worst-case loss.',
+  },
+  {
+    id: 'survival-cs01', topic: 'Credit',
+    prompt: 'What is the CDS CS01 before applying the position sign?',
+    context: 'Notional 50m EUR; risky annuity 4.2; CS01 is per 1bp.',
+    options: [['A', '2,100 EUR/bp'], ['B', '21,000 EUR/bp'], ['C', '210,000 EUR/bp'], ['D', '2,100,000 EUR/bp']], correct: 'B',
+    explanation: 'CS01 = 50m × 4.2 × 0.0001 = 21,000 EUR/bp.',
+  },
+  {
+    id: 'survival-credit-shock', topic: 'Credit',
+    prompt: 'What is the absolute spread-shock PV move for +25bp widening?',
+    context: 'CS01 = 21,000 EUR/bp; report the move before buyer/seller position sign.',
+    options: [['A', '−525,000 EUR'], ['B', '−84,000 EUR'], ['C', '+84,000 EUR'], ['D', '+525,000 EUR']], correct: 'D',
+    explanation: 'Absolute move = 21,000 × 25 = 525,000 EUR; protection-buyer/seller sign is separate.',
+  },
+  {
+    id: 'survival-barrier', topic: 'Barriers',
+    prompt: 'What is the payoff at spot 1.20 if the barrier was never touched?',
+    context: 'Down-and-out EUR/USD call; strike 1.10; notional EUR 10m; payoff is in USD.',
+    options: [['A', '0 USD'], ['B', '100,000 USD'], ['C', '1,000,000 USD'], ['D', '10,000,000 USD']], correct: 'C',
+    explanation: '(1.20 − 1.10) × EUR 10m = 1,000,000 USD, assuming no knock-out.',
+  },
+  {
+    id: 'survival-iv', topic: 'Implied volatility',
+    prompt: 'What implied volatility matches the displayed ATM call price?',
+    context: 'Call = 8.00; S = K = 100; r = 2%; T = 0.5y; Newton starts at 20%.',
+    options: [['A', '20.00%'], ['B', '25.43%'], ['C', '26.73%'], ['D', '32.00%']], correct: 'C',
+    explanation: 'Using Black-Scholes vega per vol unit, Newton-Raphson converges in four iterations to 26.73%.',
+  },
+  {
+    id: 'survival-asian-ci', topic: 'Monte Carlo',
+    prompt: 'What does the reported 95% confidence interval communicate?',
+    context: 'Asian call estimate 5.36; standard error 0.03; interval [5.31, 5.41].',
+    options: [['A', 'A guaranteed price range'], ['B', 'Sampling uncertainty around the estimate'], ['C', 'The live market bid/offer'], ['D', 'A worst-case loss limit']], correct: 'B',
+    explanation: 'The interval describes Monte Carlo sampling uncertainty under the declared simulation convention; it is not a live quote.',
+  },
+  {
+    id: 'survival-crr-probability', topic: 'CRR lattice',
+    prompt: 'Which risk-neutral probability is plausible for this four-step CRR tree?',
+    context: 'r = 2%, q = 0, σ = 20%, T = 1y; p = (exp((r−q)dt) − d)/(u−d).',
+    options: [['A', '−0.20'], ['B', '0.50'], ['C', '1.20'], ['D', '2.00']], correct: 'B',
+    explanation: 'With dt = 0.25, u = exp(0.10), d = exp(−0.10), giving p ≈ 0.501; it must lie in [0,1].',
   },
 ];
 
@@ -165,54 +321,6 @@ export const COURSE_BLUEPRINTS = {
     ],
     resources: ['Volatility surface notes', 'SVI fitting references', 'Vol products post', 'IV calculator'],
     relatedExerciseIds: ['iv-newton', 'smile-fit'],
-  },
-  'vol-products': {
-    deskPromise: 'Understand variance swaps and vol carry through replication, P&L and exposure management.',
-    deskRole: 'Vol products analyst',
-    workflow: ['Identify payoff', 'Estimate fair variance', 'Compare realized/implied', 'Attribute P&L', 'State hedge'],
-    lessons: [
-      { n: '1.1', t: 'Variance payoff in P&L terms', d: '12m', done: true },
-      { n: '1.2', t: 'Realized vs implied variance', d: '18m', done: false, current: true },
-      { n: '1.3', t: 'Vol carry and convexity', d: '18m', done: false },
-      { n: '2.1', t: 'VIX and term structure', d: '20m', done: false },
-    ],
-    modules: [
-      { t: 'Payoff first', d: 'State exactly when the trade wins or loses.' },
-      { t: 'Carry estimate', d: 'Compare implied and expected realized variance.' },
-      { t: 'Exposure map', d: 'Separate spot, vol and vol-of-vol sensitivity.' },
-      { t: 'Risk note', d: 'Explain gap risk, convexity and limits.' },
-    ],
-    labs: [
-      ['Variance P&L', 'Compute P&L from realized variance below strike.'],
-      ['Vol carry', 'Rank three maturities by carry and tail risk.'],
-      ['Risk memo', 'Explain why short variance can look profitable until it is not.'],
-    ],
-    resources: ['Volatility Products course', 'Variance swap notes', 'VIX term structure dataset'],
-    relatedExerciseIds: ['var-swap-pnl', 'smile-fit'],
-  },
-  hedging: {
-    deskPromise: 'Build hedges that survive realistic constraints: liquidity, residual Greeks and rebalance frequency.',
-    deskRole: 'Hedging strategist',
-    workflow: ['Define exposure', 'Choose hedge instrument', 'Size hedge', 'Stress residuals', 'Plan rebalancing'],
-    lessons: [
-      { n: '1.1', t: 'What needs hedging', d: '10m', done: true },
-      { n: '1.2', t: 'Delta-gamma hedge sizing', d: '20m', done: false, current: true },
-      { n: '1.3', t: 'Vega hedge mismatch', d: '18m', done: false },
-      { n: '2.1', t: 'Rebalancing and transaction cost', d: '16m', done: false },
-    ],
-    modules: [
-      { t: 'Hedge objective', d: 'State whether you hedge P&L, Greeks, capital or limit usage.' },
-      { t: 'Instrument choice', d: 'Pick liquid hedges and make basis risk visible.' },
-      { t: 'Residual risk', d: 'Show what remains after the hedge and when to rebalance.' },
-      { t: 'Desk decision', d: 'Document action, trigger and escalation threshold.' },
-    ],
-    labs: [
-      ['Delta hedge', 'Neutralize a book and compute shares/futures required.'],
-      ['Gamma residual', 'Stress the hedged book under a 2% move.'],
-      ['Vega mismatch', 'Hedge 3M vega with 1M and 6M options.'],
-    ],
-    resources: ['Dynamic Hedging', 'Options book Greek calculator', 'Hedge memo template'],
-    relatedExerciseIds: ['delta-hedge', 'options-book-greeks'],
   },
   exotics: {
     deskPromise: 'Read path-dependent payoffs, build scenario tables and identify the risk that vanilla intuition misses.',
@@ -418,7 +526,6 @@ export const PRACTICE_EXERCISES = [
     cat: 'Black-Scholes',
     level: 'L1',
     time: '20m',
-    done: true,
     product: 'equity option',
     concept: 'Black-Scholes quote control',
     courseIds: ['black-scholes'],
@@ -471,10 +578,9 @@ def bs_put(S, K, r, sigma, T):
     cat: 'Greeks',
     level: 'L3',
     time: '35m',
-    done: false,
     product: 'equity options book',
     concept: 'delta gamma vega theta P&L',
-    courseIds: ['greeks', 'hedging'],
+    courseIds: ['greeks'],
     description: 'Compute delta-gamma-vega-theta P&L and recommend a hedge.',
     objective: 'Turn a Greek report into P&L attribution and an operational hedge decision.',
     marketData: [
@@ -491,7 +597,7 @@ def bs_put(S, K, r, sigma, T):
       'Add total scenario P&L.',
       'Identify the dominant risk and propose hedge action.',
     ],
-    hints: ['Do not multiply 250k by -0.02 here.', 'Gamma uses move squared.', 'Short gamma loses under large spot moves.'],
+    hints: ['Do not multiply 250k by -0.02 here.', 'The second-order gamma term is 0.5 * Gamma * move^2.', 'Short gamma loses under large spot moves.'],
     starterCode: `delta_per_1pct = 250_000
 gamma_per_1pct2 = -80_000
 vega_per_vol_pt = 120_000
@@ -502,13 +608,13 @@ vol_move_points = 3
 
 # compute pnl_delta, pnl_gamma, pnl_vega, pnl_theta, total`,
     output: `Delta P&L: -500,000 EUR
-Gamma P&L: -320,000 EUR
+Gamma P&L: -160,000 EUR
 Vega P&L: +360,000 EUR
 Theta P&L: -15,000 EUR
-Total: -475,000 EUR
+Total: -315,000 EUR
 Action: reduce short gamma or add convexity before monitoring vega hedge mismatch.`,
     solution: `pnl_delta = 250_000 * (-2)
-pnl_gamma = -80_000 * ((-2) ** 2)
+pnl_gamma = 0.5 * -80_000 * ((-2) ** 2)
 pnl_vega = 120_000 * 3
 pnl_theta = -15_000
 total = pnl_delta + pnl_gamma + pnl_vega + pnl_theta`,
@@ -520,7 +626,6 @@ total = pnl_delta + pnl_gamma + pnl_vega + pnl_theta`,
     cat: 'Rates',
     level: 'L2',
     time: '30m',
-    done: false,
     product: 'EUR interest-rate swap',
     concept: 'PV DV01 curve shock',
     courseIds: ['rates-swaps', 'yield-curves'],
@@ -551,11 +656,11 @@ shock_bp = 10
 # pv = ?
 # dv01 = ?
 # shock_pnl = ?`,
-    output: `PV approx: +910,000 EUR
+    output: `PV approx: -910,000 EUR
 DV01: 45,500 EUR/bp
 Shock P&L for +10bp: +455,000 EUR
 Action: monitor curve-shape risk; parallel hedge can use offsetting receiver/pay fixed exposure.`,
-    solution: `pv = (fixed - par) * annuity * notional
+    solution: `pv = (par - fixed) * annuity * notional
 dv01 = notional * annuity * 0.0001
 shock_pnl = dv01 * 10`,
     grading: [['PV approximation', '3 pts'], ['DV01', '3 pts'], ['Shock sign', '2 pts'], ['Hedge note', '2 pts']],
@@ -566,7 +671,6 @@ shock_pnl = dv01 * 10`,
     cat: 'Barrier',
     level: 'L3',
     time: '35m',
-    done: false,
     product: 'FX barrier option',
     concept: 'knock-out payoff and gap risk',
     courseIds: ['exotics', 'structured-products'],
@@ -611,10 +715,9 @@ Action: escalate monitoring as spot approaches barrier; delta hedge is unreliabl
     cat: 'Volatility',
     level: 'L3',
     time: '40m',
-    done: false,
     product: 'equity index options',
     concept: 'smile cleaning and SVI intuition',
-    courseIds: ['implied-vol', 'vol-products'],
+    courseIds: ['implied-vol'],
     description: 'Clean option quotes and fit a usable implied-vol smile slice.',
     objective: 'Turn noisy option prices into an implied-vol slice and explain skew.',
     marketData: [
@@ -655,7 +758,6 @@ Action: flag downside protection demand and stress put-spread hedges.`,
     cat: 'Monte Carlo',
     level: 'L3',
     time: '35m',
-    done: true,
     product: 'Asian option',
     concept: 'path simulation and confidence interval',
     courseIds: ['monte-carlo'],
@@ -683,9 +785,10 @@ def price_asian_call(S0, K, r, sigma, T, steps, paths, seed=7):
     rng = np.random.default_rng(seed)
     # simulate paths and return price, stderr
     pass`,
-    output: `Asian call price: 5.32
-Std error: 0.02
-95% CI: [5.28, 5.36]
+    output: `Asian call price: 5.36
+Std error: 0.03
+95% CI: [5.31, 5.41]
+Convention: monthly observations exclude t=0; NumPy default_rng(seed=7)
 Action: report model and discretization assumptions with the quote.`,
     solution: `# Generate normal shocks, evolve GBM, average each path,
 # payoff = max(avg - K, 0), price = exp(-rT) * mean(payoff),
@@ -698,7 +801,6 @@ Action: report model and discretization assumptions with the quote.`,
     cat: 'Yield Curves',
     level: 'L2',
     time: '30m',
-    done: false,
     product: 'interest-rate curve',
     concept: 'discount factors bootstrapping',
     courseIds: ['yield-curves', 'rates-swaps'],
@@ -723,8 +825,8 @@ dfs = {}
 
 # bootstrap annual discount factors`,
     output: `DF(1Y): 0.9709
-DF(2Y): 0.9384
-DF(3Y): 0.9056
+DF(2Y): 0.9389
+DF(3Y): 0.9057
 Action: use the curve for rough pricing only; production requires conventions and interpolation controls.`,
     solution: `# For maturity n:
 # par = (1 - DF_n) / sum_{i=1..n} DF_i
@@ -737,10 +839,9 @@ Action: use the curve for rough pricing only; production requires conventions an
     cat: 'Greeks',
     level: 'L2',
     time: '25m',
-    done: false,
     product: 'option hedge',
     concept: 'delta rebalancing',
-    courseIds: ['greeks', 'hedging'],
+    courseIds: ['greeks'],
     description: 'Compute hedge shares and explain rebalancing P&L.',
     objective: 'Size a delta hedge and explain why it must be rebalanced.',
     marketData: [
@@ -779,7 +880,6 @@ rebalance = shares1 - shares0`,
     cat: 'Volatility',
     level: 'L2',
     time: '25m',
-    done: true,
     product: 'vanilla option',
     concept: 'implied volatility inversion',
     courseIds: ['implied-vol', 'black-scholes'],
@@ -807,7 +907,7 @@ rebalance = shares1 - shares0`,
         # update sigma
         pass
     return sigma`,
-    output: `Implied volatility: 25.43%
+    output: `Implied volatility: 26.73%
 Iterations: 4
 Action: flag low-vega options for robust solver or quote filtering.`,
     solution: `# sigma_next = sigma - (bs_price(sigma) - target_price) / vega_unit
@@ -820,7 +920,6 @@ Action: flag low-vega options for robust solver or quote filtering.`,
     cat: 'Exotic',
     level: 'L4',
     time: '55m',
-    done: false,
     product: 'autocallable note',
     concept: 'coupon and redemption scenarios',
     courseIds: ['exotics', 'structured-products'],
@@ -864,7 +963,6 @@ Action: communicate path dependency and downside participation clearly.`,
     cat: 'Credit',
     level: 'L3',
     time: '30m',
-    done: false,
     product: 'single-name CDS',
     concept: 'CS01 spread shock carry',
     courseIds: ['credit-derivatives'],
@@ -907,7 +1005,6 @@ shock_move = cs01 * shock_bp`,
     cat: 'Risk',
     level: 'L2',
     time: '25m',
-    done: false,
     product: 'portfolio',
     concept: 'parametric VaR limit',
     courseIds: ['market-risk-var'],
@@ -944,7 +1041,6 @@ Action: escalate and reduce/hedge exposure; add stress loss for a -5% move.`,
     cat: 'Rates',
     level: 'L2',
     time: '25m',
-    done: false,
     product: 'fixed-income bond',
     concept: 'duration DV01 shock P&L',
     courseIds: ['fixed-income-bonds'],
@@ -1032,7 +1128,14 @@ export const GENERATOR_PRESETS = [
 ];
 
 export function getPracticeApiBase() {
-  const raw = import.meta.env.VITE_TPL_RAG_API_URL || 'http://127.0.0.1:8000';
+  if (import.meta.env.DEV && typeof window !== 'undefined' && window.__TPL_LOCAL_PREVIEW_ENABLED__
+    && window.__TPL_LOCAL_PREVIEW_MODE__ !== 'real'
+    && ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname)) return '/__dev/api';
+  const configured = import.meta.env.VITE_TPL_RAG_API_URL;
+  if (import.meta.env.PROD && !configured) {
+    throw new Error('VITE_TPL_RAG_API_URL is required in production');
+  }
+  const raw = configured || 'http://127.0.0.1:8000';
   return raw.replace(/\/+$/, '');
 }
 
@@ -1052,13 +1155,30 @@ export async function getBillingConfig() {
   }
 }
 
-export async function startCheckout(plan, email) {
+function bearerHeaders(accessToken) {
+  return accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
+}
+
+let platformAccessToken = null;
+export function setPlatformAccessToken(accessToken) {
+  if (sessionSubject(platformAccessToken) !== sessionSubject(accessToken)) clearExerciseMemory();
+  platformAccessToken = accessToken || null;
+}
+function sessionSubject(token = platformAccessToken) {
+  try { return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).sub || null; }
+  catch { return null; }
+}
+export function getPlatformAccessToken() {
+  return platformAccessToken;
+}
+
+export async function startCheckout(plan, accessToken) {
   let r;
   try {
     r = await fetch(`${getPracticeApiBase()}/billing/checkout`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(email ? { plan, email } : { plan }),
+      headers: { 'Content-Type': 'application/json', ...bearerHeaders(accessToken) },
+      body: JSON.stringify({ plan }),
     });
   } catch (e) {
     throw new Error(`backend unreachable: ${e.message}`);
@@ -1071,10 +1191,10 @@ export async function startCheckout(plan, email) {
   return r.json(); // { id, url, plan, mode }
 }
 
-export async function getEntitlement(email) {
-  if (!email) return { active: false, plan: null };
+export async function getEntitlement(accessToken) {
+  if (!accessToken) return { active: false, plan: null };
   try {
-    const r = await fetch(`${getPracticeApiBase()}/billing/entitlement?email=${encodeURIComponent(email)}`);
+    const r = await fetch(`${getPracticeApiBase()}/billing/entitlement`, { headers: bearerHeaders(accessToken) });
     if (!r.ok) return { active: false, plan: null };
     return r.json();
   } catch {
@@ -1082,25 +1202,119 @@ export async function getEntitlement(email) {
   }
 }
 
+// --- one-shot Market Finance Starter Kit ---------------------------------
+// Product identity, release path and redirects remain server-controlled. The
+// browser sends only the signed user token and never receives filesystem data.
+
+async function starterKitError(response, fallback) {
+  let detail = fallback || `HTTP ${response.status}`;
+  try { detail = (await response.json()).detail || detail; } catch { /* non-JSON error */ }
+  const error = new Error(detail);
+  error.status = response.status;
+  return error;
+}
+
+export async function getStarterKitAvailability() {
+  try {
+    const response = await fetch(`${getPracticeApiBase()}/products/market-finance-starter-kit/availability`);
+    if (!response.ok) return { sale_ready: false, checkout_configured: false, artifact_ready: false, reachable: true };
+    return { ...(await response.json()), reachable: true };
+  } catch {
+    return { sale_ready: false, checkout_configured: false, artifact_ready: false, reachable: false };
+  }
+}
+
+export async function startStarterKitCheckout(accessToken) {
+  if (!accessToken) {
+    const error = new Error('Sign in before starting checkout.');
+    error.status = 401;
+    throw error;
+  }
+  let response;
+  try {
+    response = await fetch(`${getPracticeApiBase()}/products/market-finance-starter-kit/checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...bearerHeaders(accessToken) },
+      body: '{}',
+    });
+  } catch (error) {
+    throw new Error(`backend unreachable: ${error.message}`);
+  }
+  if (!response.ok) throw await starterKitError(response, 'Starter Kit checkout is unavailable.');
+  return response.json();
+}
+
+export async function getStarterKitManifest(accessToken) {
+  if (!accessToken) {
+    const error = new Error('Sign in to access your Starter Kit.');
+    error.status = 401;
+    throw error;
+  }
+  let response;
+  try {
+    response = await fetch(`${getPracticeApiBase()}/products/market-finance-starter-kit/manifest`, {
+      headers: bearerHeaders(accessToken),
+    });
+  } catch (error) {
+    throw new Error(`backend unreachable: ${error.message}`);
+  }
+  if (!response.ok) throw await starterKitError(response, 'Starter Kit access is unavailable.');
+  return response.json();
+}
+
+export async function downloadStarterKit(accessToken) {
+  if (!accessToken) {
+    const error = new Error('Sign in to download your Starter Kit.');
+    error.status = 401;
+    throw error;
+  }
+  let response;
+  try {
+    response = await fetch(`${getPracticeApiBase()}/products/market-finance-starter-kit/download`, {
+      headers: bearerHeaders(accessToken),
+    });
+  } catch (error) {
+    throw new Error(`backend unreachable: ${error.message}`);
+  }
+  if (!response.ok) throw await starterKitError(response, 'Starter Kit download is unavailable.');
+  const disposition = response.headers.get('content-disposition') || '';
+  const encoded = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+  const plain = disposition.match(/filename="?([^";]+)"?/i);
+  const filename = encoded ? decodeURIComponent(encoded[1]) : plain ? plain[1] : 'market-finance-starter-kit.zip';
+  return { blob: await response.blob(), filename };
+}
+
 // --- platform data API (community/jobs/blog/leaderboard/progress/...) ------
 // Real persistence via the local/VPS FastAPI backend. Every call degrades
 // gracefully (returns null/[]) so the UI can show an honest empty/offline state
 // instead of crashing when the backend is down.
 
-async function platformGet(path) {
+async function platformGet(path, required = false) {
   try {
-    const r = await fetch(`${getPracticeApiBase()}${path}`);
-    if (!r.ok) return null;
+    const r = await fetch(`${getPracticeApiBase()}${path}`, { headers: bearerHeaders(platformAccessToken) });
+    if (!r.ok) {
+      if (!required) return null;
+      const error = new Error(`Service unavailable (HTTP ${r.status}).`);
+      error.status = r.status;
+      throw error;
+    }
     return await r.json();
-  } catch {
+  } catch (error) {
+    if (required) throw error;
     return null;
   }
+}
+
+async function platformList(path, key) {
+  const data = await platformGet(path, true);
+  if (!Array.isArray(data?.[key])) throw new Error('Invalid service response.');
+  return data[key];
 }
 
 async function platformPost(path, body) {
   const r = await fetch(`${getPracticeApiBase()}${path}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...bearerHeaders(platformAccessToken) },
     body: JSON.stringify(body || {}),
   });
   if (!r.ok) {
@@ -1113,34 +1327,60 @@ async function platformPost(path, body) {
 
 export const platformApi = {
   base: getPracticeApiBase,
+  async listExercises(owner, offset=0) {
+    const data = await platformGet(`/platform/exercises?offset=${offset}`, true);
+    if (data.owner_id !== owner) throw new Error('Le compte a changé. Rechargez votre bibliothèque.');
+    return {records:data.exercises,hasMore:data.has_more};
+  },
+  async getExercise(id, owner) {
+    const data = await platformGet(`/platform/exercises/${encodeURIComponent(id)}`, true);
+    if (data.owner_id !== owner) throw new Error('Le compte a changé. Rechargez votre bibliothèque.');
+    return data;
+  },
   async health() { return platformGet('/platform/health'); },
+  async adminCounts() {
+    const response = await fetch(`${getPracticeApiBase()}/platform/admin/counts`, {headers:bearerHeaders(platformAccessToken)});
+    if (!response.ok) throw new Error(`Admin counts denied (HTTP ${response.status}).`);
+    return response.json();
+  },
+  async courseScript(courseId) {
+    const response = await fetch(`${getPracticeApiBase()}/courses/${encodeURIComponent(courseId)}/script`, {
+      headers: bearerHeaders(platformAccessToken),
+    });
+    if (!response.ok) {
+      let detail = `HTTP ${response.status}`;
+      try { detail = (await response.json()).detail || detail; } catch { /* ignore */ }
+      throw new Error(detail);
+    }
+    return response.text();
+  },
   // blog
-  async listBlog() { const d = await platformGet('/platform/blog'); return d?.posts || []; },
-  async getBlog(slug) { return platformGet(`/platform/blog/${encodeURIComponent(slug)}`); },
+  async listBlog() { return platformList('/platform/blog', 'posts'); },
+  async getBlog(slug) { return platformGet(`/platform/blog/${encodeURIComponent(slug)}`, true); },
   // community
-  async listThreads(channel) { const d = await platformGet(`/platform/community/threads${channel && channel !== 'all' ? `?channel=${channel}` : ''}`); return d?.threads || []; },
+  async listThreads(channel) { return platformList(`/platform/community/threads${channel && channel !== 'all' ? `?channel=${encodeURIComponent(channel)}` : ''}`, 'threads'); },
   async createThread(body) { return platformPost('/platform/community/threads', body); },
   async voteThread(id) { return platformPost(`/platform/community/threads/${id}/vote`, {}); },
-  async listComments(id) { const d = await platformGet(`/platform/community/threads/${id}/comments`); return d?.comments || []; },
+  async listComments(id) { return platformList(`/platform/community/threads/${encodeURIComponent(id)}/comments`, 'comments'); },
   async addComment(id, body) { return platformPost(`/platform/community/threads/${id}/comments`, body); },
   // jobs
-  async listJobs(kind) { const d = await platformGet(`/platform/jobs${kind && kind !== 'all' ? `?kind=${kind}` : ''}`); return d?.jobs || []; },
+  async listJobs(kind) { return platformList(`/platform/jobs${kind && kind !== 'all' ? `?kind=${encodeURIComponent(kind)}` : ''}`, 'jobs'); },
   async createJob(body) { return platformPost('/platform/jobs', body); },
-  async applyJob(id, body) { return platformPost(`/platform/jobs/${id}/apply`, body); },
+  async applyJob(id, body = {}) { return platformPost(`/platform/jobs/${id}/apply`, body); },
   // bug reports
   async reportBug(body) { return platformPost('/platform/bug-reports', body); },
   // newsletter
   async subscribe(email, source) { return platformPost('/platform/newsletter', { email, source }); },
   // progress + leaderboard
   async recordProgress(body) { try { return await platformPost('/platform/progress', body); } catch { return null; } },
-  async getProgress(userId) { return platformGet(`/platform/progress/${encodeURIComponent(userId)}`); },
-  async leaderboard(limit = 20) { const d = await platformGet(`/platform/leaderboard?limit=${limit}`); return d?.leaderboard || []; },
+  async getProgress(userId) { return platformGet(`/platform/progress/${encodeURIComponent(userId)}`, true); },
+  async leaderboard(limit = 20) { return platformList(`/platform/leaderboard?limit=${limit}`, 'leaderboard'); },
   // agentic desk (multi-agent trading room)
   async deskRun(query) { try { return await platformPost('/agent/desk/run', { query }); } catch { return null; } },
   async deskState() { return platformGet('/agent/desk/state'); },
   async deskTrade(query) { try { return await platformPost('/agent/desk/trade', { query }); } catch { return null; } },
   // survival
-  async recordSurvival(body) { try { return await platformPost('/platform/survival', body); } catch { return null; } },
+  async recordSurvival(body) { return platformPost('/platform/survival', body); },
   async survivalLeaderboard(limit = 20) { const d = await platformGet(`/platform/survival/leaderboard?limit=${limit}`); return d?.leaderboard || []; },
 };
 
@@ -1161,7 +1401,7 @@ function strategyQs(params) {
 async function strategyPost(path, params) {
   let r;
   try {
-    r = await fetch(`${getPracticeApiBase()}${path}${strategyQs(params)}`, { method: 'POST' });
+    r = await fetch(`${getPracticeApiBase()}${path}${strategyQs(params)}`, { method: 'POST', headers: bearerHeaders(platformAccessToken) });
   } catch (e) {
     throw new Error(`backend injoignable: ${e.message}`);
   }
@@ -1250,36 +1490,36 @@ export function exerciseDescription(exercise) {
   return byCategory[exercise.cat] || 'Desk-style practice case with calculation and decision.';
 }
 
-export function loadGeneratedExercises() {
-  if (typeof window === 'undefined') return [];
-  try {
-    const raw = window.localStorage.getItem(GENERATED_EXERCISES_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+function localExerciseStorage() {
+  try { return typeof window === 'undefined' ? null : window.localStorage; } catch { return null; }
 }
-
-export function saveGeneratedExercise(exercise) {
-  const existing = loadGeneratedExercises();
+export function loadGeneratedExercises(owner = sessionSubject()) {
+  return readExerciseCache(GENERATED_EXERCISES_KEY, owner, localExerciseStorage());
+}
+export function cacheGeneratedExercises(items, owner = sessionSubject()) {
+  return writeExerciseCache(GENERATED_EXERCISES_KEY, owner, items, localExerciseStorage());
+}
+export function saveGeneratedExercise(exercise, owner = sessionSubject()) {
+  if (exercise.metadata?.owner_id && owner !== exercise.metadata.owner_id) throw new Error('Le compte a changé. Rechargez votre bibliothèque.');
+  const existing = loadGeneratedExercises(owner);
   const next = [exercise, ...existing.filter((item) => item.id !== exercise.id)].slice(0, 30);
-  try {
-    window.localStorage.setItem(GENERATED_EXERCISES_KEY, JSON.stringify(next));
-  } catch {
-    // Storage can fail in private browsing; the caller still receives the item.
-  }
+  const cached = cacheGeneratedExercises(next, owner);
+  if (!cached && exercise.metadata?.persistence !== 'account') exercise.metadata = { ...exercise.metadata, cache_warning: true };
   return next;
 }
 
-export function getExerciseById(id) {
-  return loadGeneratedExercises().find((item) => item.id === id)
+export function getExerciseById(id, owner = sessionSubject()) {
+  return loadGeneratedExercises(owner).find((item) => item.id === id)
     || PRACTICE_EXERCISES.find((item) => item.id === id)
     || null;
 }
 
 export async function generateAiDeskExercise(input) {
   const request = normalizeGeneratorInput(input);
+  const attemptKey = ownerExerciseKey(`${GENERATED_EXERCISES_KEY}:attempt:${JSON.stringify(request)}`, sessionSubject());
+  const storage = localExerciseStorage();
+  let attempt = crypto.randomUUID();
+  try { attempt = storage?.getItem(attemptKey) || attempt; storage?.setItem(attemptKey, attempt); } catch { /* Retry still works in this browser session. */ }
   const payload = {
     topic: request.topic || null,
     product: request.product || null,
@@ -1287,7 +1527,8 @@ export async function generateAiDeskExercise(input) {
     free_prompt: request.free_prompt || null,
     difficulty: request.difficulty,
     exercise_format: request.exercise_format,
-    number_of_questions: 5,
+    number_of_questions: request.number_of_questions,
+    client_request_id: attempt,
     target_audience: 'learners who want market-finance desk practice',
     require_calculations: true,
     top_k: 8,
@@ -1297,15 +1538,21 @@ export async function generateAiDeskExercise(input) {
   try {
     const response = await fetch(`${getPracticeApiBase()}/agent/exercise`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...bearerHeaders(platformAccessToken) },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(90000),
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error(data.detail || `RAG backend returned ${response.status}`);
+      const detail = Array.isArray(data.detail) ? data.detail.map(item=>item.msg).join(' ') : data.detail;
+      const error = new Error(({401:'Votre session a expiré. Reconnectez-vous pour créer un exercice.',403:'Votre accès ne permet pas cette création. Vérifiez votre abonnement.',429:'Trop de demandes. Patientez avant de réessayer.'})[response.status] || detail || 'La création est indisponible. Réessayez.');
+      error.status = response.status;
+      throw error;
     }
-    return normalizeGeneratedExercise(data, request, 'rag');
+    try { storage?.removeItem(attemptKey); } catch { /* No credentials are cached. */ }
+    return normalizeGeneratedExercise(data, request, data.sources?.length && data.metadata?.source_grounded !== false ? 'rag' : 'backend');
   } catch (error) {
+    if (error.status && error.status < 500) throw error;
     return buildLocalDeskExercise(request, error);
   }
 }
@@ -1318,14 +1565,15 @@ function normalizeGeneratorInput(input) {
     difficulty: input.difficulty || 'intermediate',
     exercise_format: input.exercise_format || 'mixed',
     free_prompt: (input.free_prompt || '').trim(),
+    number_of_questions: input.number_of_questions === undefined || input.number_of_questions === '' ? 5 : Number(input.number_of_questions),
   };
 }
 
-function normalizeGeneratedExercise(data, request, engine) {
-  const now = new Date().toISOString();
+export function normalizeGeneratedExercise(data, request, engine) {
+  const now = data.metadata?.created_at ? new Date(data.metadata.created_at * 1000).toISOString() : new Date().toISOString();
   const category = categorize(request);
   return {
-    id: `ai-${Date.now().toString(36)}-${slugify(request.product || request.topic).slice(0, 18)}`,
+    id: data.metadata?.library_id || `ai-${Date.now().toString(36)}-${slugify(request.product || request.topic).slice(0, 18)}`,
     title: data.title || `Cas pratique - ${request.topic}`,
     cat: category,
     level: levelLabel(request.difficulty),
@@ -1336,7 +1584,8 @@ function normalizeGeneratedExercise(data, request, engine) {
     createdAt: now,
     product: request.product,
     concept: request.concept,
-    description: `Generated from ${engine === 'rag' ? 'the local RAG engine' : 'the browser fallback'} for ${request.product}.`,
+    description: engine === 'fallback' ? 'Exemple fixe hors connexion ; les paramètres personnalisés ne sont pas appliqués.'
+      : `Cas calculé pour ${request.product}${engine === 'rag' ? ', avec références de la bibliothèque' : ', sans référence attachée'}.`,
     content: data.content || '',
     sources: data.sources || [],
     metadata: data.metadata || {},
@@ -1344,138 +1593,31 @@ function normalizeGeneratedExercise(data, request, engine) {
   };
 }
 
+export function exerciseFromRecord(record) {
+  return normalizeGeneratedExercise(record.response, record.request,
+    record.response.sources?.length && record.response.metadata?.source_grounded !== false ? 'rag' : 'backend');
+}
+
+export function exerciseModeLabel(exercise) {
+  if (exercise.engine === 'fallback') return 'Exemple fixe hors connexion';
+  const mode = exercise.metadata?.generation_mode;
+  if (mode === 'llm_unverified') return 'Brouillon IA à vérifier';
+  if (mode === 'llm') return exercise.sources?.length ? 'Rédaction IA · bibliothèque' : 'Rédaction IA · sans référence';
+  return exercise.sources?.length ? 'Cas calculé · bibliothèque' : 'Cas calculé · sans référence';
+}
+
 function buildLocalDeskExercise(request, error) {
-  const family = detectFamily(request);
-  const templates = {
-    options: {
-      title: 'Cas pratique - Options book Greeks',
-      cat: 'Greeks',
-      market: [
-        ['Delta', '+250k EUR par 1%'],
-        ['Gamma', '-80k EUR par 1%^2'],
-        ['Vega', '+120k EUR par vol point'],
-        ['Theta', '-15k EUR par jour'],
-        ['Scenario', 'Spot -2%, vol +3 points, one day passes'],
-      ],
-      correction: [
-        'P&L delta = 250k * (-2) = -500,000 EUR.',
-        'P&L gamma = -80k * (-2)^2 = -320,000 EUR.',
-        'P&L vega = 120k * 3 = +360,000 EUR.',
-        'P&L theta = -15,000 EUR.',
-        'P&L total = -475,000 EUR.',
-        'Decision: reduce short gamma or buy convexity before relying on a simple delta hedge.',
-      ],
-    },
-    rates: {
-      title: 'Cas pratique - Swap DV01',
-      cat: 'Rates',
-      market: [
-        ['Position', 'Payer swap EUR 5Y'],
-        ['Notional', '100m EUR'],
-        ['Fixed coupon', '3.20%'],
-        ['Current par rate', '3.00%'],
-        ['Annuity', '4.55'],
-        ['Shock', '+10bp parallel'],
-      ],
-      correction: [
-        'PV approx = (3.20% - 3.00%) * 4.55 * 100m = +910,000 EUR.',
-        'DV01 = 100m * 4.55 * 0.0001 = 45,500 EUR/bp.',
-        'Shock P&L = 45,500 * 10 = +455,000 EUR for a payer swap.',
-        'Decision: hedge residual curve risk, not only the parallel DV01.',
-      ],
-    },
-    credit: {
-      title: 'Cas pratique - CDS CS01',
-      cat: 'Credit',
-      market: [
-        ['Notional', '50m'],
-        ['Spread', '120bp'],
-        ['Risky annuity', '4.2'],
-        ['Shock', '+25bp'],
-      ],
-      correction: [
-        'Annual carry = 50m * 120bp = 600,000 per year.',
-        'CS01 = 50m * 4.2 * 0.0001 = 21,000 per bp.',
-        'Spread shock move = 21,000 * 25 = 525,000 before position sign.',
-        'Decision: carry is not enough compensation if widening/default risk is accelerating.',
-      ],
-    },
-    risk: {
-      title: 'Cas pratique - VaR limit',
-      cat: 'Risk',
-      market: [
-        ['Portfolio', '20m'],
-        ['Daily vol', '2%'],
-        ['Confidence', '95%'],
-        ['Limit', '600k'],
-      ],
-      correction: [
-        'VaR 95% = 20m * 2% * 1.645 = 658,000.',
-        'The 600k limit is breached.',
-        'Decision: escalate, reduce exposure or hedge; add a stress scenario because VaR is not a worst-case loss.',
-      ],
-    },
-  };
-  const selected = templates[family] || templates.options;
-  const marketLines = selected.market.map(([k, v]) => `- ${k}: ${v}`).join('\n');
-  const correctionLines = selected.correction.map((line, idx) => `${idx + 1}. ${line}`).join('\n');
-  const promptLine = request.free_prompt
-    ? `\n## Contrainte utilisateur\n${request.free_prompt}\n`
-    : '';
-  const content = `# ${selected.title}
-
-## Brief de desk
-Tu es junior analyst sur un desk. L'objectif n'est pas de reciter le cours: tu dois produire un calcul exploitable, une interpretation risque et une action.
-
-## Produit et concept
-- Produit: ${request.product}
-- Concept: ${request.concept}
-- Niveau: ${request.difficulty}
-${promptLine}
-## Donnees de marche
-${marketLines}
-
-## Mission
-1. Identifier le risque principal.
-2. Poser les hypotheses manquantes.
-3. Faire le calcul numerique avec les bonnes unites.
-4. Interpreter le resultat comme un trader ou un risk manager.
-5. Proposer une action: hedge, monitor, reduce, escalate or no-trade.
-
-## Corrige commente
-${correctionLines}
-
-## Grille d'evaluation
-- Calculs et unites: 40%.
-- Diagnostic risque: 25%.
-- Decision operationnelle: 25%.
-- Communication claire: 10%.
-
-## Sources
-Generation locale de secours. Lance le backend RAG sur http://127.0.0.1:8000 pour ancrer l'exercice dans les PDFs de ThePricingLibrary.`;
-
-  const normalized = normalizeGeneratedExercise(
-    {
-      title: selected.title,
-      content,
-      sources: [],
-      metadata: {
-        fallback_reason: error instanceof Error ? error.message : String(error || 'unknown'),
-      },
-    },
-    request,
-    'fallback'
-  );
-  normalized.cat = selected.cat;
-  normalized.description = 'Local fallback desk case generated because the RAG backend was unavailable.';
-  return normalized;
+  const data=buildOfflineReference(request, error instanceof Error ? error.message : String(error || ''));
+  const exercise=normalizeGeneratedExercise(data,request,'fallback');
+  const reference=data.metadata.reference;
+  return {...exercise,product:reference.product,concept:reference.concept,cat:reference.category,level:levelLabel(reference.difficulty),time:timeForDifficulty(reference.difficulty)};
 }
 
 function detectFamily(request) {
   const text = `${request.topic} ${request.product} ${request.concept} ${request.free_prompt}`.toLowerCase();
   if (/(swap|rates|taux|dv01|bond|curve|courbe)/.test(text)) return 'rates';
   if (/(cds|credit|spread|cs01|default)/.test(text)) return 'credit';
-  if (/(var|risk|portfolio|limit|stress)/.test(text)) return 'risk';
+  if (/\bvar\b|value.at.risk|portfolio|limite de risque/.test(text)) return 'risk';
   return 'options';
 }
 

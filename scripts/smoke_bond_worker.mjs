@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+
+const workerUrl = new URL('../src/workers/bond.worker.mjs', import.meta.url);
+const source = await readFile(workerUrl, 'utf8');
+assert.match(source, /import \{ analyzeBond \} from '\.\.\/lib\/bond\.mjs'/);
+for (const forbidden of ['fetch(', 'XMLHttpRequest', 'document.', 'window.', 'Math.random', 'Date.now']) assert.equal(source.includes(forbidden), false);
+console.log('[STEP 1] worker isolation · [STATUS] ok · [OUTPUT] canonical engine import and no network/DOM/ambient randomness');
+const messages = [];
+globalThis.self = { onmessage: null, postMessage: (message) => messages.push(message) };
+await import(`${workerUrl.href}?smoke=${process.pid}`);
+const input = { schemaVersion: 'tpl.bond.input.v1', settlementDate: '2026-10-17', maturityDate: '2036-07-31', dayCount: 'ACT/ACT ICMA', couponRate: 0.05, couponFrequency: 2, quoteMode: 'yield', yieldToMaturity: 0.04, cleanPrice: null, currency: 'EUR', notional: 1_000_000, position: 'long', shockBp: 25 };
+await globalThis.self.onmessage({ data: { type: 'analyze', requestId: 'run-1', input } });
+assert.equal(messages[0].type, 'result'); assert.equal(messages[0].requestId, 'run-1'); assert.ok(messages[0].result.cashflows.length > 0);
+console.log(`[STEP 2] worker success · [STATUS] ok · [OUTPUT] request preserved; SHA=${messages[0].result.analysisId.slice(0, 12)}; clean/dirty/accrued retained`);
+await globalThis.self.onmessage({ data: { type: 'analyze', requestId: 'run-2', input: { ...input, couponFrequency: 0 } } });
+assert.equal(messages[1].type, 'error'); assert.equal(messages[1].requestId, 'run-2'); assert.match(messages[1].error, /couponFrequency/); assert.equal('result' in messages[1], false);
+console.log('[STEP 3] worker failure · [STATUS] ok · [OUTPUT] invalid frequency returns scoped error and no stale result');
+await globalThis.self.onmessage({ data: { type: 'noop', requestId: 'run-3' } });
+assert.deepEqual(messages[2], { type: 'error', requestId: 'run-3', error: 'Invalid bond worker request.' });
+delete globalThis.self;
+console.log('[STEP 4] protocol rejection · [STATUS] ok · [OUTPUT] unsupported message rejected deterministically');
+console.log('[VERDICT] PASS · F-CAL-8 worker isolates schedule, solver and scenario analysis from the UI');

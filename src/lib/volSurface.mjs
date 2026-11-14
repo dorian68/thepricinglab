@@ -1,0 +1,108 @@
+/** Canonical implied-volatility surface quality engine for F-CAL-9. */
+export const VOL_SURFACE_INPUT_SCHEMA = 'tpl.vol-surface.input.v1';
+export const VOL_SURFACE_SCHEMA_VERSION = 'tpl.vol-surface.analysis.v1';
+export const VOL_SURFACE_ENGINE_VERSION = '1.0.0';
+export const VOL_SURFACE_POINTS_CSV_SCHEMA = 'tpl.vol-surface.points.v1';
+export const VOL_SURFACE_DIAGNOSTICS_CSV_SCHEMA = 'tpl.vol-surface.diagnostics.v1';
+
+export const VOL_SURFACE_CONTRACT = Object.freeze({
+  inputKeys: Object.freeze(['schemaVersion', 'surfaceName', 'asOfDate', 'sourceKind', 'interpolationMode', 'selectedMaturity', 'selectedLogMoneyness', 'quotes']),
+  quoteKeys: Object.freeze(['maturity', 'forward', 'discountFactor', 'logMoneyness', 'impliedVolatility', 'bidVolatility', 'askVolatility']),
+  sourceKinds: Object.freeze(['deterministic_fixture', 'user_csv']), interpolationMode: 'total_variance_bilinear',
+  limits: Object.freeze({ minMaturities: 2, minLogMoneynessPoints: 5, maxQuotes: 500, minMaturity: 1 / 365, maxMaturity: 30, minForward: 1e-6, maxForward: 1e9, minDiscountFactor: 1e-6, maxDiscountFactor: 2, minLogMoneyness: -2, maxLogMoneyness: 2, minVolatility: 1e-4, maxVolatility: 5 }),
+  conventions: Object.freeze({ coordinate: 'k = ln(K/F)', variance: 'w(k,T) = impliedVolatility^2 * T', interpolation: 'piecewise linear in log-moneyness and maturity on total variance; no extrapolation', pricing: 'forward-normalized undiscounted Black call, then multiplied by discountFactor * forward', arbitrage: 'discrete diagnostics on submitted nodes; not a proof between nodes' }),
+  limitations: Object.freeze(['Educational deterministic surface-quality analysis; inputs are user assumptions or a labelled fixture, never live quotes.', 'Diagnostics are discrete necessary checks on submitted nodes, not a continuous global arbitrage proof.', 'Interpolation is inside the rectangular grid only; no extrapolation, smoothing, sorting, filling or clipping is performed.', 'No SVI/SABR/Heston calibration, Dupire local volatility, stochastic rates, dividends, American exercise or trading signal is inferred.']),
+  pointsHeaders: Object.freeze(['schemaVersion', 'engineVersion', 'analysisId', 'surfaceName', 'asOfDate', 'sourceKind', 'maturityYears', 'forward', 'discountFactor', 'logMoneyness', 'strike', 'impliedVolatility', 'bidVolatility', 'askVolatility', 'totalVariance', 'normalizedCall', 'discountedCallPrice']),
+  diagnosticsHeaders: Object.freeze(['schemaVersion', 'engineVersion', 'analysisId', 'surfaceName', 'asOfDate', 'status', 'severity', 'code', 'maturityYears', 'logMoneyness', 'message']),
+});
+const L = VOL_SURFACE_CONTRACT.limits; const EPS = 1e-12; const ARB_EPS = 1e-10;
+
+const plainObject = (value, label) => { if (value === null || typeof value !== 'object' || Array.isArray(value) || Object.getPrototypeOf(value) !== Object.prototype) throw new Error(`${label} must be a plain object.`); };
+const exactKeys = (value, keys, label) => { const allowed = new Set(keys); const missing = keys.filter((key) => !Object.hasOwn(value, key)); const unknown = Object.keys(value).filter((key) => !allowed.has(key)); if (missing.length || unknown.length) throw new Error(`${label} schema is invalid; missing=${missing.join('|') || 'none'}; unknown=${unknown.join('|') || 'none'}.`); };
+const finite = (value, label, min, max) => { if (typeof value !== 'number' || !Number.isFinite(value)) throw new Error(`${label} must be a finite number.`); if (value < min || value > max) throw new Error(`${label} is outside the supported domain.`); return Object.is(value, -0) ? 0 : value; };
+const nullableVol = (value, label) => value === null ? null : finite(value, label, L.minVolatility, L.maxVolatility);
+const strictDate = (value) => { if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) throw new Error('asOfDate must use strict YYYY-MM-DD format.'); const date = new Date(`${value}T00:00:00Z`); if (!Number.isFinite(date.valueOf()) || date.toISOString().slice(0, 10) !== value) throw new Error('asOfDate is invalid.'); return value; };
+const normCdf = (x) => { const sign = x < 0 ? -1 : 1; const z = Math.abs(x) / Math.sqrt(2); const t = 1 / (1 + 0.3275911 * z); const erf = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-z * z); return 0.5 * (1 + sign * erf); };
+const blackNormalizedCall = (k, totalVariance) => { if (totalVariance <= 0) return Math.max(1 - Math.exp(k), 0); const root = Math.sqrt(totalVariance); const d1 = -k / root + 0.5 * root; const d2 = d1 - root; return normCdf(d1) - Math.exp(k) * normCdf(d2); };
+
+export const normalizeVolSurfaceInput = (raw) => {
+  plainObject(raw, 'Vol-surface input'); exactKeys(raw, VOL_SURFACE_CONTRACT.inputKeys, 'Vol-surface input');
+  if (raw.schemaVersion !== VOL_SURFACE_INPUT_SCHEMA) throw new Error(`schemaVersion must be '${VOL_SURFACE_INPUT_SCHEMA}'.`);
+  if (typeof raw.surfaceName !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9 ._/-]{0,79}$/.test(raw.surfaceName)) throw new Error('surfaceName must contain 1-80 safe display characters.');
+  if (!VOL_SURFACE_CONTRACT.sourceKinds.includes(raw.sourceKind)) throw new Error('sourceKind is unsupported.');
+  if (raw.interpolationMode !== VOL_SURFACE_CONTRACT.interpolationMode) throw new Error(`interpolationMode must be '${VOL_SURFACE_CONTRACT.interpolationMode}'.`);
+  if (!Array.isArray(raw.quotes) || raw.quotes.length > L.maxQuotes) throw new Error(`quotes must be an array with at most ${L.maxQuotes} rows.`);
+  const quotes = raw.quotes.map((quote, index) => {
+    plainObject(quote, `quotes[${index}]`); exactKeys(quote, VOL_SURFACE_CONTRACT.quoteKeys, `quotes[${index}]`);
+    const row = { maturity: finite(quote.maturity, `quotes[${index}].maturity`, L.minMaturity, L.maxMaturity), forward: finite(quote.forward, `quotes[${index}].forward`, L.minForward, L.maxForward), discountFactor: finite(quote.discountFactor, `quotes[${index}].discountFactor`, L.minDiscountFactor, L.maxDiscountFactor), logMoneyness: finite(quote.logMoneyness, `quotes[${index}].logMoneyness`, L.minLogMoneyness, L.maxLogMoneyness), impliedVolatility: finite(quote.impliedVolatility, `quotes[${index}].impliedVolatility`, L.minVolatility, L.maxVolatility), bidVolatility: nullableVol(quote.bidVolatility, `quotes[${index}].bidVolatility`), askVolatility: nullableVol(quote.askVolatility, `quotes[${index}].askVolatility`) };
+    if ((row.bidVolatility === null) !== (row.askVolatility === null)) throw new Error(`quotes[${index}] bid/ask must both be null or both be finite.`);
+    if (row.bidVolatility !== null && !(row.bidVolatility <= row.impliedVolatility && row.impliedVolatility <= row.askVolatility)) throw new Error(`quotes[${index}] must satisfy bid <= implied <= ask.`);
+    return row;
+  });
+  const slices = []; let current = null; const seen = new Set();
+  quotes.forEach((row, index) => {
+    const key = `${row.maturity}|${row.logMoneyness}`; if (seen.has(key)) throw new Error(`Duplicate quote node at maturity=${row.maturity}, k=${row.logMoneyness}.`); seen.add(key);
+    if (current === null || Math.abs(row.maturity - current.maturity) > EPS) { if (current && row.maturity <= current.maturity) throw new Error('Quote rows must be ordered by strictly increasing maturity without hidden sorting.'); current = { maturity: row.maturity, forward: row.forward, discountFactor: row.discountFactor, rows: [] }; slices.push(current); }
+    if (Math.abs(row.maturity - current.maturity) > EPS || Math.abs(row.forward - current.forward) > EPS || Math.abs(row.discountFactor - current.discountFactor) > EPS) throw new Error(`All rows in maturity slice ${current.maturity} must share forward and discountFactor.`);
+    if (current.rows.length && row.logMoneyness <= current.rows.at(-1).logMoneyness) throw new Error(`Log-moneyness rows inside maturity ${current.maturity} must be strictly increasing without hidden sorting.`);
+    current.rows.push(row);
+  });
+  if (slices.length < L.minMaturities) throw new Error(`Surface requires at least ${L.minMaturities} maturities.`);
+  const grid = slices[0].rows.map((row) => row.logMoneyness); if (grid.length < L.minLogMoneynessPoints) throw new Error(`Each maturity requires at least ${L.minLogMoneynessPoints} log-moneyness points.`);
+  if (!grid.some((value) => Math.abs(value) <= EPS)) throw new Error('The rectangular grid must contain an exact ATM k=0 node.');
+  slices.forEach((slice) => { if (slice.rows.length !== grid.length || slice.rows.some((row, i) => Math.abs(row.logMoneyness - grid[i]) > EPS)) throw new Error('Every maturity must use the same complete rectangular log-moneyness grid; no filling is performed.'); });
+  const selectedMaturity = finite(raw.selectedMaturity, 'selectedMaturity', L.minMaturity, L.maxMaturity); const selectedLogMoneyness = finite(raw.selectedLogMoneyness, 'selectedLogMoneyness', L.minLogMoneyness, L.maxLogMoneyness);
+  if (selectedMaturity < slices[0].maturity - EPS || selectedMaturity > slices.at(-1).maturity + EPS || selectedLogMoneyness < grid[0] - EPS || selectedLogMoneyness > grid.at(-1) + EPS) throw new Error('Selected interpolation point is outside the submitted grid; extrapolation is forbidden.');
+  return { schemaVersion: VOL_SURFACE_INPUT_SCHEMA, surfaceName: raw.surfaceName, asOfDate: strictDate(raw.asOfDate), sourceKind: raw.sourceKind, interpolationMode: raw.interpolationMode, selectedMaturity, selectedLogMoneyness, quotes };
+};
+
+const canonicalNumber = (value) => { if (!Number.isFinite(value)) throw new Error('Canonical data contains a non-finite number.'); if (value === 0 || Object.is(value, -0)) return '0'; const [m, e] = value.toExponential(16).toLowerCase().split('e'); return `${m.replace(/0+$/, '').replace(/\.$/, '')}e${Number(e)}`; };
+const canonicalTree = (value) => typeof value === 'number' ? canonicalNumber(value) : Array.isArray(value) ? value.map(canonicalTree) : value && typeof value === 'object' ? Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalTree(value[key])])) : value;
+const sha256 = async (text) => { if (!globalThis.crypto?.subtle) throw new Error('SHA-256 is unavailable in this runtime.'); const digest = await globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)); return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join(''); };
+const bracket = (values, target) => { if (target <= values[0] + EPS) return [0, 0, 0]; if (target >= values.at(-1) - EPS) return [values.length - 1, values.length - 1, 0]; for (let i = 0; i < values.length - 1; i += 1) { if (target >= values[i] - EPS && target <= values[i + 1] + EPS) { const weight = (target - values[i]) / (values[i + 1] - values[i]); return [i, i + 1, Math.max(0, Math.min(1, weight))]; } } throw new Error('Interpolation bracket is unavailable.'); };
+const lerp = (a, b, weight) => a + weight * (b - a);
+
+export const analyzeVolSurface = async (raw) => {
+  const input = normalizeVolSurfaceInput(raw); const analysisId = await sha256(JSON.stringify(canonicalTree(input)));
+  const maturities = [...new Set(input.quotes.map((row) => row.maturity))]; const ks = input.quotes.slice(0, input.quotes.length / maturities.length).map((row) => row.logMoneyness);
+  const slices = maturities.map((maturity) => {
+    const submitted = input.quotes.filter((row) => row.maturity === maturity); const points = submitted.map((row) => { const strike = row.forward * Math.exp(row.logMoneyness); const totalVariance = row.impliedVolatility ** 2 * row.maturity; const normalizedCall = blackNormalizedCall(row.logMoneyness, totalVariance); return { ...row, strike, totalVariance, normalizedCall, discountedCallPrice: row.discountFactor * row.forward * normalizedCall }; });
+    const atmIndex = points.findIndex((row) => Math.abs(row.logMoneyness) <= EPS); const left = points[atmIndex - 1]; const atm = points[atmIndex]; const right = points[atmIndex + 1];
+    if (!left || !right) throw new Error('ATM k=0 must have at least one submitted node on each side.');
+    const skew = (right.impliedVolatility - left.impliedVolatility) / (right.logMoneyness - left.logMoneyness); const leftSlope = (atm.impliedVolatility - left.impliedVolatility) / (atm.logMoneyness - left.logMoneyness); const rightSlope = (right.impliedVolatility - atm.impliedVolatility) / (right.logMoneyness - atm.logMoneyness); const curvature = 2 * (rightSlope - leftSlope) / (right.logMoneyness - left.logMoneyness);
+    return { maturity, forward: atm.forward, discountFactor: atm.discountFactor, atmVolatility: atm.impliedVolatility, atmTotalVariance: atm.totalVariance, skew, curvature, points };
+  });
+  const diagnostics = [];
+  slices.forEach((slice) => {
+    slice.points.forEach((point) => { const lower = Math.max(slice.discountFactor * (slice.forward - point.strike), 0); const upper = slice.discountFactor * slice.forward; if (point.discountedCallPrice < lower - ARB_EPS || point.discountedCallPrice > upper + ARB_EPS) diagnostics.push({ severity: 'error', code: 'CALL_BOUND_VIOLATION', maturityYears: slice.maturity, logMoneyness: point.logMoneyness, message: 'Discounted Black call falls outside intrinsic/forward bounds.' }); if (point.bidVolatility !== null && point.askVolatility - point.bidVolatility > 0.05) diagnostics.push({ severity: 'warning', code: 'WIDE_BID_ASK', maturityYears: slice.maturity, logMoneyness: point.logMoneyness, message: 'Bid/ask width exceeds five volatility points.' }); });
+    const slopes = []; for (let i = 0; i < slice.points.length - 1; i += 1) { const a = slice.points[i]; const b = slice.points[i + 1]; const slope = (b.discountedCallPrice - a.discountedCallPrice) / (b.strike - a.strike); slopes.push(slope); if (slope > ARB_EPS || slope < -slice.discountFactor - ARB_EPS) diagnostics.push({ severity: 'error', code: 'VERTICAL_SPREAD_VIOLATION', maturityYears: slice.maturity, logMoneyness: b.logMoneyness, message: 'Discrete call slope is outside [-discountFactor, 0].' }); }
+    for (let i = 1; i < slopes.length; i += 1) if (slopes[i] < slopes[i - 1] - ARB_EPS) diagnostics.push({ severity: 'error', code: 'BUTTERFLY_CONVEXITY_VIOLATION', maturityYears: slice.maturity, logMoneyness: slice.points[i].logMoneyness, message: 'Discrete call slopes decrease with strike, violating convexity.' });
+  });
+  for (let t = 1; t < slices.length; t += 1) for (let k = 0; k < ks.length; k += 1) if (slices[t].points[k].totalVariance < slices[t - 1].points[k].totalVariance - ARB_EPS) diagnostics.push({ severity: 'error', code: 'CALENDAR_VARIANCE_VIOLATION', maturityYears: slices[t].maturity, logMoneyness: ks[k], message: `Total variance is below the preceding maturity ${slices[t - 1].maturity}.` });
+  const errorCount = diagnostics.filter((row) => row.severity === 'error').length; const warningCount = diagnostics.filter((row) => row.severity === 'warning').length; const status = errorCount ? 'POTENTIAL_ARBITRAGE' : 'PASS';
+  if (!diagnostics.length) diagnostics.push({ severity: 'info', code: 'NO_DISCRETE_ARBITRAGE_FLAGS', maturityYears: null, logMoneyness: null, message: 'All submitted-node bound, vertical, convexity and calendar checks passed.' });
+  const [t0, t1, tw] = bracket(maturities, input.selectedMaturity); const [k0, k1, kw] = bracket(ks, input.selectedLogMoneyness); const varianceAt = (ti) => lerp(slices[ti].points[k0].totalVariance, slices[ti].points[k1].totalVariance, kw); const selectedVariance = lerp(varianceAt(t0), varianceAt(t1), tw); const selectedForward = lerp(slices[t0].forward, slices[t1].forward, tw); const selectedDiscount = Math.exp(lerp(Math.log(slices[t0].discountFactor), Math.log(slices[t1].discountFactor), tw)); const selectedVolatility = Math.sqrt(selectedVariance / input.selectedMaturity); const selectedStrike = selectedForward * Math.exp(input.selectedLogMoneyness); const selectedNormalizedCall = blackNormalizedCall(input.selectedLogMoneyness, selectedVariance);
+  const points = slices.flatMap((slice) => slice.points); const vols = points.map((row) => row.impliedVolatility); const bidAskCount = points.filter((row) => row.bidVolatility !== null).length;
+  const result = { schemaVersion: VOL_SURFACE_SCHEMA_VERSION, engineVersion: VOL_SURFACE_ENGINE_VERSION, analysisId, input, quality: { status, errorCount, warningCount, quoteCount: points.length, maturityCount: maturities.length, logMoneynessCount: ks.length, bidAskCoverage: bidAskCount / points.length, minImpliedVolatility: Math.min(...vols), maxImpliedVolatility: Math.max(...vols) }, selectedPoint: { maturity: input.selectedMaturity, logMoneyness: input.selectedLogMoneyness, forward: selectedForward, discountFactor: selectedDiscount, strike: selectedStrike, totalVariance: selectedVariance, impliedVolatility: selectedVolatility, normalizedCall: selectedNormalizedCall, discountedCallPrice: selectedDiscount * selectedForward * selectedNormalizedCall, maturityBracket: [maturities[t0], maturities[t1]], logMoneynessBracket: [ks[k0], ks[k1]] }, slices, points, diagnostics, conventions: VOL_SURFACE_CONTRACT.conventions, limitations: VOL_SURFACE_CONTRACT.limitations };
+  return result;
+};
+
+const exportNumber = (value) => { if (value === null || value === undefined) return ''; if (!Number.isFinite(value)) throw new Error('Evidence export contains a non-finite number.'); if (value === 0 || Object.is(value, -0) || Math.abs(value) < 1e-15) return '0'; const [m, e] = value.toExponential(8).toLowerCase().split('e'); return `${m.replace(/0+$/, '').replace(/\.$/, '')}e${Number(e)}`; };
+const csvEscape = (value) => { const text = String(value ?? ''); return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text; };
+const csv = (headers, rows) => `${headers.join(',')}\n${rows.map((row) => headers.map((header) => csvEscape(typeof row[header] === 'number' ? exportNumber(row[header]) : row[header])).join(',')).join('\n')}${rows.length ? '\n' : ''}`;
+export const buildVolSurfacePointsCsv = (result) => csv(VOL_SURFACE_CONTRACT.pointsHeaders, result.points.map((row) => ({ schemaVersion: VOL_SURFACE_POINTS_CSV_SCHEMA, engineVersion: result.engineVersion, analysisId: result.analysisId, surfaceName: result.input.surfaceName, asOfDate: result.input.asOfDate, sourceKind: result.input.sourceKind, maturityYears: row.maturity, forward: row.forward, discountFactor: row.discountFactor, logMoneyness: row.logMoneyness, strike: row.strike, impliedVolatility: row.impliedVolatility, bidVolatility: row.bidVolatility, askVolatility: row.askVolatility, totalVariance: row.totalVariance, normalizedCall: row.normalizedCall, discountedCallPrice: row.discountedCallPrice })));
+export const buildVolSurfaceDiagnosticsCsv = (result) => csv(VOL_SURFACE_CONTRACT.diagnosticsHeaders, result.diagnostics.map((row) => ({ schemaVersion: VOL_SURFACE_DIAGNOSTICS_CSV_SCHEMA, engineVersion: result.engineVersion, analysisId: result.analysisId, surfaceName: result.input.surfaceName, asOfDate: result.input.asOfDate, status: result.quality.status, ...row })));
+export const buildVolSurfaceJson = (result) => `${JSON.stringify(result, null, 2)}\n`;
+
+export const parseVolSurfaceCsv = (text) => {
+  if (typeof text !== 'string' || !text.trim()) throw new Error('CSV file is empty.'); if (text.length > 1_000_000) throw new Error('CSV exceeds the 1 MB limit.');
+  const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/).filter((line) => line.trim() && !line.trimStart().startsWith('#')); if (lines.length < 2) throw new Error('CSV must contain a header and quote rows.');
+  const delimiter = lines[0].includes(';') && !lines[0].includes(',') ? ';' : ','; const headers = lines[0].split(delimiter).map((cell) => cell.trim()); const expected = ['maturity_years', 'forward', 'discount_factor', 'log_moneyness', 'implied_volatility', 'bid_volatility', 'ask_volatility']; if (headers.length !== expected.length || headers.some((header, i) => header !== expected[i])) throw new Error(`CSV headers must exactly be: ${expected.join(',')}.`);
+  return lines.slice(1).map((line, rowIndex) => { const cells = line.split(delimiter).map((cell) => cell.trim()); if (cells.length !== expected.length) throw new Error(`CSV row ${rowIndex + 2} has ${cells.length} columns; expected ${expected.length}.`); const numberCell = (index, label, nullable = false) => { if (nullable && cells[index] === '') return null; if (cells[index] === '' || !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(cells[index])) throw new Error(`CSV row ${rowIndex + 2} ${label} is not an explicit decimal.`); const value = Number(cells[index]); if (!Number.isFinite(value)) throw new Error(`CSV row ${rowIndex + 2} ${label} is non-finite.`); return value; }; return { maturity: numberCell(0, 'maturity_years'), forward: numberCell(1, 'forward'), discountFactor: numberCell(2, 'discount_factor'), logMoneyness: numberCell(3, 'log_moneyness'), impliedVolatility: numberCell(4, 'implied_volatility'), bidVolatility: numberCell(5, 'bid_volatility', true), askVolatility: numberCell(6, 'ask_volatility', true) }; });
+};
+
+export const buildDeterministicVolSurface = (variant = 'clean') => {
+  const maturities = [0.25, 0.5, 1, 2]; const ks = [-0.3, -0.15, 0, 0.15, 0.3]; const quotes = [];
+  maturities.forEach((maturity) => { const forward = 100 * Math.exp(0.02 * maturity); const discountFactor = Math.exp(-0.03 * maturity); ks.forEach((k) => { let vol = 0.2 - 0.06 * k + 0.1 * k * k + 0.01 * Math.log1p(maturity); if (variant === 'calendar' && maturity === 1) vol = 0.1 + 0.01 * k * k; if (variant === 'butterfly' && maturity === 1 && k === 0) vol = 0.8; quotes.push({ maturity, forward, discountFactor, logMoneyness: k, impliedVolatility: vol, bidVolatility: Math.max(0.0001, vol - 0.005), askVolatility: vol + 0.005 }); }); });
+  return quotes;
+};

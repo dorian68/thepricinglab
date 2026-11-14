@@ -1,7 +1,8 @@
 
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useSafeNavigate } from '@/security/useSafeNavigate';
 import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet-async";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,7 +16,7 @@ import { safeTranslate } from "../utils/translationUtils";
 
 const Courses = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const navigate = useSafeNavigate();
   const [selectedTab, setSelectedTab] = useState("fundamentals");
   const { profile } = useAuth();
   const userPlan = (profile?.plan ?? "freemium") as SubscriptionPlan;

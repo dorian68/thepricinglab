@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useSafeNavigate } from '@/security/useSafeNavigate';
 import { safeTranslate } from '@/utils/translationUtils';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -27,7 +27,7 @@ import { adaptCommunityToTradingStrategy, adaptTradingToCommunityStrategy } from
 
 const StrategyBuilder: React.FC = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const navigate = useSafeNavigate();
   const [activeStep, setActiveStep] = useState<number>(0);
   const [isPublic, setIsPublic] = useState<boolean>(true);
   const [strategyTitle, setStrategyTitle] = useState<string>('Nouvelle Stratégie');

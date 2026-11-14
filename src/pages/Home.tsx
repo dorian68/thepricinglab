@@ -88,7 +88,7 @@ const Home = () => {
               ></div>
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="bg-background/70 px-6 py-3 rounded-lg border border-primary/30 tracking-wider uppercase text-sm terminal-text text-primary shadow-lg">
-                  TRADING TERMINAL ACTIVATED
+                  DETERMINISTIC DEMO · NO LIVE QUOTE
                 </div>
               </div>
             </div>

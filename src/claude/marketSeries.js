@@ -1,7 +1,7 @@
-// Loader for the real farmed market history sliced into a static bundle
-// (public/market-data/desk-series.json). Lets course mini-widgets show genuine
-// price / vol / rates history with NO backend running. Degrades gracefully to an
-// empty bundle if the file is missing.
+// Loader for dated market history sliced into a static bundle
+// (public/market-data/desk-series.json). Course widgets use it as an offline
+// reference snapshot, never as a live quote. Degrades gracefully to an empty
+// bundle if the file is missing.
 
 let _cache = null;
 let _promise = null;
@@ -31,7 +31,7 @@ export const SYMBOL_ALIAS = {
 // Per-course-script choice: a primary series for the line chart and an optional
 // secondary series shown as a sparkline, plus a desk-relevant read.
 const COURSE_SERIES = {
-  'vanilla-options-quote':          { primary: 'SPX',      secondary: 'SPX_RVOL21', tone: 'blue',  read: "Le spot et la vol realisee sont les deux inputs vivants du ticket d'option." },
+  'vanilla-options-quote':          { primary: 'SPX',      secondary: 'SPX_RVOL21', tone: 'blue',  read: "Le spot historique et la vol realisee sont les deux inputs de reference du ticket d'option." },
   'options-book-greeks-pnl':        { primary: 'SPX',      secondary: 'VIX',        tone: 'blue',  read: "Le gamma du book transforme les mouvements du S&P en P&L; le VIX situe le regime de vol." },
   'monte-carlo-pricing':            { primary: 'SPX',      secondary: 'SPX_RVOL21', tone: 'blue',  read: "La GBM simulee doit reproduire la vol realisee observee sur le sous-jacent." },
   'implied-volatility-smile':       { primary: 'VIX',      secondary: 'SPX_RVOL21', tone: 'amber', read: "Vol implicite (VIX) vs vol realisee: l'ecart est la prime de risque de variance cotee." },

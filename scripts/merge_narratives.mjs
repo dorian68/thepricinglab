@@ -5,9 +5,14 @@ import path from 'path';
 
 const SCRAT = process.argv[2];
 const ROOT = path.resolve('.');
-const idx = JSON.parse(fs.readFileSync('./public/course-scripts/_index.json', 'utf8'));
-const slugs = idx.courses.map(c => c.slug);
-const topics = Object.fromEntries(idx.courses.map(c => [c.slug, (c.topic || '').toLowerCase()]));
+const COURSE_DIR = process.env.TPL_COURSE_SCRIPTS_DIR
+  ? path.resolve(process.env.TPL_COURSE_SCRIPTS_DIR)
+  : path.resolve(ROOT, '..', '..', 'Tools', 'pricinglibrary_rag_backend', 'pricinglibrary_rag', 'course_scripts');
+const slugs = fs.readdirSync(COURSE_DIR)
+  .filter((name) => name.endsWith('.md'))
+  .map((name) => path.basename(name, '.md'))
+  .sort();
+const topics = Object.fromEntries(slugs.map((slug) => [slug, slug.replaceAll('-', ' ')]));
 const wc = s => (String(s).trim().match(/\S+/g) || []).length;
 
 const merged = {};

@@ -78,7 +78,7 @@ const Index = () => {
               ></div>
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="bg-black/70 px-6 py-3 rounded-lg border border-[#ea384c]/30 tracking-wider uppercase text-sm font-mono text-[#ea384c] shadow-lg">
-                  TRADING TERMINAL ACTIVATED
+                  DETERMINISTIC DEMO · NO LIVE QUOTE
                 </div>
               </div>
             </div>

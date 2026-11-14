@@ -1,6 +1,7 @@
 
 import React, { useEffect, useRef } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
+import { useSafeNavigate } from '@/security/useSafeNavigate';
 import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet-async";
 import { 
@@ -48,7 +49,7 @@ import { transformCodeBlocks } from "@/utils/codeBlockTransformer";
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const navigate = useSafeNavigate();
   const { toast } = useToast();
   const contentRef = useRef<HTMLDivElement>(null);
 

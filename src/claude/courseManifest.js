@@ -1,0 +1,23 @@
+// Canonical frontend course manifest. The catalogue, progress denominator and
+// backend-script routing all derive from this list.
+export const COURSE_MANIFEST = [
+  { id: 'black-scholes', scriptSlug: 'vanilla-options-quote', title: 'Black-Scholes Model', tier: 'Fundamentals', level: 'L1', duration: '3h', modules: 8, badge: 'free-preview', tagline: 'Closed-form pricing for European options, from PDE to code.', topics: ['PDE derivation', 'd1/d2', 'Risk-neutral measure', 'Implementation', 'Limitations'], accent: '#19C37D' },
+  { id: 'yield-curves', scriptSlug: 'yield-curve-bootstrapping', title: 'Yield Curves', tier: 'Fundamentals', level: 'L1', duration: '3h 40m', modules: 9, badge: 'starter', tagline: 'Bootstrapping, zero rates, forward curves, bond pricing.', topics: ['Bootstrapping', 'Zero-coupon', 'Forward rates', 'Discount factors'], accent: '#3E8BFF' },
+  { id: 'greeks', scriptSlug: 'options-book-greeks-pnl', title: 'Option Greeks', tier: 'Fundamentals', level: 'L2', duration: '3h 30m', modules: 9, badge: 'starter', tagline: 'Delta, Gamma, Vega, Theta, Rho — measure & manage risk.', topics: ['Delta hedging', 'Gamma scalping', 'Vega risk', 'Theta decay'], accent: '#FFB020' },
+  { id: 'implied-vol', scriptSlug: 'implied-volatility-smile', title: 'Implied Volatility Analysis', tier: 'Advanced', level: 'L3', duration: '3h 40m', modules: 9, badge: 'student', tagline: 'Smile, skew, term structure & surface construction.', topics: ['Smile/skew', 'Term structure', 'SVI', 'Arbitrage-free surfaces'], accent: '#FF2E45' },
+  { id: 'exotics', scriptSlug: 'barrier-options-gap-risk', title: 'Exotic Options', tier: 'Complex', level: 'L4', duration: '3h 50m', modules: 9, badge: 'pro', tagline: 'Barrier options: monitoring, knock-out risk and hedging gaps.', topics: ['Barriers', 'Monitoring', 'Gap risk', 'Rebates'], accent: '#3E8BFF' },
+  { id: 'monte-carlo', scriptSlug: 'monte-carlo-pricing', title: 'Monte Carlo Methods', tier: 'Complex', level: 'L4', duration: '4h', modules: 10, badge: 'pro', tagline: 'GBM paths, variance reduction, convergence, VaR/ES.', topics: ['GBM', 'Antithetic', 'Control variates', 'VaR/ES'], accent: '#FFB020' },
+  { id: 'stochastic', scriptSlug: 'stochastic-calculus-for-hedging', title: 'Stochastic Calculus', tier: 'Complex', level: 'L5', duration: '4h 20m', modules: 10, badge: 'pro', tagline: "Itô's lemma, SDEs, measure changes — the math behind it all.", topics: ["Itô's lemma", 'SDE', 'Girsanov', 'Martingales'], accent: '#FF2E45' },
+  { id: 'rates-swaps', scriptSlug: 'rates-swaps-dv01', title: 'Rates Swaps & DV01', tier: 'Fundamentals', level: 'L2', duration: '3h 30m', modules: 9, badge: 'starter', tagline: 'Quote, value and hedge an interest-rate swap from par rate to DV01.', topics: ['Par rate', 'Annuity', 'DV01', 'Curve shock'], accent: '#3E8BFF' },
+  { id: 'credit-derivatives', scriptSlug: 'credit-derivatives-cds', title: 'Credit Derivatives & CS01', tier: 'Advanced', level: 'L3', duration: '3h 30m', modules: 8, badge: 'student', tagline: 'Turn CDS spreads into carry, CS01 and spread-shock P&L decisions.', topics: ['CDS spread', 'Risky annuity', 'CS01', 'Credit shock'], accent: '#FFB020' },
+  { id: 'market-risk-var', scriptSlug: 'market-risk-var-stress', title: 'Market Risk & VaR', tier: 'Advanced', level: 'L3', duration: '3h 40m', modules: 9, badge: 'student', tagline: 'Estimate loss limits, stress moves and escalation decisions from desk data.', topics: ['Parametric VaR', 'Expected shortfall', 'Stress testing', 'Limits'], accent: '#19C37D' },
+  { id: 'structured-products', scriptSlug: 'structured-products-autocall', title: 'Structured Products Desk', tier: 'Complex', level: 'L4', duration: '4h 10m', modules: 10, badge: 'pro', tagline: 'Build autocallable and barrier payoffs like a structuring analyst.', topics: ['Autocall', 'Coupon barrier', 'Protection', 'Scenario table'], accent: '#D946EF' },
+  { id: 'fixed-income-bonds', scriptSlug: 'fixed-income-bonds-duration', title: 'Fixed Income Bonds', tier: 'Fundamentals', level: 'L2', duration: '3h 10m', modules: 8, badge: 'starter', tagline: 'Price bonds, compute duration and explain rate-shock P&L.', topics: ['Clean price', 'YTM', 'Duration', 'Convexity'], accent: '#19C37D' },
+];
+
+export const COURSE_SCRIPT_SLUGS = Object.fromEntries(COURSE_MANIFEST.map((course) => [course.id, course.scriptSlug]));
+export const CHAPTER_COUNTS = Object.fromEntries(COURSE_MANIFEST.map((course) => [course.id, course.modules]));
+export const PRACTICE_COURSE_EXTENSIONS = COURSE_MANIFEST.filter((course) => ![
+  'black-scholes', 'yield-curves', 'greeks', 'implied-vol', 'exotics', 'monte-carlo', 'stochastic',
+].includes(course.id));
+

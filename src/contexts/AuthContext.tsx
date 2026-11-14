@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
-import { User, Session } from '@supabase/supabase-js'
-import { supabase } from '@/integrations/supabase/client'
-import { UserProfile } from '@/types/auth'
-import { getEntitlement } from '@/claude/practiceEngine'
+import React, { createContext, lazy, Suspense, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import type { User, Session } from '@supabase/supabase-js'
+import type { UserProfile } from '@/types/auth'
+import { getEntitlement, setPlatformAccessToken } from '@/claude/practiceEngine'
 import { toast } from 'sonner'
+import { createAuthFreshnessGuard } from './authFreshnessGuard.mjs'
 
-interface AuthContextType {
+export interface AuthContextType {
   user: User | null
   profile: UserProfile | null
   session: Session | null
@@ -14,27 +14,51 @@ interface AuthContextType {
   isAdmin: () => boolean
   plan: string
   hasPlan: (required: string) => boolean
-  signUp: (email: string, password: string, prenom: string, nom: string, plan?: string) => Promise<void>
+  refreshEntitlement: () => Promise<void>
+  signUp: (email: string, password: string, prenom: string, nom: string) => Promise<{ confirmationRequired: boolean }>
   signIn: (email: string, password: string) => Promise<void>
+  requestPasswordReset: (email: string) => Promise<void>
+  updatePassword: (password: string) => Promise<void>
   signOut: () => Promise<void>
 }
 
 const PLAN_RANK: Record<string, number> = { free: 0, starter: 1, student: 2, pro: 3 }
+let supabasePromise: ReturnType<typeof importSupabase> | null = null
+
+function importSupabase() {
+  return import('@/integrations/supabase/client').then(({ supabase }) => supabase)
+}
+
+function loadSupabase() {
+  supabasePromise ||= importSupabase().catch((error) => {
+    supabasePromise = null
+    throw error
+  })
+  return supabasePromise
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const SupabaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [sessionRevision, setSessionRevision] = useState(0)
   // Authoritative paid plan from the server-side Stripe entitlement store.
   // This is the ONLY trusted source of a paid plan — never user_metadata.
   const [entitlementPlan, setEntitlementPlan] = useState<string | null>(null)
+  const freshness = useRef(createAuthFreshnessGuard())
+
+  useEffect(() => {
+    setPlatformAccessToken(session?.access_token || null)
+    return () => setPlatformAccessToken(null)
+  }, [session?.access_token])
 
   // Récupérer le profil utilisateur
   const fetchProfile = async (userId: string) => {
     try {
+      const supabase = await loadSupabase()
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -55,91 +79,124 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Initialiser la session et configurer les listeners d'auth
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, currentSession) => {
-        setSession(currentSession)
-        setUser(currentSession?.user ?? null)
-        
-        // Utilisation de setTimeout pour éviter le deadlock avec Supabase
-        if (currentSession?.user) {
-          setTimeout(async () => {
-            const profile = await fetchProfile(currentSession.user.id)
-            setProfile(profile)
-            setIsLoading(false)
-          }, 0)
-        } else {
-          setProfile(null)
-          setIsLoading(false)
-        }
-      }
-    )
+    let active = true
+    let unsubscribe: (() => void) | null = null
 
-    // Vérification initiale de la session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+    const applySession = (currentSession: Session | null) => {
+      const accessToken = currentSession?.access_token || null
+      const ticket = freshness.current.beginSession(accessToken)
       setSession(currentSession)
       setUser(currentSession?.user ?? null)
-      
-      if (currentSession?.user) {
-        fetchProfile(currentSession.user.id).then(profile => {
-          setProfile(profile)
-          setIsLoading(false)
-        })
-      } else {
+      setProfile(null)
+      setEntitlementPlan(null)
+      setSessionRevision((revision) => revision + 1)
+
+      if (!currentSession?.user) {
         setIsLoading(false)
+        return
       }
+
+      setIsLoading(true)
+      setTimeout(async () => {
+        const profile = await fetchProfile(currentSession.user.id)
+        if (!active || !freshness.current.isSessionCurrent(ticket)) return
+        setProfile(profile)
+        setIsLoading(false)
+      }, 0)
+    }
+
+    const initialSessionTicket = freshness.current.captureSession()
+
+    void loadSupabase().then((supabase) => {
+      if (!active) return
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (_event, currentSession) => {
+          if (!active) return
+          applySession(currentSession)
+        }
+      )
+      unsubscribe = () => subscription.unsubscribe()
+
+      // Vérification initiale de la session
+      void supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+        if (!active || !freshness.current.isSessionCurrent(initialSessionTicket)) return
+        applySession(currentSession)
+      })
+    }).catch((error) => {
+      console.error('Erreur lors du chargement de Supabase:', error)
+      if (active) setIsLoading(false)
     })
 
     return () => {
-      subscription.unsubscribe()
+      active = false
+      unsubscribe?.()
     }
   }, [])
 
-  // Resolve the real Stripe entitlement from the backend whenever the signed-in
-  // email changes. A paid plan is granted ONLY if the server says it is active —
-  // closing the self-grant hole where a user picked a plan at signup.
-  useEffect(() => {
-    const email = user?.email
-    if (!email) {
-      setEntitlementPlan(null)
+  const refreshEntitlement = useCallback(async () => {
+    const accessToken = session?.access_token
+    const ticket = freshness.current.beginEntitlement(accessToken || null)
+    setEntitlementPlan(null)
+    if (!accessToken) {
       return
     }
-    let alive = true
-    getEntitlement(email)
-      .then((e: { active?: boolean; plan?: string | null }) => {
-        if (alive) setEntitlementPlan(e && e.active && e.plan ? String(e.plan).toLowerCase() : null)
-      })
-      .catch(() => { if (alive) setEntitlementPlan(null) })
-    return () => { alive = false }
-  }, [user?.email])
-
-  const signUp = async (email: string, password: string, prenom: string, nom: string, plan: string = 'free') => {
     try {
-      const { error } = await supabase.auth.signUp({
+      const entitlement = await getEntitlement(accessToken) as { active?: boolean; plan?: string | null }
+      if (!freshness.current.isEntitlementCurrent(ticket)) return
+      setEntitlementPlan(entitlement?.active && entitlement.plan ? String(entitlement.plan).toLowerCase() : null)
+    } catch {
+      if (!freshness.current.isEntitlementCurrent(ticket)) return
+      setEntitlementPlan(null)
+    }
+  }, [session?.access_token, sessionRevision])
+
+  // The backend derives identity from the signed bearer token, never an email
+  // supplied as a query parameter by the browser.
+  useEffect(() => { void refreshEntitlement() }, [refreshEntitlement])
+
+  const signUp = async (email: string, password: string, prenom: string, nom: string) => {
+    try {
+      const supabase = await loadSupabase()
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             prenom,
             nom,
-            plan,
           },
+          emailRedirectTo: `${window.location.origin}/dashboard`,
         },
       })
 
       if (error) throw error
 
-      toast("Inscription réussie! Bienvenue sur The Pricing Library !")
+      return { confirmationRequired: !data.session }
     } catch (error) {
       console.error("Erreur lors de l'inscription:", error)
       toast(error instanceof Error ? error.message : "Une erreur est survenue")
       throw error
     }
 
-    toast("Inscription réussie! Bienvenue sur The Pricing Library !")
+  }
+
+  const requestPasswordReset = async (email: string) => {
+    const supabase = await loadSupabase()
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/reset-password`,
+    })
+    if (error) throw error
+  }
+
+  const updatePassword = async (password: string) => {
+    const supabase = await loadSupabase()
+    const { error } = await supabase.auth.updateUser({ password })
+    if (error) throw error
   }
 
   const signIn = async (email: string, password: string) => {
     try {
+      const supabase = await loadSupabase()
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -157,6 +214,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     try {
+      const supabase = await loadSupabase()
       const { error } = await supabase.auth.signOut()
       if (error) throw error
       
@@ -170,18 +228,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Helper function to check if user is admin
   const isAdmin = () => {
-    return profile?.role === 'admin';
+    // Operator authority must come from signed JWT app_metadata, matching the
+    // backend verifier. A mutable profile row is display data, not RBAC.
+    return user?.app_metadata?.role === 'admin';
   }
 
-  // Effective plan, in trust order: the server Stripe entitlement (paid, real),
-  // then an admin/DB-set profiles.plan, else free. We deliberately do NOT read
-  // user_metadata.plan — it is user-chosen at signup and would grant paid tiers
-  // for free. A paying user gets access via the entitlement; an admin via isAdmin.
-  const plan = (
-    entitlementPlan ||
-    (profile as unknown as { plan?: string })?.plan ||
-    'free'
-  ).toLowerCase()
+  // Paid access is granted only from the server-side billing entitlement.
+  // Profile and signup metadata are intentionally never entitlement sources.
+  const plan = (entitlementPlan || 'free').toLowerCase()
 
   const hasPlan = (required: string) => {
     if (isAdmin()) return true
@@ -197,8 +251,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAdmin,
     plan,
     hasPlan,
+    refreshEntitlement,
     signUp,
     signIn,
+    requestPasswordReset,
+    updatePassword,
     signOut,
   }
 
@@ -207,6 +264,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       {children}
     </AuthContext.Provider>
   )
+}
+
+// Vite removes this entire import from every production build. A local signed
+// test session never changes the Supabase account or production auth rules.
+const LocalPreviewAuthProvider = import.meta.env.DEV
+  ? lazy(() => import('./LocalPreviewAuthProvider'))
+  : null
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  if (import.meta.env.DEV && LocalPreviewAuthProvider && window.__TPL_LOCAL_PREVIEW_ENABLED__
+    && ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname)) {
+    return (
+      <Suspense fallback={<div role="status" style={{ padding: '3rem', color: '#f4f4f5', background: '#111113', minHeight: '100vh' }}>Ouverture de votre espace…</div>}>
+        <LocalPreviewAuthProvider context={AuthContext} RealProvider={SupabaseAuthProvider}>
+          {children}
+        </LocalPreviewAuthProvider>
+      </Suspense>
+    )
+  }
+  return <SupabaseAuthProvider>{children}</SupabaseAuthProvider>
 }
 
 export const useAuth = () => {

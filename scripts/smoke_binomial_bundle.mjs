@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import { readdir, readFile } from 'node:fs/promises';
+import path from 'node:path';
+
+const assets = path.resolve('dist/assets');
+const shell = await readFile(path.resolve('src/claude/ClaudeFrontend.jsx'), 'utf8');
+const lab = await readFile(path.resolve('src/components/tools/BinomialLab.tsx'), 'utf8');
+const files = (await readdir(assets)).filter((file) => file.endsWith('.js'));
+const sources = await Promise.all(files.map(async (file) => ({ file, source: await readFile(path.join(assets, file), 'utf8') })));
+const components = sources.filter(({ file }) => file.startsWith('BinomialLab-'));
+const workers = sources.filter(({ file }) => file.startsWith('binomial.worker-'));
+assert.equal(components.length, 1, `expected one BinomialLab chunk, got ${components.map(({ file }) => file).join(', ') || 'none'}`);
+assert.equal(workers.length, 1, `expected one binomial worker, got ${workers.map(({ file }) => file).join(', ') || 'none'}`);
+for (const marker of ['American Option & CRR Lattice Lab', 'Optimal exercise frontier', 'No probability clamping', 'Convergence CSV', 'Frontier CSV']) assert.ok(components[0].source.includes(marker), `missing ${marker}`);
+for (const marker of ['cox_ross_rubinstein', 'risk_neutral_Q', 'CRR no-arbitrage probability', 'american_price_minus_european_price']) assert.ok(workers[0].source.includes(marker), `worker missing ${marker}`);
+const all = sources.map(({ source }) => source).join('\n');
+for (const legacy of ['lattice price stabilises as steps increase', 'CRR beta']) assert.ok(!all.includes(legacy), `legacy binomial path remains: ${legacy}`);
+assert.match(shell, /const BinomialLabTool = React\.lazy/); assert.match(shell, /binomial: <React\.Suspense[\s\S]*?<BinomialLabTool\/>/);
+assert.doesNotMatch(shell, /function crrPrice\(/); assert.match(lab, /normalizeBinomialInput\(input\)/); assert.ok(lab.indexOf('normalizeBinomialInput(input)') < lab.indexOf('new Worker('));
+console.log(`[STEP 1] production bundle · [STATUS] ok · [INPUT] ${files.length} JavaScript assets · [OUTPUT] component=${components[0].file} (${components[0].source.length} bytes); worker=${workers[0].file} (${workers[0].source.length} bytes); one lazy fail-closed route`);
+console.log('[VERDICT] PASS · F-CAL-7 ships one worker-backed Student lattice lab with legacy active route absent');

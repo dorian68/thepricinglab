@@ -3,7 +3,6 @@ import React, { useEffect, useRef } from 'react';
 import { LineChart } from '@/components/ui/chart';
 import { Strategy as CommunityStrategy } from '@/types/community';
 import { Strategy as TradingStrategy } from '@/types/strategies';
-import { getCalculationStrategy } from '@/utils/options/strategyAdapter';
 
 interface PayoffChartProps {
   strategy: CommunityStrategy | TradingStrategy;
@@ -93,12 +92,9 @@ const PayoffChart: React.FC<PayoffChartProps> = ({ strategy, results, interactiv
     }
 
     try {
-      const currentStrategy = getCalculationStrategy(strategy);
-      if (!currentStrategy?.parameters?.spotPrice) return null;
-
-      const spotRange = currentStrategy.parameters.spotPrice;
-      const minPrice = spotRange * 0.5;
-      const maxPrice = spotRange * 1.5;
+      const minPrice = Math.min(...chartData.map((point) => point.x));
+      const maxPrice = Math.max(...chartData.map((point) => point.x));
+      if (!Number.isFinite(minPrice) || !Number.isFinite(maxPrice) || maxPrice <= minPrice) return null;
 
       return (
         <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none">
@@ -129,7 +125,7 @@ const PayoffChart: React.FC<PayoffChartProps> = ({ strategy, results, interactiv
       console.warn('Error rendering break-even overlay:', error);
       return null;
     }
-  }, [results?.breakEvenPoints, strategy]);
+  }, [results?.breakEvenPoints, strategy, chartData]);
 
   // Pass only the expected props to LineChart, without tooltipFormatter
   const chartProps = {

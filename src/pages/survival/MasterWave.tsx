@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useSafeNavigate } from '@/security/useSafeNavigate';
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useTranslation } from "react-i18next";
@@ -11,7 +11,7 @@ import Footer from "../../components/Footer";
 
 const MasterWave = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const navigate = useSafeNavigate();
   
   const waveInfo = {
     id: 5,

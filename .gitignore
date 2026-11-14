@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+.local-preview/
 
 # Editor directories and files
 .vscode/*
@@ -29,9 +30,14 @@ dist-ssr
 # ...except the production public config (API base URL only — no secrets),
 # so the deployed (Lovable) build reliably targets the live backend.
 !.env.production
+!.env.production.example
 
 # Dev artifacts / bloat (not part of the app)
 nul.css
 scripts/_shots/
 public/course-scripts_backup_*/
 public/agent-room-kit/uploads/
+
+# Local design snapshots and audit output are not deployable source.
+archive/
+.audit-*.json

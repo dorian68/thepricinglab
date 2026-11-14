@@ -25,48 +25,71 @@
 
 @layer base {
   :root {
-    --background: 220 12% 10%;
-    --foreground: 210 10% 92%;
+    /* TPL desk tokens are declared synchronously here so the shell, lazy
+       frontend and agent dock share one visual baseline from first paint. */
+    --bg: #07090d;
+    --panel: #0d1219;
+    --panel-2: #131a24;
+    --line: #202936;
+    --line-2: #2c3848;
+    --steel: #4a586b;
+    --mute: #8c96a6;
+    --text: #e8ecf2;
+    --text-2: #b8c0cc;
+    --white: #f8f9fb;
+    --red: #ff3654;
+    --red-2: #e5475d;
+    --red-dim: #5f1a27;
+    --green: #28d391;
+    --green-dim: #0f412d;
+    --amber: #ffb84d;
+    --blue: #5b9dff;
+    --magenta: #d946ef;
+    --font-sans: 'Inter', 'Inter Fallback', 'Segoe UI Variable', 'Aptos', 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'JetBrains Mono Fallback', 'Cascadia Code', 'SFMono-Regular', Consolas, monospace;
 
-    --card: 220 12% 13%;
-    --card-foreground: 210 10% 92%;
+    --background: 225 30% 4%;
+    --foreground: 216 23% 93%;
 
-    --popover: 220 12% 13%;
-    --popover-foreground: 210 10% 92%;
+    --card: 216 32% 8%;
+    --card-foreground: 216 23% 93%;
 
-    --primary: 354 75% 54%;
+    --popover: 216 32% 8%;
+    --popover-foreground: 216 23% 93%;
+
+    --primary: 350 100% 61%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 10% 18%;
-    --secondary-foreground: 210 10% 88%;
+    --secondary: 216 27% 12%;
+    --secondary-foreground: 216 16% 84%;
 
-    --muted: 220 10% 18%;
-    --muted-foreground: 215 10% 58%;
+    --muted: 216 27% 12%;
+    --muted-foreground: 216 11% 60%;
 
-    --accent: 354 45% 35%;
-    --accent-foreground: 210 10% 92%;
+    --accent: 350 45% 24%;
+    --accent-foreground: 216 23% 93%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 220 10% 17%;
-    --input: 220 10% 17%;
-    --ring: 354 75% 54%;
+    --border: 216 26% 17%;
+    --input: 216 26% 17%;
+    --ring: 350 100% 61%;
 
     --radius: 0.375rem;
 
     /* Elevated surfaces */
-    --surface-elevated: 220 12% 16%;
-    --surface-overlay: 220 12% 20%;
+    --surface-elevated: 216 28% 11%;
+    --surface-overlay: 216 25% 15%;
 
-    --sidebar-background: 220 14% 9%;
-    --sidebar-foreground: 210 10% 92%;
-    --sidebar-primary: 354 75% 54%;
+    --sidebar-background: 225 30% 4%;
+    --sidebar-foreground: 216 23% 93%;
+    --sidebar-primary: 350 100% 61%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 12% 15%;
-    --sidebar-accent-foreground: 210 10% 92%;
-    --sidebar-border: 220 10% 17%;
-    --sidebar-ring: 354 75% 54%;
+    --sidebar-accent: 216 27% 12%;
+    --sidebar-accent-foreground: 216 23% 93%;
+    --sidebar-border: 216 26% 17%;
+    --sidebar-ring: 350 100% 61%;
   }
 }
 
@@ -77,14 +100,14 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', 'Inter Fallback', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(--font-sans);
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'JetBrains Mono', 'JetBrains Mono Fallback', 'Roboto Mono', monospace;
+    font-family: var(--font-mono);
     letter-spacing: -0.01em;
   }
 

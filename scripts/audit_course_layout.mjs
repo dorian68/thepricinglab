@@ -13,8 +13,6 @@ const COURSE_ROUTES = [
   ['yield-curves', 'yield-curve-bootstrapping'],
   ['greeks', 'options-book-greeks-pnl'],
   ['implied-vol', 'implied-volatility-smile'],
-  ['vol-products', 'implied-volatility-smile'],
-  ['hedging', 'options-book-greeks-pnl'],
   ['exotics', 'barrier-options-gap-risk'],
   ['monte-carlo', 'monte-carlo-pricing'],
   ['stochastic', 'stochastic-calculus-for-hedging'],
@@ -23,6 +21,10 @@ const COURSE_ROUTES = [
   ['market-risk-var', 'market-risk-var-stress'],
   ['fixed-income-bonds', 'fixed-income-bonds-duration'],
 ].map(([id, slug]) => ({ id, slug }));
+
+if (new Set(COURSE_ROUTES.map(({ slug }) => slug)).size !== COURSE_ROUTES.length) {
+  throw new Error('Every commercial course route must deliver a unique script');
+}
 
 const REQUIRED_SECTIONS = [
   'Promesse du module',

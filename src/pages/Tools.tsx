@@ -5,7 +5,7 @@ import {
   Calculator, LineChart, ArrowRight, ChevronDown, CandlestickChart,
   Activity, Dices, Database, Gauge, BarChart
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useSafeNavigate } from '@/security/useSafeNavigate';
 import { useTranslation } from "react-i18next";
 import { safeTranslate } from "../utils/translationUtils";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const ToolCard = ({ icon: Icon, title, description, locked = false, path, onClick }: { icon: React.ElementType; title: string; description: string; locked?: boolean; path?: string; onClick?: () => void; }) => {
-  const navigate = useNavigate();
+  const navigate = useSafeNavigate();
   const handleClick = () => { if (locked) return; onClick ? onClick() : path && navigate(path); };
   return (
     <Card className={`bg-card border-border ${locked ? 'opacity-60' : 'hover:border-primary/40 transition-colors duration-300'}`}>
@@ -43,7 +43,7 @@ const faqItems = [
 const Tools = () => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("all");
-  const navigate = useNavigate();
+  const navigate = useSafeNavigate();
 
   const allTools = [
     { icon: BarChart, title: 'Payoff Visualizer', description: 'Build multi-leg option strategies and analyze payoff diagrams, breakevens, and Greeks at expiry.', path: '/tools/payoff-visualizer' },

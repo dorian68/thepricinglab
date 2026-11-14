@@ -12,6 +12,7 @@ import GreekDisplay from '@/components/strategies/GreekDisplay';
 import MarkdownMathRenderer from '../../components/editors/MarkdownMathRenderer';
 import { Strategy } from '@/types/community';
 import { calculateStrategyResults } from '@/utils/options/strategyCalculator';
+import { adaptCommunityToTradingStrategy } from '@/utils/options/strategyAdapter';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 // Add mock strategies data properly typed
@@ -77,7 +78,8 @@ const StrategyDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { t } = useTranslation();
   const [strategy, setStrategy] = useState<Strategy | undefined>(undefined);
-  const [results, setResults] = useState<any>(null); // Placeholder for strategy results
+  const [results, setResults] = useState<any>(null);
+  const [calculationError, setCalculationError] = useState<string | null>(null);
   const [pricingMethod, setPricingMethod] = useState<'analytical' | 'monteCarlo'>('analytical');
   const [isAddedToPortfolio, setIsAddedToPortfolio] = useState(false);
 
@@ -100,31 +102,20 @@ const StrategyDetail = () => {
     }
   }, [strategy, pricingMethod]);
 
-  // Function to simulate strategy calculation
   const calculateStrategy = () => {
     if (!strategy) return;
-
-    // In a real implementation, this would use different calculation methods
-    // based on the selected pricing method
-    const calculatedResults = strategy.strategyData ? {
-      payoff: [10, 20, 15, 25, 30],
-      payoffPoints: Array.from({ length: 50 }, (_, i) => ({
-        x: 90 + i, // Generate x values from 90 to 139
-        y: Math.sin((i - 25) / 10) * 20 // Generate a sine wave for demonstration
-      })),
-      totalPrice: 250,
-      maxProfit: 500,
-      maxLoss: -200,
-      totalGreeks: { 
-        delta: 0.5, 
-        gamma: 0.1, 
-        theta: -0.05, 
-        vega: 3.2,
-        rho: 1.5
-      }
-    } : null;
-    
-    setResults(calculatedResults);
+    setCalculationError(null);
+    if (pricingMethod !== 'analytical') {
+      setResults(null);
+      setCalculationError('Le moteur Monte Carlo n’est pas disponible pour cette fiche. Aucun résultat de substitution n’est affiché.');
+      return;
+    }
+    try {
+      setResults(calculateStrategyResults(adaptCommunityToTradingStrategy(strategy)));
+    } catch (error) {
+      setResults(null);
+      setCalculationError(error instanceof Error ? error.message : 'Le calcul de stratégie a échoué.');
+    }
   };
 
   // Function to handle adding strategy to portfolio
@@ -237,6 +228,8 @@ const StrategyDetail = () => {
                 {safeTranslate(t, 'community.calculateStrategy', 'Recalculer')}
               </Button>
             </div>
+
+            {calculationError && <div className="mb-4 rounded border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-300">{calculationError}</div>}
 
             {/* Payoff Chart and Greek Display */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">

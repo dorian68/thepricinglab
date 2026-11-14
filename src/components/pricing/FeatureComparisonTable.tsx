@@ -97,19 +97,19 @@ const FeatureComparisonTable = () => {
       category: st('pricing.comparison.category4', 'Professional Features'),
       features: [
         {
-          name: st('pricing.comparison.certificates', 'Course Certificates'),
+          name: st('pricing.comparison.certificates', 'Evidence exports'),
           freemium: false,
           student: 'basic',
           pro: true
         },
         {
-          name: st('pricing.comparison.linkedinIntegration', 'LinkedIn Integration'),
+          name: st('pricing.comparison.linkedinIntegration', 'Course progress'),
           freemium: false,
           student: false,
           pro: true
         },
         {
-          name: st('pricing.comparison.performanceReports', 'Performance Reports'),
+          name: st('pricing.comparison.performanceReports', 'Run history'),
           freemium: false,
           student: true,
           pro: true

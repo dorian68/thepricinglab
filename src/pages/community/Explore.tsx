@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useSafeNavigate } from '@/security/useSafeNavigate';
 import { useTranslation } from 'react-i18next';
 import { safeTranslate } from '@/utils/translationUtils';
 import { Search, Filter, ThumbsUp, Eye, Calendar, User, PlusCircle, BookOpen, Layers } from 'lucide-react';
@@ -75,7 +76,7 @@ const mockPublications: Publication[] = [
 
 const Explore: React.FC = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const navigate = useSafeNavigate();
   const [activeTab, setActiveTab] = useState<"all" | "articles" | "strategies">("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredPublications, setFilteredPublications] = useState<Publication[]>(mockPublications);

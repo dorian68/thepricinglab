@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useSafeNavigate } from '@/security/useSafeNavigate';
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { ArrowLeft, Clock, Check, X, Zap, Trophy, AlertTriangle } from "lucide-r
 
 const LegendaryWave = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const navigate = useSafeNavigate();
   
   const waveInfo = {
     id: 6,

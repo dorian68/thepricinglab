@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useSafeNavigate } from '@/security/useSafeNavigate';
 import { Button } from "@/components/ui/button";
 import { Loader, Flame } from "lucide-react";
 import { toast } from "sonner";
@@ -12,7 +12,7 @@ interface SurvivalButtonProps {
 
 const SurvivalButton = ({ waveId, className }: SurvivalButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const navigate = useSafeNavigate();
 
   const handleStartSurvival = async () => {
     setIsLoading(true);

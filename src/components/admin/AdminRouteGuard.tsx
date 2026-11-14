@@ -1,5 +1,5 @@
 
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -11,22 +11,11 @@ interface AdminRouteGuardProps {
 
 const AdminRouteGuard = ({ children }: AdminRouteGuardProps) => {
   const location = useLocation();
-  const { user, profile, isLoading } = useAuth();
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
-
-  useEffect(() => {
-    if (!isLoading && user && profile) {
-      // Check if user has admin role in database
-      setIsAdmin(profile.role === 'admin');
-      setIsCheckingAdmin(false);
-    } else if (!isLoading && !user) {
-      setIsCheckingAdmin(false);
-    }
-  }, [user, profile, isLoading]);
+  const { user, isAdmin, isLoading } = useAuth();
+  const hasAdminClaim = isAdmin();
 
   // Show loading while checking auth state
-  if (isLoading || isCheckingAdmin) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-finance-accent"></div>
@@ -40,7 +29,7 @@ const AdminRouteGuard = ({ children }: AdminRouteGuardProps) => {
   }
 
   // Show access denied if not admin
-  if (!isAdmin) {
+  if (!hasAdminClaim) {
     return (
       <div className="min-h-screen bg-finance-dark flex items-center justify-center p-4">
         <div className="max-w-md w-full">

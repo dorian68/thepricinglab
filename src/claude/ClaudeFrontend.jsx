@@ -1,31 +1,111 @@
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
+import AuthenticationPage from './AuthenticationPage';
+import ForumWorkspace from './ForumWorkspace';
+import { StrategyPayoffFigure, SimulationComparison } from './LabIllustrations';
+import { shortStrangleScenario } from '../lib/teachingScenarios.mjs';
+import { AboutPage, ServiceUnavailable, RouteMetadata, downloadExercise, downloadExerciseMarkdown } from './DeliverySupport';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
-import rehypeKatex from 'rehype-katex';
-import remarkMath from 'remark-math';
+import {
+  Activity,
+  ArrowRight,
+  Award,
+  Bell,
+  BookOpen,
+  Bookmark,
+  Braces,
+  Briefcase,
+  Building2,
+  Calculator,
+  Check,
+  ChevronRight,
+  Circle,
+  CircleAlert,
+  CircleCheck,
+  ClipboardCheck,
+  Code2,
+  Copy,
+  CreditCard,
+  Crown,
+  Database,
+  ExternalLink,
+  FileText,
+  Github,
+  GraduationCap,
+  Handshake,
+  HelpCircle,
+  LayoutDashboard,
+  Library,
+  Lightbulb,
+  Linkedin,
+  LoaderCircle,
+  Lock,
+  LogOut,
+  Mail,
+  Medal,
+  Menu,
+  MessageSquareText,
+  Paperclip,
+  Play,
+  Plus,
+  Quote,
+  RotateCcw,
+  Search,
+  Send,
+  ShieldCheck,
+  Sigma,
+  SlidersHorizontal,
+  Sparkles,
+  Star,
+  Target,
+  Terminal,
+  TriangleAlert,
+  Trophy,
+  Twitter,
+  User,
+  Users,
+  Video,
+  X,
+  Youtube,
+  Zap,
+} from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToolRegister } from '../agent/toolControl';
 import { runPython } from './pyodideRunner';
-import { getDerivation } from './derivations';
 import { loadDeskSeries, pickCourseSeries, SYMBOL_ALIAS } from './marketSeries';
-import { getLessonProse } from './lessonProse';
 import { getCourseLayout, showMarketOnLesson } from './courseLayouts';
-import AgentRoomReal from '../agent/AgentRoomReal';
+import { COURSE_MANIFEST, COURSE_SCRIPT_SLUGS, CHAPTER_COUNTS } from './courseManifest';
+import { blackScholesOption, normCdf as canonicalNormCdf, normPdf as canonicalNormPdf } from '../lib/blackScholes.mjs';
 import {
   GENERATOR_PRESETS,
-  PRACTICE_COURSE_EXTENSIONS,
   PRACTICE_EXERCISES,
+  SURVIVAL_QUESTIONS,
   exerciseDescription,
   generateAiDeskExercise,
-  getCourseBlueprint,
   getExerciseById,
+  getEntitlement,
   getPracticeApiBase,
   loadGeneratedExercises,
   platformApi,
   saveGeneratedExercise,
+  cacheGeneratedExercises,
+  exerciseFromRecord,
+  exerciseModeLabel,
   startCheckout,
   strategyApi,
 } from './practiceEngine';
+
+const AgentRoomReal = React.lazy(() => import('../agent/AgentRoomReal'));
+const StarterKitPage = React.lazy(() => import('./StarterKitPage'));
+const CourseMarkdown = React.lazy(() => import('./CourseMarkdown'));
+const ModelCalibrationTool = React.lazy(() => import('../components/tools/ModelCalibration'));
+const YieldCurveBuilderTool = React.lazy(() => import('../components/tools/YieldCurveBuilder'));
+const RealizedVolatilityLabTool = React.lazy(() => import('../components/tools/RealizedVolatilityLab'));
+const PayoffStrategyLabTool = React.lazy(() => import('../components/tools/PayoffStrategyLab'));
+const MonteCarloLabTool = React.lazy(() => import('../components/tools/MonteCarloLab'));
+const BinomialLabTool = React.lazy(() => import('../components/tools/BinomialLab'));
+const BondLabTool = React.lazy(() => import('../components/tools/BondLab'));
+const VolSurfaceLabTool = React.lazy(() => import('../components/tools/VolSurfaceLab'));
+const BlackScholesLabTool = React.lazy(() => import('../components/tools/BlackScholesLab'));
 import './claude.css';
 
 
@@ -69,7 +149,7 @@ function ToastStack() {
 function FormNotice({type = 'success', children}) {
   if (!children) return null;
   return (
-    <div className={`form-notice ${type}`}>
+    <div className={`form-notice ${type}`} role={type==='error'?'alert':'status'}>
       <Icon name={type === 'error' ? 'circle-alert' : 'check'} size={14}/>
       <span>{children}</span>
     </div>
@@ -87,7 +167,7 @@ async function copyText(value, success = 'Copied to clipboard.') {
 }
 
 function handleSave(label) {
-  notify(`${label} saved to your workspace.`);
+  notify(`${label}: this action is unavailable. Nothing was saved.`, 'warning');
 }
 
 function handleShare(label) {
@@ -98,20 +178,49 @@ function submitStub(label) {
   notify(`${label} queued for backend processing.`);
 }
 
+const LEGAL_IDENTITY = {
+  name: import.meta.env.VITE_TPL_LEGAL_NAME || '',
+  formCapital: import.meta.env.VITE_TPL_LEGAL_FORM_CAPITAL || '',
+  address: import.meta.env.VITE_TPL_LEGAL_ADDRESS || '',
+  registration: import.meta.env.VITE_TPL_LEGAL_REGISTRATION || '',
+  vat: import.meta.env.VITE_TPL_LEGAL_VAT || '',
+  phone: import.meta.env.VITE_TPL_LEGAL_PHONE || '',
+  publisher: import.meta.env.VITE_TPL_PUBLICATION_DIRECTOR || '',
+  host: import.meta.env.VITE_TPL_HOST_NOTICE || '',
+  mediator: import.meta.env.VITE_TPL_CONSUMER_MEDIATOR || '',
+  email: import.meta.env.VITE_TPL_SUPPORT_EMAIL || '',
+};
+const LEGAL_READY = Boolean(LEGAL_IDENTITY.name && LEGAL_IDENTITY.formCapital && LEGAL_IDENTITY.address && LEGAL_IDENTITY.registration && LEGAL_IDENTITY.vat && LEGAL_IDENTITY.phone && LEGAL_IDENTITY.publisher && LEGAL_IDENTITY.host && LEGAL_IDENTITY.mediator && LEGAL_IDENTITY.email);
+const LEGAL_SUPPORT_CONTACT = LEGAL_IDENTITY.email || 'the support contact published in the legal notice before sales open';
+const STARTER_KIT_PRICE_EUR = Number(import.meta.env.VITE_TPL_STARTER_KIT_PRICE_EUR || 0);
+const STARTER_KIT_SALES_ENABLED = import.meta.env.VITE_TPL_STARTER_KIT_SALES_ENABLED === 'true';
+const SOURCE_RIGHTS_CLEARED = import.meta.env.VITE_TPL_SOURCE_RIGHTS_CLEARED === 'true';
+const STARTER_KIT_SALES_GUARD = {
+  legalReady: LEGAL_READY,
+  salesEnabled: STARTER_KIT_SALES_ENABLED,
+  sourceRightsCleared: SOURCE_RIGHTS_CLEARED,
+  priceEur: Number.isFinite(STARTER_KIT_PRICE_EUR) && STARTER_KIT_PRICE_EUR > 0 ? STARTER_KIT_PRICE_EUR : null,
+};
+
+function SupportLink({subject = '', children, className = 'btn btn-outline btn-sm'}) {
+  if (!LEGAL_IDENTITY.email) return <span className="badge badge-amber">Support contact not configured</span>;
+  return <a className={className} href={`mailto:${LEGAL_IDENTITY.email}?subject=${encodeURIComponent(subject)}`}>{children}</a>;
+}
+
 // ---------- Routing ----------
 const COURSE_ROUTE_ALIASES = {
   'black-scholes': 'black-scholes',
   'yield-curves': 'yield-curves',
   greeks: 'greeks',
   'implied-vol': 'implied-vol',
-  'vol-products': 'vol-products',
+  'vol-products': 'implied-vol',
   'exotic-options': 'exotics',
   exotics: 'exotics',
   'monte-carlo': 'monte-carlo',
   'stochastic-calculus': 'stochastic',
   stochastic: 'stochastic',
-  'hedging-strategies': 'hedging',
-  hedging: 'hedging',
+  'hedging-strategies': 'greeks',
+  hedging: 'greeks',
 };
 
 const TOOL_ROUTE_ALIASES = {
@@ -153,7 +262,7 @@ function mapLegacyPath(rawPath) {
   if (path === '/rapports') return '/dashboard';
   if (path === '/vol-surface' || path === '/VolSurface') return '/tools/volsurface';
   if (path === '/courses/fundamentals' || path === '/courses/advanced' || path === '/courses/complex') return '/courses';
-  if (path === '/quizzes') return '/dashboard';
+  if (path === '/quizzes') return '/courses';
   if (path === '/projects') return '/community/projects';
   if (path === '/community/notebook-workspace') return '/notebooks';
   if (path.startsWith('/community/article/')) return '/community/publications';
@@ -213,52 +322,95 @@ function nav(path) {
 // Without this assignment they were silent no-ops (and the agent painted a fake
 // "Navigation done"). Same pushState+popstate the app already uses internally.
 if (typeof window !== 'undefined') window.nav = nav;
-function Link({to, children, className, style, onClick}) {
-  return <RouterLink to={to} className={className} style={style} onClick={onClick}>{children}</RouterLink>;
+function Link({to, children, className, style, onClick, ...props}) {
+  return <RouterLink {...props} to={to} className={className} style={style} onClick={onClick}>{children}</RouterLink>;
 }
 
 // ---------- Lucide icon ----------
+const ICONS = {
+  activity: Activity,
+  'arrow-right': ArrowRight,
+  award: Award,
+  bell: Bell,
+  'book-open': BookOpen,
+  bookmark: Bookmark,
+  braces: Braces,
+  briefcase: Briefcase,
+  'building-2': Building2,
+  calculator: Calculator,
+  check: Check,
+  'check-circle': CircleCheck,
+  'chevron-right': ChevronRight,
+  circle: Circle,
+  'circle-alert': CircleAlert,
+  'circle-check': CircleCheck,
+  'clipboard-check': ClipboardCheck,
+  code: Code2,
+  copy: Copy,
+  'credit-card': CreditCard,
+  crown: Crown,
+  database: Database,
+  'external-link': ExternalLink,
+  'file-text': FileText,
+  github: Github,
+  'graduation-cap': GraduationCap,
+  'help-circle': HelpCircle,
+  library: Library,
+  lightbulb: Lightbulb,
+  linkedin: Linkedin,
+  'layout-dashboard': LayoutDashboard,
+  'loader-circle': LoaderCircle,
+  lock: Lock,
+  'log-out': LogOut,
+  mail: Mail,
+  medal: Medal,
+  menu: Menu,
+  'message-square-text': MessageSquareText,
+  paperclip: Paperclip,
+  play: Play,
+  plus: Plus,
+  quote: Quote,
+  risk: ShieldCheck,
+  'rotate-ccw': RotateCcw,
+  sales: Handshake,
+  search: Search,
+  send: Send,
+  'shield-check': ShieldCheck,
+  sigma: Sigma,
+  sliders: SlidersHorizontal,
+  'sliders-horizontal': SlidersHorizontal,
+  sparkles: Sparkles,
+  star: Star,
+  target: Target,
+  terminal: Terminal,
+  trader: Briefcase,
+  'triangle-alert': TriangleAlert,
+  trophy: Trophy,
+  twitter: Twitter,
+  user: User,
+  users: Users,
+  video: Video,
+  x: X,
+  youtube: Youtube,
+  zap: Zap,
+};
+
 function Icon({name, size=14, style, className}) {
-  return <i className={"icon icon-"+name+" "+(className||'')} style={{fontSize:size, lineHeight:1, ...style}} />;
+  const Glyph = ICONS[name];
+  const classes = `icon icon-${name} ${className || ''}`;
+  if (!Glyph) {
+    return <span className={classes} aria-hidden="true" style={{display:'inline-block',width:size,height:size,flexShrink:0,...style}} />;
+  }
+  return <Glyph className={classes} aria-hidden="true" focusable="false" size={size} strokeWidth={1.8} style={{flexShrink:0,...style}}/>;
 }
 
 // ---------- Math: Black-Scholes ----------
-function normCdf(x){
-  // Abramowitz & Stegun
-  const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
-  const sign = x<0?-1:1;
-  x = Math.abs(x)/Math.SQRT2;
-  const t = 1/(1+p*x);
-  const y = 1 - (((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);
-  return 0.5*(1+sign*y);
-}
-function normPdf(x){ return Math.exp(-0.5*x*x)/Math.sqrt(2*Math.PI); }
+const normCdf = canonicalNormCdf;
+const normPdf = canonicalNormPdf;
 
 function bsPrice({S,K,r,q=0,sigma,T,type='call'}){
-  if (T<=0 || sigma<=0) {
-    const intr = type==='call' ? Math.max(S-K,0) : Math.max(K-S,0);
-    return {price:intr, delta:0, gamma:0, vega:0, theta:0, rho:0, d1:0, d2:0};
-  }
-  const d1 = (Math.log(S/K) + (r-q+0.5*sigma*sigma)*T)/(sigma*Math.sqrt(T));
-  const d2 = d1 - sigma*Math.sqrt(T);
-  const Nd1 = normCdf(d1), Nd2 = normCdf(d2);
-  const pdf = normPdf(d1);
-  const eqT = Math.exp(-q*T), erT = Math.exp(-r*T);
-  let price, delta, theta, rho;
-  if (type === 'call') {
-    price = S*eqT*Nd1 - K*erT*Nd2;
-    delta = eqT*Nd1;
-    theta = (-S*eqT*pdf*sigma/(2*Math.sqrt(T)) - r*K*erT*Nd2 + q*S*eqT*Nd1)/365;
-    rho   = K*T*erT*Nd2/100;
-  } else {
-    price = K*erT*normCdf(-d2) - S*eqT*normCdf(-d1);
-    delta = eqT*(Nd1-1);
-    theta = (-S*eqT*pdf*sigma/(2*Math.sqrt(T)) + r*K*erT*normCdf(-d2) - q*S*eqT*normCdf(-d1))/365;
-    rho   = -K*T*erT*normCdf(-d2)/100;
-  }
-  const gamma = eqT*pdf/(S*sigma*Math.sqrt(T));
-  const vega = S*eqT*pdf*Math.sqrt(T)/100;
-  return {price, delta, gamma, vega, theta, rho, d1, d2};
+  const option = blackScholesOption({spot:S, strike:K, maturityYears:T, riskFreeRate:r, dividendYield:q, volatility:sigma, optionType:type});
+  return {price:option.price, ...option.greeks, d1:option.d1 ?? 0, d2:option.d2 ?? 0};
 }
 
 // ---------- Pretty number ----------
@@ -292,58 +444,51 @@ const TICKER = [
   {sym:'AAPL', px:228.41, chg: 0.21},
 ];
 
-// ---------- Mock data: courses ----------
-const COURSES = [
+// Legacy catalogue removed from the active path; the manifest below is the
+// only catalogue used by the application.
+/* legacy course snapshot retained only for migration reference; active UI uses COURSE_MANIFEST
+const LEGACY_COURSES = [
   // FUNDAMENTALS
-  {id:'black-scholes', title:'Black-Scholes Model', tier:'Fundamentals', level:'L1', duration:'4h 20m', modules:8, badge:'free',
+  {id:'black-scholes', title:'Black-Scholes Model', tier:'Fundamentals', level:'L1', duration:'3h', modules:8, badge:'free-preview',
    tagline:'Closed-form pricing for European options, from PDE to code.',
    topics:['PDE derivation','d1/d2','Risk-neutral measure','Implementation','Limitations'],
    accent:'#19C37D'},
-  {id:'yield-curves', title:'Yield Curves', tier:'Fundamentals', level:'L1', duration:'3h 50m', modules:7, badge:'free',
+  {id:'yield-curves', title:'Yield Curves', tier:'Fundamentals', level:'L1', duration:'3h 40m', modules:9, badge:'starter',
    tagline:'Bootstrapping, zero rates, forward curves, bond pricing.',
    topics:['Bootstrapping','Zero-coupon','Forward rates','Discount factors'],
    accent:'#3E8BFF'},
-  {id:'greeks', title:'Option Greeks', tier:'Fundamentals', level:'L2', duration:'5h 10m', modules:9, badge:'student',
+  {id:'greeks', title:'Option Greeks', tier:'Fundamentals', level:'L2', duration:'3h 30m', modules:9, badge:'starter',
    tagline:'Delta, Gamma, Vega, Theta, Rho — measure & manage risk.',
    topics:['Delta hedging','Gamma scalping','Vega risk','Theta decay'],
    accent:'#FFB020'},
   // ADVANCED
-  {id:'implied-vol', title:'Implied Volatility Analysis', tier:'Advanced', level:'L3', duration:'6h 40m', modules:11, badge:'student',
+  {id:'implied-vol', title:'Implied Volatility Analysis', tier:'Advanced', level:'L3', duration:'3h 40m', modules:9, badge:'student',
    tagline:'Smile, skew, term structure & surface construction.',
    topics:['Smile/skew','Term structure','SVI','Arbitrage-free surfaces'],
    accent:'#FF2E45'},
-  {id:'vol-products', title:'Volatility Products', tier:'Advanced', level:'L3', duration:'4h 50m', modules:9, badge:'pro',
-   tagline:'Variance swaps, VIX futures, vol carry & dispersion.',
-   topics:['Variance swaps','VIX','Dispersion','Vol carry'],
-   accent:'#D946EF'},
-  {id:'hedging', title:'Advanced Hedging', tier:'Advanced', level:'L4', duration:'5h 30m', modules:10, badge:'student',
-   tagline:'Static & dynamic hedging across vega, gamma, cross-greeks.',
-   topics:['Delta-gamma','Vega hedging','Cross greeks','Replication'],
-   accent:'#19C37D'},
   // COMPLEX
-  {id:'exotics', title:'Exotic Options', tier:'Complex', level:'L4', duration:'7h 15m', modules:12, badge:'pro',
+  {id:'exotics', title:'Exotic Options', tier:'Complex', level:'L4', duration:'3h 50m', modules:9, badge:'pro',
    tagline:'Barriers, Asians, lookbacks, autocallables. Path matters.',
    topics:['Barriers','Asians','Lookbacks','Autocallables'],
    accent:'#3E8BFF'},
-  {id:'monte-carlo', title:'Monte Carlo Methods', tier:'Complex', level:'L4', duration:'6h 05m', modules:10, badge:'pro',
+  {id:'monte-carlo', title:'Monte Carlo Methods', tier:'Complex', level:'L4', duration:'4h', modules:10, badge:'pro',
    tagline:'GBM paths, variance reduction, convergence, VaR/ES.',
    topics:['GBM','Antithetic','Control variates','VaR/ES'],
    accent:'#FFB020'},
-  {id:'stochastic', title:'Stochastic Calculus', tier:'Complex', level:'L5', duration:'8h 30m', modules:14, badge:'pro',
+  {id:'stochastic', title:'Stochastic Calculus', tier:'Complex', level:'L5', duration:'4h 20m', modules:10, badge:'pro',
    tagline:"Itô's lemma, SDEs, measure changes — the math behind it all.",
    topics:["Itô's lemma","SDE","Girsanov","Martingales"],
    accent:'#FF2E45'},
-  ...PRACTICE_COURSE_EXTENSIONS,
 ];
 
-const COURSE_SCRIPT_SLUGS = {
+const COURSES = COURSE_MANIFEST;
+
+const LEGACY_COURSE_SCRIPT_SLUGS = {
   'black-scholes': 'vanilla-options-quote',
   'greeks': 'options-book-greeks-pnl',
-  'hedging': 'options-book-greeks-pnl',
   'rates-swaps': 'rates-swaps-dv01',
   'yield-curves': 'yield-curve-bootstrapping',
   'implied-vol': 'implied-volatility-smile',
-  'vol-products': 'implied-volatility-smile',
   'monte-carlo': 'monte-carlo-pricing',
   'exotics': 'barrier-options-gap-risk',
   'structured-products': 'structured-products-autocall',
@@ -356,38 +501,39 @@ const COURSE_SCRIPT_SLUGS = {
 // Real teaching-chapter count per course (counted from the Hull-level scripts —
 // the 0-Hook → 8-Source-map structure, minus meta sections). Drives the catalog
 // card so the displayed module count is truthful, not a hardcoded guess.
-const CHAPTER_COUNTS = {
-  'black-scholes': 8, 'yield-curves': 8, 'greeks': 8, 'implied-vol': 8,
-  'vol-products': 8, 'hedging': 8, 'exotics': 8, 'monte-carlo': 8, 'stochastic': 8,
-};
+const LEGACY_CHAPTER_COUNTS = {
+  'black-scholes': 8, 'yield-curves': 9, 'greeks': 9, 'implied-vol': 9,
+  'exotics': 9, 'monte-carlo': 10, 'stochastic': 10,
+}; */
+
+// The canonical manifest is the only active catalogue source. Keep this alias
+// outside the archived migration snapshot so every active page resolves it at
+// runtime, including the home page and course routes.
+const COURSES = COURSE_MANIFEST;
 
 const TOOLS = [
-  {id:'bs-pricer', name:'Black-Scholes Pricer', cat:'Calculators', tier:'free', desc:'Closed-form price + Greeks for European options.'},
-  {id:'payoff', name:'Payoff Visualizer', cat:'Visualizers', tier:'free', desc:'Build multi-leg strategies, view P&L, breakevens, Greeks.'},
-  {id:'mc', name:'Monte Carlo Simulator', cat:'Simulators', tier:'free', desc:'GBM paths, terminal distribution, VaR & ES.'},
-  {id:'iv-calc', name:'Volatility Calculator', cat:'Calculators', tier:'free', desc:'Realized vol, rolling windows, multiple estimators.'},
-  {id:'calib', name:'Model Calibration', cat:'Calculators', tier:'student', desc:'Fit Black, SABR, Heston to market smiles.'},
-  {id:'binomial', name:'Binomial Tree', cat:'Calculators', tier:'free', desc:'Cox-Ross-Rubinstein for American + early exercise.'},
-  {id:'volsurface', name:'Vol Surface Explorer', cat:'Visualizers', tier:'free', desc:'Implied vol surface, slice by strike/tenor.'},
-  {id:'bond', name:'Bond Calculator', cat:'Calculators', tier:'free', desc:'YTM, duration, convexity, scenario shifts.'},
-  {id:'curve', name:'Yield Curve Builder', cat:'Calculators', tier:'free', desc:'Bootstrap from deposits, futures, swaps.'},
+  {id:'bs-pricer', name:'Black-Scholes Pricing & IV Lab', cat:'Calculators', tier:'free', status:'validated engine · evidence-ready', desc:'European call/put pricing, strict implied volatility, signed Greeks, exact scenarios and SHA-bound exports.', engine:'Canonical Black-Scholes v1', inputs:'spot, strike, maturity, rates, dividend, volatility/market price, position', conventions:'continuous rates; USD-style quote; signed position and multiplier', assumptions:'European exercise; continuous carry; risk-neutral pricing', limits:'European vanilla only; no executable market quote', diagnostics:'parity, intrinsic value, monotonicity and IV convergence', evidence:'JSON/CSV export plus local run history', courseId:'black-scholes', exerciseId:'bs-eur-call'},
+  {id:'payoff', name:'Payoff Strategy Lab', cat:'Visualizers', tier:'starter', status:'validated engine v1', desc:'Exact premium-aware terminal P&L, analytical tails, breakevens and signed Greeks.', engine:'Canonical payoff v1.0.1', inputs:'strategy legs, strikes, premiums, spot grid, multiplier', conventions:'terminal P&L; premium-inclusive; long/short signed', assumptions:'path-independent terminal payoff; stated multiplier and currency', limits:'unsupported path-dependent exotics fail closed', diagnostics:'tails, bounds, roots, breakevens and signed Greeks', evidence:'JSON/two-CSV exports plus immutable run history', courseId:'greeks', exerciseId:'options-book-greeks'},
+  {id:'mc', name:'Monte Carlo Pricing & Risk Lab', cat:'Simulators', tier:'starter', status:'validated MC engine v1', desc:'Explicit P/Q GBM, loss VaR/ES, option pricing uncertainty and reproducible evidence.', engine:'Seeded Monte Carlo v1.0.0', inputs:'spot, strike, maturity, rates, volatility, paths, seed, measure', conventions:'P/Q explicit; loss is non-negative; confidence/error shown', assumptions:'GBM dynamics; declared timestep, seed and payoff', limits:'GBM/Asian scope; model risk and discretisation remain', diagnostics:'CI, standard error, convergence and benchmark comparison', evidence:'JSON/CSV path evidence plus local run history', courseId:'monte-carlo', exerciseId:'mc-asian'},
+  {id:'iv-calc', name:'Realized Volatility Lab', cat:'Calculators', tier:'starter', status:'validated engine v1', desc:'Five OHLC estimators, local data-quality diagnostics and evidence exports.', engine:'OHLC realized-vol v1', inputs:'dated OHLC rows, estimator, annualisation, rolling window', conventions:'price units; 252/365 annualisation explicit', assumptions:'historical OHLC observations; no forecast or implied quote', limits:'historical estimate, not implied volatility or forecast', diagnostics:'missing dates, OHLC consistency, warnings and estimator comparison', evidence:'deterministic JSON/CSV export plus run history', courseId:'implied-vol', exerciseId:'iv-newton'},
+  {id:'calib', name:'Model Calibration', cat:'Calculators', tier:'student', status:'validated engine v1', desc:'Fit Black, SABR, Heston to market smiles.', engine:'Black-76 / SABR / Fourier Heston v1', inputs:'dated smile CSV, forward, rates, model and bounds', conventions:'market smile snapshot; residuals and fit diagnostics retained', assumptions:'input smile is a dated snapshot; bounded model family', limits:'calibration is not a price forecast; data quality/model risk apply', diagnostics:'residuals, fit improvement, parameter bounds and arbitrage checks', evidence:'CSV/JSON export plus actual run history', courseId:'implied-vol', exerciseId:'smile-fit'},
+  {id:'binomial', name:'American Option & CRR Lattice Lab', cat:'Calculators', tier:'student', status:'validated CRR engine v1', desc:'Fail-closed CRR pricing, exercise frontier, convergence, Greeks and reproducible evidence.', engine:'CRR lattice v1.0.0', inputs:'spot, strike, maturity, rate, dividend, volatility, steps, position', conventions:'European/American; discrete exercise; signed Greeks', assumptions:'recombining CRR tree; declared exercise and dividend conventions', limits:'CRR domain and requested step limits are enforced', diagnostics:'probability bounds, convergence, frontier and Greeks', evidence:'JSON/CSV evidence plus SHA-bound run history', courseId:'exotics', exerciseId:'barrier-knock-in'},
+  {id:'volsurface', name:'Volatility Surface Quality & Interpolation Lab', cat:'Visualizers', tier:'student', status:'validated surface engine v1', desc:'Total variance, in-grid interpolation, smile metrics and discrete static-arbitrage diagnostics.', engine:'Total-variance surface v1.0.0', inputs:'dated strike/expiry/volatility grid, forward, interpolation point', conventions:'k=ln(K/F); w=sigma²T; no silent repair', assumptions:'rectangular dated snapshot; no hidden filling or smoothing', limits:'in-grid interpolation only; diagnostics are discrete checks', diagnostics:'vertical, butterfly, calendar and missing-grid flags', evidence:'points/diagnostics CSV plus JSON and run history', courseId:'implied-vol', exerciseId:'smile-fit'},
+  {id:'bond', name:'Fixed-Rate Bond Pricing & Risk Lab', cat:'Calculators', tier:'starter', status:'validated bond engine v1', desc:'Clean/dirty pricing, accrued interest, YTM inversion, cash flows, DV01 and exact scenarios.', engine:'Fixed-rate bond v1.0.0', inputs:'coupon, maturity, settlement, yield, frequency, day count, position', conventions:'clean/dirty identity; ACT/ACT ICMA or 30E/360; signed DV01', assumptions:'fixed coupon; declared day-count and settlement convention', limits:'fixed-rate bonds; calendars and credit/liquidity risk excluded', diagnostics:'cash-flow identity, YTM inversion, DV01 and shock residuals', evidence:'cash-flow/scenario CSV plus JSON and run history', courseId:'fixed-income-bonds', exerciseId:'bond-duration'},
+  {id:'curve', name:'Yield Curve Builder', cat:'Calculators', tier:'starter', status:'validated engine v1', desc:'Bootstrap deposits, FRAs, adjusted futures and sparse par swaps with exact repricing.', engine:'Mono-curve bootstrap v1', inputs:'dated instruments, quotes, calendars/conventions, interpolation', conventions:'discount factors/log-DF; exact repricing residuals', assumptions:'educational mono-curve and declared interpolation', limits:'no OIS/projection multi-curve or extrapolation', diagnostics:'repricing residuals, DF positivity and forward stability', evidence:'curve JSON/CSV export plus local run history', courseId:'yield-curves', exerciseId:'curve-boot'},
 ];
 
 const TIER_BADGE = {
-  free:    {label:'Starter', cls:'badge-green'},
+  free:    {label:'Free', cls:'badge-green'},
+  'free-preview': {label:'Free preview', cls:'badge-green'},
+  starter: {label:'Starter', cls:'badge-green'},
   student: {label:'Student', cls:'badge-blue'},
   pro:     {label:'Pro', cls:'badge-red'},
 };
+const UNKNOWN_TIER_BADGE = {label:'Unavailable', cls:'badge-red'};
 
-// ---------- Mock: blog ----------
-const POSTS = [
-  {id:'understanding-vega', title:'Understanding Vega Across Strikes', tag:'Options', readTime:'8 min', date:'May 18, 2026', author:'L. Martin', excerpt:'How vega behaves along the volatility smile and what hedgers miss when assuming flat vol.'},
-  {id:'monte-carlo-pitfalls', title:'Monte Carlo Pitfalls in Production', tag:'Monte Carlo', readTime:'12 min', date:'May 10, 2026', author:'S. Okafor', excerpt:'Variance reduction is not optional. Five mistakes that survive code review and torch your P&L.'},
-  {id:'bs-from-scratch', title:'Re-deriving Black-Scholes from Scratch', tag:'Black-Scholes', readTime:'15 min', date:'May 03, 2026', author:'M. Rivera', excerpt:'A pedagogical derivation starting from the replicating portfolio — no measure theory required.'},
-  {id:'vol-cones', title:'Volatility Cones Reconsidered', tag:'Volatility', readTime:'6 min', date:'Apr 27, 2026', author:'A. Chen', excerpt:'Why cones can mislead during regime shifts, and a simple Bayesian alternative.'},
-  {id:'quant-interview', title:'10 Quant Interview Brain-teasers Worth Practicing', tag:'Quant Interview', readTime:'10 min', date:'Apr 19, 2026', author:'L. Martin', excerpt:'Hands-on problems that show up at top desks, with full solutions and intuition.'},
-  {id:'python-numerics', title:'Python Numerics for Pricing: Pitfalls', tag:'Python', readTime:'9 min', date:'Apr 12, 2026', author:'S. Okafor', excerpt:'Float precision, vectorization and when to abandon NumPy for plain loops.'},
-];
+// Blog posts are loaded from the persisted platform API; no synthetic authors or dates.
+const POSTS = [];
 
 // ---------- Mock: exercises ----------
 const EXERCISES = PRACTICE_EXERCISES;
@@ -412,8 +558,8 @@ function TopStrip() {
     <div className="top-strip">
       <div className="top-strip-inner">
         <div className="row" style={{gap:14, flexShrink:0}}>
-          <span><span className="dot dot-green" style={{marginRight:6}}></span>MKT · OPEN</span>
-          <span className="mute">SESSION · NY</span>
+          <span><span className="dot" style={{marginRight:6}}></span>REFERENCE SNAPSHOT</span>
+          <span className="mute">NOT LIVE MARKET DATA</span>
           <span>{time}</span>
         </div>
         <Ticker />
@@ -444,22 +590,70 @@ function Ticker() {
 }
 
 const NAV_ITEMS = [
-  {to:'/agent-room', label:'Agent Room'},
   {to:'/courses', label:'Courses'},
-  {to:'/lab', label:'Trading Lab'},
   {to:'/tools', label:'Tools'},
   {to:'/exercises', label:'Exercises'},
+  {to:'/lab', label:'Trading Lab'},
+  {to:'/agent-room', label:'Agent Room'},
   {to:'/community', label:'Community'},
   {to:'/blog', label:'Blog'},
 ];
 
+function BrandSignature({horizontal=false}) {
+  return <img className={"brand-signature"+(horizontal?' brand-signature-horizontal':'')} src={horizontal?'/brand/thepricinglibrary-horizontal.svg':'/brand/thepricinglibrary.svg'} alt="The Pricing Library" width={horizontal?1422.69:841} height={horizontal?180:401} decoding="async" data-brand-logo="true"/>;
+}
+
 function Header({route}) {
-  const [lang, setLang] = useState('EN');
   const [drawer, setDrawer] = useState(false);
+  const [exploreOpen, setExploreOpen] = useState(false);
+  const exploreRef = useRef(null);
+  const exploreTrigger = useRef(null);
   const { user, profile, isAuthenticated, signOut } = useAuth();
   const isActive = (to) => route.path === to || route.path.startsWith(to+'/');
   const displayName = profile?.prenom || user?.email?.split('@')[0] || 'Desk';
   const closeDrawer = () => setDrawer(false);
+  const primaryItems = NAV_ITEMS.slice(0, 3);
+  const exploreItems = [...NAV_ITEMS.slice(3), {to:'/pricing', label:'Plans & pricing'}];
+  useEffect(() => {
+    if (!exploreOpen) return;
+    const onPointerDown = (event) => {
+      if (!exploreRef.current?.contains(event.target)) setExploreOpen(false);
+    };
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setExploreOpen(false);
+        exploreTrigger.current?.focus();
+      }
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [exploreOpen]);
+  useEffect(() => {
+    if (!drawer) return;
+    const previousFocus = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const dialog = document.getElementById('mobile-navigation');
+    dialog?.querySelector('button[aria-label="Close menu"]')?.focus();
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') setDrawer(false);
+      if (event.key !== 'Tab' || !dialog) return;
+      const items = Array.from(dialog.querySelectorAll('a[href], button:not([disabled])'));
+      const first = items[0], last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', onKeyDown);
+      if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus();
+    };
+  }, [drawer]);
   const handleSignOut = async () => {
     await signOut();
     notify('Signed out.');
@@ -470,25 +664,25 @@ function Header({route}) {
     <>
       <header className="nav">
         <div className="nav-inner">
-          <Link to="/" className="brand">
-            <span className="brand-mark"></span>
-            <span>THE PRICING LIBRARY</span>
-            <span style={{color:'var(--mute)',marginLeft:8,fontWeight:500}}>·</span>
-            <span className="mute" style={{fontWeight:500}}>EDU</span>
+          <Link to="/" className="brand" aria-label="The Pricing Library home">
+            <BrandSignature horizontal/>
           </Link>
-          <nav className="nav-links">
-            {NAV_ITEMS.map(n => (
-              <Link key={n.to} to={n.to} className={"nav-link " + (isActive(n.to)?'active':'')}>{n.label}</Link>
+          <nav className="nav-links" aria-label="Main navigation">
+            {primaryItems.map(n => (
+              <Link key={n.to} to={n.to} aria-current={isActive(n.to)?'page':undefined} className={"nav-link " + (isActive(n.to)?'active':'')}>{n.label}</Link>
             ))}
+            <div className="nav-explore" ref={exploreRef} onBlur={(event)=>{if (!event.currentTarget.contains(event.relatedTarget)) setExploreOpen(false);}}>
+              <button ref={exploreTrigger} className={"nav-link nav-explore-trigger " + (exploreItems.some(n=>isActive(n.to))?'active':'')} aria-expanded={exploreOpen} aria-controls="explore-navigation" onClick={()=>setExploreOpen(value=>!value)}>Explore <Icon name="chevron-right" size={12}/></button>
+              {exploreOpen && <div id="explore-navigation" className="nav-explore-panel">
+                <span className="micro">Keep exploring</span>
+                {exploreItems.map(n=><Link key={n.to} to={n.to} onClick={()=>setExploreOpen(false)} aria-current={isActive(n.to)?'page':undefined}><span>{n.label}</span><Icon name="arrow-right" size={13}/></Link>)}
+              </div>}
+            </div>
           </nav>
           <div className="nav-right">
-            <div className="lang-switch">
-              <button className={lang==='FR'?'on':''} onClick={()=>{setLang('FR'); notify('Interface language set to French.');}}>FR</button>
-              <button className={lang==='EN'?'on':''} onClick={()=>{setLang('EN'); notify('Interface language set to English.');}}>EN</button>
-            </div>
-            <Link to="/dashboard" className="btn btn-ghost btn-sm nav-dashboard" style={{padding:'6px 10px'}}>
+            {isAuthenticated && <Link to="/dashboard" className="btn btn-ghost btn-sm nav-dashboard" style={{padding:'6px 10px'}}>
               <Icon name="layout-dashboard" size={13}/> Dashboard
-            </Link>
+            </Link>}
             {isAuthenticated ? (
               <button className="btn btn-outline btn-sm nav-login" onClick={handleSignOut}>
                 <Icon name="log-out" size={13}/> {displayName}
@@ -496,10 +690,10 @@ function Header({route}) {
             ) : (
               <>
                 <Link to="/auth/login" className="btn btn-outline btn-sm nav-login">Log in</Link>
-                <Link to="/auth/signup" className="btn btn-primary btn-sm nav-signup">Sign up<Icon name="arrow-right" size={13}/></Link>
+                <Link to="/tools/bs-pricer" className="btn btn-primary btn-sm nav-signup">Start free<span className="nav-cta-arrow"><Icon name="arrow-right" size={13}/></span></Link>
               </>
             )}
-            <button className="btn btn-ghost btn-sm mobile-menu-btn" onClick={()=>setDrawer(true)} aria-label="Open menu">
+            <button className="btn btn-ghost btn-sm mobile-menu-btn" onClick={()=>setDrawer(true)} aria-label="Open menu" aria-expanded={drawer} aria-controls="mobile-navigation">
               <Icon name="menu" size={16}/>
             </button>
           </div>
@@ -507,17 +701,16 @@ function Header({route}) {
       </header>
       {drawer && (
         <div className="mobile-drawer-backdrop" onClick={closeDrawer}>
-          <aside className="mobile-drawer" onClick={(event)=>event.stopPropagation()} aria-label="Mobile navigation">
+          <aside id="mobile-navigation" className="mobile-drawer" role="dialog" aria-modal="true" onClick={(event)=>event.stopPropagation()} aria-label="Mobile navigation">
             <div className="row between" style={{padding:'16px 18px',borderBottom:'1px solid var(--line)'}}>
               <Link to="/" className="brand" onClick={closeDrawer}>
-                <span className="brand-mark"></span>
-                <span>TPL</span>
+                <BrandSignature horizontal/>
               </Link>
               <button className="btn btn-ghost btn-sm" onClick={closeDrawer} aria-label="Close menu"><Icon name="x" size={16}/></button>
             </div>
             <div className="mobile-drawer-body">
               {NAV_ITEMS.map((n) => (
-                <Link key={n.to} to={n.to} onClick={closeDrawer} className={"mobile-drawer-link " + (isActive(n.to)?'active':'')}>
+                <Link key={n.to} to={n.to} onClick={closeDrawer} aria-current={isActive(n.to)?'page':undefined} className={"mobile-drawer-link " + (isActive(n.to)?'active':'')}>
                   <span>{n.label}</span>
                   <Icon name="arrow-right" size={13}/>
                 </Link>
@@ -548,28 +741,38 @@ function Header({route}) {
 function NewsletterStrip() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('');
-  const submit = (event) => {
+  const [busy, setBusy] = useState(false);
+  const submit = async (event) => {
     event.preventDefault();
     if (!/^\S+@\S+\.\S+$/.test(email)) {
       setStatus('Enter a valid email address.');
       notify('Enter a valid email address.', 'warning');
       return;
     }
-    setStatus('You are on the list.');
-    notify('Subscription recorded.');
-    setEmail('');
+    setBusy(true);
+    setStatus('');
+    try {
+      await platformApi.subscribe(email, 'home-newsletter');
+      setStatus('You are on the list.');
+      notify('Subscription confirmed.');
+      setEmail('');
+    } catch (error) {
+      setStatus('Subscription is temporarily unavailable.');
+      notify(`Could not subscribe (${error.message}).`, 'error');
+    } finally {
+      setBusy(false);
+    }
   };
   return (
-    <form className="news-strip" onSubmit={submit}>
-      <span className="pulse"></span>
+    <form className="news-strip home-news-strip" aria-label="The Pricing Letter" onSubmit={submit}>
       <span className="micro" style={{color:'var(--red)'}}>The Pricing Letter</span>
       <span className="mute" style={{fontFamily:"'JetBrains Mono',monospace",fontSize:11.5}}>
-        Weekly · Black-Scholes, smile dynamics, recent quant interview seeds. Free.
+        Pricing, risk and quant interview practice. Free subscription.
       </span>
       <div style={{flex:1}}></div>
-      {status && <span className="mono green" style={{fontSize:11}}>{status}</span>}
-      <input value={email} onChange={(event)=>setEmail(event.target.value)} placeholder="you@desk.com" style={{background:'#06080B',border:'1px solid var(--line-2)',color:'var(--text)',padding:'5px 10px',borderRadius:3,fontFamily:"'JetBrains Mono',monospace",fontSize:11.5,width:200,outline:'none'}}/>
-      <button className="btn btn-primary btn-sm" type="submit">Subscribe</button>
+      {status && <span role="status" className="mono text-2" style={{fontSize:11}}>{status}</span>}
+      <input type="email" aria-label="Email for The Pricing Letter" autoComplete="email" required value={email} onChange={(event)=>setEmail(event.target.value)} placeholder="you@desk.com" style={{background:'#06080B',border:'1px solid var(--line-2)',color:'var(--text)',padding:'5px 10px',borderRadius:3,fontFamily:"'JetBrains Mono',monospace",fontSize:11.5,width:200}}/>
+      <button className="btn btn-outline btn-sm" type="submit" disabled={busy}>{busy?'Subscribing…':'Subscribe'}</button>
     </form>
   );
 }
@@ -580,8 +783,7 @@ function Footer() {
       <div className="foot-grid">
         <div>
           <Link to="/" className="brand" style={{marginBottom:14}}>
-            <span className="brand-mark"></span>
-            <span>THE PRICING LIBRARY</span>
+            <BrandSignature/>
           </Link>
           <p className="text-2" style={{maxWidth:'34ch',marginTop:14,fontSize:12.5,lineHeight:1.6}}>
             An applied platform for option pricing & quantitative finance — courses, calculators, simulators and a community of practitioners.
@@ -629,17 +831,19 @@ function Footer() {
             <li><Link to="/pricing">Pricing</Link></li>
             <li><Link to="/community">Community</Link></li>
             <li><Link to="/bug">Report a bug</Link></li>
-            <li><Link to="/admin">Admin</Link></li>
-            <li><Link to="/404">Not Found</Link></li>
+            <li><Link to="/contact">Contact & support</Link></li>
+            <li><Link to="/legal">Legal notice</Link></li>
           </ul>
         </div>
       </div>
       <div className="foot-bottom">
         <div>© 2026 The Pricing Library · All rights reserved</div>
         <div className="row" style={{gap:18}}>
+          <Link to="/terms">Terms</Link>
+          <Link to="/privacy">Privacy</Link>
+          <Link to="/refund">Refund policy</Link>
+          <Link to="/cancel">Cancel contract</Link>
           <span>Educational platform · Not investment advice</span>
-          <span>·</span>
-          <span>Built in Paris · NY · Singapore</span>
         </div>
       </div>
     </footer>
@@ -719,7 +923,7 @@ function Stat({label, value, sub, accent}) {
 }
 
 function TierBadge({tier}) {
-  const t = TIER_BADGE[tier];
+  const t = TIER_BADGE[tier] ?? UNKNOWN_TIER_BADGE;
   return <span className={"badge "+t.cls}>{t.label}</span>;
 }
 
@@ -754,7 +958,7 @@ function ChartFrame({title, subtitle, right, children, h=240, padded=true}) {
 }
 
 // ----- Line chart -----
-function LineChart({series, width=420, height=200, yAxis=true, xAxis=true, grid=true, fill=true, padX=8, smooth=false}) {
+function LineChart({series, width=420, height=200, yAxis=true, xAxis=true, grid=true, axes=true, preserveAspectRatio='xMidYMid meet', fill=true, padX=8, smooth=false}) {
   // series: [{name, color, data:[{x,y}]}]
   const all = series.flatMap(s=>s.data);
   if (!all.length) return null;
@@ -786,7 +990,7 @@ function LineChart({series, width=420, height=200, yAxis=true, xAxis=true, grid=
   };
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} width="100%" height={height} style={{display:'block',fontFamily:"'JetBrains Mono',monospace"}}>
+    <svg viewBox={`0 0 ${width} ${height}`} width="100%" height={height} preserveAspectRatio={preserveAspectRatio} style={{display:'block',fontFamily:"'JetBrains Mono',monospace"}}>
       {grid && yticks.map((t,i)=>(
         <line key={'gy'+i} x1={ML} y1={Y(t)} x2={width-MR} y2={Y(t)} stroke="#1A1F28" strokeWidth="1" strokeDasharray={i%2?"2 4":"0"}/>
       ))}
@@ -797,8 +1001,8 @@ function LineChart({series, width=420, height=200, yAxis=true, xAxis=true, grid=
         <text key={'xt'+i} x={X(t)} y={height-8} textAnchor="middle" fill="#7C8493" fontSize="9.5">{Number.isInteger(t)?t:t.toFixed(1)}</text>
       ))}
       {/* axes */}
-      <line x1={ML} y1={MT} x2={ML} y2={height-MB} stroke="#2C3340"/>
-      <line x1={ML} y1={height-MB} x2={width-MR} y2={height-MB} stroke="#2C3340"/>
+      {axes && <line x1={ML} y1={MT} x2={ML} y2={height-MB} stroke="#2C3340"/>}
+      {axes && <line x1={ML} y1={height-MB} x2={width-MR} y2={height-MB} stroke="#2C3340"/>}
 
       {series.map((s,i)=>(
         <g key={i}>
@@ -819,7 +1023,7 @@ function HeatmapChart({width=420, height=220, rows=10, cols=14, gen}) {
   const cw = W/cols, rh = H/rows;
   const data = [];
   for (let r=0;r<rows;r++) for (let c=0;c<cols;c++) {
-    data.push({r,c, v: gen ? gen(r,c,rows,cols) : 0.15 + 0.08*Math.cos((c-cols/2)/cols*Math.PI*2) + 0.04*(r/rows) + 0.03*Math.random()});
+    data.push({r,c, v: gen ? gen(r,c,rows,cols) : 0.15 + 0.08*Math.cos((c-cols/2)/cols*Math.PI*2) + 0.04*(r/rows) + 0.02*Math.sin((r+1)*(c+2))});
   }
   const vs = data.map(d=>d.v);
   const vmin = Math.min(...vs), vmax = Math.max(...vs);
@@ -946,10 +1150,12 @@ function OrderBook({width=300, levels=10}) {
   const bids = [], asks = [];
   let pBid = mid - 0.02, pAsk = mid + 0.02;
   for (let i=0;i<levels;i++) {
-    bids.push({px:pBid, sz: Math.floor(50+Math.random()*450)});
-    asks.push({px:pAsk, sz: Math.floor(50+Math.random()*450)});
-    pBid -= 0.01 + Math.random()*0.02;
-    pAsk += 0.01 + Math.random()*0.02;
+    const bidSize = 80 + ((i * 137) % 371);
+    const askSize = 95 + (((i + 3) * 113) % 359);
+    bids.push({px:pBid, sz: bidSize});
+    asks.push({px:pAsk, sz: askSize});
+    pBid -= 0.01 + (((i * 7) % 9) / 1000);
+    pAsk += 0.01 + ((((i + 4) * 5) % 9) / 1000);
   }
   const maxSz = Math.max(...bids.map(b=>b.sz), ...asks.map(a=>a.sz));
   return (
@@ -1009,132 +1215,123 @@ Object.assign(window, {ChartFrame, LineChart, HeatmapChart, Spark, BarChart, Ord
 // ============== HOME ==============
 function HomePage() {
   return (
-    <div>
-      <NewsletterStrip/>
+    <div className="home-page">
       <div className="container">
         <HeroBlock/>
-        <BuiltForBlock/>
+        <div className="home-market-context"><TopStrip/></div>
         <CurriculumPreview/>
         <ToolsPreview/>
+        <BuiltForBlock/>
         <CommunityPreview/>
         <FinalCTA/>
       </div>
+      <NewsletterStrip/>
     </div>
   );
 }
 
+const HERO_TARGET_SPOT = 5872.34;
+
 function HeroBlock() {
-  const walk = useMemo(() => genWalk(120, 100, 0.014, 0.0006, 7), []);
-  const walk2 = useMemo(() => genWalk(120, 100, 0.011, 0.0002, 19), []);
+  const fillId = `hero-signature-${React.useId().replace(/:/g,'')}`;
+  const paths = useMemo(()=>[7,19].map((seed,index)=>{
+    const raw = genWalk(120,100,index?0.011:0.014,index?0.0002:0.0006,seed);
+    const scale = HERO_TARGET_SPOT * (index?0.985:1) / raw[raw.length-1].y;
+    return raw.map(point=>({...point,y:Number((point.y*scale).toFixed(2))}));
+  }),[]);
+  const prices = paths[0].map(point=>point.y);
+  const pathStats = [['Open',prices[0]],['High',Math.max(...prices)],['Low',Math.min(...prices)]];
+  const formatIndex = value=>value.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const graph = useMemo(()=>{
+    const values = paths.flatMap(series=>series.map(point=>point.y));
+    const low = Math.min(...values), high = Math.max(...values);
+    const y = value=>260-(value-low)/(high-low)*210;
+    const path = series=>series.map((point,index)=>`${index?'L':'M'} ${(index/(series.length-1)*1000).toFixed(2)} ${y(point.y).toFixed(2)}`).join(' ');
+    return {scenario:path(paths[0]),reference:path(paths[1]),endY:y(paths[0][paths[0].length-1].y)};
+  },[paths]);
   return (
-    <div className="hero-grid">
+    <section className="hero-grid home-hero" data-hero-layout="signature">
       <div className="hero-left">
-        <div className="hero-eyebrow">
-          <span className="dot dot-red"></span>
-          <span>Quant Finance · Option Pricing · 2026</span>
-        </div>
-        <h1 className="hero-title">Master Option Pricing<br/><span className="accent">From Theory</span> to Code.</h1>
-        <p className="hero-sub">
-          A dense, terminal-grade platform for learning derivatives — closed-form models, stochastic calculus,
-          calibration, exotic payoffs and Monte Carlo. Built by quants, for aspiring quants.
-        </p>
+        <div className="hero-eyebrow"><span>The quant finance workspace</span></div>
+        <h1 className="hero-title">Build your<br/><em className="accent">quant intuition.</em></h1>
+        <p className="hero-sub">Go from a formula to a pricing decision. Learn the models, explore the numbers and make sense of risk — in one workspace.</p>
         <div className="hero-ctas">
-          <Link to="/courses" className="btn btn-primary">Start Learning<Icon name="arrow-right" size={14}/></Link>
-          <Link to="/tools" className="btn btn-outline">Explore Tools<Icon name="terminal" size={14}/></Link>
-          <Link to="/survival" className="btn btn-ghost">Survival Mode<Icon name="zap" size={14}/></Link>
+          <Link to="/tools/bs-pricer" className="btn btn-primary">Try Black-Scholes<span className="hero-cta-arrow"><Icon name="arrow-right" size={15}/></span></Link>
+          <Link to="/courses" className="btn btn-ghost">Browse courses<Icon name="arrow-right" size={14}/></Link>
         </div>
-        <div className="kpi-row">
-          <div className="kpi"><div className="num">9+</div><div className="lbl">Courses</div></div>
-          <div className="kpi"><div className="num">50+</div><div className="lbl">Exercises</div></div>
-          <div className="kpi"><div className="num">9</div><div className="lbl">Tools</div></div>
-          <div className="kpi"><div className="num">9€</div><div className="lbl">Starter Plan</div></div>
-        </div>
+        <p className="hero-start-note">Free calculator · no account required</p>
       </div>
-      <div className="hero-right">
-        <div className="term-toolbar">
-          <div className="row" style={{gap:14}}>
-            <span style={{color:'var(--red)',fontWeight:700}}>BS&lt;GO&gt;</span>
-            <span>EUR · CALL · SPX Index</span>
-            <span className="mute">K=5900 · T=30d</span>
-          </div>
-          <div className="row" style={{gap:10}}>
-            <span className="green">● LIVE</span>
-            <span className="mute">15:42:18</span>
-          </div>
-        </div>
-        <div style={{display:'grid', gridTemplateColumns:'1.4fr 1fr', gap:0, flex:1}}>
-          <div style={{borderRight:'1px solid var(--line)', display:'flex', flexDirection:'column'}}>
-            <div style={{padding:'10px 12px', borderBottom:'1px solid var(--line)'}}>
-              <div className="row between">
-                <div>
-                  <div className="label">SPX · spot vs theoretical</div>
-                  <div className="row" style={{gap:14, marginTop:4}}>
-                    <span className="mono" style={{fontSize:18,fontWeight:700}}>5,872.34</span>
-                    <span className="badge badge-green">+0.31%</span>
-                    <span className="mono mute" style={{fontSize:11}}>σ=14.2 · 30d</span>
-                  </div>
-                </div>
-                <div className="mono mute" style={{fontSize:10.5}}>HV5 12.4 · HV20 13.8 · HV60 15.2</div>
+      <div className="hero-demo-stage">
+        <div className="hero-right hero-terminal" aria-label="Illustrative stock market overview" data-hero-market-chart="true">
+          <div className="hero-terminal-grid">
+            <div className="hero-chart-wrap" style={{'--hero-point-y':`${graph.endY/300*100}%`,'--hero-point-x':'83.333333%'}}>
+              <svg viewBox="0 0 1200 300" preserveAspectRatio="none" role="img" aria-label="Illustrative SPX scenario and reference path; 120 simulated observations, not live market prices">
+                <defs>
+                  <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#FF3654" stopOpacity=".14"/>
+                    <stop offset="100%" stopColor="#FF3654" stopOpacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d={`${graph.scenario} L 1000 300 L 0 300 Z`} fill={`url(#${fillId})`} aria-hidden="true"/>
+                <path data-hero-reference-path="true" d={graph.reference} fill="none" stroke="#8C96A6" strokeWidth="1" opacity=".26" vectorEffect="non-scaling-stroke"/>
+                <path data-hero-scenario-path="true" d={graph.scenario} fill="none" stroke="#FF3654" strokeWidth="2.6" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke"/>
+                <circle data-hero-endpoint="true" cx="1000" cy={graph.endY} r="4" fill="#FF3654"/>
+              </svg>
+              <div className="hero-quote-head" data-hero-quote="true">
+                <span className="micro">SPX · simulated scenario</span>
+                <div className="hero-market-value" data-hero-spot={prices[prices.length-1]}>{formatIndex(prices[prices.length-1])}</div>
+                <span className="hero-market-unit">Index points</span>
               </div>
             </div>
-            <div style={{flex:1,padding:'4px 6px'}}>
-              <LineChart series={[
-                {name:'spot', color:'#FF2E45', data:walk, fillOpacity:0.1},
-                {name:'theo', color:'#3E8BFF', data:walk2, dashed:true, fill:false},
-              ]} width={500} height={240}/>
+            <div className="hero-signature-footer">
+              <div className="hero-trust-row" aria-label="Platform trust principles">
+                <span><i className="trust-mark" aria-hidden="true"></i> Source-grounded</span>
+                <span><i className="trust-mark" aria-hidden="true"></i> Engine-verified</span>
+                <span><i className="trust-mark" aria-hidden="true"></i> Limits disclosed</span>
+              </div>
+              <div className="hero-signature-status"><span className="badge badge-amber">DETERMINISTIC DEMO</span><p className="hero-demo-note">Illustrative scenario · not a market feed</p></div>
             </div>
-            <div className="row" style={{borderTop:'1px solid var(--line)', padding:'8px 12px', gap:18}}>
-              {['delta 0.512','gamma 0.018','vega 6.42','theta -0.34','rho 1.21'].map((g,i)=>(
-                <span key={i} className="mono" style={{fontSize:10.5}}>
-                  <span className="mute" style={{marginRight:4}}>{g.split(' ')[0]}</span>
-                  <span>{g.split(' ')[1]}</span>
-                </span>
-              ))}
-            </div>
-          </div>
-          <div style={{display:'flex',flexDirection:'column'}}>
-            <div style={{padding:'10px 12px', borderBottom:'1px solid var(--line)'}}>
-              <div className="label">Vol Surface · SPX</div>
-              <div className="mono mute" style={{fontSize:10.5,marginTop:4}}>Strike × Tenor → σ</div>
-            </div>
-            <div style={{flex:1, padding:4}}>
-              <HeatmapChart width={300} height={150} rows={6} cols={10}/>
-            </div>
-            <div style={{borderTop:'1px solid var(--line)', padding:'8px 0'}}>
-              <div className="label" style={{padding:'0 12px',marginBottom:6}}>Order Book · SPX 5900C</div>
-              <OrderBook/>
-            </div>
+            <details className="hero-evidence-details">
+              <summary>About this chart <Icon name="plus" size={14}/></summary>
+              <div className="hero-secondary-grid">
+                <div><strong>Illustrative price paths</strong><p>Two reproducible, simulated paths of 120 observations show how an index can move. They are not historical observations or current SPX quotes.</p></div>
+                <div><strong>Reading the chart</strong><p>The attached price and Open, High and Low values come from the same red scenario. The quiet grey line is a separate reference path, not a forecast.</p></div>
+                <div className="row hero-path-stats" aria-label="Illustrative price path statistics">
+                  {pathStats.map(([label,value])=><span key={label} data-hero-stat={label}><span>{label}</span><strong>{formatIndex(value)}</strong></span>)}
+                </div>
+                <div className="hero-market-legend"><span>Scenario</span><span>Reference path</span></div>
+              </div>
+            </details>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
 function BuiltForBlock() {
   const items = [
-    {ic:'graduation-cap', t:'Aspiring Quants', d:'Targeting desks at top funds, market-makers, and prop shops.'},
-    {ic:'briefcase', t:'Career Switchers', d:'From engineering or pure math into pricing & risk.'},
-    {ic:'building-2', t:'Practitioners', d:'Active traders who want to read between the screens.'},
-    {ic:'book-open', t:'Curious Minds', d:'Researchers and students sharpening their applied skills.'},
+    {t:'Aspiring Quants', d:'Targeting desks at top funds, market-makers, and prop shops.'},
+    {t:'Career Switchers', d:'From engineering or pure math into pricing & risk.'},
+    {t:'Practitioners', d:'Active traders who want to read between the screens.'},
+    {t:'Curious Minds', d:'Researchers and students sharpening their applied skills.'},
   ];
   return (
-    <section className="section">
-      <div className="section-eyebrow">// 01 · Audience</div>
+    <section className="section audience-section">
+      <div className="section-eyebrow">03 · Built for you</div>
       <div className="section-head">
         <div>
           <h2 className="section-title">Built for aspiring quants.</h2>
-          <p className="text-2" style={{marginTop:8, maxWidth:'52ch'}}>The platform mirrors a trading floor cockpit. You learn the way you'll work — with code, data, and live numerics.</p>
+          <p className="text-2" style={{marginTop:8, maxWidth:'52ch'}}>Build intuition you can use at a desk — with clear explanations, practical tools and reproducible calculations.</p>
         </div>
         <Link to="/about" className="btn btn-ghost btn-sm">About the platform <Icon name="arrow-right" size={13}/></Link>
       </div>
-      <div className="grid-4">
-        {items.map(it=>(
-          <div key={it.t} className="panel" style={{padding:18}}>
-            <div className="row" style={{color:'var(--red)', marginBottom:14}}>
-              <Icon name={it.ic} size={18}/>
-            </div>
-            <div className="mono" style={{fontWeight:700, fontSize:14, marginBottom:6}}>{it.t}</div>
+      <div className="grid-4 audience-grid">
+        {items.map((it,index)=>(
+          <div key={it.t} className="panel audience-card" style={{padding:18}}>
+            <span className="audience-card-index mono">0{index + 1}</span>
+            <div className="audience-card-kicker mono">Profile</div>
+            <div className="audience-card-title mono">{it.t}</div>
             <div className="mute" style={{fontSize:12.5,lineHeight:1.55}}>{it.d}</div>
           </div>
         ))}
@@ -1146,16 +1343,16 @@ function BuiltForBlock() {
 function CurriculumPreview() {
   const featured = COURSES.slice(0,6);
   return (
-    <section className="section">
-      <div className="section-eyebrow">// 02 · Curriculum</div>
+    <section className="section curriculum-section">
+      <div className="section-eyebrow">01 · Learn the foundations</div>
       <div className="section-head">
         <div>
-          <h2 className="section-title">Module preview.</h2>
+          <h2 className="section-title">A clear path into quant finance.</h2>
           <p className="text-2" style={{marginTop:8}}>Three tiers · Fundamentals, Advanced, Complex.</p>
         </div>
         <Link to="/courses" className="btn btn-outline btn-sm">All courses <Icon name="arrow-right" size={13}/></Link>
       </div>
-      <div className="grid-3">
+      <div className="grid-3 curriculum-grid">
         {featured.map(c => <CourseCard key={c.id} c={c}/>)}
       </div>
     </section>
@@ -1165,18 +1362,18 @@ function CurriculumPreview() {
 function ToolsPreview() {
   const ts = TOOLS.slice(0,4);
   return (
-    <section className="section">
-      <div className="section-eyebrow">// 03 · Tools</div>
+    <section className="section tools-section">
+      <div className="section-eyebrow">02 · Put it to work</div>
       <div className="section-head">
         <div>
-          <h2 className="section-title">Professional tools — usable.</h2>
-          <p className="text-2" style={{marginTop:8}}>Not screenshots. Real calculators with inputs, charts, and Greeks.</p>
+          <h2 className="section-title">Change an input. Understand the impact.</h2>
+          <p className="text-2" style={{marginTop:8}}>Explore prices, payoffs and risk with interactive calculators.</p>
         </div>
         <Link to="/tools" className="btn btn-outline btn-sm">All tools <Icon name="arrow-right" size={13}/></Link>
       </div>
-      <div className="grid-4">
+      <div className="grid-4 tools-grid">
         {ts.map(t=>(
-          <Link to={"/tools/"+t.id} key={t.id} className="course-card" style={{textDecoration:'none'}}>
+          <Link to={"/tools/"+t.id} key={t.id} className="course-card tool-preview-card" style={{textDecoration:'none'}}>
             <div className="thumb" style={{display:'grid',placeItems:'center',background:'#06080B'}}>
               <ToolThumb id={t.id}/>
             </div>
@@ -1238,65 +1435,42 @@ function ToolThumb({id}) {
 
 function CommunityPreview() {
   return (
-    <section className="section">
-      <div className="section-eyebrow">// 04 · Community</div>
+    <section className="section community-section">
+      <div className="section-eyebrow">04 · Go further together</div>
       <div className="section-head">
         <div>
-          <h2 className="section-title">A community of practitioners.</h2>
-          <p className="text-2" style={{marginTop:8}}>Forums, projects, peer review. Built where the conversation actually happens.</p>
+          <h2 className="section-title">A practitioner forum.</h2>
+          <p className="text-2" style={{marginTop:8}}>Persistent pricing and risk questions, with no fabricated activity or member counts.</p>
         </div>
-        <Link to="/community" className="btn btn-outline btn-sm">Enter community <Icon name="arrow-right" size={13}/></Link>
+        <Link to="/community/forum" className="btn btn-outline btn-sm">Enter forum <Icon name="arrow-right" size={13}/></Link>
       </div>
-      <div className="grid-3">
-        <div className="panel" style={{padding:18}}>
+      <div className="grid-3 community-grid">
+        <div className="panel community-card" style={{padding:18}}>
           <div className="row between" style={{marginBottom:14}}>
-            <div className="label">Forum · Most Active</div>
-            <span className="badge badge-red">LIVE · 142</span>
+            <div className="label">Community forum</div>
+            <span className="badge">PERSISTED</span>
           </div>
-          {[
-            {t:'Negative IV from market call quotes?', r:18, c:'Volatility'},
-            {t:'Heston calibration converges to garbage', r:24, c:'Models'},
-            {t:'Anyone using QuantLib 1.34 in prod?', r:9, c:'Tooling'},
-          ].map((f,i)=>(
-            <div key={i} className="row between" style={{padding:'10px 0', borderTop:i?'1px solid var(--line)':'none'}}>
-              <div>
-                <div style={{fontWeight:600}}>{f.t}</div>
-                <div className="mono mute" style={{fontSize:10.5, marginTop:4}}>{f.c}</div>
-              </div>
-              <div className="mute mono" style={{fontSize:11}}>{f.r} replies</div>
-            </div>
-          ))}
+          <div className="mono" style={{fontSize:15,fontWeight:700}}>Ask, reproduce, challenge.</div>
+          <p className="text-2" style={{fontSize:12.5,lineHeight:1.6}}>Post a pricing or risk question with inputs and assumptions. Topics and votes are shown only after they are persisted—no synthetic member counts.</p>
+          <Link to="/community/forum" className="btn btn-outline btn-sm">Open the forum <Icon name="arrow-right" size={13}/></Link>
         </div>
-        <div className="panel" style={{padding:18}}>
+        <div className="panel community-card" style={{padding:18}}>
           <div className="row between" style={{marginBottom:14}}>
-            <div className="label">Leaderboard · Q2</div>
-            <span className="badge">TOP 5</span>
+            <div className="label">Verified progress</div>
+            <span className="badge">OPT-IN</span>
           </div>
-          {[
-            {n:'@quantfox', s:'18,420', f:false},
-            {n:'@nu_oresund', s:'17,116', f:false},
-            {n:'@vega_neutral', s:'15,902', f:false},
-            {n:'@theta_burn', s:'14,701', f:false},
-            {n:'@you', s:'4,218', f:true},
-          ].map((u,i)=>(
-            <div key={i} className="row between" style={{padding:'10px 0', borderTop:i?'1px solid var(--line)':'none', color: u.f ? 'var(--red)':undefined}}>
-              <div className="row" style={{gap:10}}>
-                <span className="mono mute" style={{width:18}}>#{i+1}</span>
-                <span style={{fontWeight: u.f?700:500}}>{u.n}</span>
-              </div>
-              <span className="mono">{u.s}</span>
-            </div>
-          ))}
+          <p className="text-2" style={{fontSize:12.5,lineHeight:1.6}}>Scores are created only by completed exercises and Survival runs. Empty state stays empty until real learners opt in.</p>
+          <Link to="/leaderboard" className="btn btn-outline btn-sm">View recorded scores <Icon name="arrow-right" size={13}/></Link>
         </div>
-        <div className="panel" style={{padding:18}}>
+        <div className="panel community-card" style={{padding:18}}>
           <div className="row between" style={{marginBottom:14}}>
-            <div className="label">This Week's Challenge</div>
-            <span className="badge badge-amber">156 SUBMITTED</span>
+            <div className="label">Practice challenge</div>
+            <span className="badge badge-amber">PRACTICE PREVIEW</span>
           </div>
           <div className="mono" style={{fontSize:16, fontWeight:700, marginBottom:8}}>Price a Down-and-Out Call</div>
-          <p className="text-2" style={{fontSize:12.5,lineHeight:1.5}}>S=100, K=100, H=85, σ=20%, r=2%, T=6m. Use closed-form (Merton 1973) and verify with 100k MC paths. Submit notebook by Sunday 23:59 UTC.</p>
+          <p className="text-2" style={{fontSize:12.5,lineHeight:1.5}}>S=100, K=100, H=85, σ=20%, r=2%, T=6m. Use a closed form and verify with 100k antithetic Monte Carlo paths. No ranking is claimed while submissions are not enabled.</p>
           <div className="row between" style={{marginTop:16}}>
-            <span className="mono mute" style={{fontSize:11}}>Reward · 250 XP + Badge</span>
+            <span className="mono mute" style={{fontSize:11}}>Worked learning challenge</span>
             <Link to="/challenge" className="btn btn-outline btn-sm">Enter <Icon name="arrow-right" size={13}/></Link>
           </div>
         </div>
@@ -1307,19 +1481,19 @@ function CommunityPreview() {
 
 function FinalCTA() {
   return (
-    <section className="section">
-      <div className="panel" style={{padding:'48px 40px', display:'flex', justifyContent:'space-between', alignItems:'center', gap:30, position:'relative', overflow:'hidden'}}>
-        <div style={{position:'absolute', right:-40, top:-40, opacity:0.06, fontFamily:"'JetBrains Mono',monospace", fontSize:280, fontWeight:700, color:'#FF2E45'}}>σ</div>
+    <section className="section final-cta-section">
+      <div className="panel final-cta-panel" style={{padding:'48px 40px', display:'flex', justifyContent:'space-between', alignItems:'center', gap:30, position:'relative', overflow:'hidden'}}>
+        <div aria-hidden="true" style={{position:'absolute', right:-40, top:-40, opacity:0.06, fontFamily:"'JetBrains Mono',monospace", fontSize:280, fontWeight:700, color:'#FF2E45'}}>σ</div>
         <div style={{position:'relative', maxWidth:'60ch'}}>
-          <div className="section-eyebrow" style={{margin:0}}>// 05 · Get on the desk</div>
+          <div className="section-eyebrow" style={{margin:0}}>Your next step</div>
           <h2 className="section-title" style={{fontSize:32, marginTop:8}}>Start serious desk practice at 9€.</h2>
           <p className="text-2" style={{marginTop:10, fontSize:14}}>
             Starter gives the core curriculum, practical exercises and calculators. Upgrade when you need advanced products, notebooks and professional workflow tools.
           </p>
         </div>
         <div className="row" style={{gap:10, position:'relative', flexShrink:0}}>
-          <Link to="/auth/signup" className="btn btn-primary">Choose a plan <Icon name="arrow-right" size={14}/></Link>
-          <Link to="/pricing" className="btn btn-outline">See plans</Link>
+          <Link to="/pricing" className="btn btn-primary">Explore plans <Icon name="arrow-right" size={14}/></Link>
+          <Link to="/courses/black-scholes" className="btn btn-ghost">Read the free preview</Link>
         </div>
       </div>
     </section>
@@ -1338,27 +1512,31 @@ function CoursesPage() {
     return inTier && (!normalizedQuery || haystack.includes(normalizedQuery));
   });
   return (
-    <div className="container page">
+    <div className="container page catalogue-page">
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ courses</span></>}
         title="Course Catalogue"
         sub="A structured curriculum across three tiers. Start from Fundamentals or jump to Complex if you have the prerequisites."
         right={
           <>
-            <input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Search modules…" style={{background:'#0A0C10',border:'1px solid var(--line-2)',padding:'8px 10px',borderRadius:3,color:'var(--text)',fontFamily:"'JetBrains Mono',monospace",fontSize:12,width:220}}/>
+            <input type="search" aria-label="Search courses" value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Search modules…" style={{background:'#0A0C10',border:'1px solid var(--line-2)',padding:'8px 10px',borderRadius:9,color:'var(--text)',fontFamily:'var(--font-sans)',fontSize:13,width:220,minHeight:44}}/>
             <button className="btn btn-outline btn-sm" onClick={()=>{setTab('All'); setQuery('');}}><Icon name="sliders-horizontal" size={13}/> Reset</button>
           </>
         }
       />
-      <div className="tabs-bar">
+      <div className="catalogue-start">
+        <div><span className="micro">Start here · free preview</span><h2>Build your first pricing intuition.</h2><p>Read the option ticket, understand Black-Scholes, then try the calculator.</p></div>
+        <Link to="/courses/black-scholes" className="btn btn-outline">Open free preview <Icon name="arrow-right" size={14}/></Link>
+      </div>
+      <div className="tabs-bar" role="group" aria-label="Filter courses by tier">
         {tiers.map(t=>(
-          <button key={t} className={"tab-btn "+(tab===t?'on':'')} onClick={()=>setTab(t)}>
+          <button key={t} aria-pressed={tab===t} className={"tab-btn "+(tab===t?'on':'')} onClick={()=>setTab(t)}>
             {t} <span className="mute" style={{marginLeft:6}}>{t==='All' ? COURSES.length : COURSES.filter(c=>c.tier===t).length}</span>
           </button>
         ))}
       </div>
       {list.length ? (
-        <div className="grid-3">
+        <div className="grid-3 catalogue-grid">
           {list.map(c => <CourseCard key={c.id} c={c}/>)}
         </div>
       ) : (
@@ -1430,19 +1608,6 @@ function CourseThumb({c}) {
   if (id==='implied-vol') {
     return <div style={{height:'100%',padding:6}}><HeatmapChart width={280} height={140} rows={5} cols={8}/></div>;
   }
-  if (id==='vol-products') {
-    const d = useMemo(()=>genWalk(60, 18, 0.045, 0.0001, 9),[]);
-    return <ChartThumb data={d} color={acc}/>;
-  }
-  if (id==='hedging') {
-    return (
-      <svg viewBox="0 0 200 100" width="100%" height="100%" style={{padding:10}}>
-        <path d="M 0,50 L 50,50 L 100,30 L 150,55 L 200,40" fill="none" stroke={acc} strokeWidth="1.5"/>
-        <path d="M 0,55 L 50,55 L 100,35 L 150,60 L 200,45" fill="none" stroke="#7C8493" strokeWidth="1" strokeDasharray="2 2"/>
-        <text x="6" y="92" fill="#7C8493" fontSize="8" fontFamily="JetBrains Mono">P&amp;L vs replicating</text>
-      </svg>
-    );
-  }
   if (id==='exotics') {
     return (
       <svg viewBox="0 0 200 100" width="100%" height="100%" style={{padding:10}}>
@@ -1502,7 +1667,8 @@ function ChartThumb({data, color}) {
 }
 
 // ============== ENTITLEMENT GATING ==============
-const COURSE_TIER_PLAN = { Fundamentals:'free', Foundation:'free', Core:'free', Advanced:'student', Complex:'pro' };
+const COURSE_TIER_PLAN = { Fundamentals:'starter', Foundation:'starter', Core:'starter', Advanced:'student', Complex:'pro' };
+const FREE_COURSE_IDS = new Set(['black-scholes']);
 const PLAN_LABEL = { free:'Free', starter:'Starter', student:'Student', pro:'Professional' };
 function useEntitlement() {
   let auth=null; try { auth=useAuth(); } catch { auth=null; }
@@ -1512,38 +1678,54 @@ function useEntitlement() {
     has: (required)=> required==='free' ? true : (auth?.hasPlan ? auth.hasPlan(required) : false),
   };
 }
-function LockPanel({required, what='This content'}) {
+function LockPanel({required, what='This content', headingLevel=2}) {
+  const entitlement = useEntitlement();
+  const target = entitlement.isAuthed ? '/pricing' : `/auth/signup?plan=${encodeURIComponent(required)}&next=checkout`;
+  const Heading = `h${headingLevel}`;
   return (
     <div className="panel" style={{padding:48, textAlign:'center'}}>
       <Icon name="lock" size={30} style={{color:'var(--red)'}}/>
-      <h2 className="mono" style={{fontSize:20,fontWeight:700,marginTop:16}}>{PLAN_LABEL[required]||required} plan required</h2>
-      <p className="text-2" style={{maxWidth:'46ch',margin:'10px auto 22px',fontSize:13.5}}>{what} is part of the {PLAN_LABEL[required]||required} tier. Upgrade to unlock it — your progress and account stay the same.</p>
-      <Link to="/pricing" className="btn btn-primary">See plans <Icon name="arrow-right" size={13}/></Link>
+      <Heading className="mono" style={{fontSize:20,fontWeight:700,marginTop:16}}>{PLAN_LABEL[required]||required} plan required</Heading>
+      <p className="text-2" style={{maxWidth:'46ch',margin:'10px auto 22px',fontSize:13.5}}>{what} is part of the {PLAN_LABEL[required]||required} tier. {entitlement.isAuthed ? 'Choose the plan to unlock it.' : 'Create a free account, then confirm the plan through checkout.'}</p>
+      <Link to={target} className="btn btn-primary">{entitlement.isAuthed?'See plans':'Create account'} <Icon name="arrow-right" size={13}/></Link>
     </div>
   );
 }
 
+function GatedPage({required, what, children, embedded=false}) {
+  const entitlement = useEntitlement();
+  return entitlement.has(required) ? children : <div className="container page"><LockPanel required={required} what={what} headingLevel={embedded?2:1}/></div>;
+}
+
 // ============== COURSE DETAIL ==============
 const _progressSent = new Set();
-export function recordProgressOnce(auth, kind, ref, score, meta) {
-  try {
-    const uid = auth?.user?.id || auth?.user?.email; if (!uid) return;
-    const key = `${kind}:${ref}`; if (_progressSent.has(key)) return; _progressSent.add(key);
-    const username = auth?.profile?.prenom || (auth?.user?.email ? auth.user.email.split('@')[0] : 'learner');
-    platformApi.recordProgress({ user_id: uid, username, kind, ref, score: score ?? null, meta: meta || {} });
-  } catch { /* progress is best-effort */ }
+export async function recordProgressOnce(auth, kind, ref, score, meta) {
+  const uid = auth?.user?.id || auth?.user?.email;
+  if (!uid) throw new Error('Sign in to save progress.');
+  const key = `${uid}:${kind}:${ref}`;
+  if (_progressSent.has(key)) return {ok:true, created:false, cached:true};
+  const result = await platformApi.recordProgress({ kind, ref, score: score ?? null, meta: meta || {} });
+  if (!result?.ok) throw new Error('The progress service did not confirm the completion.');
+  _progressSent.add(key);
+  return result;
 }
 function CourseDetailPage({route}) {
+  return route.parts.length===2 && COURSES.some((course)=>course.id===route.parts[1]) ? <CourseDetailContent route={route}/> : <NotFoundPage/>;
+}
+function CourseDetailContent({route}) {
   const id = route.parts[1] || 'black-scholes';
   const c = COURSES.find(x=>x.id===id) || COURSES[0];
   let auth=null; try { auth = useAuth(); } catch { auth=null; }
   const ent = useEntitlement();
-  const requiredPlan = COURSE_TIER_PLAN[c.tier] || 'free';
+  const requiredPlan = FREE_COURSE_IDS.has(c.id) ? 'free' : (COURSE_TIER_PLAN[c.tier] || 'starter');
   const locked = requiredPlan!=='free' && !ent.has(requiredPlan);
+  const previewOnly = c.id==='black-scholes' && !ent.has('starter');
   const [tab, setTab] = useState('content');
   const [selectedModuleIndex, setSelectedModuleIndex] = useState(0);
+  const [completedModules, setCompletedModules] = useState(()=>new Set());
+  const [completionBusy, setCompletionBusy] = useState(false);
   const contentTopRef = useRef(null);
-  const scriptState = useCourseScript(c.id);
+  const scriptState = useCourseScript(c.id, locked, previewOnly);
   const scriptModel = useMemo(
     () => scriptState.status === 'ready' ? parseCourseScript(scriptState.content) : null,
     [scriptState.status, scriptState.content]
@@ -1554,21 +1736,50 @@ function CourseDetailPage({route}) {
     setTab('content');
   }, [c.id]);
 
+  const userId = auth?.user?.id || auth?.user?.email || null;
   useEffect(() => {
-    if (scriptState.status === 'ready') recordProgressOnce(auth, 'lesson', `${c.id}#L0`, 5, { course: c.id });
-  }, [scriptState.status, auth, c.id]);
+    setCompletedModules(new Set());
+    if (!userId || locked || previewOnly) return undefined;
+    let active = true;
+    platformApi.getProgress(userId).then((progress) => {
+      if (!active || !progress) return;
+      const prefix = `${c.id}#L`;
+      const lessonRefs = Array.isArray(progress.completed_lessons) ? progress.completed_lessons
+        : Array.isArray(progress.events) ? progress.events.filter((event)=>event.kind==='lesson').map((event)=>event.ref) : [];
+      const restored = new Set(
+        lessonRefs
+          .filter((ref)=>String(ref || '').startsWith(prefix))
+          .map((ref)=>Number(String(ref).slice(prefix.length)))
+          .filter(Number.isInteger)
+      );
+      setCompletedModules(restored);
+    }).catch(()=>{});
+    return () => { active = false; };
+  }, [c.id, locked, previewOnly, userId]);
 
   const openModule = useCallback((index) => {
     setSelectedModuleIndex(index);
     setTab('content');
-    recordProgressOnce(auth, 'lesson', `${c.id}#L${index}`, 5, { course: c.id });
     // Scroll the lesson content back to the top of the viewport: selecting a
     // module only swaps state (not a route change), so without this the page
     // keeps the previous scroll position and lands the reader mid/bottom-page.
     requestAnimationFrame(() => {
       contentTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
-  }, [auth, c.id]);
+  }, []);
+
+  const completeModule = useCallback(async () => {
+    setCompletionBusy(true);
+    try {
+      await recordProgressOnce(auth, 'lesson', `${c.id}#L${selectedModuleIndex}`, null, { course: c.id });
+      setCompletedModules((current)=>new Set([...current, selectedModuleIndex]));
+      notify(`${c.title} module ${selectedModuleIndex + 1} completion saved.`);
+    } catch (error) {
+      notify(`Completion was not saved (${error.message}).`, 'error');
+    } finally {
+      setCompletionBusy(false);
+    }
+  }, [auth, c.id, c.title, selectedModuleIndex]);
 
   return (
     <div className="container page">
@@ -1581,11 +1792,11 @@ function CourseDetailPage({route}) {
           <span className="badge">{c.tier}</span>
           <span className="badge">{c.level}</span>
           <span className="badge">{c.duration}</span>
-          <button className="btn btn-primary btn-sm" onClick={()=>{openModule(selectedModuleIndex); notify(`Opening ${c.title} module ${selectedModuleIndex + 1}.`)}}>Resume <Icon name="play" size={13}/></button>
+          {!locked && <button className="btn btn-primary btn-sm" onClick={()=>openModule(selectedModuleIndex)}>Resume <Icon name="play" size={13}/></button>}
         </>}
       />
 
-      <div className="course-detail-layout">
+      {locked ? <LockPanel required={requiredPlan} what={`The ${c.title} course`}/> : <div className="course-detail-layout">
         <CourseSidebar
           c={c}
           scriptModel={scriptModel}
@@ -1606,43 +1817,49 @@ function CourseDetailPage({route}) {
               <button key={k} className={"tab-btn "+(tab===k?'on':'')} onClick={()=>setTab(k)}>{l}</button>
             ))}
           </div>
-          {tab==='content' && <CourseContent c={c} scriptState={scriptState} scriptModel={scriptModel} selectedModuleIndex={selectedModuleIndex} onSelectModule={openModule} onOpenScript={()=>setTab('script')}/>}
-          {tab==='script' && (locked ? <LockPanel required={requiredPlan} what={`The full ${c.title} script`}/> : <CourseScript c={c} scriptState={scriptState} scriptModel={scriptModel}/>)}
-          {tab==='calc' && (locked ? <LockPanel required={requiredPlan} what="The interactive calculator"/> : <CourseCalculator c={c}/>)}
-          {tab==='exercises' && (locked ? <LockPanel required={requiredPlan} what="The graded exercises"/> : <CourseExercises c={c}/>)}
+          {tab==='content' && <><CourseContent c={c} scriptState={scriptState} scriptModel={scriptModel} selectedModuleIndex={selectedModuleIndex} onSelectModule={openModule} onOpenScript={()=>setTab('script')}/>{previewOnly ? <div className="panel" style={{padding:16,marginTop:16}}><LockPanel required="starter" what="Module completion and the full Black-Scholes course"/></div> : <div className="panel" style={{padding:16,marginTop:16,textAlign:'right'}}><button type="button" className="btn btn-primary" disabled={completionBusy || completedModules.has(selectedModuleIndex)} onClick={completeModule}>{completionBusy ? 'Saving…' : completedModules.has(selectedModuleIndex) ? 'Completion saved' : 'Mark module complete'} <Icon name="check" size={13}/></button></div>}</>}
+          {tab==='script' && (previewOnly ? <LockPanel required="starter" what="The full Black-Scholes script"/> : <CourseScript c={c} scriptState={scriptState} scriptModel={scriptModel}/>)}
+          {tab==='calc' && <CourseCalculator c={c}/>}
+          {tab==='exercises' && (previewOnly ? <LockPanel required="starter" what="The graded Black-Scholes exercises"/> : <CourseExercises c={c}/>)}
           {tab==='resources' && <CourseResources c={c} scriptModel={scriptModel}/>}
         </div>
-      </div>
+      </div>}
     </div>
   );
 }
 
-function useCourseScript(courseId) {
+function useCourseScript(courseId, locked = false, previewOnly = false) {
   const scriptSlug = COURSE_SCRIPT_SLUGS[courseId];
   const [script, setScript] = useState({status:'loading', content:'', error:''});
 
   useEffect(() => {
+    if (locked) {
+      setScript({status:'locked', content:'', error:''});
+      return undefined;
+    }
     if (!scriptSlug) {
       setScript({status:'missing', content:'', error:''});
       return undefined;
     }
 
-    const controller = new AbortController();
     setScript({status:'loading', content:'', error:''});
-    fetch(`/course-scripts/${scriptSlug}.md`, {signal: controller.signal})
-      .then((response) => {
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return response.text();
-      })
-      .then((content) => setScript({status:'ready', content, error:''}))
+    const request = previewOnly
+      ? fetch(`/course-scripts/${scriptSlug}.md`).then((response) => {
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return response.text();
+        })
+      : platformApi.courseScript(courseId);
+    let active = true;
+    request
+      .then((content) => { if (active) setScript({status:'ready', content, error:''}); })
       .catch((error) => {
-        if (error.name !== 'AbortError') {
+        if (active) {
           setScript({status:'error', content:'', error:error.message || 'Course script unavailable'});
         }
       });
 
-    return () => controller.abort();
-  }, [scriptSlug]);
+    return () => { active = false; };
+  }, [courseId, locked, previewOnly, scriptSlug]);
 
   return {...script, slug: scriptSlug};
 }
@@ -1772,11 +1989,13 @@ function parseNumberedSection(markdown, heading) {
 }
 
 function parseSourceAppendix(markdown) {
-  const section = markdownSection(markdown, 'Source Appendix') || markdownSection(markdown, 'Sources RAG a citer');
-  return section
-    .split(/\r?\n/)
-    .map((line) => parseSourceLine(line))
-    .filter(Boolean);
+  // Client rendering is fail-closed: authoring appendices, retrieval scores and
+  // raw chunk metadata are never accepted as a fallback reference surface.
+  const section = markdownSection(markdown, 'References du cours');
+  if (!section) return [];
+  const cleanReferences = [...section.matchAll(/^-\s+\*([^*\r\n]+)\*\s+—\s+«([\s\S]*?)»\s*(?=^-\s+\*|(?![\s\S]))/gm)]
+    .map((match, index)=>({id:`R${index+1}`,title:match[1].trim(),chunk:'',score:'',snippet:match[2].replace(/\s+/g,' ').trim(),withheld:false}));
+  return cleanReferences;
 }
 
 // Robust to both the current backend format
@@ -1785,8 +2004,19 @@ function parseSourceAppendix(markdown) {
 // and the legacy parenthesised format
 //   - [S1] Title (chunk 58, score 0.65)
 // Never folds the excerpt (or noise) into the title.
-export function parseSourceLine(line) {
+export function parseSourceLine(line, index = 0) {
   if (!line) return null;
+  const cleanReference = line.match(/^-\s+\*?([^*—]+?)\*?\s+—\s+«([\s\S]*)»\s*$/);
+  if (cleanReference) {
+    return {
+      id: `R${index + 1}`,
+      title: cleanReference[1].trim(),
+      chunk: '',
+      score: '',
+      snippet: cleanReference[2].trim(),
+      withheld: false,
+    };
+  }
   let m = line.match(
     /^-\s+\[(S\d+)\]\s+(.+?),\s*chunk\s+([^,]+),\s+score\s+([\d.]+)\s*(?::\s*(.*)|\((extrait[^)]*)\))?\s*$/i,
   );
@@ -1827,14 +2057,13 @@ function markdownSection(markdown, heading) {
 }
 
 function CourseSidebar({c, scriptModel, selectedModuleIndex = 0, onSelectModule, onOpenScript, onOpenResources}) {
-  const blueprint = getCourseBlueprint(c.id);
   const lessons = scriptModel?.modules?.length
     ? scriptModel.modules.map((module,idx)=>({
         n: String(idx + 1).padStart(2, '0'),
         t: module.title,
         d: normalizeCourseMicrocopy(module.deliverable || module.objective || 'Livrable de desk'),
       }))
-    : (blueprint?.lessons || blueprint?.modules || [
+    : ([
         {n:'01', t:'Desk setup', d:'Inputs, market context and first calculation'},
         {n:'02', t:'Risk read', d:'Sensitivities and scenario interpretation'},
         {n:'03', t:'Desk action', d:'Hedge, quote, monitor or escalate'},
@@ -1968,29 +2197,16 @@ function HedgingContent(props = {}) {
 }
 
 function CourseContent({c, scriptState, scriptModel, selectedModuleIndex, onSelectModule, onOpenScript}) {
-  const blueprint = getCourseBlueprint(c.id);
-  if (blueprint) {
-    return (
-      <PracticeCourseContent
-        c={c}
-        blueprint={blueprint}
-        scriptState={scriptState}
-        scriptModel={scriptModel}
-        selectedModuleIndex={selectedModuleIndex}
-        onSelectModule={onSelectModule}
-        onOpenScript={onOpenScript}
-      />
-    );
-  }
-  if (c.id === 'black-scholes') return <BSContent/>;
-  if (c.id === 'yield-curves') return <YCContent/>;
-  if (c.id === 'greeks') return <GreeksContent/>;
-  if (c.id === 'implied-vol') return <IVContent/>;
-  if (c.id === 'exotics') return <ExoticsContent/>;
-  if (c.id === 'monte-carlo') return <MCContent/>;
-  if (c.id === 'hedging') return <HedgingContent/>;
-  // generic fallback
-  return <GenericContent c={c}/>;
+  return (
+    <PracticeCourseContent
+      c={c}
+      scriptState={scriptState}
+      scriptModel={scriptModel}
+      selectedModuleIndex={selectedModuleIndex}
+      onSelectModule={onSelectModule}
+      onOpenScript={onOpenScript}
+    />
+  );
 }
 
 function CourseScript({c, scriptState, scriptModel}) {
@@ -2016,7 +2232,10 @@ function CourseScript({c, scriptState, scriptModel}) {
 
   const formulaCount = scriptModel?.formulas?.length || 0;
   const sourceCount = scriptModel?.sources?.length || 0;
-  const scriptUrl = `/course-scripts/${scriptSlug}.md`;
+  const personaScript = String(scriptState.content || '')
+    .replace(/\[S(?:\d+|x)\]/gi, '')
+    .replace(/^.*(?:chunk[_ -]?id|retrieval score|similarity score|source family slug).*$/gim, '')
+    .replace(/\n{3,}/g, '\n\n');
 
   return (
     <div className="col course-script-shell" style={{gap:14}}>
@@ -2025,7 +2244,7 @@ function CourseScript({c, scriptState, scriptModel}) {
           <div className="section-eyebrow" style={{margin:0}}>// Generated desk course</div>
           <h2 className="mono">{c.title} · course script</h2>
           <p className="text-2">
-            Script construit depuis la base RAG locale, avec formules LaTeX, cas pratiques, livrables et sources rattachees.
+            Notes de cours avec hypothèses explicites, démonstrations, cas corrigés et références consultables.
           </p>
           <div className="row" style={{gap:8,flexWrap:'wrap',marginTop:14}}>
             <span className="badge">{formulaCount} formulas</span>
@@ -2033,12 +2252,33 @@ function CourseScript({c, scriptState, scriptModel}) {
             <span className="badge">{c.level} · {c.duration}</span>
           </div>
         </div>
-        <a className="btn btn-outline btn-sm" href={scriptUrl} target="_blank" rel="noreferrer">
-          Open MD <Icon name="external-link" size={13}/>
-        </a>
+        <span className="badge">Learner view</span>
       </div>
+      <CourseProvenancePanel sourceCount={sourceCount}/>
       <div className="panel course-script-panel">
-        <LatexMarkdown content={scriptState.content}/>
+        <LatexMarkdown content={personaScript}/>
+      </div>
+    </div>
+  );
+}
+
+function CourseProvenancePanel({sourceCount = 0}) {
+  return (
+    <div className="panel" data-course-provenance="true" style={{padding:16}}>
+      <div className="row between" style={{gap:12,alignItems:'flex-start'}}>
+        <div>
+          <div className="label">Content provenance</div>
+          <p className="text-2" style={{margin:'6px 0 0',fontSize:12.5,lineHeight:1.55}}>
+            The course separates what comes from the reviewed library from what is
+            authored for practice. {sourceCount} readable source excerpts are attached below.
+          </p>
+        </div>
+        <span className="badge">Traceable content</span>
+      </div>
+      <div className="grid-3" style={{marginTop:14,gap:10}}>
+        <div><span className="badge">Source excerpt</span><div className="mute" style={{fontSize:11,marginTop:6}}>Readable extract from the reviewed corpus.</div></div>
+        <div><span className="badge">Pedagogical rewrite</span><div className="mute" style={{fontSize:11,marginTop:6}}>Original explanation structured for the learner.</div></div>
+        <div><span className="badge">Verified generation</span><div className="mute" style={{fontSize:11,marginTop:6}}>Examples, exercises and quizzes; numbers recomputed by the deterministic engine.</div></div>
       </div>
     </div>
   );
@@ -2050,17 +2290,29 @@ function parseUiBlock(text='') {
   const mt = text.match(/type:\s*([a-z_]+)/i); if (mt) out.type = mt[1].trim();
   const ti = text.match(/title:\s*(.+)/i); if (ti) out.title = ti[1].trim();
   const mp = text.match(/params:\s*(\{[\s\S]*\})/i);
-  if (mp) { try { out.params = JSON.parse(mp[1].replace(/([{,]\s*)([a-zA-Z_][\w]*)\s*:/g,'$1"$2":').replace(/'/g,'"')); } catch(e){ out.params = {}; } }
+  if (mp) {
+    try {
+      // Course generation emits strict JSON. Parse it untouched so ordinary
+      // apostrophes inside French/English strings cannot corrupt the payload.
+      out.params = JSON.parse(mp[1]);
+    } catch {
+      try {
+        // Bounded compatibility path for old authoring blocks that used
+        // unquoted keys / single-quoted values. New content must not rely on it.
+        out.params = JSON.parse(mp[1].replace(/([{,]\s*)([a-zA-Z_][\w]*)\s*:/g,'$1"$2":').replace(/'([^']*)'/g,'"$1"'));
+      } catch { out.params = {}; }
+    }
+  }
   return out;
 }
 
-const RAG_API = (import.meta.env.VITE_TPL_RAG_API_URL || 'http://127.0.0.1:8000').replace(/\/+$/,'');
+const RAG_API = getPracticeApiBase();
 
 const TONE_COLOR = { blue:'var(--blue)', amber:'var(--amber)', green:'var(--green)', red:'var(--red)' };
 
-// Real price history. Tries the backend market API first (live AAPL etc.); when
-// no backend is reachable, falls back to the bundled farmed series so the chart
-// still renders genuine history offline. Renders through the real LineChart.
+// Reference price history. Tries the backend historical API first; when no
+// backend is reachable, falls back to the bundled dated snapshot. Neither path
+// is an executable quote, and the rendered provenance states that explicitly.
 function UIPriceChart({ symbol='AAPL', points=140 }) {
   const [data,setData] = useState(null);
   useEffect(()=>{
@@ -2071,21 +2323,37 @@ function UIPriceChart({ symbol='AAPL', points=140 }) {
         if(!ok) return;
         if(j&&Array.isArray(j.series)&&j.series.length){
           const closes=j.series.map(s=>s.close);
-          setData({label:symbol, closes, src:`${(j.rows||closes.length).toLocaleString()} real bars`});
+          setData({
+            label:symbol,
+            closes,
+            src:`${(j.rows||closes.length).toLocaleString()} daily bars`,
+            range:[j.series[0].date, j.series[j.series.length-1].date],
+            provenance:j.provenance || null,
+          });
         } else throw new Error('no-backend');
       })
       .catch(()=>{ loadDeskSeries().then(b=>{
         if(!ok) return;
         const key=SYMBOL_ALIAS[symbol]||'SPX';
         const s=b.series?.[key];
-        if(s&&s.points?.length) setData({label:s.label, closes:s.points.map(p=>p.c), src:s.source, range:[s.points[0].d, s.points[s.points.length-1].d]});
+        if(s&&s.points?.length) setData({
+          label:s.label,
+          closes:s.points.map(p=>p.c),
+          src:s.source,
+          range:[s.points[0].d, s.points[s.points.length-1].d],
+          provenance:{source:s.source, status:'offline_snapshot', as_of_date:s.points[s.points.length-1].d, unit:s.unit || 'native', limitations:'historical reference only; not an executable quote'},
+        });
       }); });
     return ()=>{ok=false;};
   },[symbol,points]);
-  if(!data) return <div className="mute mono" style={{fontSize:12,padding:14}}>Chargement de l'historique de prix reel…</div>;
+  if(!data) return <div className="mute mono" style={{fontSize:12,padding:14}}>Chargement de l'historique de référence…</div>;
   const series=[{name:data.label,color:'var(--blue)',data:data.closes.map((y,i)=>({x:i,y}))}];
   const last=data.closes[data.closes.length-1];
-  return (<div><LineChart series={series} xAxis={false} height={160}/><div className="mono mute" style={{fontSize:11,marginTop:6}}>{data.label} · {data.src}{data.range?` · ${data.range[0]} → ${data.range[1]}`:''} · dernier {fmt(last)}</div></div>);
+  const provenance = data.provenance;
+  const limitations = Array.isArray(provenance?.limitations)
+    ? provenance.limitations.join(' · ')
+    : (provenance?.limitations || 'historique quotidien, pas un prix exécutable.');
+  return (<div><LineChart series={series} xAxis={false} height={160}/><div className="mono mute" style={{fontSize:11,marginTop:6}}>{data.label} · {data.src}{data.range?` · ${data.range[0]} → ${data.range[1]}`:''} · dernier {fmt(last)}</div>{provenance&&<div data-price-provenance="true" className="mono mute" style={{fontSize:10.5,marginTop:6}}>Source: {provenance.source} · statut: {provenance.status} · as-of: {provenance.as_of_date} · unité: {provenance.unit} · limites: {limitations}</div>}</div>);
 }
 
 // A genuine real-market anchor for each course: the live-history line of the most
@@ -2097,7 +2365,7 @@ function CourseMarketWidget({ slug }) {
   const pick = pickCourseSeries(slug);
   if(!pick) return null;
   const color = TONE_COLOR[pick.tone] || 'var(--blue)';
-  if(!bundle) return <div className="panel" style={{padding:16,margin:'14px 0'}}><div className="mute mono" style={{fontSize:12}}>Chargement des donnees de marche reelles…</div></div>;
+  if(!bundle) return <div className="panel" style={{padding:16,margin:'14px 0'}}><div className="mute mono" style={{fontSize:12}}>Chargement de l’historique de référence…</div></div>;
   const prim = bundle.series?.[pick.primary];
   if(!prim || !prim.points?.length) return null;
   const sec = pick.secondary ? bundle.series?.[pick.secondary] : null;
@@ -2113,10 +2381,10 @@ function CourseMarketWidget({ slug }) {
     <div className="panel course-market-widget" style={{padding:16,margin:'14px 0'}}>
       <div className="row between" style={{marginBottom:10,alignItems:'flex-start',gap:12}}>
         <div>
-          <div className="label">Donnee de marche reelle</div>
+          <div className="label">Historique de référence</div>
           <h4 className="mono" style={{margin:'4px 0 0',fontSize:14}}>{prim.label}</h4>
         </div>
-        <span className="badge" style={{background:'rgba(25,195,125,.08)',color:'var(--green)'}}>farmed cache · {prim.source}</span>
+        <span className="badge" style={{background:'rgba(25,195,125,.08)',color:'var(--green)'}}>snapshot offline · {prim.source}</span>
       </div>
       <LineChart series={series} xAxis={false} height={160}/>
       <div className="course-market-stats">
@@ -2132,17 +2400,18 @@ function CourseMarketWidget({ slug }) {
         </div>
       )}
       <p className="mute" style={{fontSize:12,lineHeight:1.5,marginTop:10}}>{pick.read}</p>
+      <p className="mono mute" style={{fontSize:10.5,lineHeight:1.5,marginTop:8}}>Statut: snapshot historique local · source: {prim.source} · unité: {prim.unit || 'unité native'} · dernière observation: {d1} · pas de quote live ni de signal d’investissement.</p>
     </div>
   );
 }
 
 function UIScenarioTable(props) {
-  const { rows, cols, cells, rowLabel } = props;
+  const { rows, cols, cells, rowLabel, sourceStatus } = props;
   // Generic engine-fed grid: a course supplies explicit rows/cols/cells (real
   // rate-shock / VaR / KRD01 numbers) instead of the Black-Scholes option grid.
   if (Array.isArray(rows) && Array.isArray(cols) && Array.isArray(cells)) {
-    return (<table className="data"><thead><tr><th>{rowLabel||''}</th>{cols.map((c,i)=><th key={i} className="num">{c}</th>)}</tr></thead>
-      <tbody>{rows.map((r,i)=><tr key={i}><td className="symbol">{r}</td>{(cells[i]||[]).map((v,j)=>{ const neg=String(v).trim().startsWith('-'); return <td key={j} className="num" style={neg?{color:'var(--red)'}:undefined}>{String(v)}</td>; })}</tr>)}</tbody></table>);
+    return (<div data-scenario-table="true"><table className="data"><thead><tr><th>{rowLabel||''}</th>{cols.map((c,i)=><th key={i} className="num">{c}</th>)}</tr></thead>
+      <tbody>{rows.map((r,i)=><tr key={i}><td className="symbol">{r}</td>{(cells[i]||[]).map((v,j)=>{ const neg=String(v).trim().startsWith('-'); return <td key={j} className="num" style={neg?{color:'var(--red)'}:undefined}>{String(v)}</td>; })}</tr>)}</tbody></table>{sourceStatus&&<div className="mono mute" style={{fontSize:10.5,marginTop:8}}>{sourceStatus}</div>}</div>);
   }
   const { spot=100, strike=100, vol=0.2, T=0.25, kind='call' } = props;
   const ss=[-0.2,-0.1,0,0.1,0.2], vs=[-0.05,0,0.05];
@@ -2183,7 +2452,7 @@ function CDSScenario({ notional=50000000, spread_bp=120, riskyAnnuity=4.2, recov
     </div>
   );
   return (
-    <div className="grid-2">
+    <div className="grid-2" data-cds-scenario="true">
       <div className="panel" style={{ padding: 20 }}>
         <div className="label" style={{ marginBottom: 12 }}>Ticket CDS ({side === 'seller' ? 'vendeur' : 'acheteur'} de protection)</div>
         <div className="grid-2" style={{ gap: 12 }}>
@@ -2241,65 +2510,174 @@ function CDSScenarioTable({ notional=50000000, spread_bp=120, riskyAnnuity=4.2, 
   );
 }
 
-function UICorrMatrix({ labels = [], matrix = [] }) {
+function UICorrMatrix({ labels = [], matrix = [], sourceStatus = 'Hypothetical teaching assumptions — not observed market data.' }) {
   const col = (v) => { const x = Math.max(-1, Math.min(1, Number(v) || 0)), a = Math.abs(x);
     return x >= 0 ? `rgba(46,204,113,${0.10 + 0.55 * a})` : `rgba(255,46,69,${0.10 + 0.55 * a})`; };
-  return (<table className="data" style={{ fontSize: 11 }}><thead><tr><th></th>{labels.map((l, i) => <th key={i} className="num">{l}</th>)}</tr></thead>
-    <tbody>{matrix.map((row, i) => <tr key={i}><td className="symbol">{labels[i]}</td>{row.map((v, j) => <td key={j} className="num" style={{ background: col(v), color: 'var(--text)' }}>{Number(v).toFixed(2)}</td>)}</tr>)}</tbody></table>);
+  return (<div data-correlation-matrix="true"><table className="data" style={{ fontSize: 11 }}><thead><tr><th></th>{labels.map((l, i) => <th key={i} className="num">{l}</th>)}</tr></thead>
+    <tbody>{matrix.map((row, i) => <tr key={i}><td className="symbol">{labels[i]}</td>{row.map((v, j) => <td key={j} className="num" style={{ background: col(v), color: 'var(--text)' }}>{Number(v).toFixed(2)}</td>)}</tr>)}</tbody></table><div className="mono mute" style={{fontSize:10.5,marginTop:8}}>{sourceStatus}</div></div>);
+}
+
+function UIGreeksScenario({ delta=0, gamma=0, vega=0, theta=0, spotMove=-2, volMove=3 }) {
+  const [moves, setMoves] = useState({ spot: Number(spotMove), vol: Number(volMove) });
+  const parts = [
+    ['Delta', Number(delta) * moves.spot, 'Delta × Δspot (%)'],
+    ['Gamma', 0.5 * Number(gamma) * moves.spot ** 2, '½ × Gamma × Δspot²'],
+    ['Vega', Number(vega) * moves.vol, 'Vega × Δvol (pts)'],
+    ['Theta', Number(theta), 'Theta × 1 jour'],
+  ];
+  const total = parts.reduce((sum, [,value]) => sum + value, 0);
+  const maxAbs = Math.max(1, ...parts.map(([,value]) => Math.abs(value)));
+  const eur = (value) => `${value >= 0 ? '+' : '−'}€${Math.abs(Math.round(value)).toLocaleString()}`;
+  return (
+    <div data-greeks-scenario="true">
+      <div className="grid-2" style={{gap:16,marginBottom:16}}>
+        <label className="mono" style={{fontSize:11}}>Choc spot: {moves.spot >= 0 ? '+' : ''}{moves.spot}%<input aria-label="Course spot shock" type="range" min="-10" max="10" step="0.5" value={moves.spot} onChange={(event)=>setMoves((current)=>({...current,spot:Number(event.target.value)}))} style={{width:'100%',marginTop:8}}/></label>
+        <label className="mono" style={{fontSize:11}}>Choc vol: {moves.vol >= 0 ? '+' : ''}{moves.vol} pts<input aria-label="Course volatility shock" type="range" min="-10" max="10" step="0.5" value={moves.vol} onChange={(event)=>setMoves((current)=>({...current,vol:Number(event.target.value)}))} style={{width:'100%',marginTop:8}}/></label>
+      </div>
+      {parts.map(([label,value,formula])=><div key={label} style={{display:'grid',gridTemplateColumns:'70px minmax(120px,1fr) 125px',gap:10,alignItems:'center',padding:'6px 0'}}><span className="mono mute" style={{fontSize:11}}>{label}</span><div style={{height:8,background:'var(--line)',borderRadius:4,overflow:'hidden'}}><div style={{height:'100%',width:`${Math.abs(value)/maxAbs*100}%`,background:value>=0?'var(--green)':'var(--red)'}}/></div><span className="mono" style={{fontSize:11,textAlign:'right',color:value>=0?'var(--green)':'var(--red)'}} title={formula}>{eur(value)}</span></div>)}
+      <div className="row between" style={{borderTop:'1px solid var(--line)',marginTop:10,paddingTop:10}}><span className="label">P&amp;L local total</span><strong className="mono" style={{color:total>=0?'var(--green)':'var(--red)'}}>{eur(total)}</strong></div>
+      <div className="mono mute" style={{fontSize:10.5,marginTop:8}}>Approximation locale avec unités opérationnelles : delta par 1% spot, gamma par (1%)², vega par point de vol, theta par jour.</div>
+    </div>
+  );
+}
+
+function UIVolSmile({ matrix=[], strikes=[], maturities=[] }) {
+  const values = matrix.flat().map(Number).filter(Number.isFinite);
+  if (!values.length) return <div className="mono mute">Aucun noeud de volatilité authentifié.</div>;
+  const lo = Math.min(...values), hi = Math.max(...values);
+  const strikeLabels = strikes.length === matrix[0]?.length ? strikes : matrix[0].map((_,index)=>`K${index+1}`);
+  const maturityLabels = maturities.length === matrix.length ? maturities : matrix.map((_,index)=>`T${index+1}`);
+  const fill = (value) => {
+    const weight = (Number(value)-lo)/Math.max(hi-lo,1e-12);
+    return `rgba(255,46,69,${0.10+0.60*weight})`;
+  };
+  return <div data-vol-smile="true"><table className="data"><thead><tr><th>Échéance / strike</th>{strikeLabels.map((strike)=><th key={strike} className="num">{strike}</th>)}</tr></thead><tbody>{matrix.map((row,rowIndex)=><tr key={maturityLabels[rowIndex]}><td className="symbol">{maturityLabels[rowIndex]}</td>{row.map((value,colIndex)=><td key={colIndex} className="num" style={{background:fill(value)}}>{(Number(value)*100).toFixed(1)}%</td>)}</tr>)}</tbody></table><div className="mono mute" style={{fontSize:10.5,marginTop:8}}>Volatilités annuelles en décimal dans le script authentifié ; rendu en pourcentage sans extrapolation.</div></div>;
+}
+
+function UIPathDependentPayoff({kind, spot=100, strike=100, barrier=80, rebate=0, notional=1000, autocallBarrier=1, couponBarrier=0.7, protectionBarrier=0.6, couponRate=0.08}) {
+  const initial = Number(spot);
+  const [barrierPath,setBarrierPath] = useState({minimum:Math.min(initial,Number(barrier)+5),terminal:initial});
+  const [observations,setObservations] = useState([95,105,75].map((level)=>level/100*initial));
+  const money = (value)=>`€${Number(value).toLocaleString(undefined,{maximumFractionDigits:2})}`;
+  if (kind==='barrier') {
+    const knocked = barrierPath.minimum <= Number(barrier);
+    const terminalPayoff = knocked ? Number(rebate) : Math.max(barrierPath.terminal-Number(strike),0);
+    return <div data-path-dependent-payoff="barrier"><div className="grid-2" style={{gap:16}}><label className="mono" style={{fontSize:11}}>Minimum observé: {fmt(barrierPath.minimum,1)}<input aria-label="Course barrier minimum" type="range" min="0" max={initial*1.2} step="1" value={barrierPath.minimum} onChange={(event)=>setBarrierPath((current)=>({...current,minimum:Number(event.target.value)}))} style={{width:'100%',marginTop:8}}/></label><label className="mono" style={{fontSize:11}}>Spot terminal: {fmt(barrierPath.terminal,1)}<input aria-label="Course barrier terminal spot" type="range" min="0" max={initial*1.8} step="1" value={barrierPath.terminal} onChange={(event)=>setBarrierPath((current)=>({...current,terminal:Number(event.target.value)}))} style={{width:'100%',marginTop:8}}/></label></div><div className="grid-3" style={{marginTop:14}}><Stat label="État" value={knocked?'Knocked out':'Alive'} accent={knocked?'var(--red)':'var(--green)'}/><Stat label="Payoff terminal" value={money(terminalPayoff)}/><Stat label="Barrière" value={fmt(Number(barrier),1)}/></div><div className="mono mute" style={{fontSize:10.5,marginTop:10}}>Down-and-out call pédagogique: max(Sₜ−K,0) si le minimum reste strictement au-dessus de la barrière, sinon rebate. Payoff non actualisé — ce widget ne prétend pas fournir un prix.</div></div>;
+  }
+  const setObservation=(index,value)=>setObservations((current)=>current.map((item,itemIndex)=>itemIndex===index?value:item));
+  const autocallLevel=Number(autocallBarrier)*initial, couponLevel=Number(couponBarrier)*initial, protectionLevel=Number(protectionBarrier)*initial;
+  const callIndex=observations.findIndex((level,index)=>index<2&&level>=autocallLevel);
+  let redemption, outcome;
+  if(callIndex>=0){redemption=Number(notional)*(1+Number(couponRate)*(callIndex+1));outcome=`Autocall observation ${callIndex+1}`;}
+  else {const terminal=observations[2];const coupon=terminal>=couponLevel?Number(couponRate)*3:0;redemption=terminal>=protectionLevel?Number(notional)*(1+coupon):Number(notional)*terminal/initial;outcome=terminal>=protectionLevel?'Remboursement à maturité':'Protection cassée';}
+  return <div data-path-dependent-payoff="autocall"><div className="grid-3" style={{gap:12}}>{observations.map((level,index)=><label key={index} className="mono" style={{fontSize:11}}>Observation {index+1}: {(level/initial*100).toFixed(0)}%<input aria-label={`Course autocall observation ${index+1}`} type="range" min="30" max="130" step="1" value={level/initial*100} onChange={(event)=>setObservation(index,Number(event.target.value)/100*initial)} style={{width:'100%',marginTop:8}}/></label>)}</div><div className="grid-3" style={{marginTop:14}}><Stat label="Issue" value={outcome}/><Stat label="Remboursement" value={money(redemption)}/><Stat label="P&L capital" value={money(redemption-Number(notional))} accent={redemption>=Number(notional)?'var(--green)':'var(--red)'}/></div><div className="mono mute" style={{fontSize:10.5,marginTop:10}}>Term sheet pédagogique explicite: autocall {autocallBarrier*100}%, coupon {couponRate*100}% par observation, barrière coupon {couponBarrier*100}%, protection {protectionBarrier*100}%. Payoff déterministe non actualisé — aucune valorisation autocall n'est revendiquée.</div></div>;
+}
+
+function UIMonteCarlo({ paths=20000, spot=100, strike=100, vol=0.2, T=1 }) {
+  const [pathCount,setPathCount] = useState(Math.min(50000,Math.max(100,Number(paths))));
+  const [state,setState] = useState({status:'loading',result:null,error:''});
+  useEffect(()=>{
+    let active=true;
+    setState({status:'loading',result:null,error:''});
+    import('../lib/monteCarlo.mjs').then(({analyzeMonteCarlo,MONTE_CARLO_INPUT_SCHEMA})=>analyzeMonteCarlo({
+      schemaVersion:MONTE_CARLO_INPUT_SCHEMA,mode:'pricing_risk_neutral',spot:Number(spot),volatility:Number(vol),maturityYears:Number(T),dayCount:'ACT/365F',paths:pathCount,timeSteps:12,seed:7,method:'antithetic',samplePaths:Math.min(8,pathCount),histogramBins:20,currency:'EUR',quantity:1,contractMultiplier:1,position:'long',riskFreeRate:0.05,dividendYield:0,strike:Number(strike),optionType:'call',payoffType:'european',
+    })).then((result)=>{if(active)setState({status:'ready',result,error:''});}).catch((error)=>{if(active)setState({status:'error',result:null,error:error.message||'Monte Carlo indisponible'});});
+    return ()=>{active=false;};
+  },[pathCount,spot,strike,vol,T]);
+  const pricing=state.result?.pricing;
+  return <div data-monte-carlo-course="true"><label className="mono" style={{fontSize:11}}>Trajectoires: {pathCount.toLocaleString()}<input aria-label="Course Monte Carlo paths" type="range" min="1000" max="50000" step="1000" value={pathCount} onChange={(event)=>setPathCount(Number(event.target.value))} style={{width:'100%',margin:'8px 0 14px'}}/></label>{state.status==='loading'&&<div className="mono mute">Simulation déterministe seed 7…</div>}{state.status==='error'&&<div className="form-notice error">{state.error}</div>}{pricing&&<><div className="grid-4"><Stat label="Prix MC" value={fmt(pricing.price,4)}/><Stat label="Erreur standard" value={fmt(pricing.standardError,4)}/><Stat label="IC 95%" value={`[${fmt(pricing.ci95.lower,4)} ; ${fmt(pricing.ci95.upper,4)}]`}/><Stat label="Black-Scholes" value={fmt(pricing.blackScholesBenchmark,4)}/></div><div className="mono mute" style={{fontSize:10.5,marginTop:10}}>Moteur canonique v{state.result.engineVersion} · antithétiques · {pricing.effectiveSamples.toLocaleString()} échantillons effectifs · benchmark {pricing.benchmarkInsideCi95?'dans':'hors'} IC.</div></>}</div>;
 }
 
 function UIPayoffChart({ spot=100, strike=100, kind='call', premium=0, qty=1, title='' }) {
-  const S0 = Math.max(1e-6, Number(spot) || 100);
-  const K = Math.max(1e-6, Number(strike) || S0);
-  const q = Number(qty) || 1;
-  const prem = Number(premium) || 0;
-  const side = String(kind || '').toLowerCase().includes('put') ? 'put' : 'call';
-  const lo = Math.min(S0, K) * 0.55;
-  const hi = Math.max(S0, K) * 1.55;
-  const xs = Array.from({ length: 81 }, (_, i) => lo + (hi - lo) * i / 80);
-  const payoffValue = (x) => q * ((side === 'put' ? Math.max(K - x, 0) : Math.max(x - K, 0)) - prem);
-  const payoff = xs.map((x) => ({ x, y: payoffValue(x) }));
-  const breakevens = [];
-  for (let i = 1; i < payoff.length; i += 1) {
-    const a = payoff[i - 1], b = payoff[i];
-    if (Math.abs(a.y) < 1e-8) breakevens.push(a.x);
-    if (a.y * b.y < 0) breakevens.push(a.x - a.y * (b.x - a.x) / (b.y - a.y));
-  }
-  const legs = [{ id: 'course-payoff', K, side: 'long', type: side, qty: q, prem }];
-  const maxGain = Math.max(...payoff.map((p) => p.y));
-  const maxLoss = Math.min(...payoff.map((p) => p.y));
+  const [analysis, setAnalysis] = useState(null);
+  const [analysisError, setAnalysisError] = useState('');
+
+  useEffect(() => {
+    let active = true;
+    setAnalysis(null);
+    setAnalysisError('');
+    const S0 = Number(spot), K = Number(strike), rawQuantity = Number(qty), entryPremium = Number(premium);
+    const kindText = String(kind || '').toLowerCase();
+    const quantity = Math.abs(rawQuantity);
+    if (!Number.isFinite(S0) || !Number.isFinite(K) || !Number.isSafeInteger(quantity) || quantity < 1 || !Number.isFinite(entryPremium) || entryPremium < 0) {
+      setAnalysisError('Paramètres payoff invalides : spot/strike positifs, prime positive ou nulle et quantité entière requise.');
+      return () => { active = false; };
+    }
+    import('../lib/payoffStrategy.mjs')
+      .then(({ analyzePayoffStrategy }) => analyzePayoffStrategy({
+        spot: S0,
+        volatility: 0.2,
+        timeToMaturity: 1,
+        riskFreeRate: 0,
+        dividendYield: 0,
+        currency: 'EUR',
+        contractMultiplier: 1,
+        gridPoints: 201,
+        legs: [{
+          id: 'course-payoff',
+          type: kindText.includes('put') ? 'put' : 'call',
+          side: kindText.includes('short') || rawQuantity < 0 ? 'short' : 'long',
+          strike: K,
+          quantity,
+          premiumSource: 'manual',
+          manualPremium: entryPremium,
+        }],
+      }))
+      .then((result) => { if (active) setAnalysis(result); })
+      .catch((error) => { if (active) setAnalysisError(error instanceof Error ? error.message : 'Analyse payoff impossible.'); });
+    return () => { active = false; };
+  }, [spot, strike, kind, premium, qty]);
+
+  if (analysisError) return <div className="form-notice error">{analysisError}</div>;
+  if (!analysis) return <div className="mono mute" style={{padding:18}}>Analyse exacte du payoff…</div>;
+
+  const W=820, H=260, ML=52, MR=18, MT=18, MB=30;
+  const xs = analysis.curve.map((point) => point.terminalSpot);
+  const ys = analysis.curve.map((point) => point.terminalPnl);
+  const xMin = Math.min(...xs), xMax = Math.max(...xs);
+  const rawMin = Math.min(0, ...ys), rawMax = Math.max(0, ...ys);
+  const padding = Math.max((rawMax - rawMin) * 0.1, 1);
+  const yMin = rawMin - padding, yMax = rawMax + padding;
+  const X = (value) => ML + (value - xMin) / Math.max(xMax - xMin, 1) * (W - ML - MR);
+  const Y = (value) => MT + (1 - (value - yMin) / Math.max(yMax - yMin, 1)) * (H - MT - MB);
+  const line = analysis.curve.map((point, index) => `${index ? 'L' : 'M'} ${X(point.terminalSpot)} ${Y(point.terminalPnl)}`).join(' ');
+  const leg = analysis.legs[0];
+  const maxProfit = analysis.bounds.maxProfit.kind === 'unlimited' ? '∞' : fmt(analysis.bounds.maxProfit.amount, 2);
+  const maxLoss = analysis.bounds.maxLoss.kind === 'unlimited' ? '−∞' : fmt(-analysis.bounds.maxLoss.amount, 2);
+
   return (
     <div className="ui-payoff-widget">
-      <PayoffChart payoff={payoff} breakevens={breakevens.slice(0, 3)} legs={legs}/>
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} role="img" aria-label="Exact terminal payoff over non-negative spot prices" style={{display:'block',fontFamily:"'JetBrains Mono',monospace"}}>
+        {[yMin, 0, yMax].map((value) => <g key={value}><line x1={ML} y1={Y(value)} x2={W-MR} y2={Y(value)} stroke={value === 0 ? '#596273' : '#1A1F28'} /><text x={ML-7} y={Y(value)+3} textAnchor="end" fill="#7C8493" fontSize="10">{fmt(value, 0)}</text></g>)}
+        {[xMin, (xMin+xMax)/2, xMax].map((value) => <text key={value} x={X(value)} y={H-9} textAnchor="middle" fill="#7C8493" fontSize="10">{fmt(value, 0)}</text>)}
+        <line x1={X(leg.strike)} y1={MT} x2={X(leg.strike)} y2={H-MB} stroke="#3E8BFF" strokeDasharray="3 3" />
+        {analysis.breakevens.map((value) => <g key={value}><line x1={X(value)} y1={MT} x2={X(value)} y2={H-MB} stroke="#FFB020" strokeDasharray="3 3" /><text x={X(value)+4} y={MT+10} fill="#FFB020" fontSize="9">BE {fmt(value, 2)}</text></g>)}
+        <path d={line} fill="none" stroke="#FF2E45" strokeWidth="2.2" />
+      </svg>
       <div className="payoff-widget-stats">
-        <div><span>Produit</span><strong>{title.toLowerCase().includes('barrier') ? 'Payoff conditionnel' : `${side.toUpperCase()} vanilla`}</strong></div>
-        <div><span>Spot</span><strong>{fmt(S0, 2)}</strong></div>
-        <div><span>Strike</span><strong>{fmt(K, 2)}</strong></div>
-        <div><span>P&L min / max</span><strong>{fmt(maxLoss, 2)} / {fmt(maxGain, 2)}</strong></div>
+        <div><span>Produit</span><strong>{title.toLowerCase().includes('barrier') ? 'Payoff terminal vanilla uniquement' : `${leg.side.toUpperCase()} ${leg.type.toUpperCase()}`}</strong></div>
+        <div><span>Domaine exact</span><strong>Sₜ ≥ 0</strong></div>
+        <div><span>Profit max</span><strong>{maxProfit}</strong></div>
+        <div><span>Perte max</span><strong>{maxLoss}</strong></div>
       </div>
+      <div className="mono mute" style={{fontSize:10.5,marginTop:8}}>Prime manuelle · multiplicateur 1 · aucun cours de marché live · bornes indépendantes de la fenêtre tracée.</div>
     </div>
   );
 }
 
 function UIBlock({ spec }) {
   const { type, title, params = {} } = spec;
-  const isCDS = params && params.kind === 'cds';
-  const body = (() => {
-    switch(type){
-      case 'greeks_scenario': return isCDS ? <CDSScenario {...params}/> : <HedgingContent {...params}/>;
-      case 'payoff': return <UIPayoffChart {...params} title={title}/>;
-      case 'monte_carlo': return (params && (params.mode==='var_pnl' || params.histVaR!=null)) ? <VarMCContent {...params}/> : <MCContent/>;
-      case 'vol_smile': return <VolHeatmap matrix={params.matrix||TR_VOLHEAT} rowLabels={['80%','100%','120%','','']} colLabels={['1W','1M','3M','6M','1Y']} cell={20}/>;
-      case 'price_chart': return <UIPriceChart symbol={params.symbol||'AAPL'} points={params.points||140}/>;
-      case 'scenario_table': case 'pnl_grid': case 'rate_shock_table': case 'stress_table':
-        return isCDS ? <CDSScenarioTable {...params}/> : <UIScenarioTable {...params}/>;
-      case 'equation': return <LatexMarkdown content={`$$\n${params.latex||params.expression||''}\n$$`}/>;
-      case 'corr_matrix': case 'covariance_matrix': return <UICorrMatrix {...params}/>;
-      default: return <div className="mono mute" style={{fontSize:12}}>UI block: {type}</div>;
-    }
-  })();
+  const body = type === 'equation' ? <LatexMarkdown content={`$$\n${params.latex||params.expression||''}\n$$`}/>
+    : type === 'scenario_table' ? <UIScenarioTable {...params}/>
+    : type === 'greeks_scenario' ? (params.kind==='cds' ? <CDSScenario {...params}/> : <UIGreeksScenario {...params}/>)
+    : type === 'corr_matrix' ? <UICorrMatrix {...params}/>
+    : type === 'price_chart' ? <UIPriceChart {...params}/>
+    : type === 'payoff' ? (params.kind==='barrier'||params.kind==='autocall' ? <UIPathDependentPayoff {...params}/> : <UIPayoffChart {...params} title={title}/>)
+    : type === 'vol_smile' ? <UIVolSmile {...params}/>
+    : type === 'monte_carlo' ? <UIMonteCarlo {...params}/>
+    : <div className="course-lab-list">{Object.entries(params).map(([key,value])=><div className="course-lab-item" key={key}><span className="mono">{key}</span><p>{typeof value === 'string' ? value : JSON.stringify(value)}</p></div>)}{Object.keys(params).length===0 && <div className="mono mute" style={{fontSize:12}}>No authenticated widget inputs were published for this block.</div>}</div>;
   return (
-    <div className="panel" style={{padding:18, margin:'18px 0'}}>
+    <div className="panel" data-ui-block-type={type||'unknown'} style={{padding:18, margin:'18px 0'}}>
       {title && <div className="row between" style={{marginBottom:12}}><div className="label">{title}</div><span className="badge" style={{background:'rgba(62,139,255,.08)',color:'var(--blue)'}}>interactive</span></div>}
       {body}
     </div>
@@ -2321,10 +2699,12 @@ function LatexMarkdown({content}) {
   if (!parts.length) parts.push({ t:'md', v: md });
   return (
     <div className="course-script-markdown">
-      {parts.map((p,i)=> p.t==='block'
-        ? <UIBlock key={i} spec={parseUiBlock(p.v)}/>
-        : <ReactMarkdown key={i} remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>{p.v}</ReactMarkdown>
-      )}
+      <React.Suspense fallback={<div className="mono mute" data-markdown-loading="true">Rendu du contenu vérifié…</div>}>
+        {parts.map((p,i)=> p.t==='block'
+          ? <UIBlock key={i} spec={parseUiBlock(p.v)}/>
+          : <CourseMarkdown key={i}>{p.v}</CourseMarkdown>
+        )}
+      </React.Suspense>
     </div>
   );
 }
@@ -2370,39 +2750,29 @@ const _LESSON_BOILERPLATE = new RegExp('^(?:' + [
   'Un entretien quant demande la derivation',
 ].join('|') + ')', 'i');
 
-function PracticeCourseContent({c, blueprint, scriptState, scriptModel, selectedModuleIndex = 0, onSelectModule, onOpenScript}) {
-  const modules = scriptModel?.modules?.length
-    ? scriptModel.modules
-    : blueprint.modules.map((module,idx)=>({
-        number: idx + 1,
-        title: module.t,
-        objective: module.d,
-        situation: blueprint.deskPromise,
-        notion: c.topics.join(', '),
-        activity: `Build the desk calculation for ${module.t.toLowerCase()}.`,
-        deliverable: 'Desk note',
-      }));
+function PracticeCourseContent({c, scriptState, scriptModel, selectedModuleIndex = 0, onSelectModule, onOpenScript}) {
+  const modules = scriptModel?.modules || [];
   const safeIndex = Math.min(Math.max(selectedModuleIndex, 0), Math.max(modules.length - 1, 0));
   const activeModule = modules[safeIndex];
   const formulas = scriptModel?.formulas || [];
   const uiBlocks = scriptModel?.uiBlocks || [];
-  const labs = scriptModel?.labs?.length ? scriptModel.labs : blueprint.labs.map(([lab, task])=>`${lab}: ${task}`);
+  const labs = scriptModel?.labs || [];
   const facts = scriptModel?.facts?.slice(0, 6) || [];
-  const supports = scriptModel?.supports?.length ? scriptModel.supports : blueprint.resources;
+  const supports = scriptModel?.supports || [];
   const loading = scriptState?.status === 'loading';
 
   return (
     <div className="col" style={{gap:18}}>
       <div className="panel" style={{padding:24}}>
         <div className="section-eyebrow" style={{margin:0}}>// Parcours pratique salle de marche</div>
-        <h2 className="mono" style={{fontSize:24,fontWeight:700,marginTop:10,marginBottom:12}}>{blueprint.deskRole}</h2>
+        <h2 className="mono" style={{fontSize:24,fontWeight:700,marginTop:10,marginBottom:12}}>{c.title}</h2>
         <p className="text-2" style={{fontSize:13.5,lineHeight:1.75,marginTop:0,maxWidth:'82ch'}}>
-          {blueprint.deskPromise} Chaque module part d'un ticket ou d'un risque de marche, introduit la theorie utile,
+          {c.tagline} Chaque module part d'un ticket ou d'un risque de marche, introduit la theorie utile,
           puis force un calcul, un controle, une lecture de risque et une action de desk.
         </p>
         <div className="row" style={{gap:8,flexWrap:'wrap',marginTop:16}}>
           <span className="badge badge-green">Modules ouverts</span>
-          {(modules.length ? modules : blueprint.workflow).slice(0, 6).map((step,idx)=>(
+          {modules.slice(0, 6).map((step,idx)=>(
             <span key={step.title || step} className="badge">{String(idx + 1).padStart(2,'0')} · {step.title || step}</span>
           ))}
         </div>
@@ -2596,14 +2966,12 @@ function CourseModuleReader({c, module, writtenLesson, formula, uiBlocks = [], m
 
 function CourseWrittenLessonExperience({c, module, writtenLesson, formula, uiBlocks = [], lessonWords = 0, onOpenScript}) {
   const courseSlug = COURSE_SCRIPT_SLUGS[c.id] || c.id;
-  const bespokeProse = getLessonProse(courseSlug, writtenLesson.number);
-  const sections = bespokeProse ? buildBespokeSections(bespokeProse) : buildLessonSections(writtenLesson.body);
+  const sections = buildLessonSections(writtenLesson.body);
   const equationDemo = buildEquationDemo(c, module, formula);
   const actionText = normalizeCourseMicrocopy(module.deliverable || module.activity || 'Note de quote/risque avec decision');
   const layout = getCourseLayout(courseSlug);
   const tone = layout?.tone || 'blue';
   const showMarket = showMarketOnLesson(courseSlug, writtenLesson.number);
-  const narrative = bespokeProse?.narrative;
   return (
     <div className={`course-written-lesson course-written-lesson-cockpit tone-${tone}`}>
       <div className="course-written-head">
@@ -2617,12 +2985,6 @@ function CourseWrittenLessonExperience({c, module, writtenLesson, formula, uiBlo
           <span className="badge badge-blue">cockpit</span>
         </div>
       </div>
-
-      {narrative && (
-        <div className="lesson-editorial">
-          <LatexMarkdown content={narrative}/>
-        </div>
-      )}
 
       <div className="lesson-situation-grid">
         <div className="lesson-situation-card">
@@ -2639,7 +3001,7 @@ function CourseWrittenLessonExperience({c, module, writtenLesson, formula, uiBlo
         </div>
       </div>
 
-      {!narrative && sections.length > 0 && (
+      {sections.length > 0 && (
         <div className="lesson-section-grid">
           {sections.map((section) => (
             <div key={section.title} className="lesson-concept-card">
@@ -2709,12 +3071,12 @@ function buildBespokeSections(prose) {
   ].filter((s) => s.content);
 }
 
-function buildEquationDemo(c, module, formula) {
+function buildEquationDemo(c, module, formula, resolveDerivation) {
   if (!formula?.expression) return null;
   // Prefer a rigorous, formula-specific proof when one is authored; otherwise
   // fall back to the generic family-level outline (no regression).
   const slug = COURSE_SCRIPT_SLUGS[c.id] || c.id;
-  const real = getDerivation(slug, formula);
+  const real = resolveDerivation?.(slug, formula);
   if (real) {
     return {
       title: formula.title,
@@ -3089,7 +3451,7 @@ function GreeksContent() {
               <Icon name="sliders" size={22} style={{color:'var(--red)'}}/>
             </div>
             <div className="mono mute" style={{fontSize:11,marginTop:14,letterSpacing:'.08em'}}>GREEKS RISK PANEL</div>
-            <Link to="/tools" className="btn btn-outline btn-sm" style={{marginTop:12}}>Open the live pricing tools ›</Link>
+            <Link to="/tools" className="btn btn-outline btn-sm" style={{marginTop:12}}>Open the deterministic pricing tools ›</Link>
           </div>
         </div>
       </div>
@@ -3245,33 +3607,35 @@ function PayoffSketch({type}) {
 }
 
 function MCContent() {
-  const paths = useMemo(()=>Array.from({length:20},(_,i)=>genWalk(100, 100, 0.014, 0.0005, i+3)),[]);
-  const histo = useMemo(()=>{
-    const bins = Array(20).fill(0);
-    for (let i=0;i<2000;i++) {
-      let s = 100;
-      for (let j=0;j<100;j++) s *= Math.exp(0.0005 + 0.014*(Math.random()-0.5)*2);
-      const idx = Math.min(19, Math.max(0, Math.floor((s-60)/4)));
-      bins[idx]++;
-    }
-    return bins.map((b,i)=>({x:60+i*4, y:b}));
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
+  useEffect(()=>{
+    const worker = new Worker(new URL('../workers/monteCarlo.worker.mjs', import.meta.url), { type:'module' });
+    const requestId = 'course-monte-carlo-v1';
+    worker.onmessage = (event) => {
+      if (event.data?.requestId !== requestId) return;
+      if (event.data.type === 'result') setResult(event.data.result);
+      else setError(event.data?.error || 'Monte Carlo course calculation failed.');
+    };
+    worker.onerror = (event) => setError(event.message || 'Monte Carlo course worker failed.');
+    worker.postMessage({
+      type:'analyze', requestId,
+      input:{
+        schemaVersion:'tpl.monte-carlo.input.v1', mode:'pricing_risk_neutral',
+        spot:100, volatility:0.20, maturityYears:1, dayCount:'ACT/365F',
+        paths:20000, timeSteps:100, seed:20240617, method:'antithetic',
+        samplePaths:20, histogramBins:20, currency:'EUR', quantity:1,
+        contractMultiplier:1, position:'long', riskFreeRate:0.02,
+        dividendYield:0, strike:100, optionType:'call', payoffType:'european',
+      },
+    });
+    return () => worker.terminate();
   },[]);
-  // Real Monte-Carlo call price (Box-Muller GBM) + standard error, vs BS — all
-  // computed live, no fabricated figures.
-  const mc = useMemo(()=>{
-    const S0=100,K=100,r=0.02,sigma=0.20,T=1,N=20000;
-    const disc=Math.exp(-r*T), drift=(r-0.5*sigma*sigma)*T, vol=sigma*Math.sqrt(T);
-    let sum=0,sum2=0;
-    for(let i=0;i<N;i++){
-      const u1=Math.random()||1e-9,u2=Math.random();
-      const z=Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);
-      const pay=disc*Math.max(S0*Math.exp(drift+vol*z)-K,0);
-      sum+=pay; sum2+=pay*pay;
-    }
-    const mean=sum/N, se=Math.sqrt(Math.max(0,sum2/N-mean*mean)/N);
-    const bs=bsPrice({S:S0,K,r,sigma,T,type:'call'}).price;
-    return {mean,se,lo:mean-1.96*se,hi:mean+1.96*se,bs,N};
-  },[]);
+  if (error) return <div className="panel mono red" role="alert" style={{padding:18}}>Canonical Monte Carlo unavailable: {error}</div>;
+  if (!result) return <div className="panel mono mute" style={{padding:18}}>Running the seeded F-CAL-6 worker…</div>;
+  const paths = result.samplePaths.map(path=>path.points.map(point=>({y:point.spot})));
+  const histo = result.distribution.histogram.map(row=>({x:row.midpoint, y:row.count}));
+  const pricing = result.pricing;
   return (
     <div className="col" style={{gap:18}}>
       <div className="panel" style={{padding:24}}>
@@ -3280,7 +3644,7 @@ function MCContent() {
         <div className="panel-2 mono" style={{padding:18,fontSize:13.5,marginTop:10}}>S(t+Δt) = S(t) · exp((r − σ²/2)Δt + σ √Δt · Z),  Z ~ N(0,1)</div>
       </div>
       <div className="grid-2">
-        <ChartFrame title="GBM paths" subtitle="20 of 100,000">
+        <ChartFrame title="GBM paths" subtitle={`${result.run.samplePathCount} of ${result.run.simulatedPaths.toLocaleString()} · same seeded run`}>
           <svg viewBox="0 0 500 260" width="100%" height={260} style={{display:'block'}}>
             <line x1="40" y1="240" x2="490" y2="240" stroke="#2C3340"/>
             <line x1="40" y1="20" x2="40" y2="240" stroke="#2C3340"/>
@@ -3297,89 +3661,12 @@ function MCContent() {
         </ChartFrame>
       </div>
       <div className="grid-3">
-        <Stat label="MC Mean Price" value={fmt(mc.mean,3)} sub={`${(mc.N/1000)}k paths`}/>
-        <Stat label="Std Error" value={`±${fmt(mc.se,3)}`}/>
-        <Stat label="95% CI" value={`[${fmt(mc.lo,3)}, ${fmt(mc.hi,3)}]`}/>
-        <Stat label="Black-Scholes ref" value={fmt(mc.bs,3)} accent="var(--blue)"/>
-        <Stat label="MC − BS" value={fmt(mc.mean-mc.bs,3)} sub="convergence check"/>
-        <Stat label="Convergence" value="O(1/√n)"/>
-      </div>
-    </div>
-  );
-}
-
-// VaR/ES Monte-Carlo P&L distribution, tied to the real ^GSPC return sample.
-// The histogram is the parametric (Gaussian) P&L model the desk *assumes*
-// (P&L = V·σ·Z, σ the realised ^GSPC 252d vol); the vertical markers are the
-// engine-computed empirical VaR/ES on the 24,737 real ^GSPC returns plus the
-// worst realised day. The point made visual: the Gaussian model is a thin
-// spike near zero while the real tail sprawls far to the left (fat tails).
-function VarMCContent(props) {
-  const V = props.V || 10000000;
-  const sigma = props.sigma || 0.00788;
-  const conf = props.confidence || 0.99;
-  const paramVaR = props.paramVaR || V*sigma*2.3263479;
-  const paramES  = props.paramES  || V*sigma*0.0266521/(1-conf);
-  const histVaR  = props.histVaR  || 348606;
-  const histES   = props.histES   || 521990;
-  const worst    = props.worst    || 2289973;      // 1987-10-19 loss on the book
-  const worstLbl = props.worstLabel || '1987';
-  const N = 20000;
-  const sim = useMemo(()=>{
-    let x = 987654321;
-    const rnd = () => { x = (x*1664525+1013904223) % 4294967296; return x/4294967296; };
-    const xmin = -2400000, xmax = 300000, NB = 80, bw = (xmax-xmin)/NB;
-    const bins = Array(NB).fill(0);
-    const pnls = [];
-    for (let i=0;i<N;i++){
-      const u1 = rnd()||1e-9, u2 = rnd();
-      const z = Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2);
-      const p = V*sigma*z; pnls.push(p);
-      const idx = Math.floor((p-xmin)/bw);
-      if (idx>=0 && idx<NB) bins[idx]++;
-    }
-    pnls.sort((a,b)=>a-b);
-    const simVaR = -pnls[Math.floor((1-conf)*N)];   // empirical 99% loss of the sim
-    return { bins, xmin, xmax, NB, bw, simVaR };
-  },[V,sigma,conf]);
-
-  const W=760, Hh=210, ML=8, MR=8, MT=10, MB=42;
-  const pw = W-ML-MR, ph = Hh-MT-MB;
-  const xpix = v => ML + (v - sim.xmin)/(sim.xmax - sim.xmin) * pw;
-  const ymax = Math.max(...sim.bins);
-  const ypix = c => MT + (1 - c/ymax) * ph;
-  const k = v => (v>=0?'+':'−') + '$' + Math.abs(Math.round(v/1000)) + 'k';
-  const mk = (v, color, label, up) => (
-    <g>
-      <line x1={xpix(-v)} y1={MT} x2={xpix(-v)} y2={MT+ph} stroke={color} strokeWidth="1.5" strokeDasharray="3 2"/>
-      <text x={xpix(-v)} y={up?MT+10:MT+ph-4} fill={color} fontSize="9.5" textAnchor="middle" fontFamily="'JetBrains Mono',monospace">{label}</text>
-    </g>
-  );
-  return (
-    <div className="col" style={{gap:14}}>
-      <div className="mono mute" style={{fontSize:11.5, lineHeight:1.5}}>
-        Histogramme = {N.toLocaleString()} P&amp;L simulés sous le modèle <b>gaussien</b> (P&amp;L = V·σ·Z, σ = {(sigma*100).toFixed(3)}%/j, la vol 252j réelle du ^GSPC). Repères verticaux = VaR/ES <b>empiriques</b> calculées sur les 24&nbsp;737 rendements ^GSPC réels (§3.3) + le pire jour réalisé. La cloche gaussienne est un pic étroit ; la vraie queue est loin à gauche.
-      </div>
-      <svg viewBox={`0 0 ${W} ${Hh}`} width="100%" height={Hh} style={{display:'block',fontFamily:"'JetBrains Mono',monospace"}}>
-        <line x1={ML} y1={MT+ph} x2={W-MR} y2={MT+ph} stroke="#2C3340"/>
-        {sim.bins.map((c,i)=> c>0 && (
-          <rect key={i} x={xpix(sim.xmin+i*sim.bw)} y={ypix(c)} width={Math.max(1,pw/sim.NB-0.5)} height={MT+ph-ypix(c)} fill="#3E8BFF" opacity="0.55"/>
-        ))}
-        {mk(paramVaR, '#3E8BFF', 'VaR param '+k(-paramVaR), true)}
-        {mk(histVaR, '#F5A623', 'VaR hist '+k(-histVaR), false)}
-        {mk(histES, '#FF7A1A', 'ES hist '+k(-histES), true)}
-        {mk(worst, '#FF2E45', worstLbl+' '+k(-worst), false)}
-        {[-2000000,-1500000,-1000000,-500000,0].map(t=>(
-          <text key={t} x={xpix(t)} y={Hh-6} fill="#7C8493" fontSize="9" textAnchor="middle">{(t/1e6).toFixed(1)}M</text>
-        ))}
-      </svg>
-      <div className="grid-3">
-        <Stat label="VaR param. 99% (gaussien)" value={'$'+Math.round(paramVaR).toLocaleString()} sub="modèle simulé" accent="var(--blue)"/>
-        <Stat label="VaR sim. (contrôle)" value={'$'+Math.round(sim.simVaR).toLocaleString()} sub={`${(N/1000)}k tirages → ≈ VaR param.`}/>
-        <Stat label="VaR hist. 99% (réel ^GSPC)" value={'$'+Math.round(histVaR).toLocaleString()} sub="24 737 rendements"/>
-        <Stat label="ES hist. 99% (réel ^GSPC)" value={'$'+Math.round(histES).toLocaleString()} sub={`ES/VaR = ${(histES/histVaR).toFixed(2)}`}/>
-        <Stat label="Pire jour réalisé" value={'−$'+Math.round(worst).toLocaleString()} sub="19/10/1987 (−22.9%)" accent="var(--red)"/>
-        <Stat label="Sous-estimation queue" value={(histVaR/paramVaR).toFixed(1)+'×'} sub="hist / paramétrique"/>
+        <Stat label="MC Mean Price" value={fmt(pricing.price,3)} sub={`${(result.run.simulatedPaths/1000)}k paths · Q`}/>
+        <Stat label="Std Error" value={`±${fmt(pricing.standardError,3)}`} sub={`${pricing.effectiveSamples.toLocaleString()} pair means`}/>
+        <Stat label="95% CI" value={`[${fmt(pricing.ci95.lower,3)}, ${fmt(pricing.ci95.upper,3)}]`}/>
+        <Stat label="Black-Scholes ref" value={fmt(pricing.blackScholesBenchmark,3)} accent="var(--blue)"/>
+        <Stat label="MC − BS" value={fmt(pricing.bias,3)} sub={pricing.benchmarkInsideCi95?'benchmark inside CI':'benchmark outside CI'}/>
+        <Stat label="Evidence" value={`v${result.engineVersion}`} sub={`seed ${result.run.seed} · ${result.analysisId.slice(0,8)}`}/>
       </div>
     </div>
   );
@@ -3387,15 +3674,24 @@ function VarMCContent(props) {
 
 function CourseCalculator({c}) {
   if (c.id==='black-scholes') return <BSContent/>;
-  if (c.id==='yield-curves') return <YCContent/>;
-  if (c.id==='monte-carlo') return <MCContent/>;
-  return <BSContent/>;
+  if (c.id==='credit-derivatives') return <div className="panel" style={{padding:24}}><div className="label">Validated CDS risk workspace</div><p className="text-2">Reprice the signed carry, CS01 shock and jump-to-default of the same teaching ticket. Values are deterministic and explicitly hypothetical.</p><CDSScenario notional={50000000} spread_bp={120} riskyAnnuity={4.2} recovery={40} shock_bp={25} side="buyer"/></div>;
+  if (c.id==='exotics' || c.id==='structured-products') return <div className="panel" data-course-calculator-boundary="path-dependent" style={{padding:24}}><div className="label">Path-dependent model boundary</div><p className="text-2">The published vanilla payoff lab cannot value barriers or autocalls. Use the authenticated course scenarios for learning; no production-grade path-dependent pricer is claimed here.</p><Link to="/tools" className="btn btn-secondary btn-sm">Review validated tools <Icon name="arrow-right" size={13}/></Link></div>;
+  const tool = {
+    'yield-curves': ['/tools/curve', 'Open Yield Curve Builder'],
+    greeks: ['/tools/payoff', 'Open Payoff & Greeks Lab'],
+    'rates-swaps': ['/tools/curve', 'Open Yield Curve Builder'],
+    'fixed-income-bonds': ['/tools/bond', 'Open Bond Pricing & Risk Lab'],
+    'implied-vol': ['/tools/volsurface', 'Open Volatility Surface Lab'],
+    'market-risk-var': ['/tools/mc', 'Open Monte Carlo Risk Lab'],
+    'monte-carlo': ['/tools/mc', 'Open Monte Carlo Lab'],
+    stochastic: ['/tools/mc', 'Open Monte Carlo Lab'],
+  }[c.id] || ['/tools', 'Browse validated tools'];
+  return <div className="panel" style={{padding:24}}><div className="label">Validated calculator workspace</div><p className="text-2">The calculator for this topic is delivered as a separately validated tool under the same plan.</p><Link to={tool[0]} className="btn btn-primary btn-sm">{tool[1]} <Icon name="arrow-right" size={13}/></Link></div>;
 }
 
 function CourseExercises({c}) {
-  const blueprint = getCourseBlueprint(c.id);
   const related = EXERCISES
-    .filter((exercise)=>blueprint?.relatedExerciseIds?.includes(exercise.id) || exercise.courseIds?.includes(c.id) || exercise.cat === c.title)
+    .filter((exercise)=>exercise.courseIds?.includes(c.id) || exercise.cat === c.title)
     .slice(0, 6);
   const items = related.length ? related : EXERCISES.slice(0, 6);
   return (
@@ -3411,7 +3707,6 @@ function CourseExercises({c}) {
             </div>
           </div>
           <div className="row" style={{gap:10}}>
-            {e.done && <span className="badge badge-green">Completed</span>}
             <Icon name="arrow-right" size={14} style={{color:'var(--mute)'}}/>
           </div>
         </Link>
@@ -3428,33 +3723,27 @@ function CourseExercises({c}) {
     </div>
   );
 }
-function CourseResources({c, scriptModel}) {
-  const blueprint = getCourseBlueprint(c.id);
-  const scriptSlug = COURSE_SCRIPT_SLUGS[c.id];
-  const generatedResources = [
-    {t:'Generated course script', d:'Full Markdown course populated from the local RAG corpus, with LaTeX formulas.', ic:'file-text', href:`/course-scripts/${scriptSlug}.md`},
-    {t:'Course generation index', d:'List of all generated modules, source counts and generation metadata.', ic:'database', href:'/course-scripts/_index.json'},
-  ];
-  const blueprintResources = blueprint?.resources?.map((item,idx)=>({
+function CourseResources({scriptModel}) {
+  const blueprintResources = (scriptModel?.supports || []).map((item,idx)=>({
     t: item,
-    d: idx === 0 ? 'Primary source from the local knowledge base.' : 'Practice support used for labs, exercises and desk cases.',
+    d: idx === 0 ? 'Primary reference used for this lesson.' : 'Reference used for labs, exercises and desk cases.',
     ic: idx % 3 === 0 ? 'book-open' : idx % 3 === 1 ? 'file-text' : 'database',
-  })) || [];
-  const resources = [
-    ...generatedResources,
-    ...(blueprintResources.length ? blueprintResources : [
-    {t:'Course notes', d:'Full PDF with derivations and code annotations.', ic:'file-text'},
-    {t:'Jupyter notebook', d:'Interactive Python notebook covering every exercise.', ic:'notebook'},
-    {t:'Reference papers', d:'Original Black & Scholes 1973, Merton 1973, Heston 1993.', ic:'book'},
-    {t:'Video lectures', d:'8 hours of recorded sessions with timestamps and transcripts.', ic:'video'},
-    {t:'Cheatsheet', d:'Single-page reference for formulas, Greeks, and pitfalls.', ic:'sticky-note'},
-    {t:'Sample data', d:'Real market data extracts in CSV for hands-on practice.', ic:'database'},
-    ]),
-  ];
+  }));
+  const resources = blueprintResources;
   const sources = scriptModel?.sources || [];
   return (
     <div className="col" style={{gap:18}}>
+      <div className="panel" data-course-provenance="true" style={{padding:16}}>
+        <div className="label">Reference policy</div>
+        <p className="text-2" style={{margin:'6px 0 0',fontSize:12.5,lineHeight:1.55}}>
+          References below are reviewed, readable excerpts from the source corpus.
+          The lesson prose is a pedagogical rewrite; calculations, examples,
+          exercises and quizzes are generated for practice and checked by the
+          deterministic engine. No excerpt is presented as original authorship.
+        </p>
+      </div>
       <div className="grid-2">
+        {resources.length===0 && <div className="panel course-resource-card"><div className="mono" style={{fontWeight:700}}>No downloadable resource is published for this course yet.</div><div className="mute" style={{fontSize:12.5,marginTop:10}}>Only verified, rights-cleared artefacts will appear here.</div></div>}
         {resources.map(r=>{
           const body = (
             <>
@@ -3481,16 +3770,16 @@ function CourseResources({c, scriptModel}) {
       </div>
       <div className="panel">
         <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
-          <div className="label">Sources RAG rattachees aux ouvrages</div>
-          <span className="badge">{sources.length || 'loading'} sources</span>
+          <div className="label">Course references</div>
+          <span className="badge">{sources.length} sources</span>
         </div>
         <div className="course-source-table">
-          {(sources.length ? sources : [{id:'S-', title:'Sources loading from generated course script.', chunk:'', score:''}]).map((source)=>(
+          {(sources.length ? sources : [{id:'empty', title:'No client-safe excerpt is available.', snippet:'No noisy or off-topic corpus extract is displayed.'}]).map((source)=>(
             <div key={`${source.id}-${source.title}`} className="course-source-row">
-              <span className="mono">{source.id}</span>
+              <Icon name="book-open" size={14} style={{color:'var(--red)'}}/>
               <div>
                 <strong>{source.title}</strong>
-                {(source.chunk || source.score) && <small>chunk {source.chunk} · score {source.score}</small>}
+                <small><span className="badge" style={{marginRight:6}}>Source excerpt</span>{source.snippet ? `“${source.snippet}”` : 'Reference from ThePricingLibrary source corpus'}</small>
               </div>
             </div>
           ))}
@@ -3515,35 +3804,36 @@ function ToolsPage({route}) {
 function ToolsIndex() {
   const cats = ['All Tools','Calculators','Visualizers','Simulators'];
   const [cat, setCat] = useState('All Tools');
+  const ent = useEntitlement();
   const filtered = TOOLS.filter(t => cat==='All Tools' || t.cat===cat);
   return (
-    <div className="container page">
+    <div className="container page catalogue-page">
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ tools</span></>}
         title="Quantitative Tools"
-        sub="Real calculators with live inputs, charts and Greeks. Five free, four PRO."
-        right={<>
-          <Link to="/dashboard" className="btn btn-outline btn-sm"><Icon name="bookmark" size={13}/> Saved (3)</Link>
-          <button className="btn btn-primary btn-sm" onClick={()=>submitStub('Tool request')}><Icon name="plus" size={13}/> Request a tool</button>
-        </>}
+        sub="Deterministic calculators with editable inputs, formulas, controls and desk interpretation."
       />
-      <div className="tabs-bar">
+      <div className="catalogue-start">
+        <div><span className="micro">Start here · no account required</span><h2>Start with a price. Explore what changes it.</h2><p>Use the free Black-Scholes calculator to explore a price, its Greeks and simple scenarios.</p></div>
+        <Link to="/tools/bs-pricer" className="btn btn-outline">Open Black-Scholes <Icon name="arrow-right" size={14}/></Link>
+      </div>
+      <div className="tabs-bar" role="group" aria-label="Filter tools by category">
         {cats.map(c=>(
-          <button key={c} className={"tab-btn "+(cat===c?'on':'')} onClick={()=>setCat(c)}>
+          <button key={c} aria-pressed={cat===c} className={"tab-btn "+(cat===c?'on':'')} onClick={()=>setCat(c)}>
             {c} <span className="mute" style={{marginLeft:6}}>{c==='All Tools'?TOOLS.length:TOOLS.filter(t=>t.cat===c).length}</span>
           </button>
         ))}
       </div>
-      <div className="grid-3">
+      <div className="grid-3 catalogue-grid">
         {filtered.map(t=>(
           <Link to={"/tools/"+t.id} key={t.id} className="course-card">
             <div className="thumb" style={{position:'relative'}}>
               <ToolThumb id={t.id}/>
               <div style={{position:'absolute',top:10,left:10}}><TierBadge tier={t.tier}/></div>
-              {t.tier==='pro' && <div style={{position:'absolute',inset:0,background:'rgba(10,12,16,.3)',display:'grid',placeItems:'center'}}>
-                <div style={{background:'rgba(10,12,16,.85)',padding:'8px 12px',border:'1px solid var(--line-2)',borderRadius:3,display:'flex',gap:8,alignItems:'center'}}>
+              {t.tier!=='free' && !ent.has(t.tier) && <div style={{position:'absolute',inset:0,background:'rgba(10,12,16,.3)',display:'grid',placeItems:'center'}}>
+                <div className="tool-access-note">
                   <Icon name="lock" size={13} style={{color:'var(--red)'}}/>
-                  <span className="mono" style={{fontSize:11,letterSpacing:'.08em',textTransform:'uppercase'}}>PRO required</span>
+                  <span className="mono" style={{fontSize:11,letterSpacing:'.08em',textTransform:'uppercase'}}>{PLAN_LABEL[t.tier]||t.tier} required</span>
                 </div>
               </div>}
             </div>
@@ -3551,13 +3841,13 @@ function ToolsIndex() {
               <div className="meta">
                 <span>{t.cat}</span>
                 <span>·</span>
-                <span>{t.tier==='pro'?'Locked':'Open'}</span>
+                <span>{t.tier==='free'||ent.has(t.tier)?'Available':'Locked'}</span>
               </div>
               <h3>{t.name}</h3>
               <div className="desc">{t.desc}</div>
               <div className="foot">
-                <span className="mono mute" style={{fontSize:10.5}}>v1.2 · stable</span>
-                <span className="mono" style={{fontSize:11,color: t.tier==='pro'?'var(--mute)':'var(--red)'}}>{t.tier==='pro'?'upgrade':'launch ›'}</span>
+                <span className="mono mute" style={{fontSize:10.5}}>{t.status}</span>
+                <span className="mono" style={{fontSize:11,color: t.tier!=='free'&&!ent.has(t.tier)?'var(--mute)':'var(--red)'}}>{t.tier!=='free'&&!ent.has(t.tier)?'upgrade':'launch ›'}</span>
               </div>
             </div>
           </Link>
@@ -3565,31 +3855,6 @@ function ToolsIndex() {
       </div>
     </div>
   );
-}
-
-// ---------- Math: implied vol (Newton + bisection fallback) ----------
-function impliedVol({S,K,r,q=0,T,price,type='call'}){
-  const intrinsic = type==='call' ? Math.max(S*Math.exp(-q*T)-K*Math.exp(-r*T),0) : Math.max(K*Math.exp(-r*T)-S*Math.exp(-q*T),0);
-  if (!(price>intrinsic+1e-8)) return {sigma:NaN, iters:0, ok:false, reason:'price below intrinsic'};
-  let sigma=0.2;
-  for (let i=1;i<=100;i++){
-    const o = bsPrice({S,K,r,q,sigma,T,type});
-    const vega = o.vega*100; // bsPrice vega is per 1 vol point; here per unit vol
-    const diff = o.price - price;
-    if (Math.abs(diff)<1e-7) return {sigma, iters:i, ok:true};
-    if (vega<1e-9) break;
-    sigma -= diff/vega;
-    if (sigma<=0||sigma>5) sigma = Math.min(Math.max(sigma,1e-3),5);
-  }
-  // bisection fallback
-  let lo=1e-3, hi=5;
-  for (let i=0;i<100;i++){
-    const mid=(lo+hi)/2;
-    const pm = bsPrice({S,K,r,q,sigma:mid,T,type}).price;
-    if (Math.abs(pm-price)<1e-7) return {sigma:mid, iters:i, ok:true};
-    if (pm>price) hi=mid; else lo=mid;
-  }
-  return {sigma:(lo+hi)/2, iters:100, ok:true};
 }
 
 function ToolInputs({title='Inputs', fields, children}) {
@@ -3619,7 +3884,34 @@ function ResultRow({k,v,accent}) {
   </div>;
 }
 function ToolHead({slug,name,sub}) {
-  return <PageHead crumb={<><Link to="/tools">tools</Link><i>›</i><span>{slug}</span></>} title={name} sub={sub} right={<span className="badge badge-green">Live compute</span>}/>;
+  return <PageHead crumb={<><Link to="/tools">tools</Link><i>›</i><span>{slug}</span></>} title={name} sub={sub} right={<span className="badge badge-green">Deterministic compute</span>}/>;
+}
+
+function ToolContractPanel({tool}) {
+  return (
+    <div className="panel" data-tool-contract={tool.id} style={{padding:16,marginBottom:14}}>
+      <div className="row between" style={{gap:12,alignItems:'flex-start'}}>
+        <div>
+          <div className="label">Tool contract</div>
+          <p className="text-2" style={{margin:'6px 0 0',fontSize:12.5,lineHeight:1.55}}>
+            This workspace computes from the inputs shown below. It is not a live market quote and does not constitute investment advice.
+          </p>
+        </div>
+        <span className="badge badge-green">{tool.status}</span>
+      </div>
+      <div className="grid-3" style={{marginTop:14,gap:10}}>
+        <div><span className="badge">Engine</span><div className="mute" style={{fontSize:11,marginTop:6}}>{tool.engine}</div></div>
+        <div><span className="badge">Inputs</span><div className="mute" style={{fontSize:11,marginTop:6}}>{tool.inputs}</div></div>
+        <div><span className="badge">Conventions</span><div className="mute" style={{fontSize:11,marginTop:6}}>{tool.conventions}</div></div>
+        <div><span className="badge">Assumptions</span><div className="mute" style={{fontSize:11,marginTop:6}}>{tool.assumptions}</div></div>
+        <div><span className="badge">Limits</span><div className="mute" style={{fontSize:11,marginTop:6}}>{tool.limits}</div></div>
+        <div><span className="badge">Diagnostics</span><div className="mute" style={{fontSize:11,marginTop:6}}>{tool.diagnostics}</div></div>
+        <div><span className="badge">Provenance</span><div className="mute" style={{fontSize:11,marginTop:6}}>Source: user inputs or documented offline fixtures · status: deterministic run · as-of: input-defined, not a market observation · units: declared per field/result · no executable live price.</div></div>
+        <div><span className="badge">Exports / history</span><div className="mute" style={{fontSize:11,marginTop:6}}>{tool.evidence}</div></div>
+        <div><span className="badge">Learning path</span><div className="row" style={{gap:8,marginTop:6,fontSize:11}}><Link to={`/courses/${tool.courseId}`}>Course ↗</Link><Link to={`/exercises/${tool.exerciseId}`}>Exercise ↗</Link></div></div>
+      </div>
+    </div>
+  );
 }
 
 // Real Python execution (Pyodide). First run downloads the runtime (~10MB) then caches.
@@ -3648,157 +3940,11 @@ function PyCodeCell({initial='', label='exercise.py', minHeight=260}) {
           <button className="btn btn-primary btn-sm" onClick={run} disabled={busy}><Icon name="play" size={12}/> {busy?'Running…':'Run'}</button>
         </div>
       </div>
-      <textarea value={code} onChange={(e)=>setCode(e.target.value)} spellCheck={false}
+      <textarea aria-label={`${label} Python code`} value={code} onChange={(e)=>setCode(e.target.value)} spellCheck={false}
         style={{width:'100%',minHeight,background:'#0A0C10',color:'var(--text)',border:'none',borderBottom:'1px solid var(--line)',fontFamily:"'JetBrains Mono',monospace",fontSize:12.5,lineHeight:1.6,padding:14,resize:'vertical',outline:'none'}}/>
       <div style={{padding:'10px 14px'}}>
         <div className="mono mute" style={{fontSize:10.5,letterSpacing:'.1em',marginBottom:6}}>OUTPUT</div>
         <pre className="code" style={{margin:0,maxHeight:240,overflow:'auto',color:err?'var(--red)':'var(--text-2)',whiteSpace:'pre-wrap'}}><code>{out || '— run the code to see output —'}</code></pre>
-      </div>
-    </div>
-  );
-}
-
-// ---------- Binomial tree (Cox-Ross-Rubinstein), American early exercise ----------
-function crrPrice({S,K,r,q,sigma,T,steps,type,american}){
-  const dt=T/steps, u=Math.exp(sigma*Math.sqrt(dt)), d=1/u;
-  const p=(Math.exp((r-q)*dt)-d)/(u-d), disc=Math.exp(-r*dt);
-  if (p<=0||p>=1) return {price:NaN};
-  const val=new Array(steps+1);
-  for (let i=0;i<=steps;i++){ const ST=S*Math.pow(u,steps-i)*Math.pow(d,i); val[i]=type==='call'?Math.max(ST-K,0):Math.max(K-ST,0); }
-  for (let n=steps-1;n>=0;n--){
-    for (let i=0;i<=n;i++){
-      let v=disc*(p*val[i]+(1-p)*val[i+1]);
-      if (american){ const ST=S*Math.pow(u,n-i)*Math.pow(d,i); const ex=type==='call'?Math.max(ST-K,0):Math.max(K-ST,0); v=Math.max(v,ex); }
-      val[i]=v;
-    }
-  }
-  return {price:val[0], u, d, p};
-}
-function BinomialTreeTool(){
-  const [S,setS]=useState(100),[K,setK]=useState(100),[r,setR]=useState(3),[q,setQ]=useState(0),[sigma,setSigma]=useState(25),[T,setT]=useState(365),[steps,setSteps]=useState(200);
-  const [type,setType]=useState('put'),[american,setAmerican]=useState(true);
-  const p={S,K,r:r/100,q:q/100,sigma:sigma/100,T:T/365};
-  const am=crrPrice({...p,steps,type,american:true}).price;
-  const eu=crrPrice({...p,steps,type,american:false}).price;
-  const bs=bsPrice({...p,type}).price;
-  const conv=useMemo(()=>{const a=[];for(let n=5;n<=Math.min(steps,300);n+=5){a.push({x:n,y:+crrPrice({...p,steps:n,type,american}).price.toFixed(4)});}return a;},[S,K,r,q,sigma,T,steps,type,american]);
-  return (
-    <div className="container page">
-      <ToolHead slug="binomial tree" name="Binomial Tree (CRR)" sub="Cox-Ross-Rubinstein lattice — American & European, with early-exercise premium."/>
-      <div style={{display:'grid',gridTemplateColumns:'320px 1fr 320px',gap:14}}>
-        <ToolInputs fields={[['Spot S',S,10,500,1,setS,'$'],['Strike K',K,10,500,1,setK,'$'],['Rate r',r,-2,15,0.1,setR,'%'],['Yield q',q,0,12,0.1,setQ,'%'],['Vol σ',sigma,1,120,0.5,setSigma,'%'],['Maturity T',T,1,1825,1,setT,'d'],['Steps',steps,5,500,5,setSteps,'n']]}>
-          <div className="label" style={{marginBottom:8}}>Option</div>
-          <div className="toggle" style={{width:'100%',marginBottom:10}}>{['call','put'].map(t=><button key={t} className={type===t?'on':''} onClick={()=>setType(t)} style={{flex:1}}>{t}</button>)}</div>
-          <div className="toggle" style={{width:'100%'}}>{[['true','American'],['false','European']].map(([k,l])=><button key={k} className={String(american)===k?'on':''} onClick={()=>setAmerican(k==='true')} style={{flex:1}}>{l}</button>)}</div>
-        </ToolInputs>
-        <ChartFrame title="Convergence vs steps" subtitle="lattice price stabilises as steps increase">
-          <LineChart width={620} height={260} series={[{name:'price',color:'#FF2E45',data:conv,fillOpacity:0.1}]}/>
-        </ChartFrame>
-        <div className="panel" style={{padding:18,alignSelf:'start'}}>
-          <div className="label" style={{marginBottom:6}}>Results</div>
-          <ResultRow k="American price" v={fmt(am,4)} accent="var(--red)"/>
-          <ResultRow k="European price" v={fmt(eu,4)}/>
-          <ResultRow k="Black-Scholes" v={fmt(bs,4)}/>
-          <ResultRow k="Early-exercise premium" v={fmt(am-eu,4)} accent={am-eu>1e-4?'var(--amber)':'var(--text-2)'}/>
-          <div className="mute" style={{fontSize:11.5,marginTop:12,lineHeight:1.5}}>{am-eu>1e-4? 'Early exercise is worth something here (typical for American puts / dividend-paying calls).' : 'No early-exercise premium — American ≈ European for these inputs.'}</div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ---------- Bond calculator: price, duration, convexity, DV01 ----------
-function bondAnalytics({face,coupon,freq,years,ytm}){
-  const n=Math.round(years*freq), c=face*coupon/freq, y=ytm/freq;
-  let price=0, dur=0, conv=0;
-  for(let t=1;t<=n;t++){ const cf=c+(t===n?face:0); const df=Math.pow(1+y,-t); const pv=cf*df; price+=pv; dur+=t*pv; conv+=t*(t+1)*pv; }
-  const macaulay=(dur/price)/freq;
-  const modified=macaulay/(1+y);
-  const convexity=(conv/price)/(freq*freq*Math.pow(1+y,2));
-  const dv01=modified*price*1e-4;
-  return {price,macaulay,modified,convexity,dv01,n};
-}
-function BondCalcTool(){
-  const [face,setFace]=useState(100),[coupon,setCoupon]=useState(5),[freq,setFreq]=useState(2),[years,setYears]=useState(10),[ytm,setYtm]=useState(4),[shock,setShock]=useState(25);
-  const a=bondAnalytics({face,coupon:coupon/100,freq,years,ytm:ytm/100});
-  const aShock=bondAnalytics({face,coupon:coupon/100,freq,years,ytm:(ytm+shock/100)/100});
-  const approx=-a.modified*(shock/1e4)+0.5*a.convexity*Math.pow(shock/1e4,2);
-  const curve=useMemo(()=>{const arr=[];for(let yv=Math.max(0.1,ytm-4);yv<=ytm+4;yv+=0.2){arr.push({x:+yv.toFixed(2),y:+bondAnalytics({face,coupon:coupon/100,freq,years,ytm:yv/100}).price.toFixed(3)});}return arr;},[face,coupon,freq,years,ytm]);
-  return (
-    <div className="container page">
-      <ToolHead slug="bond calculator" name="Bond Calculator" sub="Price, Macaulay & modified duration, convexity, DV01 and scenario shifts."/>
-      <div style={{display:'grid',gridTemplateColumns:'320px 1fr 320px',gap:14}}>
-        <ToolInputs fields={[['Face',face,1,1000,1,setFace,''],['Coupon',coupon,0,15,0.1,setCoupon,'%'],['Freq/yr',freq,1,12,1,setFreq,'×'],['Years',years,0.5,40,0.5,setYears,'y'],['YTM',ytm,0.1,20,0.05,setYtm,'%'],['Rate shock',shock,-200,200,5,setShock,'bp']]}/>
-        <ChartFrame title="Price vs yield" subtitle="convex, downward-sloping price/yield relationship">
-          <LineChart width={620} height={260} series={[{name:'price',color:'#FF2E45',data:curve,fillOpacity:0.1}]}/>
-        </ChartFrame>
-        <div className="panel" style={{padding:18,alignSelf:'start'}}>
-          <div className="label" style={{marginBottom:6}}>Analytics</div>
-          <ResultRow k="Clean price" v={fmt(a.price,3)} accent="var(--red)"/>
-          <ResultRow k="Macaulay duration" v={fmt(a.macaulay,3)+' y'}/>
-          <ResultRow k="Modified duration" v={fmt(a.modified,3)}/>
-          <ResultRow k="Convexity" v={fmt(a.convexity,2)}/>
-          <ResultRow k="DV01" v={fmt(a.dv01,4)+' / bp'}/>
-          <div className="hairline" style={{margin:'12px 0'}}></div>
-          <div className="label" style={{marginBottom:6}}>Shock {shock>=0?'+':''}{shock}bp</div>
-          <ResultRow k="Repriced (exact)" v={fmt(aShock.price,3)}/>
-          <ResultRow k="ΔP exact" v={fmt(aShock.price-a.price,3)}/>
-          <ResultRow k="ΔP/P dur+convex" v={fmtPct(approx,3)} accent="var(--amber)"/>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ---------- Yield curve builder: bootstrap par swaps ----------
-function bootstrapCurve(nodes){ // nodes: [{t, rate}] annual par swaps, sorted
-  const dfs=[]; let cum=0; const out=[];
-  for(const nd of nodes){ const s=nd.rate; const df=(1-s*cum)/(1+s); dfs.push(df); cum+=df; const zero=Math.pow(df,-1/nd.t)-1; out.push({t:nd.t,par:s,df,zero}); }
-  for(let i=1;i<out.length;i++){ out[i].fwd=dfs[i-1]/dfs[i]-1; }
-  return out;
-}
-function YieldCurveTool(){
-  const [r1,setR1]=useState(3.0),[r2,setR2]=useState(3.2),[r3,setR3]=useState(3.35),[r5,setR5]=useState(3.55),[r10,setR10]=useState(3.8);
-  const nodes=[{t:1,rate:r1/100},{t:2,rate:r2/100},{t:3,rate:r3/100},{t:5,rate:r5/100},{t:10,rate:r10/100}];
-  const out=bootstrapCurve(nodes);
-  const zeroSeries=out.map(o=>({x:o.t,y:+(o.zero*100).toFixed(3)}));
-  const dfSeries=out.map(o=>({x:o.t,y:+o.df.toFixed(4)}));
-  return (
-    <div className="container page">
-      <ToolHead slug="yield curve builder" name="Yield Curve Builder" sub="Bootstrap discount factors, zero & forward rates from par swap quotes."/>
-      <div style={{display:'grid',gridTemplateColumns:'320px 1fr 360px',gap:14}}>
-        <ToolInputs title="Par swap rates" fields={[['1y',r1,0,10,0.05,setR1,'%'],['2y',r2,0,10,0.05,setR2,'%'],['3y',r3,0,10,0.05,setR3,'%'],['5y',r5,0,10,0.05,setR5,'%'],['10y',r10,0,10,0.05,setR10,'%']]}/>
-        <ChartFrame title="Zero curve" subtitle="annualised zero-coupon rates by maturity">
-          <LineChart width={640} height={260} series={[{name:'zero',color:'#FF2E45',data:zeroSeries,fillOpacity:0.1}]}/>
-        </ChartFrame>
-        <div className="panel" style={{padding:0,alignSelf:'start'}}>
-          <div className="label" style={{padding:'14px 16px'}}>Bootstrapped curve</div>
-          <table className="data"><thead><tr><th>Tenor</th><th className="num">DF</th><th className="num">Zero</th><th className="num">1y fwd</th></tr></thead>
-          <tbody>{out.map(o=><tr key={o.t}><td className="symbol">{o.t}y</td><td className="num">{fmt(o.df,4)}</td><td className="num">{fmt(o.zero*100,3)}%</td><td className="num">{o.fwd!=null?fmt(o.fwd*100,3)+'%':'—'}</td></tr>)}</tbody></table>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ---------- Vol surface explorer: parametric skew, inverted to IV ----------
-function VolSurfaceTool(){
-  const [atm,setAtm]=useState(20),[skew,setSkew]=useState(-12),[smile,setSmile]=useState(40),[term,setTerm]=useState(3);
-  // total-variance flat term structure with a quadratic-in-logmoneyness smile
-  const ivAt=(k,T)=>{ const base=(atm/100)+(skew/100)*k+(smile/100)*k*k; const tt=base*(1+(term/100)*Math.log(Math.max(T,0.05))); return Math.max(0.02,tt); };
-  const tenors=[0.25,0.5,1,2,5];
-  const ks=useMemo(()=>{const a=[];for(let k=-0.4;k<=0.4;k+=0.04)a.push(+k.toFixed(3));return a;},[]);
-  const series=tenors.map((T,i)=>({name:`${T}y`,color:['#FF2E45','#FFB020','#3DA5FF','#36C26B','#B36BFF'][i],data:ks.map(k=>({x:k,y:+(ivAt(k,T)*100).toFixed(2)})),fill:false}));
-  return (
-    <div className="container page">
-      <ToolHead slug="vol surface explorer" name="Vol Surface Explorer" sub="Parametric implied-vol surface — slice the smile by tenor and log-moneyness."/>
-      <div style={{display:'grid',gridTemplateColumns:'320px 1fr',gap:14}}>
-        <ToolInputs title="Surface parameters" fields={[['ATM vol',atm,5,80,0.5,setAtm,'%'],['Skew',skew,-50,50,1,setSkew,'%/k'],['Smile (curv.)',smile,0,150,2,setSmile,'%/k²'],['Term slope',term,-30,30,1,setTerm,'%']]}>
-          <div className="mute" style={{fontSize:11.5,marginTop:6,lineHeight:1.5}}>σ(k,T) = ATM + skew·k + smile·k², k = ln(K/S), scaled in maturity. Each line is a tenor slice.</div>
-        </ToolInputs>
-        <ChartFrame title="Implied-vol smile slices" subtitle="vol (%) vs log-moneyness, per tenor" h={320}>
-          <LineChart width={760} height={320} series={series} fill={false}/>
-        </ChartFrame>
       </div>
     </div>
   );
@@ -3812,746 +3958,30 @@ function GatedTool({required, name, children}) {
 function ToolDetailPage({id}) {
   const tool = TOOLS.find(t=>t.id===id);
   if (!tool) return <ToolNotFound/>;
-  if (id === 'bs-pricer') return <BSPricerTool/>;
-  if (id === 'payoff') return <PayoffVisualizerTool/>;
-  if (id === 'mc') return <MonteCarloTool/>;
-  if (id === 'iv-calc') return <IVCalcTool/>;
-  if (id === 'calib') return <GatedTool required="student" name="Smile Calibration"><CalibrationTool/></GatedTool>;
-  if (id === 'binomial') return <BinomialTreeTool/>;
-  if (id === 'bond') return <BondCalcTool/>;
-  if (id === 'curve') return <YieldCurveTool/>;
-  if (id === 'volsurface') return <VolSurfaceTool/>;
-  if (tool.tier === 'pro') return <ProLockedTool tool={tool}/>;
-  return <BSPricerTool/>;
+  const renderers = {
+    'bs-pricer': <React.Suspense fallback={<div className="container page"><div className="panel" style={{padding:28}}><span className="mono mute">Loading canonical Black-Scholes engine…</span></div></div>}><BlackScholesLabTool/></React.Suspense>,
+    payoff: <React.Suspense fallback={<div className="container page"><div className="panel" style={{padding:28}}><span className="mono mute">Loading deterministic payoff engine…</span></div></div>}><PayoffStrategyLabTool/></React.Suspense>,
+    mc: <React.Suspense fallback={<div className="container page"><div className="panel" style={{padding:28}}><span className="mono mute">Loading deterministic Monte Carlo engine…</span></div></div>}><MonteCarloLabTool/></React.Suspense>,
+    'iv-calc': <React.Suspense fallback={<div className="container page"><div className="panel" style={{padding:28}}><span className="mono mute">Loading deterministic realized-volatility engine…</span></div></div>}><RealizedVolatilityLabTool/></React.Suspense>,
+    calib: <React.Suspense fallback={<div className="container page"><div className="panel" style={{padding:28}}><span className="mono mute">Loading deterministic calibration engine…</span></div></div>}><ModelCalibrationTool/></React.Suspense>,
+    binomial: <React.Suspense fallback={<div className="container page"><div className="panel" style={{padding:28}}><span className="mono mute">Loading deterministic CRR engine…</span></div></div>}><BinomialLabTool/></React.Suspense>,
+    bond: <React.Suspense fallback={<div className="container page"><div className="panel" style={{padding:28}}><span className="mono mute">Loading deterministic bond engine…</span></div></div>}><BondLabTool/></React.Suspense>,
+    curve: <React.Suspense fallback={<div className="container page"><div className="panel" style={{padding:28}}><span className="mono mute">Loading deterministic curve engine…</span></div></div>}><YieldCurveBuilderTool/></React.Suspense>,
+    volsurface: <React.Suspense fallback={<div className="container page"><div className="panel" style={{padding:28}}><span className="mono mute">Loading deterministic volatility-surface engine…</span></div></div>}><VolSurfaceLabTool/></React.Suspense>,
+  };
+  const content = renderers[id] || renderers['bs-pricer'];
+  const contract = <div className="container page" style={{paddingBottom:0}}><ToolContractPanel tool={tool}/></div>;
+  if (tool.tier !== 'free') {
+    return <><>{contract}</><GatedTool required={tool.tier} name={tool.name}>{content}</GatedTool></>;
+  }
+  return <><>{contract}</>{content}</>;
 }
 
 function ToolNotFound() {
   return <div className="container page"><PageHead title="Tool not found"/></div>;
 }
 
-function ProLockedTool({tool}) {
-  return (
-    <div className="container page">
-      <PageHead
-        crumb={<><Link to="/tools">tools</Link><i>›</i><span>{tool.name.toLowerCase()}</span></>}
-        title={tool.name}
-        sub={tool.desc}
-        right={<TierBadge tier="pro"/>}
-      />
-      <div className="panel" style={{padding:60, textAlign:'center', position:'relative', overflow:'hidden'}}>
-        <Icon name="lock" size={32} style={{color:'var(--red)'}}/>
-        <h2 className="mono" style={{fontSize:22,fontWeight:700,marginTop:18}}>Pro Feature</h2>
-        <p className="text-2" style={{maxWidth:'48ch',margin:'10px auto 24px',fontSize:13.5}}>
-          {tool.name} is part of the Pro tier. Upgrade to unlock all 9 tools and Complex courses.
-        </p>
-        <div className="row" style={{gap:10,justifyContent:'center'}}>
-          <Link to="/pricing" className="btn btn-primary">See plans <Icon name="arrow-right" size={13}/></Link>
-          <Link to="/tools" className="btn btn-outline">Back to tools</Link>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============= BS PRICER =============
-function BSPricerTool() {
-  const [S,setS]=useState(100),[K,setK]=useState(100),[r,setR]=useState(2),[q,setQ]=useState(0),[sigma,setSigma]=useState(20),[T,setT]=useState(180);
-  const [view,setView]=useState('spot'); // sensitivity
-  useToolRegister('bs-pricer', {S,K,r,q,sigma,T,view}, {S:setS,K:setK,r:setR,q:setQ,sigma:setSigma,T:setT,view:setView});
-  const params = {S,K,r:r/100,q:q/100,sigma:sigma/100,T:T/365};
-  const call = bsPrice({...params, type:'call'});
-  const put  = bsPrice({...params, type:'put'});
-  const sens = useMemo(()=>{
-    const arr = [];
-    let lo, hi, step;
-    if (view==='spot') { lo=S*0.5; hi=S*1.5; step=(hi-lo)/40; }
-    else if (view==='vol') { lo=0.05; hi=0.8; step=(hi-lo)/40; }
-    else { lo=0.01; hi=2; step=(hi-lo)/40; }
-    for (let v=lo; v<=hi; v+=step) {
-      const p = view==='spot' ? bsPrice({...params, S:v, type:'call'}).price :
-                view==='vol'  ? bsPrice({...params, sigma:v, type:'call'}).price :
-                                bsPrice({...params, T:v, type:'call'}).price;
-      arr.push({x:+v.toFixed(3), y:+p.toFixed(4)});
-    }
-    return arr;
-  },[S,K,r,sigma,T,view]);
-
-  return (
-    <div className="container page">
-      <PageHead
-        crumb={<><Link to="/tools">tools</Link><i>›</i><span>black-scholes pricer</span></>}
-        title="Black-Scholes Pricer"
-        sub="Closed-form European option pricing — price, Greeks, and sensitivity curves."
-        right={<>
-          <span className="badge badge-green">Free</span>
-          <button className="btn btn-outline btn-sm" onClick={()=>handleSave('Black-Scholes Pricer')}><Icon name="bookmark" size={13}/> Save</button>
-          <button className="btn btn-outline btn-sm" onClick={()=>handleShare('Black-Scholes Pricer')}><Icon name="share" size={13}/> Share</button>
-        </>}
-      />
-
-      <div style={{display:'grid', gridTemplateColumns:'320px 1fr 340px', gap:14}}>
-        {/* LEFT: inputs */}
-        <div className="panel" style={{padding:18, alignSelf:'start'}}>
-          <div className="label" style={{marginBottom:14}}>Market Inputs</div>
-          {[
-            ['Spot S', S, 10, 500, 0.5, setS, '$'],
-            ['Strike K', K, 10, 500, 0.5, setK, '$'],
-            ['Rate r', r, -2, 15, 0.05, setR, '%'],
-            ['Yield q', q, 0, 10, 0.05, setQ, '%'],
-            ['Vol σ', sigma, 1, 120, 0.5, setSigma, '%'],
-            ['Maturity T', T, 1, 1825, 1, setT, 'd'],
-          ].map(([lbl,val,min,max,step,setter,unit])=>(
-            <div key={lbl} className="field" style={{marginBottom:16}}>
-              <div className="row between">
-                <span className="mono mute" style={{fontSize:11,letterSpacing:'.08em'}}>{lbl}</span>
-                <div className="row" style={{gap:6}}>
-                  <input value={val} onChange={e=>{const v=parseFloat(e.target.value); if(!isNaN(v))setter(v);}} style={{width:74,padding:'4px 8px',background:'#0A0C10',border:'1px solid var(--line-2)',color:'var(--text)',fontFamily:"'JetBrains Mono',monospace",fontSize:12,borderRadius:3,outline:'none',textAlign:'right'}}/>
-                  <span className="mono mute" style={{fontSize:11,width:14}}>{unit}</span>
-                </div>
-              </div>
-              <input type="range" min={min} max={max} step={step} value={val} onChange={e=>setter(+e.target.value)}/>
-            </div>
-          ))}
-          <div className="hairline" style={{margin:'18px 0'}}></div>
-          <div className="label" style={{marginBottom:8}}>Sensitivity axis</div>
-          <div className="toggle" style={{width:'100%'}}>
-            {['spot','vol','time'].map(v=><button key={v} className={view===v?'on':''} onClick={()=>setView(v)} style={{flex:1}}>{v}</button>)}
-          </div>
-        </div>
-
-        {/* CENTER: outputs */}
-        <div className="col" style={{gap:14}}>
-          <div className="grid-2">
-            <div className="panel" style={{padding:18}}>
-              <div className="row between">
-                <div className="label">European Call</div>
-                <span className="mono mute" style={{fontSize:10.5}}>EUR · {K} · {T}d</span>
-              </div>
-              <div className="mono" style={{fontSize:38,fontWeight:700,color:'var(--red)',marginTop:6,lineHeight:1}}>{fmt(call.price,3)}</div>
-              <div className="row" style={{gap:18,marginTop:14,flexWrap:'wrap'}}>
-                {[['Δ Delta',call.delta,4],['Γ Gamma',call.gamma,5],['ν Vega',call.vega,3],['Θ Theta',call.theta,4],['ρ Rho',call.rho,3]].map(([l,v,d])=>(
-                  <div key={l}>
-                    <div className="mono mute" style={{fontSize:9.5,letterSpacing:'.1em'}}>{l}</div>
-                    <div className="mono tnum" style={{fontSize:14,marginTop:2}}>{fmt(v,d)}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="panel" style={{padding:18}}>
-              <div className="row between">
-                <div className="label">European Put</div>
-                <span className="mono mute" style={{fontSize:10.5}}>Put-Call parity ✓</span>
-              </div>
-              <div className="mono" style={{fontSize:38,fontWeight:700,color:'var(--text)',marginTop:6,lineHeight:1}}>{fmt(put.price,3)}</div>
-              <div className="row" style={{gap:18,marginTop:14,flexWrap:'wrap'}}>
-                {[['Δ Delta',put.delta,4],['Γ Gamma',put.gamma,5],['ν Vega',put.vega,3],['Θ Theta',put.theta,4],['ρ Rho',put.rho,3]].map(([l,v,d])=>(
-                  <div key={l}>
-                    <div className="mono mute" style={{fontSize:9.5,letterSpacing:'.1em'}}>{l}</div>
-                    <div className="mono tnum" style={{fontSize:14,marginTop:2}}>{fmt(v,d)}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          <ChartFrame title={`Call price vs ${view}`} subtitle={view==='spot'?'sweep S from 50% to 150%':view==='vol'?'sweep σ from 5% to 80%':'sweep T from 0 to 2y'}>
-            <LineChart width={760} height={260} series={[{name:'C', color:'#FF2E45', data:sens, fillOpacity:0.1}]}/>
-          </ChartFrame>
-          <div className="panel">
-            <div className="row between" style={{padding:'12px 16px', borderBottom:'1px solid var(--line)'}}>
-              <div className="label">Methodology</div>
-              <span className="badge">Black-Scholes 1973</span>
-            </div>
-            <div style={{padding:18}}>
-              <p className="text-2" style={{fontSize:13,lineHeight:1.7,margin:0}}>
-                Assumptions: log-normal dynamics under risk-neutral measure, frictionless market, constant volatility and rate.
-                Inputs are clipped to numerically stable ranges. For American options use the Binomial tool. For path-dependent payoffs use Monte Carlo.
-              </p>
-              <div className="grid-3" style={{marginTop:14}}>
-                <Link to="/courses/black-scholes" className="panel-2" style={{padding:12,display:'block'}}>
-                  <div className="mono mute" style={{fontSize:10.5}}>RELATED COURSE</div>
-                  <div className="mono" style={{fontWeight:600,marginTop:4}}>Black-Scholes Model</div>
-                </Link>
-                <Link to="/courses/greeks" className="panel-2" style={{padding:12,display:'block'}}>
-                  <div className="mono mute" style={{fontSize:10.5}}>RELATED COURSE</div>
-                  <div className="mono" style={{fontWeight:600,marginTop:4}}>Option Greeks</div>
-                </Link>
-                <Link to="/tools/payoff" className="panel-2" style={{padding:12,display:'block'}}>
-                  <div className="mono mute" style={{fontSize:10.5}}>NEXT TOOL</div>
-                  <div className="mono" style={{fontWeight:600,marginTop:4}}>Payoff Visualizer</div>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT: numerical breakdown */}
-        <div className="col" style={{gap:14}}>
-          <div className="panel">
-            <div className="row between" style={{padding:'12px 14px',borderBottom:'1px solid var(--line)'}}>
-              <div className="label">Numerical breakdown</div>
-            </div>
-            <table className="data">
-              <tbody>
-                {[
-                  ['d₁', call.d1.toFixed(5)],
-                  ['d₂', call.d2.toFixed(5)],
-                  ['N(d₁)', normCdf(call.d1).toFixed(5)],
-                  ['N(d₂)', normCdf(call.d2).toFixed(5)],
-                  ['S · e^(-qT)', (S*Math.exp(-q/100*T/365)).toFixed(4)],
-                  ['K · e^(-rT)', (K*Math.exp(-r/100*T/365)).toFixed(4)],
-                  ['σ·√T', (sigma/100*Math.sqrt(T/365)).toFixed(5)],
-                ].map(([k,v])=><tr key={k}><td className="symbol">{k}</td><td className="num">{v}</td></tr>)}
-              </tbody>
-            </table>
-          </div>
-          <div className="panel" style={{padding:14}}>
-            <div className="label" style={{marginBottom:10}}>Moneyness</div>
-            <div className="row between" style={{marginBottom:8}}>
-              <span className="mono" style={{fontSize:11.5}}>S/K</span>
-              <span className="mono tnum" style={{fontSize:13,fontWeight:600}}>{(S/K).toFixed(4)}</span>
-            </div>
-            <div style={{height:4,background:'var(--line)',position:'relative'}}>
-              <div style={{position:'absolute',top:-2,left:'50%',width:1,height:8,background:'var(--mute)'}}></div>
-              <div style={{position:'absolute',top:-3,left:Math.max(0,Math.min(100, (S/K)*50))+'%',width:10,height:10,background:'var(--red)',borderRadius:5,transform:'translateX(-50%)'}}></div>
-            </div>
-            <div className="row between" style={{marginTop:6}}>
-              <span className="mono mute" style={{fontSize:10}}>OTM</span>
-              <span className="mono mute" style={{fontSize:10}}>ATM</span>
-              <span className="mono mute" style={{fontSize:10}}>ITM</span>
-            </div>
-          </div>
-          <div className="panel" style={{padding:14}}>
-            <div className="label" style={{marginBottom:10}}>Put-Call Parity</div>
-            <div className="mono" style={{fontSize:11.5,lineHeight:1.8,color:'var(--text-2)'}}>
-              C − P = S·e^(-qT) − K·e^(-rT)<br/>
-              {fmt(call.price,3)} − {fmt(put.price,3)} = {fmt(call.price-put.price,3)}<br/>
-              <span className="green">RHS = {fmt(S*Math.exp(-q/100*T/365) - K*Math.exp(-r/100*T/365), 3)}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============= PAYOFF VISUALIZER =============
-function PayoffVisualizerTool() {
-  const [legs, setLegs] = useState([
-    {id:1, type:'call', side:'long',  K:100, qty:1, prem:6.0},
-    {id:2, type:'call', side:'short', K:110, qty:1, prem:2.5},
-  ]);
-  const addLeg = () => setLegs([...legs, {id:Date.now(), type:'call', side:'long', K:100, qty:1, prem:5}]);
-  const updateLeg = (id, k, v) => setLegs(legs.map(l => l.id===id?{...l,[k]:v}:l));
-  const removeLeg = (id) => setLegs(legs.filter(l => l.id!==id));
-  useToolRegister('payoff', {legs}, {legs:(v)=>setLegs((v||[]).map((l,i)=>({id:i+1,qty:1,prem:0,...l})))});
-
-  const presets = [
-    {name:'Bull Call Spread', legs:[{type:'call',side:'long',K:100,qty:1,prem:6},{type:'call',side:'short',K:110,qty:1,prem:2.5}]},
-    {name:'Iron Condor', legs:[{type:'put',side:'long',K:85,qty:1,prem:1.0},{type:'put',side:'short',K:95,qty:1,prem:2.5},{type:'call',side:'short',K:105,qty:1,prem:2.5},{type:'call',side:'long',K:115,qty:1,prem:1.0}]},
-    {name:'Long Straddle', legs:[{type:'call',side:'long',K:100,qty:1,prem:5},{type:'put',side:'long',K:100,qty:1,prem:5}]},
-    {name:'Butterfly', legs:[{type:'call',side:'long',K:95,qty:1,prem:7},{type:'call',side:'short',K:100,qty:2,prem:4},{type:'call',side:'long',K:105,qty:1,prem:2}]},
-  ];
-  const loadPreset = (p) => setLegs(p.legs.map((l,i)=>({...l,id:i+1})));
-
-  // Compute payoff vs spot
-  const payoff = useMemo(()=>{
-    const arr = [];
-    for (let s=50; s<=150; s+=1) {
-      let total = 0;
-      for (const l of legs) {
-        const intrinsic = l.type==='call' ? Math.max(s-l.K,0) : Math.max(l.K-s,0);
-        const v = (intrinsic - l.prem) * l.qty * (l.side==='long'?1:-1);
-        total += v;
-      }
-      arr.push({x:s, y:total});
-    }
-    return arr;
-  },[legs]);
-
-  // Breakevens (zero crossings)
-  const breakevens = useMemo(()=>{
-    const bes = [];
-    for (let i=1;i<payoff.length;i++) {
-      if (Math.sign(payoff[i].y) !== Math.sign(payoff[i-1].y) && Math.abs(payoff[i].y-payoff[i-1].y)>0.001) {
-        const t = -payoff[i-1].y/(payoff[i].y-payoff[i-1].y);
-        bes.push(payoff[i-1].x + t);
-      }
-    }
-    return bes;
-  },[payoff]);
-
-  // Strategy metrics
-  const maxP = Math.max(...payoff.map(p=>p.y));
-  const minP = Math.min(...payoff.map(p=>p.y));
-  const netDebit = legs.reduce((a,l)=>a + l.prem*l.qty*(l.side==='long'?1:-1), 0);
-
-  return (
-    <div className="container page">
-      <PageHead
-        crumb={<><Link to="/tools">tools</Link><i>›</i><span>payoff visualizer</span></>}
-        title="Payoff Visualizer"
-        sub="Build multi-leg strategies. See P&L, breakevens, and aggregate Greeks."
-        right={<>
-          <span className="badge badge-green">Free</span>
-          <button className="btn btn-outline btn-sm" onClick={addLeg}><Icon name="plus" size={13}/> Add leg</button>
-          <button className="btn btn-primary btn-sm" onClick={()=>handleSave('Strategy')}><Icon name="save" size={13}/> Save strategy</button>
-        </>}
-      />
-
-      <div style={{display:'grid', gridTemplateColumns:'1fr 360px', gap:14}}>
-        <div className="col" style={{gap:14}}>
-          <ChartFrame title="P&L at expiry" subtitle={`${legs.length} legs · net ${netDebit>=0?'debit':'credit'} ${fmt(Math.abs(netDebit),2)}`} right={
-            <div className="row" style={{gap:14}}>
-              <span className="mono mute" style={{fontSize:10.5}}>Max gain <span className="green">{maxP>1e6?'∞':fmt(maxP,2)}</span></span>
-              <span className="mono mute" style={{fontSize:10.5}}>Max loss <span className="red">{minP<-1e6?'-∞':fmt(minP,2)}</span></span>
-            </div>
-          }>
-            <PayoffChart payoff={payoff} breakevens={breakevens} legs={legs}/>
-          </ChartFrame>
-
-          <div className="panel">
-            <div className="row between" style={{padding:'12px 16px', borderBottom:'1px solid var(--line)'}}>
-              <div className="label">Legs</div>
-              <div className="row" style={{gap:8}}>
-                {presets.map(p=>(
-                  <button key={p.name} className="btn btn-ghost btn-sm" onClick={()=>loadPreset(p)} style={{padding:'4px 8px', fontSize:11}}>{p.name}</button>
-                ))}
-              </div>
-            </div>
-            <table className="data">
-              <thead><tr><th>Side</th><th>Type</th><th className="num">Strike</th><th className="num">Qty</th><th className="num">Premium</th><th className="num">Cost</th><th></th></tr></thead>
-              <tbody>
-                {legs.map(l => (
-                  <tr key={l.id}>
-                    <td>
-                      <select value={l.side} onChange={e=>updateLeg(l.id,'side',e.target.value)} style={{background:'#06080B',border:'1px solid var(--line-2)',color:l.side==='long'?'var(--green)':'var(--red)',padding:'3px 6px',fontFamily:"'JetBrains Mono',monospace",fontSize:11,borderRadius:2}}>
-                        <option value="long">LONG</option>
-                        <option value="short">SHORT</option>
-                      </select>
-                    </td>
-                    <td>
-                      <select value={l.type} onChange={e=>updateLeg(l.id,'type',e.target.value)} style={{background:'#06080B',border:'1px solid var(--line-2)',color:'var(--text)',padding:'3px 6px',fontFamily:"'JetBrains Mono',monospace",fontSize:11,borderRadius:2}}>
-                        <option value="call">CALL</option>
-                        <option value="put">PUT</option>
-                      </select>
-                    </td>
-                    <td className="num">
-                      <input type="number" value={l.K} onChange={e=>updateLeg(l.id,'K',+e.target.value)} style={{width:60,background:'#06080B',border:'1px solid var(--line-2)',color:'var(--text)',padding:'3px 6px',fontFamily:"'JetBrains Mono',monospace",fontSize:11,borderRadius:2,textAlign:'right'}}/>
-                    </td>
-                    <td className="num">
-                      <input type="number" value={l.qty} onChange={e=>updateLeg(l.id,'qty',+e.target.value)} style={{width:50,background:'#06080B',border:'1px solid var(--line-2)',color:'var(--text)',padding:'3px 6px',fontFamily:"'JetBrains Mono',monospace",fontSize:11,borderRadius:2,textAlign:'right'}}/>
-                    </td>
-                    <td className="num">
-                      <input type="number" step="0.1" value={l.prem} onChange={e=>updateLeg(l.id,'prem',+e.target.value)} style={{width:62,background:'#06080B',border:'1px solid var(--line-2)',color:'var(--text)',padding:'3px 6px',fontFamily:"'JetBrains Mono',monospace",fontSize:11,borderRadius:2,textAlign:'right'}}/>
-                    </td>
-                    <td className="num">{fmt(l.prem*l.qty*(l.side==='long'?1:-1),2)}</td>
-                    <td><button onClick={()=>removeLeg(l.id)} className="btn btn-ghost btn-sm" style={{padding:'2px 6px'}}><Icon name="x" size={12}/></button></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="col" style={{gap:14}}>
-          <div className="panel" style={{padding:16}}>
-            <div className="label" style={{marginBottom:14}}>Strategy Metrics</div>
-            <div className="col" style={{gap:10}}>
-              {[
-                ['Net Debit', netDebit>=0?fmt(netDebit,2):'-', netDebit>=0?'mute':''],
-                ['Net Credit', netDebit<0?fmt(-netDebit,2):'-', netDebit<0?'green':''],
-                ['Max Gain', maxP>1e6?'Unlimited':fmt(maxP,2), maxP>0?'green':''],
-                ['Max Loss', minP<-1e6?'Unlimited':fmt(minP,2), 'red'],
-                ['Breakevens', breakevens.length?breakevens.map(b=>fmt(b,1)).join(' · '):'—', 'mono'],
-                ['Risk/Reward', maxP>0&&minP<0?fmt(maxP/Math.abs(minP),2):'—', ''],
-              ].map(([k,v,c])=>(
-                <div key={k} className="row between" style={{padding:'8px 0', borderTop:k!=='Net Debit'?'1px solid var(--line)':'none'}}>
-                  <span className="mono mute" style={{fontSize:11}}>{k}</span>
-                  <span className={"mono tnum "+c} style={{fontSize:12.5,fontWeight:600}}>{v}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="panel">
-            <div className="row between" style={{padding:'12px 14px',borderBottom:'1px solid var(--line)'}}>
-              <div className="label">Aggregate Greeks</div>
-              <span className="mono mute" style={{fontSize:10.5}}>S=100, σ=20%, T=30d</span>
-            </div>
-            <table className="data">
-              <tbody>
-                {(()=>{
-                  const aggParams = {S:100,K:100,r:0.02,sigma:0.20,T:30/365};
-                  let D=0,G=0,V=0,Th=0;
-                  for (const l of legs) {
-                    const p = bsPrice({...aggParams, K:l.K, type:l.type});
-                    const sign = l.qty * (l.side==='long'?1:-1);
-                    D += p.delta*sign; G += p.gamma*sign; V += p.vega*sign; Th += p.theta*sign;
-                  }
-                  return [['Δ Delta',D,4],['Γ Gamma',G,5],['ν Vega',V,3],['Θ Theta',Th,4]].map(([k,v,d])=>(
-                    <tr key={k}><td className="symbol">{k}</td><td className={"num "+(v>=0?'green':'red')}>{fmt(v,d)}</td></tr>
-                  ));
-                })()}
-              </tbody>
-            </table>
-          </div>
-          <div className="panel" style={{padding:14}}>
-            <div className="label" style={{marginBottom:8}}>Strategy DNA</div>
-            <div className="mono mute" style={{fontSize:11,lineHeight:1.8}}>
-              {legs.map((l,i) => (
-                <div key={l.id}>
-                  {l.side==='long'?'+':'-'}{l.qty} {l.type.toUpperCase()} {l.K} @ {fmt(l.prem,2)}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-function PayoffChart({payoff, breakevens, legs}) {
-  const W=820, H=320;
-  const ML=44, MR=16, MT=16, MB=28;
-  const ys = payoff.map(p=>p.y);
-  const ymin = Math.min(...ys), ymax = Math.max(...ys);
-  const pad = (ymax-ymin)*0.1 || 1;
-  const yLo = ymin-pad, yHi = ymax+pad;
-  const xs = payoff.map(p=>p.x);
-  const xmin = Math.min(...xs), xmax = Math.max(...xs);
-  const X = x=>ML+(x-xmin)/(xmax-xmin)*(W-ML-MR);
-  const Y = y=>MT+(1-(y-yLo)/(yHi-yLo))*(H-MT-MB);
-  // build paths split by sign
-  const posPath = payoff.map((p,i)=>`${i===0?'M':'L'} ${X(p.x)} ${Y(Math.max(p.y,0))}`).join(' ');
-  const negPath = payoff.map((p,i)=>`${i===0?'M':'L'} ${X(p.x)} ${Y(Math.min(p.y,0))}`).join(' ');
-  const zero = Y(0);
-  const linePath = payoff.map((p,i)=>`${i===0?'M':'L'} ${X(p.x)} ${Y(p.y)}`).join(' ');
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} style={{display:'block',fontFamily:"'JetBrains Mono',monospace"}}>
-      {/* y grid */}
-      {[yLo, (yLo+yHi)/2, yHi].map((t,i)=>(
-        <g key={i}>
-          <line x1={ML} y1={Y(t)} x2={W-MR} y2={Y(t)} stroke="#1A1F28"/>
-          <text x={ML-6} y={Y(t)+3} textAnchor="end" fill="#7C8493" fontSize="10">{t.toFixed(0)}</text>
-        </g>
-      ))}
-      {/* zero line */}
-      <line x1={ML} y1={zero} x2={W-MR} y2={zero} stroke="#3A4150" strokeWidth="1"/>
-      {/* x axis */}
-      <line x1={ML} y1={H-MB} x2={W-MR} y2={H-MB} stroke="#2C3340"/>
-      {[xmin, (xmin+xmax)/2, xmax].map((t,i)=>(
-        <text key={i} x={X(t)} y={H-10} textAnchor="middle" fill="#7C8493" fontSize="10">{t.toFixed(0)}</text>
-      ))}
-      {/* fill positive */}
-      <path d={`M ${X(xmin)} ${zero} ${payoff.map(p=>`L ${X(p.x)} ${Y(Math.max(p.y,0))}`).join(' ')} L ${X(xmax)} ${zero} Z`} fill="#19C37D" opacity="0.12"/>
-      <path d={`M ${X(xmin)} ${zero} ${payoff.map(p=>`L ${X(p.x)} ${Y(Math.min(p.y,0))}`).join(' ')} L ${X(xmax)} ${zero} Z`} fill="#FF2E45" opacity="0.12"/>
-      {/* strikes */}
-      {legs.map((l,i)=>(
-        <g key={i}>
-          <line x1={X(l.K)} y1={MT} x2={X(l.K)} y2={H-MB} stroke="#3E8BFF" strokeDasharray="2 3" strokeWidth="1" opacity="0.6"/>
-          <text x={X(l.K)} y={MT-2} textAnchor="middle" fill="#3E8BFF" fontSize="9">K={l.K}</text>
-        </g>
-      ))}
-      {/* breakevens */}
-      {breakevens.map((b,i)=>(
-        <g key={i}>
-          <line x1={X(b)} y1={MT} x2={X(b)} y2={H-MB} stroke="#FFB020" strokeDasharray="3 3" opacity="0.7"/>
-          <circle cx={X(b)} cy={zero} r="3" fill="#FFB020"/>
-          <text x={X(b)+4} y={zero-4} fill="#FFB020" fontSize="9">BE {b.toFixed(1)}</text>
-        </g>
-      ))}
-      {/* payoff line */}
-      <path d={linePath} fill="none" stroke="#FF2E45" strokeWidth="2"/>
-    </svg>
-  );
-}
-
 // ============= MONTE CARLO =============
-function MonteCarloTool() {
-  const [S,setS]=useState(100),[mu,setMu]=useState(5),[sigma,setSigma]=useState(20),[T,setT]=useState(252),[N,setN]=useState(1000);
-  useToolRegister('mc', {S,mu,sigma,T,N}, {S:setS,mu:setMu,sigma:setSigma,T:setT,N:setN});
-  const [seed,setSeed] = useState(7);
-  const paths = useMemo(()=>{
-    const out = [];
-    const steps = 100;
-    let rng = seed;
-    const rnd = () => { rng = (rng*1664525+1013904223) % 4294967296; return rng/4294967296; };
-    const gauss = () => Math.sqrt(-2*Math.log(rnd()||0.0001))*Math.cos(2*Math.PI*rnd());
-    const dt = (T/365)/steps;
-    for (let i=0;i<Math.min(N,40);i++) {
-      let s = S;
-      const p = [{x:0, y:s}];
-      for (let t=1;t<=steps;t++) {
-        s = s * Math.exp((mu/100 - 0.5*(sigma/100)**2)*dt + (sigma/100)*Math.sqrt(dt)*gauss());
-        p.push({x:t, y:+s.toFixed(2)});
-      }
-      out.push(p);
-    }
-    return out;
-  },[S,mu,sigma,T,N,seed]);
-
-  const histo = useMemo(()=>{
-    const bins = Array(24).fill(0);
-    let rng = seed*3+1;
-    const rnd = () => { rng = (rng*1664525+1013904223) % 4294967296; return rng/4294967296; };
-    const gauss = () => Math.sqrt(-2*Math.log(rnd()||0.0001))*Math.cos(2*Math.PI*rnd());
-    const steps = 60;
-    const dt = (T/365)/steps;
-    let finals = [];
-    for (let i=0;i<Math.min(N*5,5000);i++) {
-      let s = S;
-      for (let t=1;t<=steps;t++) {
-        s = s * Math.exp((mu/100 - 0.5*(sigma/100)**2)*dt + (sigma/100)*Math.sqrt(dt)*gauss());
-      }
-      finals.push(s);
-    }
-    const fmin = Math.min(...finals), fmax = Math.max(...finals);
-    const bw = (fmax-fmin)/24;
-    for (const f of finals) bins[Math.min(23, Math.max(0, Math.floor((f-fmin)/bw)))]++;
-    return {bins: bins.map((b,i)=>({x:Math.round(fmin+i*bw), y:b})), finals};
-  },[S,mu,sigma,T,N,seed]);
-
-  const sorted = [...histo.finals].sort((a,b)=>a-b);
-  const var95 = sorted[Math.floor(sorted.length*0.05)]-S;
-  const var99 = sorted[Math.floor(sorted.length*0.01)]-S;
-  const es99 = sorted.slice(0, Math.floor(sorted.length*0.01)).reduce((a,b)=>a+(b-S),0)/Math.max(1,Math.floor(sorted.length*0.01));
-  const mean = sorted.reduce((a,b)=>a+b,0)/sorted.length;
-
-  return (
-    <div className="container page">
-      <PageHead
-        crumb={<><Link to="/tools">tools</Link><i>›</i><span>monte carlo</span></>}
-        title="Monte Carlo Simulator"
-        sub="Geometric Brownian motion — paths, terminal distribution, VaR and Expected Shortfall."
-        right={<>
-          <span className="badge badge-green">Free</span>
-          <button className="btn btn-outline btn-sm" onClick={()=>setSeed(seed+1)}><Icon name="refresh-cw" size={13}/> Re-seed</button>
-          <button className="btn btn-primary btn-sm" onClick={()=>{setSeed(seed+1); notify('Monte Carlo simulation refreshed.')}}><Icon name="play" size={13}/> Run</button>
-        </>}
-      />
-      <div style={{display:'grid', gridTemplateColumns:'320px 1fr', gap:14}}>
-        <div className="panel" style={{padding:18,alignSelf:'start'}}>
-          <div className="label" style={{marginBottom:14}}>Parameters</div>
-          {[
-            ['Spot S', S, 10, 500, 0.5, setS, '$'],
-            ['Drift μ', mu, -10, 25, 0.1, setMu, '%'],
-            ['Vol σ', sigma, 1, 100, 0.5, setSigma, '%'],
-            ['Horizon T', T, 5, 730, 1, setT, 'd'],
-            ['Paths N', N, 100, 5000, 100, setN, ''],
-          ].map(([lbl,val,min,max,step,setter,unit])=>(
-            <div key={lbl} className="field" style={{marginBottom:14}}>
-              <div className="row between">
-                <span className="mono mute" style={{fontSize:11}}>{lbl}</span>
-                <span className="mono" style={{fontSize:12.5,fontWeight:600}}>{val}{unit&&' '+unit}</span>
-              </div>
-              <input type="range" min={min} max={max} step={step} value={val} onChange={e=>setter(+e.target.value)}/>
-            </div>
-          ))}
-          <div className="hairline" style={{margin:'16px 0'}}></div>
-          <div className="label" style={{marginBottom:10}}>Risk Metrics</div>
-          <table className="data" style={{border:'none'}}>
-            <tbody>
-              <tr><td className="symbol">Mean S(T)</td><td className="num">{fmt(mean,2)}</td></tr>
-              <tr><td className="symbol">VaR 95%</td><td className="num red">{fmt(var95,2)}</td></tr>
-              <tr><td className="symbol">VaR 99%</td><td className="num red">{fmt(var99,2)}</td></tr>
-              <tr><td className="symbol">ES 99%</td><td className="num red">{fmt(es99,2)}</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div className="col" style={{gap:14}}>
-          <ChartFrame title={`GBM paths · ${paths.length} of ${N}`} subtitle={`S₀=${S} · σ=${sigma}% · T=${T}d`}>
-            <svg viewBox="0 0 760 280" width="100%" height="280">
-              <line x1="44" y1="260" x2="750" y2="260" stroke="#2C3340"/>
-              <line x1="44" y1="10" x2="44" y2="260" stroke="#2C3340"/>
-              {(()=>{
-                const allY = paths.flat().map(p=>p.y);
-                const ymin = Math.min(...allY), ymax = Math.max(...allY);
-                return paths.map((p,i)=>{
-                  const path = p.map((d,j)=>`${j===0?'M':'L'} ${44+j/(p.length-1)*706} ${260-(d.y-ymin)/((ymax-ymin)||1)*240}`).join(' ');
-                  return <path key={i} d={path} fill="none" stroke="#FF2E45" strokeWidth="0.7" opacity="0.4"/>;
-                });
-              })()}
-            </svg>
-          </ChartFrame>
-          <div className="grid-2">
-            <ChartFrame title="Terminal distribution" subtitle="S(T) histogram · 5,000 samples">
-              <BarChart data={histo.bins} width={420} height={220} color="#3E8BFF" labels={false}/>
-            </ChartFrame>
-            <div className="panel">
-              <div className="row between" style={{padding:'12px 14px',borderBottom:'1px solid var(--line)'}}>
-                <div className="label">Quantiles · S(T)</div>
-              </div>
-              <table className="data">
-                <thead><tr><th>%</th><th className="num">Value</th><th className="num">Δ vs S₀</th></tr></thead>
-                <tbody>
-                  {[[1,sorted[Math.floor(sorted.length*0.01)]],
-                    [5,sorted[Math.floor(sorted.length*0.05)]],
-                    [25,sorted[Math.floor(sorted.length*0.25)]],
-                    [50,sorted[Math.floor(sorted.length*0.50)]],
-                    [75,sorted[Math.floor(sorted.length*0.75)]],
-                    [95,sorted[Math.floor(sorted.length*0.95)]],
-                    [99,sorted[Math.floor(sorted.length*0.99)]]].map(([p,v])=>(
-                    <tr key={p}><td className="symbol">P{p}</td><td className="num">{fmt(v,2)}</td><td className={"num "+(v-S>=0?'green':'red')}>{fmtPct((v-S)/S,2)}</td></tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============= IV CALCULATOR =============
-function IVCalcTool() {
-  const [asset,setAsset] = useState('SPX');
-  const [window,setWin] = useState(20);
-  useToolRegister('iv-calc', {asset,window}, {asset:setAsset, window:setWin});
-  const assets = ['SPX','NDX','TSLA','NVDA','BTC','EURUSD'];
-  // Build a price walk and rolling realized vol
-  const prices = useMemo(()=>genWalk(252, 100, 0.013, 0.0002, asset.charCodeAt(0)+window),[asset,window]);
-  const rv = useMemo(()=>{
-    const out = [];
-    for (let i=window;i<prices.length;i++) {
-      let v = 0;
-      for (let j=i-window+1;j<=i;j++) {
-        const r = Math.log(prices[j].y/prices[j-1].y);
-        v += r*r;
-      }
-      out.push({x:i, y: Math.sqrt(v/window*252)*100 });
-    }
-    return out;
-  },[prices, window]);
-  const current = rv[rv.length-1]?.y || 0;
-
-  return (
-    <div className="container page">
-      <PageHead
-        crumb={<><Link to="/tools">tools</Link><i>›</i><span>volatility calculator</span></>}
-        title="Volatility Calculator"
-        sub="Realized volatility via rolling windows. Compare estimators across assets."
-        right={<><span className="badge badge-green">Free</span></>}
-      />
-      <div style={{display:'grid',gridTemplateColumns:'320px 1fr',gap:14}}>
-        <div className="panel" style={{padding:18,alignSelf:'start'}}>
-          <div className="label" style={{marginBottom:10}}>Asset</div>
-          <div className="col" style={{gap:4}}>
-            {assets.map(a=>(
-              <button key={a} className={"row between "+(a===asset?'on':'')} onClick={()=>setAsset(a)} style={{padding:'8px 12px',background:a===asset?'rgba(255,46,69,.08)':'transparent',border:'1px solid '+(a===asset?'rgba(255,46,69,.3)':'transparent'),borderRadius:3,fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:a===asset?'var(--text)':'var(--text-2)'}}>
-                <span>{a}</span>
-                <span className="mute" style={{fontSize:10.5}}>{a===asset?'●':'select'}</span>
-              </button>
-            ))}
-          </div>
-          <div className="hairline" style={{margin:'18px 0'}}></div>
-          <div className="label" style={{marginBottom:10}}>Window</div>
-          {[5,10,20,60,120].map(w=>(
-            <button key={w} className={"toggle-btn"} onClick={()=>setWin(w)} style={{padding:'6px 12px',marginRight:6,marginBottom:6,background:w===window?'var(--red)':'#06080B',color:w===window?'#fff':'var(--text-2)',border:'1px solid '+(w===window?'var(--red)':'var(--line-2)'),fontFamily:"'JetBrains Mono',monospace",fontSize:11,borderRadius:3}}>{w}d</button>
-          ))}
-          <div className="hairline" style={{margin:'18px 0'}}></div>
-          <div className="label" style={{marginBottom:8}}>Current realized vol</div>
-          <div className="mono" style={{fontSize:36,fontWeight:700,color:'var(--red)',lineHeight:1}}>{fmt(current,2)}%</div>
-          <div className="mono mute" style={{fontSize:11,marginTop:6}}>{window}d annualized · 252 trading days</div>
-        </div>
-        <div className="col" style={{gap:14}}>
-          <ChartFrame title={`${asset} · Price`} subtitle="252 trading days, synthetic">
-            <LineChart width={760} height={220} series={[{name:asset, color:'#FF2E45', data:prices, fillOpacity:0.08}]}/>
-          </ChartFrame>
-          <ChartFrame title={`Rolling realized vol · ${window}d`} subtitle="Annualized %">
-            <LineChart width={760} height={220} series={[{name:'rv', color:'#FFB020', data:rv, fillOpacity:0.08}]}/>
-          </ChartFrame>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============= CALIBRATION =============
-function solve3(A,b){ // Gaussian elimination for 3x3
-  const M=[[...A[0],b[0]],[...A[1],b[1]],[...A[2],b[2]]];
-  for(let i=0;i<3;i++){
-    let p=i; for(let r=i+1;r<3;r++) if(Math.abs(M[r][i])>Math.abs(M[p][i])) p=r;
-    [M[i],M[p]]=[M[p],M[i]];
-    if(Math.abs(M[i][i])<1e-12) return null;
-    for(let r=0;r<3;r++){ if(r!==i){ const f=M[r][i]/M[i][i]; for(let c=i;c<4;c++) M[r][c]-=f*M[i][c]; } }
-  }
-  return [M[0][3]/M[0][0],M[1][3]/M[1][1],M[2][3]/M[2][2]];
-}
-function fitQuadraticSmile(points, S0){ // sigma = a + b k + c k^2, k=ln(K/S0); least squares
-  let s0=points.length,s1=0,s2=0,s3=0,s4=0,ty=0,tky=0,tk2y=0;
-  for(const {K,iv} of points){ const k=Math.log(K/S0); const k2=k*k;
-    s1+=k; s2+=k2; s3+=k2*k; s4+=k2*k2; ty+=iv; tky+=k*iv; tk2y+=k2*iv; }
-  const A=[[s0,s1,s2],[s1,s2,s3],[s2,s3,s4]], b=[ty,tky,tk2y];
-  const sol=solve3(A,b); if(!sol) return {a:NaN,b:NaN,c:NaN,rmse:NaN,mae:NaN};
-  const [a,bb,c]=sol;
-  let se=0,ae=0; for(const {K,iv} of points){ const k=Math.log(K/S0); const m=a+bb*k+c*k*k; se+=(m-iv)**2; ae+=Math.abs(m-iv); }
-  return {a,b:bb,c,rmse:Math.sqrt(se/points.length),mae:ae/points.length, model:(K)=>{const k=Math.log(K/S0);return a+bb*k+c*k*k;}};
-}
-function CalibrationTool() {
-  const S0=100;
-  const [points,setPoints]=useState([
-    {K:80,iv:0.262},{K:90,iv:0.221},{K:95,iv:0.205},{K:100,iv:0.192},
-    {K:105,iv:0.187},{K:110,iv:0.190},{K:120,iv:0.214},
-  ]);
-  const fit=useMemo(()=>fitQuadraticSmile(points,S0),[points]);
-  const setIv=(i,v)=>setPoints(ps=>ps.map((p,j)=>j===i?{...p,iv:v}:p));
-  const market=points.map(p=>({x:p.K,y:+(p.iv*100).toFixed(2)}));
-  const fitted=useMemo(()=>{const a=[];for(let K=78;K<=122;K+=1)a.push({x:K,y:+((fit.model?fit.model(K):0)*100).toFixed(2)});return a;},[fit]);
-  return (
-    <div className="container page">
-      <ToolHead slug="model calibration" name="Smile Calibration (least-squares)" sub="Fit a quadratic-in-log-moneyness smile to market IV quotes — real closed-form least squares."/>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 340px',gap:14}}>
-        <div className="col" style={{gap:14}}>
-          <ChartFrame title="Market vs fitted smile" subtitle="implied vol (%) vs strike">
-            <LineChart width={760} height={300} series={[
-              {name:'Fitted', color:'#3E8BFF', data:fitted, fill:false, dashed:true},
-              {name:'Market', color:'#FF2E45', data:market, fill:false, strokeWidth:2},
-            ]}/>
-          </ChartFrame>
-          <div className="panel">
-            <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
-              <div className="label">Market quotes (editable)</div>
-              <span className="badge">spot {S0}</span>
-            </div>
-            <table className="data">
-              <thead><tr><th>Strike</th><th className="num">Market σ</th><th className="num">Fitted σ</th><th className="num">Residual</th></tr></thead>
-              <tbody>
-                {points.map((p,i)=>{ const m=fit.model?fit.model(p.K):0; const res=m-p.iv; return (
-                  <tr key={p.K}>
-                    <td className="symbol">{p.K}</td>
-                    <td className="num"><input value={p.iv} onChange={e=>{const v=parseFloat(e.target.value);if(!isNaN(v))setIv(i,v);}} style={{width:80,textAlign:'right',background:'#0A0C10',border:'1px solid var(--line-2)',color:'var(--text)',fontFamily:"'JetBrains Mono',monospace",fontSize:12,borderRadius:3,padding:'3px 6px'}}/></td>
-                    <td className="num">{m.toFixed(4)}</td>
-                    <td className={"num "+(Math.abs(res)<0.005?'green':'amber')}>{res>=0?'+':''}{res.toFixed(4)}</td>
-                  </tr>
-                );})}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div className="col" style={{gap:14}}>
-          <div className="panel" style={{padding:16}}>
-            <div className="label" style={{marginBottom:6}}>Calibrated parameters</div>
-            <ResultRow k="a (ATM level)" v={fmt(fit.a,4)} accent="var(--red)"/>
-            <ResultRow k="b (skew)" v={fmt(fit.b,4)}/>
-            <ResultRow k="c (curvature)" v={fmt(fit.c,4)}/>
-            <div className="hairline" style={{margin:'12px 0'}}></div>
-            <ResultRow k="RMSE" v={fmt(fit.rmse,5)} accent={fit.rmse<0.005?'var(--green)':'var(--amber)'}/>
-            <ResultRow k="MAE" v={fmt(fit.mae,5)} accent={fit.mae<0.005?'var(--green)':'var(--amber)'}/>
-            <div className="mute" style={{fontSize:11.5,marginTop:12,lineHeight:1.5}}>σ(K) = a + b·ln(K/S) + c·ln(K/S)². Closed-form normal-equations fit — edit any quote and the fit + residuals update live. (SABR/Heston need an iterative solver — that runs on the backend.)</div>
-          </div>
-          <div className="panel" style={{padding:16}}>
-            <div className="label" style={{marginBottom:6}}>Method</div>
-            <ResultRow k="Estimator" v="Ordinary least squares"/>
-            <ResultRow k="Basis" v="1, k, k²"/>
-            <ResultRow k="Points" v={String(points.length)}/>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-Object.assign(window, {ToolsPage, BSPricerTool, PayoffVisualizerTool, MonteCarloTool, IVCalcTool, CalibrationTool});
 
 
 // ===== src\pages-lab.jsx =====
@@ -4559,22 +3989,22 @@ Object.assign(window, {ToolsPage, BSPricerTool, PayoffVisualizerTool, MonteCarlo
 
 // ============= TRADING LAB =============
 function TradingLabPage({route}) {
-  const sub = route.parts[1] || 'backtest';
+  const sub = route.parts[1] || 'exercises';
   const tabs = [
     ['exercises','Trading Exercises'],
-    ['backtest','Backtest'],
+    ['backtest','Backtest · Pro'],
     ['scenarios','Scenarios'],
     ['strategies','Strategies'],
-    ['performance','Performance'],
+    ['performance','Simulation comparison'],
   ];
   return (
     <div className="container page">
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ trading lab</span></>}
         title="Trading Lab"
-        sub="Backtest sur un vrai moteur (données réelles) dans l’onglet Backtest ; les Scénarios/Stratégies restent des simulations pédagogiques."
+        sub="Student includes guided trading exercises and pedagogical scenarios. The real-engine Backtest workspace is reserved for Pro."
         right={<>
-          <span className="badge"><span className="dot dot-green"></span>MOTEUR RÉEL · BACKTEST</span>
+          <span className="badge badge-blue">STUDENT LAB</span>
         </>}
       />
       <div className="tabs-bar">
@@ -4582,7 +4012,7 @@ function TradingLabPage({route}) {
           <Link key={k} to={"/lab/"+k} className={"tab-btn "+(sub===k?'on':'')}>{l}</Link>
         ))}
       </div>
-      {sub==='backtest' && <BacktestPanel/>}
+      {sub==='backtest' && <GatedPage required="pro" what="The real-engine Backtest workspace" embedded><BacktestPanel/></GatedPage>}
       {sub==='scenarios' && <ScenariosPanel/>}
       {sub==='strategies' && <StrategiesPanel/>}
       {sub==='performance' && <PerformancePanel/>}
@@ -4896,30 +4326,16 @@ function BacktestPanel() {
 
 // Deterministic Monte Carlo of a short-strangle over a 30d horizon. Premium is
 // priced with Black-Scholes at entry IV; P&L = premium - terminal option payoffs.
-// Real distribution -> expected P&L, Sharpe, worst path, win rate.
-function scenarioMC({mu, sigma, seed=1, n=2000, entryIV=0.18}){
-  const S0=100, T=30/252, Kc=105, Kp=95, M=400; // contract multiplier -> ~$100k book
-  const premium=(bsPrice({S:S0,K:Kc,r:0.02,sigma:entryIV,T,type:'call'}).price + bsPrice({S:S0,K:Kp,r:0.02,sigma:entryIV,T,type:'put'}).price)*M;
-  let s=(seed*2654435761>>>0)||1; const rnd=()=>{ s=(1103515245*s+12345)>>>0; return s/4294967296; };
-  const gauss=()=>{ let u=0,v=0; while(u===0)u=rnd(); while(v===0)v=rnd(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); };
-  const pnls=[]; let worst=Infinity, wins=0;
-  for(let i=0;i<n;i++){
-    const ST=S0*Math.exp((mu-0.5*sigma*sigma)*T+sigma*Math.sqrt(T)*gauss());
-    const pnl=premium - (Math.max(ST-Kc,0)+Math.max(Kp-ST,0))*M;
-    pnls.push(pnl); if(pnl<worst)worst=pnl; if(pnl>0)wins++;
-  }
-  const mean=pnls.reduce((a,b)=>a+b,0)/n;
-  const sd=Math.sqrt(pnls.reduce((a,b)=>a+(b-mean)**2,0)/n);
-  return { pnl:Math.round(mean), sharpe:sd>0?mean/sd:0, worst:Math.round(worst), win:Math.round(100*wins/n), volPnl:Math.round(sd), meanRet:mean/100000 };
-}
+// Physical terminal distribution; nominal entry premium, no financing, costs or hedge.
+const scenarioMC = shortStrangleScenario;
 function ScenariosPanel() {
   const presets=[
     {n:'Bullish drift', d:'Slow grind higher · σ=12%', mu:0.15, sigma:0.12, seed:11},
     {n:'Bearish drift', d:'Trend reversal · σ=15%', mu:-0.15, sigma:0.15, seed:22},
-    {n:'Vol spike', d:'Realised σ=45%', mu:0, sigma:0.45, seed:33},
-    {n:'Vol crush', d:'Realised σ=8%', mu:0, sigma:0.08, seed:44},
-    {n:'Time decay', d:'Sideways · σ=12%', mu:0, sigma:0.12, seed:55},
-    {n:'Rate shock', d:'Drift -5% · σ=20%', mu:-0.05, sigma:0.20, seed:66},
+    {n:'Vol spike', d:'Assumed annual volatility 45%', mu:0, sigma:0.45, seed:33},
+    {n:'Vol crush', d:'Assumed annual volatility 8%', mu:0, sigma:0.08, seed:44},
+    {n:'Low-volatility horizon', d:'Zero drift · σ=12%', mu:0, sigma:0.12, seed:55},
+    {n:'Negative physical drift', d:'Drift -5% · σ=20%', mu:-0.05, sigma:0.20, seed:66},
   ];
   const rows=useMemo(()=>presets.map(p=>({...p, ...scenarioMC(p)})),[]);
   return (
@@ -4931,9 +4347,9 @@ function ScenariosPanel() {
               <div className="mono" style={{fontWeight:700, fontSize:14}}>{p.n}</div>
               <span className={"badge "+(p.pnl>=0?'badge-green':'badge-red')}>{p.pnl>=0?'+':''}{p.pnl.toLocaleString()}</span>
             </div>
-            <div className="mute" style={{fontSize:12,marginTop:6}}>{p.d}</div>
+            <div className="mute" style={{fontSize:12,marginTop:6}}>{p.d}</div><div className="mono mute" style={{fontSize:10,marginTop:8}}>μ {(p.mu*100).toFixed(0)}% · σ {(p.sigma*100).toFixed(0)}% · seed {p.seed} · N {p.sampleCount}</div>
             <div className="grid-2" style={{gap:8,marginTop:14}}>
-              {[['Sharpe',p.sharpe.toFixed(2)],['Worst','$'+p.worst.toLocaleString()],['Win',p.win+'%'],['E[P&L]',p.pnl.toLocaleString()]].map(([k,v])=>(
+              {[['Mean / SD',(p.meanOverSd==null?'—':p.meanOverSd.toFixed(2))],['Worst','$'+p.worst.toLocaleString()],['Win',p.win.toFixed(1)+'%'],['E[P&L]',p.pnl.toLocaleString()]].map(([k,v])=>(
                 <div key={k} className="panel-2" style={{padding:'8px 10px'}}>
                   <div className="mono mute" style={{fontSize:10}}>{k}</div>
                   <div className="mono tnum" style={{fontSize:13,fontWeight:600,marginTop:2}}>{v}</div>
@@ -4945,19 +4361,20 @@ function ScenariosPanel() {
       </div>
       <div className="panel">
         <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
-          <div className="label">Aggregate stress · Short Strangle (Kc 105 / Kp 95)</div>
-          <span className="badge">6 scenarios · 2000 paths each · live MC</span>
+          <div className="label">Scenario comparison · Short Strangle (Kc 105 / Kp 95)</div>
+          <span className="badge">6 synthetic scenarios · 2000 deterministic paths each</span>
         </div>
+        <div className="mute" style={{fontSize:11,padding:'10px 16px 14px',borderBottom:'1px solid var(--line)'}}>Synthetic teaching scenarios under P · 30/252-year horizon · spot 100, short put 95 / short call 105, multiplier 400. Entry premiums use BSM with r=2%, q=0 and IV=18%. Mean/SD is a non-annualised sample ratio, not a historical Sharpe. No transaction costs, hedging or observed market data. Cash amounts in USD; no premium financing.</div>
         <table className="data">
-          <thead><tr><th>Scenario</th><th className="num">E[P&L]</th><th className="num">Mean Return</th><th className="num">Vol of P&L</th><th className="num">Sharpe</th><th className="num">Worst Path</th></tr></thead>
+          <thead><tr><th>Scenario</th><th className="num">E[P&L]</th><th className="num">Annual drift</th><th className="num">Vol of P&L</th><th className="num">Mean / SD</th><th className="num">Worst sample</th></tr></thead>
           <tbody>
             {rows.map(p=>(
               <tr key={p.n}>
                 <td className="symbol">{p.n}</td>
                 <td className={"num "+(p.pnl>=0?'green':'red')}>{p.pnl>=0?'+':''}{p.pnl.toLocaleString()}</td>
-                <td className={"num "+(p.pnl>=0?'green':'red')}>{(p.meanRet*100).toFixed(2)}%</td>
+                <td className="num">{(p.mu*100).toFixed(0)}%</td>
                 <td className="num">{p.volPnl.toLocaleString()}</td>
-                <td className="num">{p.sharpe.toFixed(2)}</td>
+                <td className="num">{(p.meanOverSd==null?'—':p.meanOverSd.toFixed(2))}</td>
                 <td className="num red">{p.worst.toLocaleString()}</td>
               </tr>
             ))}
@@ -4977,7 +4394,6 @@ function StrategiesPanel() {
     {n:'Bear Put Spread', vol:'Moderate', view:'Bearish', max:'Capped', cost:'Debit'},
     {n:'Long Straddle', vol:'High', view:'Big move', max:'Unlimited', cost:'Debit'},
     {n:'Short Strangle', vol:'High', view:'Neutral', max:'Unlimited risk', cost:'Credit'},
-    {n:'Calendar Spread', vol:'Low', view:'Neutral', max:'Capped', cost:'Debit'},
   ];
   return (
     <div className="grid-3">
@@ -4994,109 +4410,50 @@ function StrategiesPanel() {
               <div className="mono" style={{fontSize:12,fontWeight:600,marginTop:2}}>{t.view}</div>
             </div>
             <div className="panel-2" style={{padding:'8px 10px'}}>
-              <div className="mono mute" style={{fontSize:10}}>Vol bias</div>
-              <div className="mono" style={{fontSize:12,fontWeight:600,marginTop:2}}>{t.vol}</div>
+              <div className="mono mute" style={{fontSize:10}}>Entry</div>
+              <div className="mono" style={{fontSize:12,fontWeight:600,marginTop:2}}>{t.cost}</div>
             </div>
           </div>
-          <Link to="/tools/payoff" className="btn btn-outline btn-sm" style={{width:'100%',justifyContent:'center',marginTop:14}}>Open in builder <Icon name="arrow-right" size={13}/></Link>
+          <Link to="/tools/payoff" className="btn btn-outline btn-sm" style={{width:'100%',justifyContent:'center',marginTop:14}}>Open payoff builder <Icon name="arrow-right" size={13}/></Link>
         </div>
       ))}
     </div>
   );
 }
-function StrategySketch({name}){
-  // Quick payoff sketches for templates
-  const map = {
-    'Bull Call Spread': 'M 0,80 L 60,80 L 130,30 L 200,30',
-    'Iron Condor': 'M 0,30 L 40,30 L 80,80 L 120,80 L 160,30 L 200,30',
-    'Butterfly': 'M 0,80 L 70,80 L 100,30 L 130,80 L 200,80',
-    'Long Call': 'M 0,80 L 100,80 L 200,15',
-    'Bear Put Spread': 'M 0,30 L 70,30 L 140,80 L 200,80',
-    'Long Straddle': 'M 0,30 L 100,80 L 200,30',
-    'Short Strangle': 'M 0,30 L 70,80 L 130,80 L 200,30',
-    'Calendar Spread': 'M 0,80 L 60,80 Q 100,40 140,80 L 200,80',
-  };
-  return (
-    <svg viewBox="0 0 200 100" width="100%" height="90">
-      <line x1="0" y1="80" x2="200" y2="80" stroke="#2C3340"/>
-      <path d={map[name] || map['Bull Call Spread']} fill="none" stroke="#FF2E45" strokeWidth="1.6"/>
-    </svg>
-  );
-}
+function StrategySketch({name}) { return <StrategyPayoffFigure name={name}/>; }
 
 function PerformancePanel() {
-  const strategies = useMemo(()=>{
-    const defs=[
-      {n:'Short Strangle SPX', mu:0.05, sigma:0.14, seed:101, runs:28},
-      {n:'Short Strangle NDX', mu:0.02, sigma:0.20, seed:202, runs:14},
-      {n:'Short Strangle TSLA', mu:0.0, sigma:0.42, seed:303, runs:9},
-      {n:'Short Strangle NVDA', mu:0.08, sigma:0.10, seed:404, runs:18},
-      {n:'Short Strangle SPY', mu:0.03, sigma:0.12, seed:505, runs:21},
-    ];
-    return defs.map(d=>{ const m=scenarioMC(d); return {n:d.n, sharpe:+m.sharpe.toFixed(2), pnl:m.pnl, win:m.win, dd:+((m.worst/100000)*100).toFixed(1), runs:d.runs}; });
-  },[]);
-  const totalPnL=strategies.reduce((a,s)=>a+s.pnl,0);
-  const avgSharpe=strategies.reduce((a,s)=>a+s.sharpe,0)/strategies.length;
-  const avgWin=strategies.reduce((a,s)=>a+s.win,0)/strategies.length;
-  const maxDD=Math.min(...strategies.map(s=>s.dd));
-  return (
-    <div className="col" style={{gap:14}}>
-      <div className="grid-4">
-        {[
-          {l:'Total E[P&L]',v:(totalPnL>=0?'+':'')+totalPnL.toLocaleString(),c:totalPnL>=0?'var(--green)':'var(--red)'},
-          {l:'Avg Sharpe',v:avgSharpe.toFixed(2),c:'var(--text)'},
-          {l:'Win Rate',v:avgWin.toFixed(1)+'%',c:'var(--text)'},
-          {l:'Worst Path',v:maxDD.toFixed(1)+'%',c:'var(--red)'},
-        ].map(s=><Stat key={s.l} label={s.l} value={s.v} accent={s.c}/>)}
-      </div>
-      <div className="panel">
-        <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
-          <div className="label">Strategy leaderboard · Q2 2026</div>
-          <button className="btn btn-ghost btn-sm" onClick={()=>copyText(strategies.map((s)=>`${s.n},${s.sharpe},${s.pnl},${s.win}`).join('\n'), 'Performance table copied as CSV.')}>Export</button>
-        </div>
-        <table className="data">
-          <thead><tr><th>#</th><th>Strategy</th><th className="num">Sharpe</th><th className="num">P&L</th><th className="num">Win %</th><th className="num">Max DD</th><th className="num">Runs</th><th></th></tr></thead>
-          <tbody>
-            {strategies.sort((a,b)=>b.sharpe-a.sharpe).map((s,i)=>(
-              <tr key={s.n}>
-                <td className="symbol">{i+1}</td>
-                <td className="symbol">{s.n}</td>
-                <td className="num">{s.sharpe}</td>
-                <td className={"num "+(s.pnl>=0?'green':'red')}>{s.pnl>=0?'+':''}{s.pnl}</td>
-                <td className="num">{s.win}%</td>
-                <td className="num red">{s.dd}%</td>
-                <td className="num">{s.runs}</td>
-                <td><Icon name="chevron-right" size={12} style={{color:'var(--mute)'}}/></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
+  const rows = useMemo(()=>[
+    {n:'Low volatility',mu:0.05,sigma:0.14,seed:101},
+    {n:'Moderate volatility',mu:0.02,sigma:0.20,seed:202},
+    {n:'High volatility',mu:0,sigma:0.42,seed:303},
+    {n:'Positive drift',mu:0.08,sigma:0.10,seed:404},
+    {n:'Lower drift',mu:0.03,sigma:0.12,seed:505},
+  ].map(parameters=>({...parameters,...scenarioMC(parameters)})),[]);
+  return <SimulationComparison rows={rows}/>;
 }
 
 function TradingExercisesPanel() {
-  const exs = [
-    {n:'Hedge a delta-neutral book', diff:'L3', t:'45m'},
-    {n:'Roll a calendar through expiry', diff:'L3', t:'35m'},
-    {n:'Capture a vol-spike with strangle', diff:'L2', t:'30m'},
-    {n:'Pair-trade SPX vs NDX', diff:'L4', t:'60m'},
-    {n:'Earnings event positioning', diff:'L3', t:'40m'},
-    {n:'Construct a gamma-neutral hedge', diff:'L4', t:'55m'},
-  ];
+  // Keep the Trading Lab entry point on the same canonical exercise records
+  // as /exercises. The former cards only fired a toast and claimed simulated
+  // grading without opening a real exercise or correction.
+  const exerciseIds = ['delta-hedge', 'options-book-greeks', 'swap-dv01', 'smile-fit', 'mc-asian', 'curve-boot'];
+  const exs = exerciseIds
+    .map((id) => EXERCISES.find((exercise) => exercise.id === id))
+    .filter(Boolean);
   return (
     <div className="grid-3">
       {exs.map(e=>(
-        <div key={e.n} className="panel" style={{padding:18}}>
+        <Link key={e.id} to={`/exercises/${e.id}`} className="panel" style={{padding:18,display:'block',textDecoration:'none'}}>
           <div className="row between" style={{marginBottom:12}}>
-            <span className="badge">{e.diff}</span>
-            <span className="mono mute" style={{fontSize:11}}>{e.t}</span>
+            <span className="badge">{e.level}</span>
+            <span className="mono mute" style={{fontSize:11}}>{e.time}</span>
           </div>
-          <div className="mono" style={{fontWeight:700, marginBottom:8}}>{e.n}</div>
-          <div className="mute" style={{fontSize:12.5,lineHeight:1.5}}>Step-by-step exercise with a simulated market and grading.</div>
-          <button className="btn btn-outline btn-sm" onClick={()=>notify(`${e.n} opened in the trading lab.`)} style={{marginTop:14,width:'100%',justifyContent:'center'}}>Start exercise</button>
-        </div>
+          <div className="mono" style={{fontWeight:700, marginBottom:8}}>{e.title}</div>
+          <div className="mute" style={{fontSize:12.5,lineHeight:1.5}}>{e.description}</div>
+          <div className="mute" style={{fontSize:11.5,lineHeight:1.5,marginTop:8}}>Inputs, étapes, correction et grille de points disponibles dans l’exercice canonique.</div>
+          <span className="btn btn-outline btn-sm" style={{marginTop:14,width:'100%',justifyContent:'center'}}>Ouvrir l’exercice <Icon name="arrow-right" size={13}/></span>
+        </Link>
       ))}
     </div>
   );
@@ -5110,9 +4467,50 @@ function ExercisesPage({route}) {
 }
 
 function ExercisesIndex({route}) {
+  const auth = useAuth();
+  const owner = auth.user?.id || null;
+  const ownerRef = useRef(owner);
+  ownerRef.current = owner;
   const [cat,setCat] = useState('All');
   const [query,setQuery] = useState('');
-  const [generated,setGenerated] = useState(()=>loadGeneratedExercises());
+  const [generated,setGenerated] = useState(()=>loadGeneratedExercises(owner));
+  const [libraryError,setLibraryError] = useState(false);
+  const [libraryRevision,setLibraryRevision] = useState(0);
+  const [libraryOffset,setLibraryOffset] = useState(0);
+  const [hasMore,setHasMore] = useState(false);
+  const [loadingMore,setLoadingMore] = useState(false);
+  const retryId = new URLSearchParams(window.location.search).get('retry');
+  const retryRequest = retryId ? getExerciseById(retryId, owner)?.request : null;
+  useEffect(()=>{
+    let active = true;
+    setGenerated(loadGeneratedExercises(owner));
+    setLibraryError(false);
+    setLibraryOffset(0); setHasMore(false);
+    if (owner) platformApi.listExercises(owner).then(({records,hasMore})=>{
+      if (!active) return;
+      const saved = records.map(exerciseFromRecord);
+      const localOnly = loadGeneratedExercises(owner).filter(item=>item.engine==='fallback');
+      const items = [...saved, ...localOnly];
+      cacheGeneratedExercises(items, owner);
+      setGenerated(items);
+      setLibraryOffset(records.length); setHasMore(hasMore);
+    }).catch(()=>{ if (active) setLibraryError(true); });
+    return ()=>{ active=false; };
+  },[owner,libraryRevision]);
+  const loadMore = async () => {
+    setLoadingMore(true);
+    try {
+      const {records,hasMore} = await platformApi.listExercises(owner,libraryOffset);
+      if (ownerRef.current !== owner) return;
+      setGenerated(current=>{
+        if (ownerRef.current !== owner) return current;
+        const items=[...current.filter(item=>item.engine!=='fallback'),...records.map(exerciseFromRecord),...current.filter(item=>item.engine==='fallback')];
+        cacheGeneratedExercises(items,owner); return items;
+      });
+      setLibraryOffset(value=>value+records.length); setHasMore(hasMore); setLibraryError(false);
+    } catch { setLibraryError(true); }
+    finally { setLoadingMore(false); }
+  };
   const cats = ['All','Generated','Black-Scholes','Greeks','Volatility','Monte Carlo','Barrier','Yield Curves','Rates','Credit','Risk','Exotic'];
   const normalizedQuery = query.trim().toLowerCase();
   const allExercises = useMemo(()=>[...generated, ...EXERCISES], [generated]);
@@ -5122,9 +4520,10 @@ function ExercisesIndex({route}) {
     return inCat && (!normalizedQuery || haystack.includes(normalizedQuery));
   });
   const onGenerated = (exercise) => {
-    const next = saveGeneratedExercise(exercise);
+    if (ownerRef.current !== owner) return;
+    const next = saveGeneratedExercise(exercise, owner);
     setGenerated(next);
-    notify(exercise.engine === 'rag' ? 'RAG exercise generated and added to the library.' : 'Local fallback exercise generated and added.');
+    notify(exercise.metadata?.persistence === 'account' ? 'Exercice créé et enregistré dans votre bibliothèque.' : 'Exemple hors connexion ouvert sur cet appareil.');
     nav(`/exercises/${exercise.id}`);
   };
   return (
@@ -5134,12 +4533,14 @@ function ExercisesIndex({route}) {
         title="Exercises"
         sub="Desk-first practice. Generate, solve and review exercises grounded in the local finance knowledge base."
         right={<>
-          <input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Search exercises…" style={{background:'#0A0C10',border:'1px solid var(--line-2)',padding:'8px 10px',borderRadius:3,color:'var(--text)',fontFamily:"'JetBrains Mono',monospace",fontSize:12,width:220}}/>
+          <input aria-label="Search exercises" value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Search exercises…" style={{background:'#0A0C10',border:'1px solid var(--line-2)',padding:'8px 10px',borderRadius:3,color:'var(--text)',fontFamily:"'JetBrains Mono',monospace",fontSize:12,width:220}}/>
           <Link to="/practice" className="btn btn-outline btn-sm">Practice Hub <Icon name="arrow-right" size={13}/></Link>
         </>}
       />
-      <ExerciseGeneratorPanel route={route} onGenerated={onGenerated}/>
+      <ExerciseGeneratorPanel key={retryId || 'new'} initialRequest={retryRequest} onGenerated={onGenerated}/>
+      {libraryError && <ServiceUnavailable title="Votre bibliothèque de compte est temporairement indisponible. Les cas en cache restent accessibles." onRetry={()=>setLibraryRevision(value=>value+1)}/>}
       <ExerciseLibraryStats exercises={allExercises} generatedCount={generated.length}/>
+      {hasMore && <button className="btn btn-outline" disabled={loadingMore} onClick={loadMore}>{loadingMore?'Chargement…':'Charger les exercices enregistrés suivants'}</button>}
       <div className="tabs-bar">
         {cats.map(c=>(
           <button key={c} className={"tab-btn "+(cat===c?'on':'')} onClick={()=>setCat(c)}>{c}</button>
@@ -5176,9 +4577,10 @@ function ExerciseLibraryStats({exercises, generatedCount}) {
   );
 }
 
-function ExerciseGeneratorPanel({onGenerated}) {
-  const [form,setForm] = useState(()=>({...GENERATOR_PRESETS[0]}));
+function ExerciseGeneratorPanel({onGenerated,initialRequest}) {
+  const [form,setForm] = useState(()=>({...GENERATOR_PRESETS[0],number_of_questions:5,...initialRequest}));
   const [busy,setBusy] = useState(false);
+  const [error,setError] = useState(null);
   const [status,setStatus] = useState({checked:false, ok:false, detail:'Checking engine'});
 
   useEffect(()=>{
@@ -5191,7 +4593,8 @@ function ExerciseGeneratorPanel({onGenerated}) {
         setStatus({
           checked:true,
           ok:canGenerate,
-          detail:canGenerate ? `${data.llm} · ${data.embedding_backend}` : `${data.llm} · API key missing`,
+          detail:canGenerate ? (data.llm==='template' ? 'Rédaction structurée · sans API IA externe' : 'Rédaction IA configurée') : 'Service de rédaction indisponible',
+          sources:Boolean(data.rag_available),
         });
       })
       .catch((error)=>{ if (alive) setStatus({checked:true, ok:false, detail:error.message}); });
@@ -5199,14 +4602,15 @@ function ExerciseGeneratorPanel({onGenerated}) {
   },[]);
 
   const update = (key,value) => setForm((current)=>({...current, [key]: value}));
-  const applyPreset = (preset) => setForm({...preset});
+  const applyPreset = (preset) => { setForm({...preset,number_of_questions:form.number_of_questions || 5}); setError(null); };
   const generate = async () => {
     setBusy(true);
+    setError(null);
     try {
       const exercise = await generateAiDeskExercise(form);
       onGenerated(exercise);
     } catch (error) {
-      notify(error instanceof Error ? error.message : 'Generation failed.', 'error');
+      setError(error);
     } finally {
       setBusy(false);
     }
@@ -5216,12 +4620,12 @@ function ExerciseGeneratorPanel({onGenerated}) {
     <div className="panel generator-panel">
       <div className="row between generator-head">
         <div>
-          <div className="section-eyebrow" style={{margin:0}}>// AI Practice Engine</div>
+          <div className="section-eyebrow" style={{margin:0}}>// Practice Engine</div>
           <h2 className="mono" style={{fontSize:20,fontWeight:700,margin:'8px 0 0'}}>Generate a desk case</h2>
         </div>
         <div className="row" style={{gap:8,flexWrap:'wrap',justifyContent:'flex-end'}}>
-          <span className={"badge "+(status.ok?'badge-green':'badge-amber')}>
-            <span className={"dot "+(status.ok?'dot-green':'dot-red')}></span>{status.ok ? 'RAG ONLINE' : 'LOCAL FALLBACK'}
+          <span className={"badge "+(status.ok && status.sources?'badge-green':'badge-amber')}>
+            <span className={"dot "+(status.ok?'dot-green':'dot-red')}></span>{status.ok ? status.sources ? 'BIBLIOTHÈQUE DISPONIBLE' : 'SANS RÉFÉRENCE DISPONIBLE' : 'MODE HORS CONNEXION'}
           </span>
           <span className="mono mute" style={{fontSize:10.5}}>{status.detail}</span>
         </div>
@@ -5236,25 +4640,25 @@ function ExerciseGeneratorPanel({onGenerated}) {
           </div>
           <div className="field">
             <span className="mono mute" style={{fontSize:11,letterSpacing:'.08em'}}>Free prompt / constraints</span>
-            <textarea value={form.free_prompt} onChange={(event)=>update('free_prompt', event.target.value)} rows={6} placeholder="Describe the market case, product, numbers and expected action."/>
+            <textarea aria-label="Exercise prompt and constraints" value={form.free_prompt} onChange={(event)=>update('free_prompt', event.target.value)} rows={6} placeholder="Describe the market case, product, numbers and expected action."/>
           </div>
         </div>
         <div className="generator-form">
           <div className="field">
             <span className="mono mute" style={{fontSize:11,letterSpacing:'.08em'}}>Topic</span>
-            <input value={form.topic} onChange={(event)=>update('topic', event.target.value)}/>
+            <input aria-label="Exercise topic" value={form.topic} onChange={(event)=>update('topic', event.target.value)}/>
           </div>
           <div className="field">
             <span className="mono mute" style={{fontSize:11,letterSpacing:'.08em'}}>Product</span>
-            <input value={form.product} onChange={(event)=>update('product', event.target.value)}/>
+            <input aria-label="Exercise product" value={form.product} onChange={(event)=>update('product', event.target.value)}/>
           </div>
           <div className="field">
             <span className="mono mute" style={{fontSize:11,letterSpacing:'.08em'}}>Concept</span>
-            <input value={form.concept} onChange={(event)=>update('concept', event.target.value)}/>
+            <input aria-label="Exercise concept" value={form.concept} onChange={(event)=>update('concept', event.target.value)}/>
           </div>
           <div className="field">
             <span className="mono mute" style={{fontSize:11,letterSpacing:'.08em'}}>Difficulty</span>
-            <select value={form.difficulty} onChange={(event)=>update('difficulty', event.target.value)}>
+            <select aria-label="Exercise difficulty" value={form.difficulty} onChange={(event)=>update('difficulty', event.target.value)}>
               <option value="beginner">Beginner</option>
               <option value="intermediate">Intermediate</option>
               <option value="advanced">Advanced</option>
@@ -5263,7 +4667,7 @@ function ExerciseGeneratorPanel({onGenerated}) {
           </div>
           <div className="field">
             <span className="mono mute" style={{fontSize:11,letterSpacing:'.08em'}}>Format</span>
-            <select value={form.exercise_format} onChange={(event)=>update('exercise_format', event.target.value)}>
+            <select aria-label="Exercise format" value={form.exercise_format} onChange={(event)=>update('exercise_format', event.target.value)}>
               <option value="mixed">Mixed</option>
               <option value="case_study">Case study</option>
               <option value="quantitative_problem">Quantitative problem</option>
@@ -5271,11 +4675,14 @@ function ExerciseGeneratorPanel({onGenerated}) {
               <option value="risk_management">Risk management</option>
             </select>
           </div>
+          <label className="field"><span className="mono mute" style={{fontSize:11}}>Nombre de questions</span><input aria-label="Number of questions" type="number" min="1" max="12" value={form.number_of_questions} onChange={event=>update('number_of_questions',event.target.value)}/></label>
           <button className="btn btn-primary" onClick={generate} disabled={busy} style={{alignSelf:'end',justifyContent:'center'}}>
             {busy ? <><Icon name="terminal" size={13}/> Generating</> : <><Icon name="play" size={13}/> Generate exercise</>}
           </button>
         </div>
       </div>
+      {busy && <p role="status" className="text-2">Recherche des références et préparation du corrigé…</p>}
+      {error && <div role="alert" className="exercise-generator-error"><p>{error.message || 'La création a échoué. Votre demande est conservée.'}</p>{error.status===401 && <Link className="btn btn-outline" to="/auth/login">Se reconnecter</Link>}{error.status===403 && <Link className="btn btn-outline" to="/pricing">Vérifier mon accès</Link>}<p className="text-2">Votre demande est conservée. Corrigez les paramètres ou réessayez.</p></div>}
     </div>
   );
 }
@@ -5286,7 +4693,7 @@ function ExerciseCard({e}) {
       <div className="row between exercise-card-top">
         <span className="row" style={{gap:6,flexWrap:'wrap'}}>
           <span className="badge">{e.cat}</span>
-          {e.generated && <span className={"badge "+(e.engine==='rag'?'badge-green':'badge-amber')}>{e.engine==='rag'?'AI/RAG':'AI/LOCAL'}</span>}
+          {e.generated && <span className={"badge "+(e.engine==='rag'?'badge-green':'badge-amber')}>{exerciseModeLabel(e)}</span>}
         </span>
         <span className="row" style={{gap:8}}>
           <span className="badge">{e.level}</span>
@@ -5306,7 +4713,7 @@ function ExerciseCard({e}) {
         </div>
       </div>
       <div className="row between exercise-card-foot">
-        {e.done ? <span className="badge badge-green">Completed</span> : <span className="badge">Open</span>}
+        <span className="badge">Practice case</span>
         <span className="mono" style={{fontSize:11,color:'var(--red)'}}>start ›</span>
       </div>
     </Link>
@@ -5314,7 +4721,28 @@ function ExerciseCard({e}) {
 }
 
 function ExerciseDetail({id}) {
-  const ex = getExerciseById(id) || EXERCISES[0];
+  const auth = useAuth();
+  const owner = auth.user?.id || null;
+  const cached = getExerciseById(id, owner);
+  const [state,setState] = useState({id:null,owner:null,exercise:null,error:null});
+  const [retry,setRetry] = useState(0);
+  useEffect(()=>{
+    if (cached || !id.startsWith('exo_') || !owner) return;
+    let active=true;
+    setState({id,owner,exercise:null,error:null});
+    platformApi.getExercise(id,owner).then(record=>{
+      if (!active) return;
+      const exercise=exerciseFromRecord(record);
+      saveGeneratedExercise(exercise,owner);
+      setState({id,owner,exercise,error:null});
+    }).catch(error=>{if(active)setState({id,owner,exercise:null,error});});
+    return ()=>{active=false;};
+  },[id,owner,retry,Boolean(cached)]);
+  const current = state.id===id && state.owner===owner ? state : null;
+  const ex = cached || current?.exercise;
+  if (!ex && id.startsWith('exo_') && owner && !current?.error) return <div className="container page" role="status">Chargement de votre exercice…</div>;
+  if (!ex && current?.error && current.error.status!==404) return <div className="container page"><ServiceUnavailable title="Cet exercice n’a pas pu être chargé." onRetry={()=>setRetry(value=>value+1)}/></div>;
+  if (!ex) return <NotFoundPage/>;
   if (ex.generated) return <GeneratedExerciseDetail ex={ex}/>;
   return <StaticExerciseDetail ex={ex}/>;
 }
@@ -5328,13 +4756,12 @@ function StaticExerciseDetail({ex}) {
         title={ex.title}
         sub={`${ex.cat} · ${ex.level} · est. ${ex.time} · ${ex.product || 'market finance'}`}
         right={<>
-          {ex.done && <span className="badge badge-green">Completed</span>}
-          <button className="btn btn-outline btn-sm" onClick={()=>handleSave(ex.title)}><Icon name="bookmark" size={13}/> Save</button>
-          <button className="btn btn-primary btn-sm" onClick={()=>setTab('code')}><Icon name="play" size={13}/> Run code</button>
+          <button className="btn btn-outline btn-sm" onClick={()=>downloadExercise(ex)}><Icon name="download" size={13}/> Download JSON</button>
+          <button className="btn btn-primary btn-sm" onClick={()=>setTab('code')}><Icon name="play" size={13}/> Open Python editor</button>
         </>}
       />
       <div className="tabs-bar">
-        {[['problem','Problem'],['code','Code'],['output','Output'],['solution','Solution']].map(([k,l])=>(
+        {[['problem','Problem'],['code','Code'],['output','Reference output'],['solution','Solution']].map(([k,l])=>(
           <button key={k} className={"tab-btn "+(tab===k?'on':'')} onClick={()=>setTab(k)}>{l}</button>
         ))}
       </div>
@@ -5346,7 +4773,7 @@ function StaticExerciseDetail({ex}) {
               <div className="panel exercise-readable-panel">
                 <div className="label" style={{marginBottom:8}}>Objective</div>
                 <p className="exercise-lead">{ex.objective}</p>
-                <div className="label" style={{marginBottom:8,marginTop:20}}>Market data</div>
+                <div className="label" style={{marginBottom:8,marginTop:20}}>Case inputs · hypothetical teaching data</div>
                 <table className="data">
                   <tbody>
                     {(ex.marketData || []).map(([k,v])=>(
@@ -5375,9 +4802,9 @@ function StaticExerciseDetail({ex}) {
           )}
           {tab==='output' && (
             <div className="panel exercise-readable-panel">
-              <div className="label" style={{marginBottom:10}}>Console output</div>
+              <div className="label" style={{marginBottom:10}}>Reference output · hypothetical teaching case</div><p className="text-2">This is the worked reference, not the result of your current code. Run your code in the editor to see its output.</p>
               <pre className="code" style={{marginBottom:14}}><code>{ex.output}</code></pre>
-              <ChartFrame title="Your output">
+              <ChartFrame title="Reference chart">
                 <ExerciseReferenceChart ex={ex} compact/>
               </ChartFrame>
             </div>
@@ -5439,7 +4866,10 @@ function ExerciseReferenceChart({ex, compact=false}) {
     return S*normCdf(d1)-K*Math.exp(-r*T)*normCdf(d2);
   }),[ex.id, ex.cat]);
   return (
-    <LineChart width={620} height={compact ? 180 : 220} series={[{name:ex.cat,color:'#FF2E45',data,fillOpacity:0.08}]}/>
+    <div data-exercise-reference-chart="true">
+      <div className="mono mute" style={{fontSize:10.5,marginBottom:7}}>Illustrative deterministic reference curve — synthetic teaching output, not observed market data.</div>
+      <LineChart width={620} height={compact ? 180 : 220} series={[{name:ex.cat,color:'#FF2E45',data,fillOpacity:0.08}]}/>
+    </div>
   );
 }
 
@@ -5451,13 +4881,16 @@ function GeneratedExerciseDetail({ex}) {
       <PageHead
         crumb={<><Link to="/exercises">exercises</Link><i>›</i><span>generated</span></>}
         title={ex.title}
-        sub={`${ex.cat} · ${ex.level} · ${ex.engine === 'rag' ? 'RAG grounded' : 'local fallback'} · ${ex.time}`}
+        sub={`${ex.cat} · ${ex.level} · ${exerciseModeLabel(ex)} · ${ex.time}`}
         right={<>
-          <span className={"badge "+(ex.engine==='rag'?'badge-green':'badge-amber')}>{ex.engine==='rag'?'AI/RAG':'AI/LOCAL'}</span>
+          <span className={"badge "+(ex.engine==='rag'?'badge-green':'badge-amber')}>{exerciseModeLabel(ex)}</span>
           <button className="btn btn-outline btn-sm" onClick={()=>copyText(ex.content, 'Exercise copied as Markdown.')}><Icon name="copy" size={13}/> Copy Markdown</button>
-          <button className="btn btn-primary btn-sm" onClick={()=>handleSave(ex.title)}><Icon name="bookmark" size={13}/> Save</button>
+          <button className="btn btn-outline btn-sm" onClick={()=>downloadExerciseMarkdown(ex)}><Icon name="download" size={13}/> Download Markdown</button>
+          <button className="btn btn-primary btn-sm" onClick={()=>downloadExercise(ex)}><Icon name="download" size={13}/> Download JSON</button>
         </>}
       />
+      {ex.engine==='fallback' && <aside className="panel exercise-offline-notice"><strong>Exemple fixe hors connexion : vos paramètres personnalisés ne sont pas appliqués.</strong><p>Aucune source de la bibliothèque n’est attachée. Votre demande originale est conservée pour réessayer.</p><details><summary>Retrouver ma demande</summary><p>{ex.request?.free_prompt}</p></details><Link className="btn btn-outline" to={`/exercises?retry=${encodeURIComponent(ex.id)}`}>Reprendre ma demande</Link></aside>}
+      <p className="text-2" role="status">{ex.metadata?.persistence==='account' ? 'Enregistré dans votre bibliothèque de compte.' : ex.metadata?.cache_warning ? 'Cache de cet appareil indisponible. Téléchargez cet exemple pour le conserver.' : 'Conservé uniquement sur cet appareil.'}</p>
       <div className="tabs-bar">
         {[['brief','Brief'],['solution','Correction'],['sources','Sources'],['export','Export']].map(([k,l])=>(
           <button key={k} className={"tab-btn "+(tab===k?'on':'')} onClick={()=>setTab(k)}>{l}</button>
@@ -5477,10 +4910,10 @@ function GeneratedExerciseDetail({ex}) {
         </div>
         <div className="col exercise-side-stack">
           <div className="panel exercise-side-panel">
-            <div className="label" style={{marginBottom:10}}>Generation metadata</div>
+            <div className="label" style={{marginBottom:10}}>À propos de ce cas</div>
             <div className="col" style={{gap:8}}>
               {[
-                ['Engine', ex.engine === 'rag' ? 'RAG backend' : 'Local fallback'],
+                ['Rédaction', exerciseModeLabel(ex)],
                 ['Product', ex.product || '-'],
                 ['Concept', ex.concept || '-'],
                 ['Sources', String(sources.length)],
@@ -5496,7 +4929,7 @@ function GeneratedExerciseDetail({ex}) {
           <div className="panel exercise-side-panel">
             <div className="label" style={{marginBottom:10}}>Next action</div>
             <div className="mute" style={{fontSize:12.5,lineHeight:1.55}}>
-              Solve the case first, then open the correction. If the source count is zero, start the RAG backend to regenerate with document grounding.
+              Solve the case first, then open the correction. If no reference is attached, treat the prompt as unsourced practice material.
             </div>
             <button className="btn btn-outline btn-sm" onClick={()=>nav('/exercises')} style={{width:'100%',justifyContent:'center',marginTop:14}}>Back to generator</button>
           </div>
@@ -5511,24 +4944,20 @@ function GeneratedSources({sources}) {
     return (
       <div>
         <div className="label" style={{marginBottom:12}}>Sources</div>
-        <p className="text-2" style={{fontSize:13.5,lineHeight:1.7}}>No retrieved sources were attached. This usually means the browser used the local fallback because the RAG backend was not running.</p>
+        <p className="text-2" style={{fontSize:13.5,lineHeight:1.7}}>No course reference was attached to this generated exercise. Treat it as an unsourced practice prompt.</p>
       </div>
     );
   }
   return (
     <div>
-      <div className="label" style={{marginBottom:12}}>Retrieved sources</div>
+      <div className="label" style={{marginBottom:12}}>Course references</div>
       <table className="data">
-        <thead><tr><th>#</th><th>Source</th><th className="num">Score</th></tr></thead>
+        <thead><tr><th>Reference</th><th>Relevant excerpt</th></tr></thead>
         <tbody>
           {sources.map((src,idx)=>(
             <tr key={src.chunk_id || idx}>
-              <td className="symbol">S{idx + 1}</td>
-              <td>
-                <div className="symbol">{src.title || src.source || src.document_id}</div>
-                <div className="mute" style={{fontSize:11,marginTop:4,lineHeight:1.45}}>{src.snippet}</div>
-              </td>
-              <td className="num">{typeof src.score === 'number' ? src.score.toFixed(3) : '-'}</td>
+              <td className="symbol">{src.title || src.source || 'Course reference'}</td>
+              <td className="mute" style={{fontSize:11,lineHeight:1.45}}>{readableExerciseText(src.snippet)}</td>
             </tr>
           ))}
         </tbody>
@@ -5537,95 +4966,11 @@ function GeneratedSources({sources}) {
   );
 }
 
+function readableExerciseText(value) {
+  return String(value || '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g,' ');
+}
 function MarkdownBlock({content}) {
-  const parsed = useMemo(()=>parseMarkdownSections(content), [content]);
-  return (
-    <div className="generated-doc">
-      {parsed.title && <h1>{parsed.title}</h1>}
-      <div className="generated-section-grid">
-        {parsed.sections.map((section,idx)=>(
-          <section key={idx} className="generated-section">
-            <h2>{section.title}</h2>
-            <MarkdownLines lines={section.lines}/>
-          </section>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function MarkdownLines({lines}) {
-  let inCode = false;
-  const rendered = [];
-  let codeLines = [];
-  const flushCode = (key) => {
-    if (!codeLines.length) return;
-    rendered.push(<pre key={key} className="code generated-code"><code>{codeLines.join('\n')}</code></pre>);
-    codeLines = [];
-  };
-  lines.forEach((line,idx)=>{
-    if (line.trim().startsWith('```')) {
-      if (inCode) {
-        flushCode(`code-${idx}`);
-        inCode = false;
-      } else {
-        inCode = true;
-      }
-      return;
-    }
-    if (inCode) {
-      codeLines.push(line);
-      return;
-    }
-    if (!line.trim()) {
-      rendered.push(<div key={idx} style={{height:6}}/>);
-      return;
-    }
-    if (line.startsWith('### ')) {
-      rendered.push(<h3 key={idx}>{line.slice(4)}</h3>);
-      return;
-    }
-    if (line.startsWith('- ')) {
-      rendered.push(<div key={idx} className="md-line md-bullet">{renderInlineMarkdown(line.slice(2))}</div>);
-      return;
-    }
-    if (/^\d+\.\s/.test(line)) {
-      rendered.push(<div key={idx} className="md-line md-number">{renderInlineMarkdown(line)}</div>);
-      return;
-    }
-    rendered.push(<p key={idx}>{renderInlineMarkdown(line)}</p>);
-  });
-  flushCode('code-final');
-  return <>{rendered}</>;
-}
-
-function renderInlineMarkdown(text) {
-  return String(text).split(/(\[S\d+\])/g).map((part,idx)=>{
-    if (/^\[S\d+\]$/.test(part)) return <span key={idx} className="source-chip">{part}</span>;
-    return part;
-  });
-}
-
-function parseMarkdownSections(content) {
-  const lines = String(content || '').split(/\r?\n/);
-  let title = '';
-  const sections = [];
-  let current = {title:'Desk brief', lines:[]};
-  for (const raw of lines) {
-    const line = raw.trimEnd();
-    if (line.startsWith('# ')) {
-      title = line.slice(2).trim();
-      continue;
-    }
-    if (line.startsWith('## ')) {
-      if (current.lines.some((item)=>item.trim())) sections.push(current);
-      current = {title: line.slice(3).trim(), lines: []};
-      continue;
-    }
-    current.lines.push(line);
-  }
-  if (current.lines.some((item)=>item.trim())) sections.push(current);
-  return {title, sections};
+  return <div className="exercise-rich-markdown"><React.Suspense fallback={<p role="status">Chargement du document…</p>}><CourseMarkdown tables>{readableExerciseText(content).replace(/^# /gm,'## ')}</CourseMarkdown></React.Suspense></div>;
 }
 
 function pickGeneratedContent(content, mode) {
@@ -5650,9 +4995,9 @@ function SurvivalIndex() {
   const [board,setBoard] = useState(null);
   useEffect(()=>{ platformApi.survivalLeaderboard(10).then(setBoard).catch(()=>setBoard([])); },[]);
   const waves = [
-    {n:'Beginner', lvl:1, time:'60s', count:10, topics:['Definitions','Basic payoffs'], status:'completed'},
-    {n:'Intermediate', lvl:2, time:'45s', count:15, topics:['Black-Scholes','Greeks'], status:'completed'},
-    {n:'Advanced', lvl:3, time:'30s', count:20, topics:['Volatility','Hedging'], status:'current'},
+    {n:'Beginner', lvl:1, time:'60s', count:10, topics:['Definitions','Basic payoffs'], status:'current'},
+    {n:'Intermediate', lvl:2, time:'45s', count:15, topics:['Black-Scholes','Greeks'], status:'locked'},
+    {n:'Advanced', lvl:3, time:'30s', count:20, topics:['Volatility','Hedging'], status:'locked'},
     {n:'Expert', lvl:4, time:'25s', count:25, topics:['Exotics','MC'], status:'locked'},
     {n:'Master', lvl:5, time:'20s', count:30, topics:['SDE','Calibration'], status:'locked'},
     {n:'Legendary', lvl:6, time:'15s', count:40, topics:['Everything'], status:'locked'},
@@ -5662,14 +5007,14 @@ function SurvivalIndex() {
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ survival</span></>}
         title={<>Survival Mode <span className="blink" style={{color:'var(--red)',marginLeft:10}}>●</span></>}
-        sub="Pressure-tested. Timer running. Each wave gets faster and meaner. Make a mistake — drop a life. Run out of lives, run out of session."
+        sub="Pressure-tested practice. Timer running. Only server-verified runs can enter the public leaderboard."
         right={<><span className="badge badge-red"><span className="dot dot-red"></span>Timed mode</span></>}
       />
       <div className="grid-4" style={{marginBottom:18}}>
-        <Stat label="Highest wave" value="Advanced" accent="var(--red)"/>
-        <Stat label="Challenges completed" value="312"/>
-        <Stat label="Success rate" value="78.4%"/>
-        <Stat label="Avg time/Q" value="22.4s"/>
+        <Stat label="Highest wave" value={board?.length?'Recorded':'No runs yet'} accent="var(--red)"/>
+        <Stat label="Available waves" value={String(waves.length)}/>
+        <Stat label="Ranking" value={board===null?'Loading':board.length?'Active':'No runs yet'}/>
+        <Stat label="Avg time/Q" value="—"/>
       </div>
       <div className="grid-3">
         {waves.map(w=>(
@@ -5712,7 +5057,7 @@ function SurvivalIndex() {
         </div>
         <div className="panel">
           {board===null && <div className="mute" style={{padding:18}}>Loading leaderboard…</div>}
-          {board!==null && board.length===0 && <div className="mute" style={{padding:18}}>No runs yet. Play a wave to put your score on the board.</div>}
+          {board!==null && board.length===0 && <div className="mute" style={{padding:18}}>No verified runs yet. Practice runs are saved to your progress but never self-publish a client-declared score.</div>}
           {board && board.length>0 && <table className="data">
             <thead><tr><th>#</th><th>Player</th><th className="num">Best score</th><th className="num">Streak</th></tr></thead>
             <tbody>
@@ -5736,14 +5081,26 @@ function SurvivalWave({wave}) {
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [selected, setSelected] = useState(null);
-  const total = 20;
-  const correct = 'D'; // ATM call delta = N(d1), d1=(0.02+0.02)/0.2=0.2 -> N(0.2)=0.579 ~ 0.58
+  const [saveStatus, setSaveStatus] = useState('idle');
+  const [completed, setCompleted] = useState(false);
+  const total = SURVIVAL_QUESTIONS.length;
+  const question = SURVIVAL_QUESTIONS[Math.min(progress, total - 1)];
+  const correct = question.correct;
   const waveName = (wave || 'advanced').replace(/-/g,' ');
   const prettyWave = waveName.charAt(0).toUpperCase() + waveName.slice(1);
-  const saveRun = (finalScore, finalStreak) => {
-    const username = auth?.profile?.prenom || (auth?.user?.email ? auth.user.email.split('@')[0] : 'guest');
-    platformApi.recordSurvival({ user_id: auth?.user?.id || null, username, wave: prettyWave, score: Math.round(finalScore), streak: finalStreak });
-    if (auth?.user) recordProgressOnce(auth, 'survival', `${prettyWave}-${Date.now()}`, Math.round(finalScore), { wave: prettyWave });
+  const saveRun = async (finalScore, finalStreak) => {
+    setSaveStatus('saving');
+    notify('Saving practice run…', 'warning');
+    try {
+      const result = await platformApi.recordSurvival({ wave: prettyWave, score: Math.round(finalScore), streak: finalStreak });
+      if (!result?.ok) throw new Error('The server did not confirm the run.');
+      setSaveStatus(result.ranked ? 'ranked' : 'saved');
+      notify(result.ranked ? 'Verified run saved to the leaderboard.' : 'Practice run saved. Public ranking requires server verification.');
+      if (auth?.user) void recordProgressOnce(auth, 'survival', `${prettyWave}-${Date.now()}`, null, { wave: prettyWave }).catch(()=>{});
+    } catch (error) {
+      setSaveStatus('error');
+      notify(`Practice run was not saved (${error.message}).`, 'error');
+    }
   };
   useEffect(()=>{
     const id = setInterval(()=>setTimer(t=>selected?t:(t>0?t-1:30)),1000);
@@ -5756,21 +5113,55 @@ function SurvivalWave({wave}) {
       const earned = Math.max(50, timer * 12);
       setScore((value)=>value + earned);
       setStreak((s)=>s+1);
-      setProgress((value)=>{ const np = Math.min(total, value + 1); if (np>=total) saveRun(score+earned, streak+1); return np; });
+      const nextProgress = Math.min(total, progress + 1);
+      setProgress(nextProgress);
+      if (nextProgress>=total) void saveRun(score+earned, streak+1);
       notify(`Correct. +${earned} pts.`);
     } else {
       setStreak(0);
-      setLives((value)=>{ const nl = Math.max(0, value - 1); if (nl===0) saveRun(score, streak); return nl; });
-      notify(lives-1<=0 ? 'Game over — score saved to the leaderboard.' : 'Wrong answer. One life removed.', 'warning');
+      const nextLives = Math.max(0, lives - 1);
+      setProgress(Math.min(total, progress + 1));
+      setLives(nextLives);
+      if (nextLives===0) void saveRun(score, streak);
+      notify(nextLives===0 ? 'Game over — saving practice run…' : 'Wrong answer. One life removed.', 'warning');
     }
   };
   const nextQuestion = () => {
+    if (progress >= total) {
+      setCompleted(true);
+      return;
+    }
     setSelected(null);
     setTimer(30);
   };
+  if (completed) return (
+    <div className="container page">
+      <PageHead
+        crumb={<><Link to="/">/ home</Link><i>›</i><Link to="/survival">/ survival</Link><i>›</i><span>/ complete</span></>}
+        title="Wave complete"
+        sub={`You completed ${total} deterministic teaching challenges in the ${prettyWave} wave.`}
+        right={<span className="badge badge-green">Completed</span>}
+      />
+      <div className="panel" style={{padding:28,maxWidth:680}}>
+        <div className="grid-3" style={{marginBottom:22}}>
+          <Stat label="Score" value={score.toLocaleString()} accent="var(--green)"/>
+          <Stat label="Best streak" value={`x${streak}`}/>
+          <Stat label="Save status" value={saveStatus==='ranked'?'Verified':saveStatus==='saved'?'Saved':saveStatus==='saving'?'Saving…':saveStatus==='error'?'Not saved':'Pending'}/>
+        </div>
+        <p className="text-2" style={{fontSize:13,lineHeight:1.65}}>
+          Every answer was evaluated against the canonical question bank. The cases are hypothetical teaching data, not live market observations.
+        </p>
+        <div className="row" style={{gap:10,marginTop:20}}>
+          <Link to="/survival" className="btn btn-primary btn-sm">Back to Survival Mode <Icon name="arrow-right" size={13}/></Link>
+          <Link to="/lab" className="btn btn-outline btn-sm">Open Trading Lab <Icon name="arrow-right" size={13}/></Link>
+        </div>
+      </div>
+    </div>
+  );
   return (
     <div className="container page">
-      <div className="row between" style={{padding:'18px 0',borderBottom:'1px solid var(--line)',marginBottom:24}}>
+      <h1 className="sr-only">Survival · {prettyWave} wave</h1>
+      <div className="row between survival-run-head" style={{padding:'18px 0',borderBottom:'1px solid var(--line)',marginBottom:24}}>
         <div className="row" style={{gap:14}}>
           <Link to="/survival" className="btn btn-ghost btn-sm"><Icon name="x" size={14}/> Quit</Link>
           <span className="mono mute" style={{fontSize:11,letterSpacing:'.1em'}}>WAVE · {prettyWave.toUpperCase()}</span>
@@ -5794,18 +5185,13 @@ function SurvivalWave({wave}) {
       </div>
       <div style={{display:'grid',gridTemplateColumns:'1fr 320px',gap:24}}>
         <div className="panel" style={{padding:40}}>
-          <div className="mono mute" style={{fontSize:11,letterSpacing:'.14em',marginBottom:18}}>QUESTION {progress} / {total}</div>
+          <div className="mono mute" style={{fontSize:11,letterSpacing:'.14em',marginBottom:18}}>QUESTION {Math.min(progress + 1, total)} / {total} · {question.topic}</div>
           <h2 className="mono" style={{fontSize:26,fontWeight:700,lineHeight:1.3,marginTop:0,marginBottom:6}}>
-            For an at-the-money European call with σ = 20% and T = 1y, what is the approximate Delta?
+            {question.prompt}
           </h2>
-          <p className="text-2" style={{fontSize:13.5,marginTop:14}}>S = 100, K = 100, r = 2%, q = 0. Pick the closest value.</p>
+          <p className="text-2" style={{fontSize:13.5,marginTop:14}}>{question.context}</p>
           <div className="col" style={{gap:10,marginTop:30}}>
-            {[
-              ['A','0.42'],
-              ['B','0.50'],
-              ['C','0.54'],
-              ['D','0.58'],
-            ].map(([k,v])=>{
+            {question.options.map(([k,v])=>{
               const isCorrect = selected && k === correct;
               const isWrong = selected === k && k !== correct;
               return (
@@ -5819,7 +5205,7 @@ function SurvivalWave({wave}) {
           {selected && (
             <div className="row between" style={{marginTop:22,paddingTop:18,borderTop:'1px solid var(--line)'}}>
               <span className={selected===correct?'green mono':'red mono'} style={{fontSize:12}}>
-                {selected===correct ? 'Correct: ATM call delta is slightly above 0.50 when rates are positive.' : 'Answer C is closest: positive rates lift d1 above zero.'}
+                {selected===correct ? `Correct. ${question.explanation}` : `Correct answer: ${correct}. ${question.explanation}`}
               </span>
               <button className="btn btn-primary btn-sm" onClick={nextQuestion}>Next <Icon name="arrow-right" size={13}/></button>
             </div>
@@ -5832,6 +5218,7 @@ function SurvivalWave({wave}) {
               <div className="row between"><span className="mono mute" style={{fontSize:11}}>Streak</span><span className="mono" style={{fontSize:13,fontWeight:600}}>x{streak}</span></div>
               <div className="row between"><span className="mono mute" style={{fontSize:11}}>Lives</span><span className="mono red" style={{fontSize:13,fontWeight:600}}>{lives}</span></div>
               <div className="row between"><span className="mono mute" style={{fontSize:11}}>Score</span><span className="mono" style={{fontSize:13,fontWeight:600}}>{score.toLocaleString()}</span></div>
+              {saveStatus!=='idle' && <div className="row between"><span className="mono mute" style={{fontSize:11}}>Save</span><span className={`mono ${saveStatus==='error'?'red':saveStatus==='saving'?'mute':'green'}`} style={{fontSize:11,fontWeight:600}}>{saveStatus==='saving'?'Saving…':saveStatus==='error'?'Not saved':saveStatus==='ranked'?'Verified + ranked':'Saved · unranked'}</span></div>}
             </div>
           </div>
           <div className="panel" style={{padding:16}}>
@@ -5854,149 +5241,41 @@ Object.assign(window, {TradingLabPage, ExercisesPage, SurvivalPage});
 
 // ============= COMMUNITY =============
 function CommunityPage({route}) {
-  let authName = null; try { const a=useAuth(); authName = a?.profile?.prenom || a?.user?.email || null; } catch { authName=null; }
-  const sub = route.parts[1] || 'forum';
-  const tabs = [['forum','Forum'],['projects','Projects'],['publications','Publications']];
+  const requestedSub = route.parts[1] || 'forum';
+  const sub = requestedSub === 'forum' ? 'forum' : 'unpublished';
+  const tabs = [['forum','Forum']];
   const [composing,setComposing] = useState(false);
   const [reloadKey,setReloadKey] = useState(0);
   return (
     <div className="container page">
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ community</span></>}
-        title="Community"
-        sub="Forums, shared notebooks, projects and peer-reviewed publications."
-        right={<>
-          <button className="btn btn-primary btn-sm" onClick={()=>setComposing(c=>!c)}><Icon name="plus" size={13}/> New post</button>
-        </>}
+        title="Community forum"
+        sub="A persisted forum for pricing and risk questions. Project publishing and publications are not included in this release."
+        right={sub==='forum' ? <button className="btn btn-primary btn-sm" onClick={()=>setComposing(c=>!c)}><Icon name="plus" size={13}/> New post</button> : null}
       />
       <div className="tabs-bar">
         {tabs.map(([k,l])=><Link key={k} to={"/community/"+k} className={"tab-btn "+(sub===k?'on':'')}>{l}</Link>)}
       </div>
-      {sub==='forum' && <ForumPanel composing={composing} setComposing={setComposing} authName={authName} reloadKey={reloadKey} onPosted={()=>setReloadKey(k=>k+1)}/>}
-      {sub==='projects' && <ProjectsPanel/>}
-      {sub==='publications' && <PublicationsPanel/>}
+      {sub==='forum' && <ForumPanel composing={composing} setComposing={setComposing} reloadKey={reloadKey} onPosted={()=>setReloadKey(k=>k+1)}/>}
+      {sub==='unpublished' && <div className="panel" style={{padding:24,marginTop:14}}><div className="label">Not published in this release</div><p className="text-2" style={{fontSize:13,lineHeight:1.6}}>Project publishing and peer-reviewed publications are not active and are not part of any paid-plan promise. The delivered community surface is the persisted forum.</p><Link to="/community/forum" className="btn btn-outline btn-sm">Back to forum <Icon name="arrow-right" size={13}/></Link></div>}
     </div>
   );
 }
 
-function ForumPanel({composing, setComposing, authName, reloadKey, onPosted}) {
-  const [query,setQuery] = useState('');
-  const [threads,setThreads] = useState(null);
-  const [form,setForm] = useState({ title:'', body:'', tag:'' });
-  const refetch = useCallback(()=>{ platformApi.listThreads('forum').then(setThreads).catch(()=>setThreads([])); },[]);
-  useEffect(()=>{ refetch(); },[refetch, reloadKey]);
-  const submitPost = async (event) => {
-    event.preventDefault();
-    if (!form.title.trim() || !form.body.trim()) { notify('Title and body are required.', 'error'); return; }
-    try {
-      await platformApi.createThread({ channel:'forum', title:form.title.trim(), body:form.body.trim(), author: authName||'anon', tags: form.tag?[form.tag]:[] });
-      setForm({ title:'', body:'', tag:'' }); setComposing&&setComposing(false);
-      notify('Posted to the forum.'); onPosted&&onPosted(); refetch();
-    } catch (e) { notify(`Could not post (${e.message}).`, 'error'); }
-  };
-  const vote = async (id) => { try { await platformApi.voteThread(id); refetch(); } catch { /* ignore */ } };
-  const list = threads || [];
-  const displayed = list.filter((t)=>`${t.title} ${(t.tags||[]).join(' ')}`.toLowerCase().includes(query.trim().toLowerCase()));
-  return (
-    <div style={{display:'grid',gridTemplateColumns:'1fr 320px',gap:14}}>
-      <div className="panel">
-        {composing && (
-          <form className="col" style={{gap:10, padding:16, borderBottom:'1px solid var(--line)'}} onSubmit={submitPost}>
-            <input value={form.title} onChange={(e)=>setForm(f=>({...f,title:e.target.value}))} placeholder="Question or topic title"/>
-            <textarea rows={3} value={form.body} onChange={(e)=>setForm(f=>({...f,body:e.target.value}))} placeholder="Describe your question…"></textarea>
-            <div className="row" style={{gap:8}}>
-              <input value={form.tag} onChange={(e)=>setForm(f=>({...f,tag:e.target.value}))} placeholder="tag (e.g. volatility)" style={{flex:1}}/>
-              <button className="btn btn-primary btn-sm" type="submit">Post</button>
-            </div>
-          </form>
-        )}
-        <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
-          <div className="mono mute" style={{fontSize:12}}>{list.length} topic{list.length===1?'':'s'}</div>
-          <input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Search forum…" style={{background:'#0A0C10',border:'1px solid var(--line-2)',padding:'6px 10px',borderRadius:3,color:'var(--text)',fontFamily:"'JetBrains Mono',monospace",fontSize:12,width:200}}/>
-        </div>
-        {threads===null && <div className="mute" style={{padding:18}}>Loading topics…</div>}
-        {threads!==null && list.length===0 && <div className="mute" style={{padding:18}}>No topics yet. Start the conversation with “New post”.</div>}
-        {list.length>0 && <table className="data">
-          <thead><tr><th>Topic</th><th>Tags</th><th className="num">Replies</th><th className="num">Votes</th></tr></thead>
-          <tbody>
-            {displayed.map((t)=>(
-              <tr key={t.id}>
-                <td><div style={{fontWeight:500}}>{t.title}</div><div className="mono mute" style={{fontSize:10.5,marginTop:2}}>by @{t.author}</div></td>
-                <td>{(t.tags||[]).map(tag=><span key={tag} className="badge" style={{marginRight:4}}>{tag}</span>)}</td>
-                <td className="num">{t.comment_count}</td>
-                <td className="num"><button className="btn btn-ghost btn-sm" onClick={()=>vote(t.id)} style={{padding:'2px 8px'}}>▲ {t.votes}</button></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>}
-      </div>
-      <div className="col" style={{gap:14, alignSelf:'start'}}>
-        <div className="panel" style={{padding:16}}>
-          <div className="label" style={{marginBottom:10}}>Categories</div>
-          {[
-            ['Black-Scholes',428],['Volatility',612],['Exotics',218],['Greeks',391],['Monte Carlo',184],['Calibration',152],['Tooling',92],['Meta',38],
-          ].map(([k,v])=>(
-            <div key={k} className="row between" style={{padding:'8px 0', borderTop:k!=='Black-Scholes'?'1px solid var(--line)':'none'}}>
-              <span className="mono" style={{fontSize:12}}>{k}</span>
-              <span className="mono mute" style={{fontSize:11}}>{v}</span>
-            </div>
-          ))}
-        </div>
-        <div className="panel" style={{padding:16}}>
-          <div className="row between" style={{marginBottom:10}}>
-            <div className="label">Upcoming events</div>
-          </div>
-          {[
-            {d:'May 28',t:'AMA · Vol surface modelling',w:'+184 RSVP'},
-            {d:'Jun 04',t:'Workshop · MC variance reduction',w:'+92 seats'},
-            {d:'Jun 11',t:'Live calibration · Heston on SPX',w:'free'},
-          ].map((e,i)=>(
-            <div key={i} className="row" style={{padding:'10px 0', borderTop:i?'1px solid var(--line)':'none', gap:12}}>
-              <div className="mono red" style={{fontSize:11,minWidth:50}}>{e.d}</div>
-              <div style={{flex:1}}>
-                <div style={{fontSize:12.5,fontWeight:600}}>{e.t}</div>
-                <div className="mono mute" style={{fontSize:10.5,marginTop:2}}>{e.w}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="panel" style={{padding:16}}>
-          <div className="label" style={{marginBottom:10}}>Community poll</div>
-          <div className="mono" style={{fontWeight:700,marginBottom:12,fontSize:13}}>Favourite stochastic vol model?</div>
-          {[['Heston',54],['SABR',31],['Bergomi',10],['Other',5]].map(([k,v])=>(
-            <div key={k} style={{marginBottom:8}}>
-              <div className="row between" style={{fontSize:11,fontFamily:"'JetBrains Mono',monospace",marginBottom:4}}>
-                <span>{k}</span><span>{v}%</span>
-              </div>
-              <div style={{height:4,background:'var(--line)'}}>
-                <div style={{height:'100%',width:v+'%',background:'var(--red)'}}></div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+function ForumPanel(props) { return <ForumWorkspace {...props}/>; }
 
 function ProjectsPanel() {
-  const myp = [
-    {n:'option-pricer-go', desc:'Closed-form & MC option pricer in Go.', stars:38, lang:'Go', updated:'2d'},
-    {n:'svi-fitter', desc:'SVI calibration with arbitrage constraints.', stars:24, lang:'Python', updated:'1w'},
-  ];
-  const com = [
-    {n:'@aurora_vol/heston-py', desc:'Pure-Python Heston with FFT pricing.', stars:412, lang:'Python', updated:'4h'},
-    {n:'@gamma_god/lookback', desc:'Lookback option closed forms & MC tests.', stars:218, lang:'C++', updated:'1d'},
-    {n:'@quantfox/curve-boot', desc:'Multi-curve bootstrap (OIS, SOFR, ESTR).', stars:184, lang:'Rust', updated:'3d'},
-    {n:'@vega_neutral/autocall', desc:'Phoenix autocallable pricer + greeks.', stars:142, lang:'Python', updated:'6d'},
-  ];
+  const myp = [];
+  const com = [];
   return (
     <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14}}>
       <div className="panel">
         <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
           <div className="label">My projects</div>
-          <button className="btn btn-outline btn-sm" onClick={()=>submitStub('GitHub connection')}><Icon name="github" size={13}/> Connect</button>
+          <span className="badge">NOT PUBLISHED</span>
         </div>
+        {myp.length===0 && <div className="mute" style={{padding:18}}>Project publishing is not part of this release.</div>}
         {myp.map((p,i)=>(
           <div key={p.n} style={{padding:16, borderTop:i?'1px solid var(--line)':'none'}}>
             <div className="row between" style={{marginBottom:6}}>
@@ -6013,8 +5292,9 @@ function ProjectsPanel() {
       </div>
       <div className="panel">
         <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
-          <div className="label">Community · trending</div>
+          <div className="label">Published projects</div>
         </div>
+        {com.length===0 && <div className="mute" style={{padding:18}}>No verified public projects yet.</div>}
         {com.map((p,i)=>(
           <div key={p.n} style={{padding:16, borderTop:i?'1px solid var(--line)':'none'}}>
             <div className="row between" style={{marginBottom:6}}>
@@ -6037,15 +5317,10 @@ function ProjectsPanel() {
 }
 
 function PublicationsPanel() {
-  const pubs = [
-    {t:'A practical guide to SVI in production',a:'@aurora_vol',d:'May 18',cite:42,kind:'Article'},
-    {t:'Heston FFT pricing — caveats and convergence',a:'@gamma_god',d:'May 11',cite:38,kind:'Notebook'},
-    {t:'Volatility carry: empirical evidence on equity indices',a:'@vega_neutral',d:'Apr 28',cite:54,kind:'Strategy'},
-    {t:'Closed-form expressions for double-barrier options',a:'@itos_lemma',d:'Apr 14',cite:31,kind:'Article'},
-    {t:'GPU Monte Carlo: benchmarks on H100',a:'@quantfox',d:'Mar 30',cite:22,kind:'Notebook'},
-  ];
+  const pubs = [];
   return (
     <div className="grid-3">
+      {pubs.length===0 && <div className="panel" style={{padding:24}}><div className="mono" style={{fontWeight:700}}>No verified publications yet.</div><p className="text-2" style={{fontSize:13,marginBottom:0}}>Publication and citation counts will only appear after editorial review and persistence.</p></div>}
       {pubs.map(p=>(
         <div key={p.t} className="panel" style={{padding:18}}>
           <div className="row between" style={{marginBottom:12}}>
@@ -6075,7 +5350,12 @@ function BlogIndex() {
   const [tag,setTag] = useState('All');
   const [query,setQuery] = useState('');
   const [posts,setPosts] = useState(null);
-  useEffect(()=>{ platformApi.listBlog().then((d)=>setPosts((d||[]).map(mapBlog))).catch(()=>setPosts([])); },[]);
+  const [loadError,setLoadError] = useState(false);
+  const loadPosts = useCallback(()=>{
+    setLoadError(false);
+    platformApi.listBlog().then((data)=>setPosts(data.map(mapBlog))).catch(()=>setLoadError(true));
+  },[]);
+  useEffect(()=>{ loadPosts(); },[loadPosts]);
   const all = posts || [];
   const categories = ['All', ...Array.from(new Set(all.map(p=>p.tag)))];
   const normalizedQuery = query.trim().toLowerCase();
@@ -6084,18 +5364,20 @@ function BlogIndex() {
     const haystack = `${post.title} ${post.excerpt} ${post.tag} ${post.author}`.toLowerCase();
     return inTag && (!normalizedQuery || haystack.includes(normalizedQuery));
   });
-  if (posts===null) return <div className="container page"><div className="panel mute" style={{padding:24}}>Loading articles…</div></div>;
-  if (all.length===0) return <div className="container page"><PageHead crumb={<><Link to="/">/ home</Link><i>›</i><span>/ blog</span></>} title="The Pricing Letter" sub="Long-form quant essays."/><div className="panel" style={{padding:28,textAlign:'center'}}><div className="mono" style={{fontWeight:600}}>No articles yet.</div><div className="mute" style={{fontSize:13,marginTop:8}}>Start the platform backend and seed content to populate the blog.</div></div></div>;
-  const featured = matches[0] || all[0];
+  if (loadError) return <div className="container page"><PageHead title="The Pricing Letter" sub="Essays on pricing, risk and quantitative finance."/><ServiceUnavailable title="Articles could not be loaded" onRetry={loadPosts}/></div>;
+  if (posts===null) return <div className="container page"><PageHead title="The Pricing Letter"/><p role="status">Loading articles…</p></div>;
+  if (all.length===0) return <div className="container page"><PageHead title="The Pricing Letter" sub="Essays on pricing, risk and quantitative finance."/><div className="panel service-state"><h2>No articles published yet</h2><p>Explore a course or try a calculator while the next article is being prepared.</p><Link className="btn btn-outline" to="/courses">Browse courses</Link></div></div>;
+  if (!matches.length) return <div className="container page"><PageHead title="The Pricing Letter"/><label className="field">Search articles<input type="search" value={query} onChange={(event)=>setQuery(event.target.value)}/></label><div className="panel service-state"><h2>No articles match this search</h2><button type="button" className="btn btn-outline" onClick={()=>{setQuery('');setTag('All');}}>Clear filters</button></div></div>;
+  const featured = matches[0];
   const cards = matches.filter((post) => post.id !== featured.id);
   return (
     <div className="container page">
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ blog</span></>}
         title="The Pricing Letter"
-        sub="Long-form essays, deep dives and quant interview seeds — published weekly."
+        sub="Essays, worked explanations and quantitative finance interview practice."
         right={<>
-          <input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Search posts…" style={{background:'#0A0C10',border:'1px solid var(--line-2)',padding:'8px 10px',borderRadius:3,color:'var(--text)',fontFamily:"'JetBrains Mono',monospace",fontSize:12,width:220}}/>
+          <input aria-label="Search articles" value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Search posts…" style={{background:'#0A0C10',border:'1px solid var(--line-2)',padding:'8px 10px',borderRadius:3,color:'var(--text)',fontFamily:"'JetBrains Mono',monospace",fontSize:12,width:220}}/>
           <button className="btn btn-primary btn-sm" onClick={async()=>{const e=window.prompt('Your email for The Pricing Letter:'); if(e&&/^\S+@\S+\.\S+$/.test(e)){try{await platformApi.subscribe(e,'blog-index');notify('Subscribed. Welcome aboard.');}catch(err){notify('Could not subscribe ('+err.message+').','error');}} else if(e){notify('Please enter a valid email.','warning');}}}>Subscribe</button>
         </>}
       />
@@ -6195,7 +5477,7 @@ function NewsletterSignup({source}) {
       <p className="text-2" style={{fontSize:13.5,marginTop:0}}>Long-form quant essays in your inbox. No spam, no upsells.</p>
       {subscribed && <FormNotice>You are on the next issue list.</FormNotice>}
       <form className="row" onSubmit={subscribe} style={{gap:8,marginTop:10}}>
-        <input value={email} onChange={(event)=>setEmail(event.target.value)} placeholder="you@desk.com" style={{flex:1, background:'#0A0C10',border:'1px solid var(--line-2)',color:'var(--text)',padding:'8px 10px',borderRadius:3,fontFamily:"'JetBrains Mono',monospace",fontSize:12.5,outline:'none'}}/>
+        <input aria-label="Newsletter email" value={email} onChange={(event)=>setEmail(event.target.value)} placeholder="you@desk.com" style={{flex:1, background:'#0A0C10',border:'1px solid var(--line-2)',color:'var(--text)',padding:'8px 10px',borderRadius:3,fontFamily:"'JetBrains Mono',monospace",fontSize:12.5,outline:'none'}}/>
         <button className="btn btn-primary btn-sm" type="submit" disabled={busy}>{busy?'…':'Subscribe'}</button>
       </form>
     </div>
@@ -6203,15 +5485,19 @@ function NewsletterSignup({source}) {
 }
 function PostDetail({slug}) {
   const [p,setP] = useState(undefined); // undefined=loading, null=not found
+  const [loadError,setLoadError] = useState(false);
+  const [reload,setReload] = useState(0);
   const [related,setRelated] = useState([]);
   useEffect(()=>{
     let alive=true;
-    platformApi.getBlog(slug).then((d)=>{ if(alive) setP(d||null); }).catch(()=>{ if(alive) setP(null); });
+    setLoadError(false); setP(undefined);
+    platformApi.getBlog(slug).then((d)=>{ if(alive) setP(d||null); }).catch((error)=>{ if(alive) { if(error.status===404) setP(null); else setLoadError(true); } });
     platformApi.listBlog().then((d)=>{ if(alive) setRelated((d||[]).map(mapBlog).filter(x=>x.id!==slug).slice(0,3)); }).catch(()=>{});
     return ()=>{ alive=false; };
-  },[slug]);
-  if (p===undefined) return <div className="container page"><div className="panel mute" style={{padding:24}}>Loading article…</div></div>;
-  if (p===null) return <div className="container page" style={{maxWidth:880}}><div className="crumb" style={{marginTop:24}}><Link to="/blog">/ blog</Link></div><div className="panel" style={{padding:28,marginTop:18,textAlign:'center'}}><div className="mono" style={{fontWeight:600}}>Article not found.</div><Link to="/blog" className="btn btn-outline" style={{marginTop:16}}>Back to blog</Link></div></div>;
+  },[slug,reload]);
+  if (loadError) return <div className="container page"><PageHead title="Article unavailable"/><ServiceUnavailable title="This article could not be loaded" onRetry={()=>setReload(value=>value+1)}/></div>;
+  if (p===undefined) return <div className="container page"><PageHead title="Article"/><p role="status">Loading article…</p></div>;
+  if (p===null) return <div className="container page"><PageHead title="Article not found"/><Link to="/blog" className="btn btn-outline">Back to blog</Link></div>;
   const tag = (p.tags&&p.tags[0])||'Quant';
   return (
     <div className="container page" style={{maxWidth:880}}>
@@ -6248,13 +5534,18 @@ function coursePct(courseId, lessonsDone){ return Math.min(100, Math.round((less
 function DashboardPage() {
   let auth=null; try { auth = useAuth(); } catch { auth=null; }
   const userId = auth?.user?.id || auth?.user?.email || null;
-  const plan = (auth?.profile?.plan || 'free').toUpperCase();
+  const plan = (auth?.plan || 'free').toUpperCase();
   const [tab,setTab] = useState('overview');
   const [prog,setProg] = useState(null); // null=loading
+  const [loadError,setLoadError] = useState(false);
+  const [reload,setReload] = useState(0);
   useEffect(()=>{
+    let active=true;
+    setLoadError(false); setProg(null);
     if (!userId) { setProg({}); return; }
-    platformApi.getProgress(userId).then((d)=>setProg(d||{})).catch(()=>setProg({}));
-  },[userId]);
+    platformApi.getProgress(userId).then((d)=>{if(active) setProg(d||{});}).catch(()=>{if(active) setLoadError(true);});
+    return ()=>{active=false;};
+  },[userId,reload]);
   if (!userId) return (
     <div className="container page"><PageHead crumb={<><Link to="/">/ home</Link><i>›</i><span>/ dashboard</span></>} title="Dashboard" sub="Your learning desk."/>
       <div className="panel" style={{padding:28,textAlign:'center'}}><div className="mono" style={{fontWeight:600}}>Log in to see your dashboard.</div><Link to="/auth/login" className="btn btn-primary" style={{marginTop:16}}>Log in</Link></div></div>
@@ -6275,7 +5566,8 @@ function DashboardPage() {
           <button key={k} className={"tab-btn "+(tab===k?'on':'')} onClick={()=>setTab(k)}>{l}</button>
         ))}
       </div>
-      {prog===null && <div className="panel mute" style={{padding:24}}>Loading your activity…</div>}
+      {loadError && <ServiceUnavailable title="Your progress could not be loaded" onRetry={()=>setReload(value=>value+1)}/>}
+      {prog===null && !loadError && <div className="panel mute" style={{padding:24}} role="status">Loading your activity…</div>}
       {prog!==null && tab==='overview' && <DashOverview prog={prog}/>}
       {prog!==null && tab==='progress' && <DashProgress prog={prog}/>}
       {prog!==null && tab==='quizzes' && <DashQuizzes prog={prog}/>}
@@ -6460,26 +5752,35 @@ function DashAchievements({prog}) {
 
 // ============= PRICING =============
 function PricingPage() {
-  const [annual,setAnnual] = useState(false);
   const [busy,setBusy] = useState(null);
   const [notice,setNotice] = useState(null);
-  let authEmail = null;
-  try { authEmail = useAuth()?.user?.email || null; } catch { authEmail = null; }
+  let auth = null;
+  try { auth = useAuth(); } catch { auth = null; }
+  const authEmail = auth?.user?.email || null;
+  const accessToken = auth?.session?.access_token || null;
   const plans = [
-    {name:'Starter', key:'starter', price:annual?7:9, save:annual?'-22%':null, desc:'For learners who want the core desk workflow, not scattered theory.',
-     features:['All Fundamentals courses','Core calculators: BS, payoff, Monte Carlo','Starter AI exercise quota','Course scripts with LaTeX formulas','Community + weekly desk brief'],
+    {name:'Starter', key:'starter', price:9, desc:'For learners who want the core desk workflow, not scattered theory.',
+     features:['All Fundamentals courses','Payoff, Monte Carlo, volatility, bond and curve tools','Exercise workspace','Course scripts with LaTeX formulas','Recorded progress + forum access'],
      cta:'Start Starter', highlight:false},
-    {name:'Student', key:'student', price:annual?15:19, save:annual?'-21%':null, desc:'Most popular for active learners building real pricing reflexes.', popular:true,
-     features:['Everything in Starter','All Advanced courses','Unlimited exercises + quizzes','Trading Lab access','Notebooks workspace','Source-backed RAG course scripts','Priority support'],
+    {name:'Student', key:'student', price:19, desc:'For active learners building pricing and risk intuition.', popular:false,
+     features:['Everything in Starter','All Advanced courses','Calibration, binomial and vol-surface tools','Trading Lab + Survival Mode','Browser Python notebook','Verified course references'],
      cta:'Go Student', highlight:true},
-    {name:'Professional', key:'pro', price:annual?39:49, save:annual?'-20%':null, desc:'For working quants, desk analysts and serious career transition.',
-     features:['Everything in Student','All Complex courses','All 9 tools incl. PRO','API access','Backtest engine','Mentoring credits (2/mo)','Job board access'],
+    {name:'Professional', key:'pro', price:49, desc:'For working quants, desk analysts and serious career transition.',
+     features:['Everything in Student','All Complex courses','Agentic RFQ desk cockpit','Backtest research workspace','Advanced model and risk notes'],
      cta:'Go Pro', highlight:false},
   ];
   async function handleCheckout(planKey, planName){
     setNotice(null); setBusy(planKey);
     try {
-      const s = await startCheckout(planKey, authEmail);
+      if (!LEGAL_READY || !SOURCE_RIGHTS_CLEARED) {
+        setNotice({type:'error', msg:'Sales are disabled until the complete legal notice and written source-rights clearance are configured.'});
+        return;
+      }
+      if (!authEmail) {
+        nav(`/auth/signup?plan=${encodeURIComponent(planKey)}&next=checkout`);
+        return;
+      }
+      const s = await startCheckout(planKey, accessToken);
       if (s.mode === 'live' && s.url) { window.location.href = s.url; return; }
       // Backend reachable but Stripe not configured (mock) — be honest.
       setNotice({type:'info', msg:`Paiement en mode test : Stripe n'est pas encore configuré sur le backend (plan ${planName}). Renseigne les clés Stripe pour activer le vrai checkout.`});
@@ -6493,38 +5794,32 @@ function PricingPage() {
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ pricing</span></>}
         title="Plans"
         sub="Three paid tiers: 9€, 19€ and 49€ per month. Each tier maps to a real learning workflow, not just locked pages."
-        right={<>
-          <div className="toggle">
-            <button className={!annual?'on':''} onClick={()=>setAnnual(false)}>Monthly</button>
-            <button className={annual?'on':''} onClick={()=>setAnnual(true)}>Annual · -20%</button>
-          </div>
-        </>}
+        right={<span className="badge">{LEGAL_READY && SOURCE_RIGHTS_CLEARED?'Monthly · cancel through support':'PREVIEW · SALES DISABLED'}</span>}
       />
       {notice && (
         <div className="panel" style={{padding:'12px 16px',marginBottom:16,borderColor:notice.type==='error'?'var(--red)':'var(--line-2)',fontSize:13}}>
           <span className="mono" style={{color:notice.type==='error'?'var(--red)':'var(--text)'}}>{notice.type==='error'?'⚠ ':'ℹ '}</span>{notice.msg}
         </div>
       )}
-      <a href="/market-finance-starter-kit/" className="panel" style={{display:'flex',alignItems:'center',gap:18,padding:'18px 22px',marginBottom:18,borderColor:'rgba(255,46,69,.35)',background:'linear-gradient(100deg, rgba(255,46,69,.07), transparent 60%)',textDecoration:'none'}}>
-        <span className="badge badge-red">BÊTA · 29€</span>
+      <Link to="/starter-kit" className="panel" style={{display:'flex',alignItems:'center',gap:18,padding:'18px 22px',marginBottom:18,borderColor:'rgba(255,46,69,.35)',background:'linear-gradient(100deg, rgba(255,46,69,.07), transparent 60%)',textDecoration:'none'}}>
+        <span className="badge">PREVIEW · NOT YET ON SALE</span>
         <div style={{flex:1}}>
           <div className="mono" style={{fontWeight:700,fontSize:14}}>Market Finance Starter Kit</div>
           <div className="mute" style={{fontSize:12.5,marginTop:3}}>Construis en 7 jours ton premier projet finance de marché en Python &amp; Excel — prêt pour ton CV, GitHub ou LinkedIn.</div>
         </div>
         <span className="btn btn-primary btn-sm" style={{flexShrink:0}}>Voir l'offre<Icon name="arrow-right" size={13}/></span>
-      </a>
+      </Link>
       <div className="grid-3">
         {plans.map(p=>(
           <div key={p.name} className="panel" style={{padding:30, position:'relative', borderColor: p.highlight?'var(--red)':'var(--line)'}}>
-            {p.popular && <div style={{position:'absolute',top:-1,right:14,background:'var(--red)',color:'#fff',padding:'4px 10px',fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:'.14em',fontWeight:600}}>MOST POPULAR</div>}
+            {p.popular && <div style={{position:'absolute',top:-1,right:14,background:'var(--red)',color:'#fff',padding:'4px 10px',fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:'.14em',fontWeight:600}}>GUIDED PRACTICE</div>}
             <div className="mono" style={{fontWeight:700,fontSize:18, color: p.highlight?'var(--red)':'var(--text)'}}>{p.name}</div>
             <div className="mute" style={{fontSize:12.5,marginTop:8,minHeight:36}}>{p.desc}</div>
             <div className="row" style={{gap:6,alignItems:'baseline',marginTop:18}}>
               <span className="mono" style={{fontSize:48,fontWeight:700,lineHeight:1}}>{p.price+'€'}</span>
               <span className="mono mute" style={{fontSize:12}}>/mo</span>
-              {p.save && <span className="badge badge-green" style={{marginLeft:8}}>{p.save}</span>}
             </div>
-            <button type="button" onClick={()=>handleCheckout(p.key, p.name)} disabled={busy===p.key} className={"btn "+(p.highlight?'btn-primary':'btn-outline')} style={{width:'100%',justifyContent:'center',marginTop:24,cursor:busy===p.key?'wait':'pointer'}}>{busy===p.key?'Redirection…':p.cta}</button>
+            <button type="button" onClick={()=>handleCheckout(p.key, p.name)} disabled={busy===p.key || !LEGAL_READY || !SOURCE_RIGHTS_CLEARED} className={"btn "+(p.highlight?'btn-primary':'btn-outline')} style={{width:'100%',justifyContent:'center',marginTop:24,cursor:busy===p.key?'wait':'pointer',opacity:LEGAL_READY && SOURCE_RIGHTS_CLEARED?1:0.55}}>{busy===p.key?'Redirection…':LEGAL_READY && SOURCE_RIGHTS_CLEARED?p.cta:'Sales disabled'}</button>
             <ul style={{listStyle:'none',padding:0,marginTop:28}}>
               {p.features.map(f=>(
                 <li key={f} className="row" style={{gap:10,padding:'8px 0',borderTop:'1px solid var(--line)'}}>
@@ -6548,25 +5843,23 @@ function PricingPage() {
                 ['Fundamentals courses','All','All','All'],
                 ['Advanced courses','—','All','All'],
                 ['Complex courses','—','—','All'],
-                ['Generated RAG course scripts','✓','✓','✓'],
+                ['Learner course scripts','✓','✓','✓'],
                 ['LaTeX formula rendering','✓','✓','✓'],
                 ['LEARNING TOOLS',null,null,null,true],
                 ['Black-Scholes Pricer','✓','✓','✓'],
                 ['Payoff Visualizer','✓','✓','✓'],
                 ['Monte Carlo','✓','✓','✓'],
-                ['AI exercise generation','Limited','Unlimited','Unlimited'],
+                ['Exercise workspace','✓','✓','✓'],
                 ['Calibration','—','✓','✓'],
-                ['Vol Surface','—','—','✓'],
-                ['Binomial Tree','—','—','✓'],
+                ['Vol Surface','—','✓','✓'],
+                ['Binomial Tree','—','✓','✓'],
                 ['TRADING TOOLS',null,null,null,true],
                 ['Trading Lab','—','✓','✓'],
                 ['Backtest engine','—','—','✓'],
                 ['Survival Mode','—','✓','✓'],
                 ['PROFESSIONAL',null,null,null,true],
-                ['Mentoring','—','—','2/mo'],
-                ['API access','—','—','✓'],
-                ['Job board','—','—','✓'],
-                ['Priority support','—','✓','✓'],
+                ['Agentic RFQ desk cockpit','—','—','✓'],
+                ['Advanced model/risk notes','—','—','✓'],
               ].map((row,i)=>{
                 if (row[4]) return <tr key={i} style={{background:'var(--panel-2)'}}><td colSpan="4" className="label" style={{padding:'8px 10px',fontSize:10}}>{row[0]}</td></tr>;
                 return <tr key={i}>
@@ -6582,10 +5875,10 @@ function PricingPage() {
         <h2 className="section-title">FAQ</h2>
         <div className="grid-2" style={{marginTop:16}}>
           {[
-            ['Is there a free trial?','All paid plans include a 14-day money-back guarantee. Starter is priced to keep the entry point low without diluting the product.'],
-            ['Can I cancel anytime?','Yes — cancel from your dashboard in one click. No questions asked.'],
-            ['Do you offer student discounts?','Yes — verify with your .edu email for 40% off Student and Pro.'],
-            ['What about teams?','Team plans (5+ seats) available. Contact sales for a quote and bulk pricing.'],
+            ['Can I try the platform first?','Yes. The Black-Scholes calculator and a short Black-Scholes course preview are free, without an account.'],
+            ['How do I cancel?','Subscriptions are not enabled in this preview. When checkout is activated, cancellation and refund terms will be shown before payment.'],
+            ['Are student discounts available?','No discount is configured in this preview. The displayed prices are indicative until the legal and billing gates are complete.'],
+            ['What about teams?','School and training pilots are handled directly through the contact page with a written scope and invoice.'],
           ].map(([q,a])=>(
             <div key={q} className="panel" style={{padding:20}}>
               <div className="mono" style={{fontWeight:700,fontSize:13.5}}>{q}</div>
@@ -6601,137 +5894,8 @@ function PricingPage() {
 // ============= AUTH =============
 function AuthPage({route}) {
   const mode = route.parts[1] || 'login';
-  const isLogin = mode==='login';
-  const [plan,setPlan] = useState('student');
-  const [name,setName] = useState('');
-  const [email,setEmail] = useState('');
-  const [password,setPassword] = useState('');
-  const [status,setStatus] = useState('');
-  const [statusType,setStatusType] = useState('success');
-  const [loading,setLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
-  const submit = async (event) => {
-    event.preventDefault();
-    setStatus('');
-    if (!/^\S+@\S+\.\S+$/.test(email) || password.length < 6 || (!isLogin && !name.trim())) {
-      setStatusType('error');
-      setStatus('Please enter a valid email, a 6+ character password, and your name.');
-      return;
-    }
-    setLoading(true);
-    try {
-      if (isLogin) {
-        await signIn(email, password);
-        setStatus('Logged in. Redirecting to your dashboard.');
-      } else {
-        const [prenom, ...rest] = name.trim().split(/\s+/);
-        await signUp(email, password, prenom || name.trim(), rest.join(' ') || '-', plan);
-        setStatus(`Account created on the ${plan} plan. Check your email if confirmation is enabled.`);
-      }
-      setStatusType('success');
-      notify(isLogin ? 'Logged in.' : 'Account created.');
-      window.setTimeout(() => nav('/dashboard'), 600);
-    } catch (error) {
-      setStatusType('error');
-      setStatus(error instanceof Error ? error.message : 'Authentication failed.');
-      notify('Authentication failed.', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-  return (
-    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',minHeight:'calc(100vh - 78px - 24px - 200px)'}}>
-      <div className="panel" style={{borderRadius:0,borderRight:'none',padding:48,display:'flex',flexDirection:'column',justifyContent:'center'}}>
-        <div style={{maxWidth:380, margin:'0 auto', width:'100%'}}>
-          <Link to="/" className="brand" style={{marginBottom:36}}>
-            <span className="brand-mark"></span>
-            <span>THE PRICING LIBRARY</span>
-          </Link>
-          <h1 className="mono" style={{fontSize:30,fontWeight:700,margin:'0 0 8px'}}>{isLogin?'Welcome back.':'Create account.'}</h1>
-          <p className="text-2" style={{fontSize:13.5,marginTop:0,marginBottom:30}}>
-            {isLogin ? 'Resume your session. Markets don\'t wait.' : 'Pick your plan, give us an email, start learning in 60 seconds.'}
-          </p>
-          {!isLogin && (
-            <>
-              <div className="label" style={{marginBottom:10}}>Plan</div>
-              <div className="col" style={{gap:8,marginBottom:24}}>
-                {[
-                  {k:'starter',n:'Starter',p:'9€/mo'},
-                  {k:'student',n:'Student',p:'19€/mo',pop:true},
-                  {k:'pro',n:'Professional',p:'49€/mo'},
-                ].map(p=>(
-                  <button key={p.k} onClick={()=>setPlan(p.k)} className="row between" style={{padding:'12px 14px', background:plan===p.k?'rgba(255,46,69,.06)':'#06080B', border:'1px solid '+(plan===p.k?'var(--red)':'var(--line-2)'),borderRadius:3, cursor:'pointer'}}>
-                    <div className="row" style={{gap:10}}>
-                      <span style={{width:14,height:14,border:'1px solid '+(plan===p.k?'var(--red)':'var(--line-2)'),borderRadius:7,display:'grid',placeItems:'center'}}>
-                        {plan===p.k && <span style={{width:6,height:6,background:'var(--red)',borderRadius:3}}></span>}
-                      </span>
-                      <span className="mono" style={{fontWeight:600,fontSize:13}}>{p.n}</span>
-                      {p.pop && <span className="badge badge-red" style={{fontSize:9}}>POPULAR</span>}
-                    </div>
-                    <span className="mono" style={{fontSize:12}}>{p.p}</span>
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-          <form className="col" style={{gap:14}} onSubmit={submit}>
-            <FormNotice type={statusType}>{status}</FormNotice>
-            {!isLogin && (
-              <div className="field">
-                <span className="mono mute" style={{fontSize:10.5,letterSpacing:'.1em'}}>Name</span>
-                <input value={name} onChange={(event)=>setName(event.target.value)} placeholder="Jordan Marais"/>
-              </div>
-            )}
-            <div className="field">
-              <span className="mono mute" style={{fontSize:10.5,letterSpacing:'.1em'}}>Email</span>
-              <input value={email} onChange={(event)=>setEmail(event.target.value)} type="email" placeholder="jordan@desk.com"/>
-            </div>
-            <div className="field">
-              <span className="mono mute" style={{fontSize:10.5,letterSpacing:'.1em'}}>Password</span>
-              <input value={password} onChange={(event)=>setPassword(event.target.value)} type="password" placeholder="••••••••••••"/>
-            </div>
-            <button className="btn btn-primary" type="submit" disabled={loading} style={{width:'100%',justifyContent:'center',marginTop:8,opacity:loading?0.7:1}}>
-              {loading ? 'Processing…' : isLogin ? 'Log in' : 'Create account'} <Icon name="arrow-right" size={13}/>
-            </button>
-            <div className="row" style={{gap:14,margin:'14px 0'}}>
-              <div style={{flex:1,height:1,background:'var(--line)'}}></div>
-              <span className="mono mute" style={{fontSize:11}}>or continue with</span>
-              <div style={{flex:1,height:1,background:'var(--line)'}}></div>
-            </div>
-            <div className="row" style={{gap:8}}>
-              <button type="button" className="btn btn-outline" onClick={()=>submitStub('GitHub OAuth request')} style={{flex:1,justifyContent:'center'}}><Icon name="github" size={14}/> GitHub</button>
-              <button type="button" className="btn btn-outline" onClick={()=>submitStub('Google OAuth request')} style={{flex:1,justifyContent:'center'}}><Icon name="mail" size={14}/> Google</button>
-            </div>
-          </form>
-          <div className="mute" style={{fontSize:12,textAlign:'center',marginTop:24}}>
-            {isLogin ? <>No account? <Link to="/auth/signup" style={{color:'var(--red)'}}>Sign up</Link></> : <>Already have one? <Link to="/auth/login" style={{color:'var(--red)'}}>Log in</Link></>}
-          </div>
-        </div>
-      </div>
-      <div style={{background:'#06080B', borderLeft:'1px solid var(--line)', padding:48, position:'relative', overflow:'hidden'}}>
-        <div className="micro" style={{color:'var(--red)'}}>// AUTHENTICATION</div>
-        <h2 className="mono" style={{fontSize:24,fontWeight:700,marginTop:14,maxWidth:'24ch'}}>Your trading floor for learning.</h2>
-        <div className="panel" style={{padding:18, marginTop:30}}>
-          <div className="row between" style={{marginBottom:14}}>
-            <div className="label">Session preview</div>
-            <span className="badge badge-green">SANDBOX</span>
-          </div>
-          <LineChart width={500} height={180} series={[{name:'demo',color:'#FF2E45',data:genWalk(80,100,0.013,0.0004,42),fillOpacity:0.12}]}/>
-          <div className="grid-2" style={{gap:8,marginTop:14}}>
-            {[['P&L 30d','+4.2%','green'],['Sharpe','1.41',''],['Trades','142',''],['Win %','62.8',''] ].map(([k,v,c])=>(
-              <div key={k} className="panel-2" style={{padding:'8px 10px'}}>
-                <div className="mono mute" style={{fontSize:10}}>{k}</div>
-                <div className={"mono "+c} style={{fontSize:13,fontWeight:600,marginTop:2}}>{v}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="mute" style={{fontSize:12.5,marginTop:30,lineHeight:1.6,maxWidth:'40ch'}}>
-          By signing up you agree to our Terms and Privacy Policy. The platform is educational — not investment advice.
-        </div>
-      </div>
-    </div>
-  );
+  if (!['login', 'signup', 'forgot-password', 'reset-password'].includes(mode)) return <NotFoundPage/>;
+  return <AuthenticationPage key={mode} mode={mode} brand={<BrandSignature/>}/>;
 }
 
 // ============= MISC PAGES =============
@@ -6750,14 +5914,14 @@ function LeaderboardPage() {
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ leaderboard</span></>}
         title="Leaderboard"
-        sub="Live ranking by points earned across courses, exercises and Survival Mode."
+        sub="Identity-bound activity board · fixed points per distinct learning event, not a skill or performance ranking."
       />
       {rows===null && <div className="panel mute" style={{padding:24}}>Loading leaderboard…</div>}
       {rows!==null && visibleRows.length===0 && (
         <div className="panel" style={{padding:28, textAlign:'center'}}>
           <div className="mono" style={{fontWeight:600,fontSize:15}}>No scores yet.</div>
           <div className="mute" style={{fontSize:13,marginTop:8}}>
-            {err ? 'Leaderboard backend unreachable — start the platform API to see live rankings.'
+            {err ? 'The activity board could not be loaded. Please try again later; your progress has not been changed.'
                  : 'Complete a lesson, exercise, quiz or Survival run and you will appear here in real time.'}
           </div>
         </div>
@@ -6800,20 +5964,17 @@ function LeaderboardPage() {
 
 function NotebooksPage() {
   const nbs = [
-    {n:'black-scholes-intro.ipynb', m:'2d', tags:['Python','BS']},
-    {n:'svi-fit.ipynb', m:'5d', tags:['Python','SVI','Vol']},
-    {n:'mc-asian-option.ipynb', m:'1w', tags:['MC','Asian']},
-    {n:'curve-bootstrap.ipynb', m:'2w', tags:['Curves']},
+    {n:'black-scholes-intro.ipynb', tags:['Python','BS','Browser runtime']},
   ];
   return (
     <div className="container page">
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ notebooks</span></>}
         title="Notebooks"
-        sub="Interactive Python notebooks — run code, plot results, share with peers."
-        right={<button className="btn btn-primary btn-sm" onClick={()=>submitStub('Notebook draft')}><Icon name="plus" size={13}/> New notebook</button>}
+        sub="One verified browser Python lab. Persistent saving and sharing are not included in this release."
+        right={<span className="badge">Pyodide runtime</span>}
       />
-      <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:14}}>
+      <div className="workspace-sidebar-left">
         <div className="panel">
           <div className="label" style={{padding:'14px 14px 10px'}}>Library</div>
           {nbs.map((n,i)=>(
@@ -6822,7 +5983,6 @@ function NotebooksPage() {
               <div className="row" style={{gap:6,marginTop:6,flexWrap:'wrap'}}>
                 {n.tags.map(t=><span key={t} className="badge" style={{fontSize:9}}>{t}</span>)}
               </div>
-              <div className="mono mute" style={{fontSize:10.5,marginTop:6}}>modified {n.m} ago</div>
             </div>
           ))}
         </div>
@@ -6850,26 +6010,20 @@ for S in range(80, 121, 10):
 }
 
 function MentoringPage() {
-  const mentors = [
-    {n:'Loïs Martin', r:'Vol trader · Paris', y:8, sp:'Vol surfaces · SABR'},
-    {n:'Sade Okafor', r:'Quant researcher · NY', y:12, sp:'Stochastic vol · Heston'},
-    {n:'Marisol Rivera', r:'Risk strategist · London', y:10, sp:'Greeks · Risk management'},
-    {n:'Akira Chen', r:'Derivs structurer · HK', y:6, sp:'Exotic options · Autocallables'},
-  ];
   return (
     <div className="container page">
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ mentoring</span></>}
         title="Mentoring"
-        sub="Get unstuck. 1-on-1 sessions with practicing quants — pricing, code review, career."
-        right={<span className="badge">Bientôt · booking opens soon</span>}
+        sub="A supervised mentoring pilot for pricing, code review and quant-career questions."
+        right={<span className="badge">Pilot · not on sale</span>}
       />
       <div className="grid-4">
         {[
-          {t:'Pick a mentor', d:'Browse by specialty and timezone.', ic:'users'},
-          {t:'Book a slot', d:'30 or 60 minutes, on the calendar.', ic:'calendar'},
-          {t:'Brief them', d:'Share notebooks, papers, screenshots.', ic:'paperclip'},
-          {t:'Ship', d:'Video call + recording + follow-up notes.', ic:'video'},
+          {t:'Apply', d:'Describe the pricing or career problem you want to solve.', ic:'users'},
+          {t:'Qualification', d:'We confirm whether a suitable reviewer is available.', ic:'circle-check'},
+          {t:'Safe brief', d:'Share only material you are authorised to disclose.', ic:'paperclip'},
+          {t:'Pilot session', d:'Scope, price and deliverables are confirmed in writing first.', ic:'video'},
         ].map(s=>(
           <div key={s.t} className="panel" style={{padding:18}}>
             <Icon name={s.ic} size={18} style={{color:'var(--red)'}}/>
@@ -6881,36 +6035,13 @@ function MentoringPage() {
       <section className="section">
         <h2 className="section-title">Available mentors</h2>
         <div className="grid-2" style={{marginTop:14}}>
-          {mentors.map(m=>(
-            <div key={m.n} className="panel" style={{padding:20, display:'flex',gap:16,alignItems:'center'}}>
-              <div style={{width:60,height:60,border:'1px solid var(--line-2)',display:'grid',placeItems:'center',background:'#06080B'}}>
-                <Icon name="user" size={20}/>
-              </div>
-              <div style={{flex:1}}>
-                <div className="mono" style={{fontWeight:700}}>{m.n}</div>
-                <div className="mute" style={{fontSize:12,marginTop:4}}>{m.r} · {m.y}y</div>
-                <div className="mono red" style={{fontSize:11.5,marginTop:6}}>{m.sp}</div>
-              </div>
-              <button className="btn btn-outline btn-sm" onClick={()=>submitStub(`Mentoring booking with ${m.n}`)}>Book</button>
-            </div>
-          ))}
+          <div className="panel" style={{padding:24}}><div className="mono" style={{fontWeight:700}}>No mentor is publicly listed yet.</div><p className="text-2" style={{fontSize:13}}>Profiles will only be shown after identity, experience and availability have been verified. The pilot is not bookable or payable online.</p><SupportLink subject="Mentoring pilot application" className="btn btn-primary btn-sm">Apply to the pilot</SupportLink></div>
         </div>
       </section>
       <section className="section">
-        <h2 className="section-title">Packages</h2>
+        <h2 className="section-title">Commercial status</h2>
         <div className="grid-3" style={{marginTop:14}}>
-          {[
-            {n:'1 session',p:'49€',d:'30 min, single topic'},
-            {n:'4 sessions',p:'179€',d:'1 month coaching plan'},
-            {n:'12 sessions',p:'479€',d:'Career-track quarterly'},
-          ].map((p,i)=>(
-            <div key={p.n} className="panel" style={{padding:24}}>
-              <div className="mono" style={{fontWeight:700,fontSize:14}}>{p.n}</div>
-              <div className="mono" style={{fontSize:32,fontWeight:700,marginTop:14,color:i===1?'var(--red)':'var(--text)'}}>{p.p}</div>
-              <div className="mute" style={{fontSize:12.5,marginTop:8}}>{p.d}</div>
-              <button className={"btn "+(i===1?'btn-primary':'btn-outline')+" btn-sm"} onClick={()=>submitStub(`${p.n} mentoring package`)} style={{width:'100%',justifyContent:'center',marginTop:20}}>Choose</button>
-            </div>
-          ))}
+          <div className="panel" style={{padding:24}}><div className="mono" style={{fontWeight:700}}>Packages are not on sale.</div><p className="text-2" style={{fontSize:13,marginBottom:0}}>Prices, cancellation terms and mentor identities will be published together when the service passes its pilot gate.</p></div>
         </div>
       </section>
     </div>
@@ -6922,26 +6053,17 @@ function JobsPage() {
   const [tab,setTab] = useState('all');
   const [query,setQuery] = useState('');
   const [jobs,setJobs] = useState(null);
+  const [loadError,setLoadError] = useState(false);
   const [applied,setApplied] = useState({});
-  const [posting,setPosting] = useState(false);
-  const [form,setForm] = useState({ title:'', company:'', location:'', kind:'full-time', description:'' });
-  const refetch = useCallback(()=>{ platformApi.listJobs().then(setJobs).catch(()=>setJobs([])); },[]);
+  const refetch = useCallback(()=>{ setLoadError(false); platformApi.listJobs().then(setJobs).catch(()=>setLoadError(true)); },[]);
   useEffect(()=>{ refetch(); },[refetch]);
   const apply = async (j) => {
+    if (!authEmail) { nav('/auth/login?next=jobs'); return; }
     try {
-      await platformApi.applyJob(j.id, { applicant: authEmail || 'guest', note:`Applied via platform` });
+      await platformApi.applyJob(j.id, { note:'Applied via platform' });
       setApplied((p)=>({...p,[j.id]:true}));
       notify(`Application sent for ${j.title}.`);
     } catch (e) { notify(`Could not apply (${e.message}).`, 'error'); }
-  };
-  const postJob = async (event) => {
-    event.preventDefault();
-    if (!form.title.trim() || !form.company.trim()) { notify('Title and company are required.', 'error'); return; }
-    try {
-      await platformApi.createJob({ ...form, tags:[], posted_by: authEmail || 'anon' });
-      setPosting(false); setForm({ title:'', company:'', location:'', kind:'full-time', description:'' });
-      notify('Job posted.'); refetch();
-    } catch (e) { notify(`Could not post (${e.message}).`, 'error'); }
   };
   const list = jobs || [];
   const filtered = list.filter(j => {
@@ -6954,32 +6076,22 @@ function JobsPage() {
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ jobs</span></>}
         title="Quant Jobs"
-        sub="Aggregated from top quant firms (Jane Street, Point72, IMC, Optiver…) and curated boards — trading, quant, structuring, risk."
+        sub="Verified links imported from configured sources or reviewed by the operator. Always confirm details on the employer site."
         right={<>
-          <input value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Role or keyword…" style={{background:'#0A0C10',border:'1px solid var(--line-2)',padding:'8px 10px',borderRadius:3,color:'var(--text)',fontFamily:"'JetBrains Mono',monospace",fontSize:12,width:220}}/>
-          <button className="btn btn-primary btn-sm" onClick={()=>setPosting(p=>!p)}><Icon name="plus" size={13}/> Post a job</button>
+          <input aria-label="Search job openings" value={query} onChange={(event)=>setQuery(event.target.value)} placeholder="Role or keyword…" style={{background:'#0A0C10',border:'1px solid var(--line-2)',padding:'8px 10px',borderRadius:3,color:'var(--text)',fontFamily:"'JetBrains Mono',monospace",fontSize:12,width:220}}/>
+          <SupportLink subject="Verified job submission"><Icon name="mail" size={13}/> Submit a role</SupportLink>
         </>}
       />
-      {posting && (
-        <div className="panel" style={{padding:20, marginBottom:16}}>
-          <form className="grid-2" style={{gap:12}} onSubmit={postJob}>
-            <input value={form.title} onChange={(e)=>setForm(f=>({...f,title:e.target.value}))} placeholder="Role title"/>
-            <input value={form.company} onChange={(e)=>setForm(f=>({...f,company:e.target.value}))} placeholder="Company"/>
-            <input value={form.location} onChange={(e)=>setForm(f=>({...f,location:e.target.value}))} placeholder="Location (or Remote)"/>
-            <select value={form.kind} onChange={(e)=>setForm(f=>({...f,kind:e.target.value}))}>{['full-time','internship','remote','contract'].map(o=><option key={o}>{o}</option>)}</select>
-            <textarea value={form.description} onChange={(e)=>setForm(f=>({...f,description:e.target.value}))} placeholder="Short description" rows={2} style={{gridColumn:'1 / -1'}}></textarea>
-            <button className="btn btn-primary btn-sm" type="submit" style={{justifySelf:'start'}}>Publish job</button>
-          </form>
-        </div>
-      )}
       <div className="tabs-bar">
         {[['all','All'],['remote','Remote'],['intern','Internship']].map(([k,l])=>(
           <button key={k} className={"tab-btn "+(tab===k?'on':'')} onClick={()=>setTab(k)}>{l} <span className="mute" style={{marginLeft:6}}>{k==='all'?list.length:list.filter(j=>(k==='remote'&&/remote/i.test(j.location||''))||(k==='intern'&&/intern/i.test(j.kind||''))).length}</span></button>
         ))}
       </div>
       <div className="panel">
-        {jobs===null && <div className="mute" style={{padding:20}}>Loading jobs…</div>}
-        {jobs!==null && list.length===0 && <div className="mute" style={{padding:20}}>No openings yet. Be the first to post one — or start the platform backend.</div>}
+        {loadError && <ServiceUnavailable title="Openings could not be loaded" onRetry={refetch}/>}
+        {jobs===null && !loadError && <div className="mute" style={{padding:20}} role="status">Loading jobs…</div>}
+        {jobs!==null && list.length===0 && <div className="mute" style={{padding:20}}>No verified openings are currently published.</div>}
+        {!loadError && list.length>0 && filtered.length===0 && <div className="service-state"><h2>No openings match your search</h2><button className="btn btn-outline" onClick={()=>{setQuery('');setTab('all');}}>Clear filters</button></div>}
         {list.length>0 && <table className="data">
           <thead><tr><th>Company</th><th>Role</th><th>Location</th><th>Type</th><th></th></tr></thead>
           <tbody>
@@ -6990,7 +6102,7 @@ function JobsPage() {
                 <td>{j.location||(j.remote?'Remote':'—')}</td>
                 <td>{j.kind||'—'}</td>
                 <td>{j.url
-                  ? <a className="btn btn-outline btn-sm" href={j.url} target="_blank" rel="noopener noreferrer" onClick={()=>{ try{ platformApi.applyJob(j.id,{applicant:authEmail||'guest',note:'Opened posting'}); }catch(e){} }}>Apply ↗</a>
+                  ? <a className="btn btn-outline btn-sm" href={j.url} target="_blank" rel="noopener noreferrer">View role ↗</a>
                   : <button className="btn btn-outline btn-sm" disabled={applied[j.id]} onClick={()=>apply(j)}>{applied[j.id]?'Applied ✓':'Apply'}</button>}</td>
               </tr>
             ))}
@@ -7049,20 +6161,20 @@ function BugReportPage() {
           {error && <FormNotice type="error">{error}</FormNotice>}
           <div className="field">
             <span className="mono mute" style={{fontSize:10.5,letterSpacing:'.1em'}}>Category</span>
-            <select value={f.kind} onChange={set('kind')}>{['Calculator','Lesson','UI','Account','Other'].map(o=><option key={o}>{o}</option>)}</select>
+            <select aria-label="Bug category" value={f.kind} onChange={set('kind')}>{['Calculator','Lesson','UI','Account','Other'].map(o=><option key={o}>{o}</option>)}</select>
           </div>
           <div className="field">
             <span className="mono mute" style={{fontSize:10.5,letterSpacing:'.1em'}}>Priority</span>
-            <select value={f.severity} onChange={set('severity')}>{['Low','Medium','High','Critical'].map(o=><option key={o}>{o}</option>)}</select>
+            <select aria-label="Bug severity" value={f.severity} onChange={set('severity')}>{['Low','Medium','High','Critical'].map(o=><option key={o}>{o}</option>)}</select>
           </div>
           <div className="field">
             <span className="mono mute" style={{fontSize:10.5,letterSpacing:'.1em'}}>Title</span>
-            <input value={f.summary} onChange={set('summary')} placeholder="Short summary of the bug"/>
+            <input aria-label="Bug summary" value={f.summary} onChange={set('summary')} placeholder="Short summary of the bug"/>
           </div>
           {[['Steps to reproduce','steps'],['Expected behaviour','expected'],['Actual behaviour','actual']].map(([l,k])=>(
             <div key={k} className="field">
               <span className="mono mute" style={{fontSize:10.5,letterSpacing:'.1em'}}>{l}</span>
-              <textarea rows={3} value={f[k]} onChange={set(k)}></textarea>
+              <textarea aria-label={l} rows={3} value={f[k]} onChange={set(k)}></textarea>
             </div>
           ))}
           <button className="btn btn-primary" type="submit" disabled={busy} style={{width:'100%',justifyContent:'center',marginTop:8,opacity:busy?0.7:1}}>{busy?'Submitting…':'Submit report'} <Icon name="send" size={13}/></button>
@@ -7073,25 +6185,22 @@ function BugReportPage() {
 }
 
 function ApiDocsPage() {
-  const [endpoint, setEndpoint] = useState('/v1/price/european');
+  const [endpoint, setEndpoint] = useState('/calculate/practice');
   const endpoints = [
-    {p:'GET',u:'/v1/price/european',d:'Closed-form European option price'},
-    {p:'POST',u:'/v1/price/american',d:'Binomial American option price'},
-    {p:'POST',u:'/v1/price/mc',d:'Monte Carlo price for path-dependent payoffs'},
-    {p:'GET',u:'/v1/iv/calc',d:'Implied volatility from market price'},
-    {p:'POST',u:'/v1/curve/bootstrap',d:'Bootstrap zero curve from instruments'},
-    {p:'POST',u:'/v1/calibrate',d:'Fit Black/SABR/Heston to vol surface'},
+    {p:'POST',u:'/calculate/practice',d:'Build a deterministic calculation pack from an explicit prompt'},
+    {p:'GET',u:'/health',d:'Service health and configured runtime mode'},
+    {p:'GET',u:'/ready',d:'Production readiness probe'},
   ];
   const activeEndpoint = endpoints.find((item)=>item.u===endpoint) || endpoints[0];
   return (
     <div className="container page">
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ api</span></>}
-        title="API Documentation"
-        sub="Programmatic access to all pricers and calibrators."
-        right={<><span className="badge">v1.4</span><button className="btn btn-primary btn-sm" onClick={()=>submitStub('API key request')}>Get API key</button></>}
+        title="Backend API · private preview"
+        sub="Implemented endpoints only. This preview is not included in paid plans; public API keys are not on sale."
+        right={<SupportLink subject="Private API preview">Request private preview</SupportLink>}
       />
-      <div style={{display:'grid',gridTemplateColumns:'280px 1fr',gap:14}}>
+      <div className="workspace-sidebar-left">
         <div className="panel">
           <div className="label" style={{padding:'14px 14px 10px'}}>Endpoints</div>
           {endpoints.map((e)=>(
@@ -7110,44 +6219,35 @@ function ApiDocsPage() {
               <span className={"badge "+(activeEndpoint.p==='GET'?'badge-blue':'badge-green')}>{activeEndpoint.p}</span>
               <span className="mono" style={{fontWeight:700,fontSize:16}}>{activeEndpoint.u}</span>
             </div>
-            <p className="text-2" style={{fontSize:13,marginTop:0}}>{activeEndpoint.d}. The schema below shows the pricing endpoint shape; POST endpoints accept the same market block plus product-specific fields.</p>
+            <p className="text-2" style={{fontSize:13,marginTop:0}}>{activeEndpoint.d}. Production generation endpoints require server-authorised access.</p>
             <div className="label" style={{margin:'18px 0 8px'}}>{activeEndpoint.p === 'GET' ? 'Query parameters' : 'Request body'}</div>
             <table className="data">
               <thead><tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
               <tbody>
-                {[
-                  ['S','float','yes','Spot price'],
-                  ['K','float','yes','Strike'],
-                  ['r','float','yes','Risk-free rate'],
-                  ['sigma','float','yes','Volatility'],
-                  ['T','float','yes','Maturity (years)'],
-                  ['type','string','no','call|put (default: call)'],
-                ].map(r=><tr key={r[0]}><td className="symbol">{r[0]}</td><td>{r[1]}</td><td className={r[2]==='yes'?'red':'mute'}>{r[2]}</td><td>{r[3]}</td></tr>)}
+                {(activeEndpoint.p==='POST' ? [
+                  ['prompt','string','yes','Explicit calculation request with inputs and units'],
+                  ['family_hint','string','no','auto, options, rates, credit, risk or portfolio'],
+                ] : []).map(r=><tr key={r[0]}><td className="symbol">{r[0]}</td><td>{r[1]}</td><td className={r[2]==='yes'?'red':'mute'}>{r[2]}</td><td>{r[3]}</td></tr>)}
+                {activeEndpoint.p==='GET' && <tr><td colSpan="4" className="mute">No request body.</td></tr>}
               </tbody>
             </table>
           </div>
           <div className="grid-2">
             <div className="panel" style={{padding:18}}>
               <div className="label" style={{marginBottom:10}}>cURL</div>
-              <pre className="code"><code>{`curl https://api.thepricinglibrary.com/v1/price/european \\
-  -H "Authorization: Bearer $TPL_KEY" \\
-  -G \\
-  -d S=100 -d K=100 -d r=0.02 \\
-  -d sigma=0.20 -d T=0.5`}</code></pre>
+              <pre className="code"><code>{activeEndpoint.p==='POST' ? `curl "$VITE_TPL_RAG_API_URL/calculate/practice" \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer $TPL_TOKEN" \\
+  --data '{"prompt":"Price a call with S=100 K=100 r=2% sigma=20% T=0.5y","family_hint":"options"}'` : `curl "$VITE_TPL_RAG_API_URL${activeEndpoint.u}"`}</code></pre>
             </div>
             <div className="panel" style={{padding:18}}>
-              <div className="label" style={{marginBottom:10}}>Response · 200 OK</div>
-              <pre className="code"><code>{`{
-  "price": 6.0401,
-  "greeks": {
-    "delta": 0.5398,
-    "gamma": 0.0281,
-    "vega":  0.2812,
-    "theta": -0.0058,
-    "rho":   0.2611
-  },
-  "d1": 0.1591, "d2": 0.0177
-}`}</code></pre>
+              <div className="label" style={{marginBottom:10}}>Response shape</div>
+              <pre className="code"><code>{activeEndpoint.p==='POST' ? `{
+  "family": "options",
+  "title": "...",
+  "markdown": "...",
+  "pack": { "inputs": {}, "steps": [], "checks": [] }
+}` : `{ "status": "ok" }`}</code></pre>
             </div>
           </div>
         </div>
@@ -7158,16 +6258,17 @@ function ApiDocsPage() {
 
 function AdminPage() {
   let auth=null; try { auth=useAuth(); } catch { auth=null; }
-  const isAdmin = (()=>{ try { return typeof auth?.isAdmin==='function' ? auth.isAdmin() : (auth?.profile?.role==='admin'); } catch { return false; } })();
+  const isAdmin = (()=>{ try { return typeof auth?.isAdmin==='function' ? auth.isAdmin() : false; } catch { return false; } })();
   const [counts,setCounts] = useState(null);
-  useEffect(()=>{ if(isAdmin) platformApi.health().then((d)=>setCounts(d?.counts||{})).catch(()=>setCounts({})); },[isAdmin]);
+  const [countsError,setCountsError] = useState('');
+  useEffect(()=>{ if(isAdmin) { setCountsError(''); platformApi.adminCounts().then((d)=>setCounts(d?.counts||{})).catch((error)=>{setCounts(null);setCountsError(error.message||'Admin counts unavailable.');}); } },[isAdmin]);
   if (!auth?.isAuthenticated) return (
     <div className="container page"><PageHead crumb={<><Link to="/">/ home</Link><i>›</i><span>/ admin</span></>} title="Admin" sub="Restricted area."/>
       <div className="panel" style={{padding:28,textAlign:'center'}}><Icon name="lock" size={24}/><div className="mono" style={{fontWeight:600,marginTop:10}}>Sign in required.</div><Link to="/auth/login" className="btn btn-primary" style={{marginTop:16}}>Log in</Link></div></div>
   );
   if (!isAdmin) return (
     <div className="container page"><PageHead crumb={<><Link to="/">/ home</Link><i>›</i><span>/ admin</span></>} title="Admin" sub="Restricted area."/>
-      <div className="panel" style={{padding:28,textAlign:'center'}}><Icon name="lock" size={24}/><div className="mono" style={{fontWeight:600,marginTop:10}}>Access denied.</div><div className="mute" style={{fontSize:13,marginTop:8}}>This area requires an admin role on your profile.</div></div></div>
+      <div className="panel" style={{padding:28,textAlign:'center'}}><Icon name="lock" size={24}/><div className="mono" style={{fontWeight:600,marginTop:10}}>Access denied.</div><div className="mute" style={{fontSize:13,marginTop:8}}>This area requires a signed admin role in the authenticated session.</div></div></div>
   );
   const c = counts || {};
   return (
@@ -7177,6 +6278,7 @@ function AdminPage() {
         title={<>Admin Dashboard <span className="badge badge-red" style={{marginLeft:12,fontSize:9}}>RESTRICTED</span></>}
         sub="Platform operations · live counts from the platform database."
       />
+      {countsError && <div className="panel" role="alert" style={{padding:14,marginBottom:16,borderColor:'var(--red)',color:'var(--red)'}}>{countsError}</div>}
       <div className="grid-4">
         {[
           {l:'Forum threads',v:c.threads},
@@ -7197,31 +6299,131 @@ function AdminPage() {
           <table className="data">
             <thead><tr><th>User</th><th>Plan</th><th>Country</th><th>Joined</th></tr></thead>
             <tbody>
-              {['@quant_apprentice|Free|UK|2h','@vol_seeker|Student|DE|4h','@gamma_grinder|Pro|US|6h','@theta_tamer|Student|FR|8h','@sigma_hunter|Free|JP|12h'].map(r=>{
+              {[].map(r=>{
                 const [n,p,c,t] = r.split('|');
                 return <tr key={n}><td className="symbol">{n}</td><td><TierBadge tier={p.toLowerCase()}/></td><td>{c}</td><td>{t} ago</td></tr>;
               })}
+              <tr><td colSpan="4" className="mute">No signup feed is connected to this dashboard.</td></tr>
             </tbody>
           </table>
         </div>
         <div className="panel">
           <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
             <div className="label">Content moderation queue</div>
-            <span className="badge badge-amber">12 pending</span>
+            <span className="badge">Not connected</span>
           </div>
           <table className="data">
             <thead><tr><th>Item</th><th>Type</th><th>Reporter</th><th></th></tr></thead>
             <tbody>
-              {[
-                ['Spam in forum thread #2412','Forum','@auto-mod'],
-                ['Notebook violates copyright','Notebook','@quantfox'],
-                ['Inappropriate content in chat','Chat','@aurora_vol'],
-                ['Plagiarism in publication','Publication','@editor'],
-              ].map((r,i)=><tr key={i}><td>{r[0]}</td><td>{r[1]}</td><td className="symbol">{r[2]}</td><td><div className="row" style={{gap:4}}><button className="btn btn-ghost btn-sm" onClick={()=>notify('Moderation item approved.')} style={{padding:'2px 6px'}}>OK</button><button className="btn btn-ghost btn-sm" onClick={()=>notify('Moderation ban staged.', 'warning')} style={{padding:'2px 6px',color:'var(--red)'}}>BAN</button></div></td></tr>)}
+              <tr><td colSpan="4" className="mute">No moderation queue is connected to this dashboard.</td></tr>
             </tbody>
           </table>
         </div>
       </div>
+    </div>
+  );
+}
+
+function BillingResultPage({status}) {
+  const auth = useAuth();
+  const [sync,setSync] = useState(status==='success'?'syncing':'cancelled');
+  const [plan,setPlan] = useState(null);
+  useEffect(()=>{
+    if (status!=='success') return undefined;
+    let active=true;
+    const token=auth?.session?.access_token;
+    const poll=async()=>{
+      if(!token){ if(active)setSync('signin'); return; }
+      for(let attempt=0;attempt<4 && active;attempt+=1){
+        const entitlement=await getEntitlement(token);
+        if(entitlement?.active && entitlement?.plan){
+          setPlan(String(entitlement.plan)); setSync('active');
+          await auth.refreshEntitlement(); return;
+        }
+        await new Promise((resolve)=>window.setTimeout(resolve,1500));
+      }
+      if(active)setSync('pending');
+    };
+    void poll();
+    return()=>{active=false;};
+  },[status,auth?.session?.access_token,auth?.refreshEntitlement]);
+  const message = status==='cancel'
+    ? 'Checkout was cancelled. No paid access was granted.'
+    : sync==='active'
+      ? `${PLAN_LABEL[plan]||plan} access is active.`
+      : sync==='pending'
+        ? 'Payment returned successfully, but the signed webhook has not activated access yet. Refresh shortly or contact support with the Stripe receipt.'
+        : sync==='signin'
+          ? 'Sign in to synchronise the subscription attached to your account.'
+          : 'Confirming the signed Stripe webhook and synchronising access…';
+  return (
+    <div className="container page"><PageHead crumb={<><Link to="/pricing">/ pricing</Link><i>›</i><span>/ billing</span></>} title={status==='cancel'?'Checkout cancelled':'Subscription status'} sub="Access is granted only from a server-verified billing event."/>
+      <div className="panel" style={{padding:32,maxWidth:760}}><FormNotice type={sync==='active'?'success':status==='cancel'||sync==='pending'?'error':'info'}>{message}</FormNotice><div className="row" style={{gap:10,marginTop:20}}><Link className="btn btn-primary" to={sync==='active'?'/dashboard':'/pricing'}>{sync==='active'?'Open dashboard':'Back to plans'}</Link><Link className="btn btn-outline" to="/contact">Contact support</Link></div></div>
+    </div>
+  );
+}
+
+const LEGAL_COPY = {
+  terms: {
+    title:'Terms of service',
+    intro:'Rules for using The Pricing Library courses, calculators, simulations and community.',
+    sections:[
+      ['Educational scope','The platform provides education and research tooling. It does not provide investment, legal or tax advice, execution services, or any promise of performance.'],
+      ['Accounts and access','You must provide accurate account details, keep credentials confidential and use only the access level confirmed by our billing system. Paid access begins only after payment confirmation.'],
+      ['Subscriptions','When subscriptions are activated, Stripe presents the monthly price, taxes, renewal, cancellation and effective end date before payment. Checkout is disabled until the required legal and billing configuration is complete.'],
+      ['Contract formation and payment','The order summary and Stripe checkout identify the selected plan, total price, billing interval and payment method before confirmation. The contract is formed only when payment is accepted and the signed billing event activates access.'],
+      ['Cancellation and withdrawal','Use the “Cancel contract” page for electronic cancellation. The separate refund policy states our 14-day first-purchase refund promise; mandatory consumer rights remain unaffected.'],
+      ['Acceptable use','Do not upload confidential or unlawfully obtained data, bypass access controls, scrape protected content, disrupt the service, or publish deceptive performance claims.'],
+      ['Intellectual property','The platform and its original course material are licensed for personal learning. Source books and papers remain the property of their respective rights holders.'],
+      ['Availability and liability','Preview features may change. We use reasonable care but do not guarantee uninterrupted availability or fitness for trading decisions. Nothing excludes rights that cannot legally be excluded.'],
+      ['Complaints and disputes',`Contact ${LEGAL_SUPPORT_CONTACT} first. If the complaint is unresolved, eligible consumers may contact the mediator identified in the legal notice. Mandatory consumer protections and competent-law rules remain unaffected.`],
+    ],
+  },
+  privacy: {
+    title:'Privacy policy',
+    intro:'How account, billing, learning and support data are handled.',
+    sections:[
+      ['Data collected','Account identity, authentication identifiers, subscription status, learning progress, community contributions, support messages and necessary technical logs. Card details are handled by Stripe and are not stored by this frontend.'],
+      ['Purposes','Provide and secure the service, confirm entitlements, persist requested progress, answer support, prevent abuse and meet accounting obligations.'],
+      ['Legal bases','Account and subscription processing is necessary to perform the contract; security and abuse prevention rely on legitimate interests; accounting retention follows legal obligations; optional newsletters rely on consent.'],
+      ['Processors and transfers','Supabase is used for authentication and application data; Stripe is used for payment. Their applicable processing locations and safeguards are described in their own notices.'],
+      ['Retention','Data is kept only as long as needed for the stated purposes, security, disputes and legal obligations. Newsletter consent can be withdrawn at any time.'],
+      ['Your choices','Request access, correction, deletion or export by emailing support. Some billing records may have to be retained by law.'],
+      ['Cookies','The application uses essential authentication and security storage. Non-essential analytics or advertising cookies must not be enabled without a separate consent choice.'],
+    ],
+  },
+  refund: {
+    title:'Cancellation and refund policy',
+    intro:'Cancellation and refund terms for digital subscriptions.',
+    sections:[
+      ['Cancel','Ask support to cancel at any time. Access continues until the end of the paid billing period unless a refund is granted.'],
+      ['14-day refund promise','For a first subscription purchase, we offer a refund when the request reaches support within 14 calendar days of payment. Refunds return to the original payment method.'],
+      ['Service incidents','If a material paid feature is unavailable for an extended period, contact support with the account email and incident details so we can assess a refund or credit.'],
+      ['How to request','Email support from the account address with the Stripe receipt reference. We acknowledge requests and communicate the outcome in writing.'],
+    ],
+  },
+};
+
+function LegalPage({kind='legal'}) {
+  if (kind==='cancel') return (
+    <div className="container page"><PageHead crumb={<><Link to="/">/ home</Link><i>›</i><span>/ cancel</span></>} title="Cancel your contract" sub="Electronic subscription cancellation for an active plan."/>
+      <div className="panel" style={{padding:28,maxWidth:760}}><p className="text-2" style={{fontSize:13.5,lineHeight:1.7}}>Send the request from the email attached to your account. State “Cancel my contract” and the subscription plan. We confirm the effective end date in writing; paid access normally continues until the end of the billing period.</p>{LEGAL_IDENTITY.email ? <a className="btn btn-primary" href={`mailto:${LEGAL_IDENTITY.email}?subject=Cancel%20my%20contract`}>Cancel my contract</a> : <FormNotice type="error">Cancellation contact is not configured yet; paid checkout remains disabled.</FormNotice>}</div>
+    </div>
+  );
+  if (kind==='contact') return (
+    <div className="container page"><PageHead crumb={<><Link to="/">/ home</Link><i>›</i><span>/ contact</span></>} title="Contact & support" sub="Account, billing, privacy and product support."/>
+      <div className="panel" style={{padding:28,maxWidth:760}}>{LEGAL_IDENTITY.email ? <><div className="label">Support email</div><a className="mono red" href={`mailto:${LEGAL_IDENTITY.email}`} style={{display:'inline-block',marginTop:10}}>{LEGAL_IDENTITY.email}</a><p className="text-2" style={{fontSize:13,lineHeight:1.7}}>Include the email attached to your account and a concise description. Never send passwords, API secrets, card details or confidential market data.</p><div className="mute" style={{fontSize:12}}>Support target: acknowledgement within two business days. This is a service target, not a guaranteed response time.</div></> : <FormNotice type="error">Support contact is not configured. Paid checkout remains disabled until the legal and support identity is complete.</FormNotice>}</div>
+    </div>
+  );
+  if (kind==='legal') return (
+    <div className="container page"><PageHead crumb={<><Link to="/">/ home</Link><i>›</i><span>/ legal</span></>} title="Legal notice" sub="Operator and publication information."/>
+      <div className="panel" style={{padding:28,maxWidth:820}}>{LEGAL_READY ? <div className="col" style={{gap:12}}><div><span className="label">Operator</span><div className="mono" style={{marginTop:6}}>{LEGAL_IDENTITY.name} · {LEGAL_IDENTITY.formCapital}</div></div><div><span className="label">Registered address</span><div style={{marginTop:6}}>{LEGAL_IDENTITY.address}</div></div><div><span className="label">Registration and VAT</span><div style={{marginTop:6}}>{LEGAL_IDENTITY.registration} · {LEGAL_IDENTITY.vat}</div></div><div><span className="label">Publication director</span><div style={{marginTop:6}}>{LEGAL_IDENTITY.publisher}</div></div><div><span className="label">Hosting provider</span><div style={{marginTop:6}}>{LEGAL_IDENTITY.host}</div></div><div><span className="label">Consumer mediator</span><div style={{marginTop:6}}>{LEGAL_IDENTITY.mediator}</div></div><div><span className="label">Contact</span><div style={{marginTop:6}}>{LEGAL_IDENTITY.email} · {LEGAL_IDENTITY.phone}</div></div></div> : <FormNotice type="error">Paid checkout is intentionally disabled: the complete operator, hosting, publication and consumer-mediation notice is not configured.</FormNotice>}</div>
+    </div>
+  );
+  const page = LEGAL_COPY[kind] || LEGAL_COPY.terms;
+  return (
+    <div className="container page"><PageHead crumb={<><Link to="/">/ home</Link><i>›</i><span>/ {kind}</span></>} title={page.title} sub={page.intro}/>
+      <div className="col" style={{gap:14,maxWidth:900}}>{page.sections.map(([title,body])=><section className="panel" style={{padding:24}} key={title}><h2 className="mono" style={{fontSize:16,marginTop:0}}>{title}</h2><p className="text-2" style={{fontSize:13.5,lineHeight:1.75,marginBottom:0}}>{body}</p></section>)}<div className="mute" style={{fontSize:11}}>Version: 19 July 2026 · Contact {LEGAL_IDENTITY.email || 'to be published before sales open'}</div></div>
     </div>
   );
 }
@@ -7231,7 +6433,7 @@ function NotFoundPage() {
     <div className="container page">
       <div className="panel" style={{padding:60,textAlign:'center',marginTop:24}}>
         <div className="mono" style={{fontSize:120,fontWeight:700,color:'var(--red)',lineHeight:1}}>404</div>
-        <div className="mono mute" style={{fontSize:14,letterSpacing:'.1em',marginTop:14,textTransform:'uppercase'}}>RESOURCE NOT FOUND</div>
+        <h1 className="mono mute" style={{fontSize:20,letterSpacing:'.1em',marginTop:14,textTransform:'uppercase'}}>Page not found</h1>
         <p className="text-2" style={{maxWidth:'48ch',margin:'24px auto',fontSize:13.5}}>
           The page you are looking for has expired, moved, or never existed.
           If you arrived here from a link inside the platform, please report it.
@@ -7251,16 +6453,16 @@ function PracticePage() {
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ practice</span></>}
         title="Practice Hub"
-        sub="Exercises · Quizzes · Survival Mode · Weekly Challenge — all in one place."
+        sub="Exercises · Course reviews · Survival Mode · Practice Challenge — all in one place."
       />
       <div className="grid-3">
         {[
-          {t:'Exercises',d:'AI-generated desk exercises with worked solutions.',ic:'code',to:'/exercises',n:'AI generator'},
-          {t:'Quizzes',d:'Multiple choice — quick check on theory.',ic:'help-circle',to:'/dashboard',n:'by topic'},
+          {t:'Exercises',d:'Source-backed desk exercises with calculated solutions.',ic:'code',to:'/exercises',n:'Practice generator'},
+          {t:'Course review',d:'Review the questions and worked corrections in your course.',ic:'help-circle',to:'/courses',n:'inside each course'},
           {t:'Survival Mode',d:'Pressure-tested questions. Timer running.',ic:'zap',to:'/survival',n:'6 waves'},
-          {t:'Weekly Challenge',d:'A worked desk problem to practise on.',ic:'trophy',to:'/challenge',n:'preview'},
-          {t:'Leaderboard',d:'Where you stand. Global and by topic.',ic:'crown',to:'/leaderboard',n:'live ranking'},
-          {t:'Pair Programming',d:'Discuss problems with other learners.',ic:'users',to:'/community',n:'via community'},
+          {t:'Practice Challenge',d:'A worked desk problem to practise on.',ic:'trophy',to:'/challenge',n:'preview'},
+          {t:'Activity board',d:'Recorded learning activity from platform accounts.',ic:'crown',to:'/leaderboard',n:'recorded activity'},
+          {t:'Community discussion',d:'Discuss pricing and risk questions with other learners.',ic:'users',to:'/community',n:'via community'},
         ].map(s=>(
           <Link to={s.to} key={s.t} className="panel" style={{padding:24, display:'block'}}>
             <Icon name={s.ic} size={22} style={{color:'var(--red)'}}/>
@@ -7282,13 +6484,13 @@ function ChallengePage() {
     <div className="container page">
       <PageHead
         crumb={<><Link to="/practice">practice</Link><i>›</i><span>weekly challenge</span></>}
-        title="Weekly Challenge"
-        sub="A worked desk problem to practise on. (Live ranked challenges are coming soon.)"
+        title="Practice Challenge"
+        sub="A worked desk problem to practise on. Ranked submissions are not enabled in this preview."
         right={<><span className="badge">Preview</span></>}
       />
-      <div style={{display:'grid',gridTemplateColumns:'1fr 320px',gap:14}}>
+      <div className="workspace-with-aside">
         <div className="panel" style={{padding:32}}>
-          <div className="mono" style={{fontSize:11, color:'var(--mute)', letterSpacing:'.14em',marginBottom:18}}>CHALLENGE 22 · WEEK 21 · 2026</div>
+          <div className="mono" style={{fontSize:11, color:'var(--mute)', letterSpacing:'.14em',marginBottom:18}}>SELF-STUDY CASE · HYPOTHETICAL INPUTS</div>
           <h2 className="mono" style={{fontSize:24,fontWeight:700, margin:'0 0 14px'}}>Price a Down-and-Out Call</h2>
           <p className="text-2" style={{fontSize:14,lineHeight:1.7}}>
             Compute the closed-form value of a down-and-out call on a non-dividend underlying using the Merton (1973) result,
@@ -7315,9 +6517,9 @@ function ChallengePage() {
         </div>
         <div className="col" style={{gap:14, alignSelf:'start'}}>
           <div className="panel" style={{padding:18}}>
-            <div className="label" style={{marginBottom:14}}>Stats</div>
+            <div className="label" style={{marginBottom:14}}>Preview status</div>
             <div className="col" style={{gap:8}}>
-              {[['Submissions','156'],['Avg score','7.2/10'],['Top score','9.8'],['Median time','42min']].map(([k,v])=>(
+              {[['Submissions','Not open'],['Ranking','Not published']].map(([k,v])=>(
                 <div key={k} className="row between" style={{padding:'4px 0'}}>
                   <span className="mono mute" style={{fontSize:11}}>{k}</span>
                   <span className="mono" style={{fontSize:12.5,fontWeight:600}}>{v}</span>
@@ -7335,7 +6537,8 @@ function ChallengePage() {
 Object.assign(window, {
   CommunityPage, BlogPage, DashboardPage, PricingPage, AuthPage, LeaderboardPage,
   NotebooksPage, MentoringPage, JobsPage, BugReportPage, ApiDocsPage, AdminPage, NotFoundPage,
-  PracticePage, ChallengePage,
+  PracticePage, ChallengePage, LegalPage,
+  BillingResultPage,
 });
 
 
@@ -7746,7 +6949,11 @@ const AGR_EXAMPLES = ['Price a 5Y EUR Callable Note','Hedge rising rates','Infla
 // backend desk agents (/agent/desk/run) + real market data, replacing the static
 // CDN/Babel design-kit iframe that used mock data.
 function AgentRoomPage() {
-  return <AgentRoomReal/>;
+  return (
+    <React.Suspense fallback={<div className="container page"><div className="panel course-script-state"><span className="mono mute">Loading agent room…</span></div></div>}>
+      <AgentRoomReal/>
+    </React.Suspense>
+  );
 }
 
 function AgentRoomPage_legacy() {
@@ -7822,7 +7029,7 @@ function AgentRoomPage_legacy() {
           ))}
         </div>
         {tab==='RFQ COCKPIT' ? <RfqCockpit parsed={parsed} query={submitted} desk={desk} live={live}/> : (
-          <div style={{padding:'60px 0',textAlign:'center',color:AGR.mute,fontFamily:agrMono,fontSize:13}}>{tab} — coming next in the agentic desk build.</div>
+          <div style={{padding:'60px 0',textAlign:'center',color:AGR.mute,fontFamily:agrMono,fontSize:13}}>{tab} — this legacy surface is not included in the current release.</div>
         )}
       </div>
       <div style={{marginTop:18}}><MarketWatch live={live}/></div>
@@ -7836,39 +7043,50 @@ function App() {
   const path = route.path;
 
   // Agentic Trading Room is a standalone full-screen app shell (its own nav).
-  if (path.startsWith('/agent-room')) {
-    return <div data-screen-label="agent-room"><AgentRoomPage/></div>;
+  if (path==='/agent-room') {
+    return <div data-screen-label="agent-room"><a className="skip-link" href="#main-content">Skip to content</a><main id="main-content" tabIndex={-1}><GatedPage required="pro" what="The agentic desk"><AgentRoomPage/></GatedPage></main><RouteMetadata path={path}/></div>;
   }
 
   let page;
   if (path==='' || path==='/') page = <HomePage/>;
   else if (path.startsWith('/courses/')) page = <CourseDetailPage route={route}/>;
   else if (path==='/courses') page = <CoursesPage/>;
-  else if (path.startsWith('/tools')) page = <ToolsPage route={route}/>;
-  else if (path.startsWith('/lab')) page = <TradingLabPage route={route}/>;
-  else if (path.startsWith('/exercises')) page = <ExercisesPage route={route}/>;
-  else if (path.startsWith('/survival')) page = <SurvivalPage route={route}/>;
-  else if (path.startsWith('/community')) page = <CommunityPage route={route}/>;
-  else if (path.startsWith('/blog')) page = <BlogPage route={route}/>;
+  else if ((path==='/tools' || path.startsWith('/tools/'))) page = <ToolsPage route={route}/>;
+  else if ((path==='/lab' || path.startsWith('/lab/'))) page = <GatedPage required="student" what="Trading Lab"><TradingLabPage route={route}/></GatedPage>;
+  else if ((path==='/exercises' || path.startsWith('/exercises/'))) page = <GatedPage required="starter" what="The exercise workspace"><ExercisesPage route={route}/></GatedPage>;
+  else if ((path==='/survival' || path.startsWith('/survival/'))) page = <GatedPage required="student" what="Survival Mode"><SurvivalPage route={route}/></GatedPage>;
+  else if ((path==='/community' || path.startsWith('/community/'))) page = <GatedPage required="starter" what="The practitioner community"><CommunityPage route={route}/></GatedPage>;
+  else if ((path==='/blog' || path.startsWith('/blog/'))) page = <BlogPage route={route}/>;
   else if (path==='/dashboard') page = <DashboardPage/>;
   else if (path==='/pricing') page = <PricingPage/>;
-  else if (path.startsWith('/auth')) page = <AuthPage route={route}/>;
+  else if ((path==='/auth' || path.startsWith('/auth/'))) page = <AuthPage route={route}/>;
   else if (path==='/leaderboard') page = <LeaderboardPage/>;
-  else if (path==='/notebooks') page = <NotebooksPage/>;
+  else if (path==='/notebooks') page = <GatedPage required="student" what="Browser notebooks"><NotebooksPage/></GatedPage>;
   else if (path==='/mentoring') page = <MentoringPage/>;
   else if (path==='/jobs') page = <JobsPage/>;
   else if (path==='/bug') page = <BugReportPage/>;
-  else if (path==='/api') page = <ApiDocsPage/>;
+  else if (path==='/api') page = <GatedPage required="pro" what="The private API preview"><ApiDocsPage/></GatedPage>;
   else if (path==='/admin') page = <AdminPage/>;
   else if (path==='/practice') page = <PracticePage/>;
   else if (path==='/challenge') page = <ChallengePage/>;
+  else if (path==='/billing/success') page = <BillingResultPage status="success"/>;
+  else if (path==='/billing/cancel') page = <BillingResultPage status="cancel"/>;
+  else if (path==='/starter-kit' || path==='/starter-kit/success' || path==='/starter-kit/cancel') page = <React.Suspense fallback={<div className="container page" style={{minHeight:'calc(100vh - 150px)'}}><div className="panel" style={{padding:28}}><span className="mono mute">Chargement de l'espace produit…</span></div></div>}><StarterKitPage salesGuard={STARTER_KIT_SALES_GUARD} returnStatus={path.endsWith('/success')?'success':path.endsWith('/cancel')?'cancel':null}/></React.Suspense>;
+  else if (path==='/terms') page = <LegalPage kind="terms"/>;
+  else if (path==='/privacy') page = <LegalPage kind="privacy"/>;
+  else if (path==='/refund') page = <LegalPage kind="refund"/>;
+  else if (path==='/legal') page = <LegalPage kind="legal"/>;
+  else if (path==='/contact') page = <LegalPage kind="contact"/>;
+  else if (path==='/about') page = <AboutPage/>;
+  else if (path==='/cancel') page = <LegalPage kind="cancel"/>;
   else page = <NotFoundPage/>;
 
   return (
     <div data-screen-label={path||'home'}>
-      <TopStrip/>
+      <a className="skip-link" href="#main-content">Skip to content</a>
       <Header route={route}/>
-      {page}
+      <main id="main-content" tabIndex={-1}>{page}</main>
+      <RouteMetadata path={path || '/'}/>
       <Footer/>
       {/* ChatFab replaced by the global AG-UI AgentDock (mounted in App.tsx) */}
       <ToastStack/>

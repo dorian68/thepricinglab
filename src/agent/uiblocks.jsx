@@ -5,22 +5,9 @@ import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import { ALLOWED_BLOCKS } from './allowedBlocks';
 
-export const ALLOWED_BLOCKS = new Set([
-  // generic
-  'summary_card', 'action_card', 'confirmation_card', 'metric_grid', 'data_table',
-  'chart_block', 'form_block', 'suggestion_chips', 'progress_steps', 'error_card',
-  'calculation_steps',
-  // RAG
-  'source_card', 'rag_source_block',
-  // quant finance
-  'latex_formula_block', 'derivation_steps_block', 'payoff_chart_block', 'payoff_block',
-  'black_scholes_explorer_block', 'bs_pricer_block', 'greeks_sensitivity_block',
-  'put_call_parity_block', 'monte_carlo_simulation_block', 'binomial_tree_block',
-  'structured_product_payoff_block',
-  // learning
-  'exercise_block', 'quiz_block', 'answer_feedback_block', 'concept_map_block',
-]);
+export { ALLOWED_BLOCKS } from './allowedBlocks';
 
 const md = (children) => (
   <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
@@ -311,8 +298,8 @@ function BlackScholesExplorerBlock({ props }) {
     <div className="agui-block">
       <div className="agui-block-head"><i className="icon icon-sliders" /> Black-Scholes — {`S=${p.S} K=${p.K} σ=${p.sigma}% T=${p.T}j`}</div>
       <Grid rows={[
-        ['Call', g.call], ['Put', g.put], ['Delta', g.delta_call], ['Gamma', g.gamma],
-        ['Vega', g.vega], ['Theta', g.theta_call], ['Rho', g.rho_call],
+        ['Call (unit price)', g.call], ['Put (unit price)', g.put], ['Delta / 1 spot', g.delta_call], ['Gamma / spot²', g.gamma],
+        ['Vega / +1 vol pt', g.vega], ['Theta / calendar day', g.theta_call], ['Rho / +1 rate pt', g.rho_call],
       ]} />
       <button className="btn btn-outline btn-sm" style={{ margin: 10 }} onClick={() => nav('/tools/bs-pricer')}>Ouvrir le pricer <i className="icon icon-arrow-right" /></button>
     </div>
