@@ -55,13 +55,13 @@ assert.equal(tools.find((tool) => tool.id === 'bs-pricer')?.tier, 'free', 'Black
 assert.equal(tools.find((tool) => tool.id === 'bs-pricer')?.status, 'validated engine · evidence-ready', 'Black-Scholes validated status must remain explicit');
 assert.match(blackScholesSource, /<Badge variant="outline">Free<\/Badge>/, 'Black-Scholes route must visibly render Free');
 assert.match(source, /const BlackScholesLabTool = React\.lazy\(\(\) => import\('\.\.\/components\/tools\/BlackScholesLab'\)\);/, 'Black-Scholes route must be lazy');
-assert.match(source, /'bs-pricer': <React\.Suspense[\s\S]*?<BlackScholesLabTool\/>/, 'bs-pricer must render the dedicated validated lab');
+assert.match(source, /'bs-pricer': <React\.Suspense[\s\S]*?<BlackScholesLabTool(?:\s[^>]*?)?\/>/, 'bs-pricer must render the dedicated validated lab');
 assert.doesNotMatch(source, /function BSPricerTool\(/, 'legacy inline Black-Scholes widget must be absent');
 assert.match(source, /const RealizedVolatilityLabTool = React\.lazy\(\(\) => import\('\.\.\/components\/tools\/RealizedVolatilityLab'\)\);/, 'realized-volatility route must be lazy');
 assert.match(source, /'iv-calc': <React\.Suspense[\s\S]*?<RealizedVolatilityLabTool\/>/, 'iv-calc must render the dedicated validated lab');
 assert.doesNotMatch(source, /function IVCalcTool\(|\['SPX','NDX','TSLA','NVDA','BTC','EURUSD'\]/, 'legacy asset-labelled synthetic walk must be absent');
 assert.match(source, /const PayoffStrategyLabTool = React\.lazy\(\(\) => import\('\.\.\/components\/tools\/PayoffStrategyLab'\)\);/, 'payoff route must be lazy');
-assert.match(source, /payoff: <React\.Suspense[\s\S]*?<PayoffStrategyLabTool\/>/, 'payoff must render the dedicated validated lab');
+assert.match(source, /payoff: <React\.Suspense[\s\S]*?<PayoffStrategyLabTool(?:\s[^>]*?)?\/>/, 'payoff must render the dedicated validated lab');
 assert.doesNotMatch(source, /function PayoffVisualizerTool\(|P&L at expiry|S=100, σ=20%, T=30d/, 'legacy grid-bound payoff route must be absent');
 assert.match(source, /const MonteCarloLabTool = React\.lazy\(\(\) => import\('\.\.\/components\/tools\/MonteCarloLab'\)\);/, 'Monte Carlo route must be lazy');
 assert.match(source, /mc: <React\.Suspense[\s\S]*?<MonteCarloLabTool\/>/, 'mc must render the dedicated validated lab');

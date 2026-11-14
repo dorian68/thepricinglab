@@ -1,5 +1,6 @@
 import { PRACTICE_COURSE_EXTENSIONS as CANONICAL_PRACTICE_COURSE_EXTENSIONS } from './courseManifest.js';
 import { buildOfflineReference } from './exerciseFallback.mjs';
+import { readableSourceReferences } from './sourceReferences.mjs';
 import { clearExerciseMemory, readExerciseCache, writeExerciseCache, ownerExerciseKey } from './exerciseCache.mjs';
 const GENERATED_EXERCISES_KEY = import.meta.env.DEV && typeof window !== 'undefined'
   && window.__TPL_LOCAL_PREVIEW_ENABLED__ && window.__TPL_LOCAL_PREVIEW_MODE__ !== 'real'
@@ -1083,7 +1084,7 @@ export const GENERATOR_PRESETS = [
     concept: 'delta gamma vega theta hedging',
     difficulty: 'intermediate',
     exercise_format: 'risk_management',
-    free_prompt: 'Book delta +250k EUR par 1%, gamma -80k EUR par 1%^2, vega +120k EUR par vol point, theta -15k EUR par jour. Scenario spot -2%, vol +3 points, un jour passe. Construire P&L, diagnostic et hedge.',
+    free_prompt: 'Book delta +250k EUR per 1% spot move, gamma -80k EUR per (1%)^2 spot move, vega +120k EUR per vol point, theta -15k EUR per day. Scenario spot -2%, vol +3 points, one day elapsed. Calculate the P&L, identify the dominant risks and propose a hedge.',
   },
   {
     id: 'rates-swap',
@@ -1093,7 +1094,7 @@ export const GENERATOR_PRESETS = [
     concept: 'PV par rate DV01 hedge PnL',
     difficulty: 'intermediate',
     exercise_format: 'risk_management',
-    free_prompt: 'Payer swap EUR 5Y, notionnel 100m, fixed coupon 3.20%, par swap rate actuel 3.00%, annuity approx 4.55, la courbe monte de 10bp. Calculer PV, DV01, P&L et couverture.',
+    free_prompt: 'Fixed-payer EUR swap 5Y, notional 100m, fixed coupon 3.20%, current par swap rate 3.00%, annuity 4.55, parallel rate shock +10bp. Calculate PV, DV01 and shock P&L, then propose a hedge.',
   },
   {
     id: 'barrier-fx',
@@ -1103,7 +1104,7 @@ export const GENERATOR_PRESETS = [
     concept: 'down-and-out call gap risk',
     difficulty: 'advanced',
     exercise_format: 'case_study',
-    free_prompt: 'EUR/USD spot 1.0800, strike 1.1000, barriere down-and-out 1.0000, notionnel EUR 10m. Scenarios spot 1.0500, 1.0000, 1.2000 sans knock-out. Evaluer payoff et gap risk.',
+    free_prompt: 'EUR/USD down-and-out call: spot 1.0800, strike 1.1000, barrier down-and-out 1.0000, notional EUR 10m in base-currency units. Terminal scenarios: spot at 1.0500, spot at 1.0000, spot at 1.2000. For terminal spots above the barrier, assume it was not hit earlier. Calculate the conditional payoffs and explain gap risk.',
   },
   {
     id: 'credit-cds',
@@ -1113,7 +1114,7 @@ export const GENERATOR_PRESETS = [
     concept: 'CS01 carry spread shock',
     difficulty: 'intermediate',
     exercise_format: 'risk_management',
-    free_prompt: 'CDS notionnel 50m spread 120bp risky annuity 4.2 shock 25bp. Calculer CS01, carry et P&L spread.',
+    free_prompt: 'CDS notional 50m, spread 120bp, risky annuity 4.2, spread-widening shock +25bp. Calculate CS01, annual premium carry and spread-shock P&L from the protection buyer perspective.',
   },
   {
     id: 'risk-var',
@@ -1123,7 +1124,7 @@ export const GENERATOR_PRESETS = [
     concept: 'VaR stress risk limit',
     difficulty: 'beginner',
     exercise_format: 'quantitative_problem',
-    free_prompt: 'VaR portefeuille 20m volatilite 2% confiance 95% horizon 1 jour. Calculer VaR, comparer a une limite 600k, proposer action risk.',
+    free_prompt: 'Parametric VaR: portfolio 20m, daily volatility 2%, confidence 95%, horizon 1 day. Calculate one-day VaR, compare it with a limit of 600k and propose a risk action.',
   },
 ];
 
@@ -1291,7 +1292,7 @@ export async function downloadStarterKit(accessToken) {
 
 async function platformGet(path, required = false) {
   try {
-    const r = await fetch(`${getPracticeApiBase()}${path}`, { headers: bearerHeaders(platformAccessToken) });
+    const r = await fetch(`${getPracticeApiBase()}${path}`, { headers: bearerHeaders(platformAccessToken), signal: AbortSignal.timeout(8000) });
     if (!r.ok) {
       if (!required) return null;
       const error = new Error(`Service unavailable (HTTP ${r.status}).`);
@@ -1316,6 +1317,7 @@ async function platformPost(path, body) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...bearerHeaders(platformAccessToken) },
     body: JSON.stringify(body || {}),
+    signal: AbortSignal.timeout(20000),
   });
   if (!r.ok) {
     let detail = `HTTP ${r.status}`;
@@ -1374,6 +1376,14 @@ export const platformApi = {
   // progress + leaderboard
   async recordProgress(body) { try { return await platformPost('/platform/progress', body); } catch { return null; } },
   async getProgress(userId) { return platformGet(`/platform/progress/${encodeURIComponent(userId)}`, true); },
+  async coursePosition(courseId, moduleIndex) {
+    const response = await fetch(`${getPracticeApiBase()}/platform/courses/${encodeURIComponent(courseId)}/position`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json', ...bearerHeaders(platformAccessToken) },
+      body: JSON.stringify({ module_index: moduleIndex }), signal: AbortSignal.timeout(10000),
+    });
+    if (!response.ok) throw new Error('Your reading position could not be saved. Please retry.');
+    return response.json();
+  },
   async leaderboard(limit = 20) { return platformList(`/platform/leaderboard?limit=${limit}`, 'leaderboard'); },
   // agentic desk (multi-agent trading room)
   async deskRun(query) { try { return await platformPost('/agent/desk/run', { query }); } catch { return null; } },
@@ -1401,9 +1411,9 @@ function strategyQs(params) {
 async function strategyPost(path, params) {
   let r;
   try {
-    r = await fetch(`${getPracticeApiBase()}${path}${strategyQs(params)}`, { method: 'POST', headers: bearerHeaders(platformAccessToken) });
+    r = await fetch(`${getPracticeApiBase()}${path}${strategyQs(params)}`, { method: 'POST', headers: bearerHeaders(platformAccessToken), signal: AbortSignal.timeout(90000) });
   } catch (e) {
-    throw new Error(`backend injoignable: ${e.message}`);
+    throw new Error(e.name === 'TimeoutError' ? 'The analysis timed out. No result was produced. Try fewer bars or return to interview practice.' : 'The analysis service could not be reached. Retry or continue with interview practice.');
   }
   if (!r.ok) {
     let detail = `HTTP ${r.status}`;
@@ -1426,7 +1436,7 @@ export const strategyApi = {
   // Returns { instruments, available, strategies } or null when offline.
   async instruments() {
     try {
-      const r = await fetch(`${getPracticeApiBase()}/strategy/instruments`);
+      const r = await fetch(`${getPracticeApiBase()}/strategy/instruments`, { headers: bearerHeaders(platformAccessToken), signal: AbortSignal.timeout(8000) });
       if (!r.ok) return null;
       return await r.json();
     } catch {
@@ -1532,7 +1542,7 @@ export async function generateAiDeskExercise(input) {
     target_audience: 'learners who want market-finance desk practice',
     require_calculations: true,
     top_k: 8,
-    language: 'fr',
+    language: request.language,
   };
 
   try {
@@ -1559,10 +1569,11 @@ export async function generateAiDeskExercise(input) {
 
 function normalizeGeneratorInput(input) {
   return {
-    topic: (input.topic || 'Desk case pratique').trim(),
+    topic: (input.topic || 'Practical desk case').trim(),
     product: (input.product || 'market finance product').trim(),
     concept: (input.concept || 'pricing and risk').trim(),
     difficulty: input.difficulty || 'intermediate',
+    language: input.language === 'fr' ? 'fr' : 'en',
     exercise_format: input.exercise_format || 'mixed',
     free_prompt: (input.free_prompt || '').trim(),
     number_of_questions: input.number_of_questions === undefined || input.number_of_questions === '' ? 5 : Number(input.number_of_questions),
@@ -1574,7 +1585,7 @@ export function normalizeGeneratedExercise(data, request, engine) {
   const category = categorize(request);
   return {
     id: data.metadata?.library_id || `ai-${Date.now().toString(36)}-${slugify(request.product || request.topic).slice(0, 18)}`,
-    title: data.title || `Cas pratique - ${request.topic}`,
+    title: data.title || `Practice case - ${request.topic}`,
     cat: category,
     level: levelLabel(request.difficulty),
     time: timeForDifficulty(request.difficulty),
@@ -1584,10 +1595,10 @@ export function normalizeGeneratedExercise(data, request, engine) {
     createdAt: now,
     product: request.product,
     concept: request.concept,
-    description: engine === 'fallback' ? 'Exemple fixe hors connexion ; les paramètres personnalisés ne sont pas appliqués.'
-      : `Cas calculé pour ${request.product}${engine === 'rag' ? ', avec références de la bibliothèque' : ', sans référence attachée'}.`,
+    description: engine === 'fallback' ? 'Fixed offline reference; custom parameters are not applied.'
+      : `Calculated practice for ${request.product}${engine === 'rag' ? ', with library references' : ', without an attached reference'}.`,
     content: data.content || '',
-    sources: data.sources || [],
+    sources: readableSourceReferences(data.sources || []),
     metadata: data.metadata || {},
     request,
   };
@@ -1599,11 +1610,11 @@ export function exerciseFromRecord(record) {
 }
 
 export function exerciseModeLabel(exercise) {
-  if (exercise.engine === 'fallback') return 'Exemple fixe hors connexion';
+  if (exercise.engine === 'fallback') return 'Fixed offline reference';
   const mode = exercise.metadata?.generation_mode;
-  if (mode === 'llm_unverified') return 'Brouillon IA à vérifier';
-  if (mode === 'llm') return exercise.sources?.length ? 'Rédaction IA · bibliothèque' : 'Rédaction IA · sans référence';
-  return exercise.sources?.length ? 'Cas calculé · bibliothèque' : 'Cas calculé · sans référence';
+  if (mode === 'llm_unverified') return 'AI draft · review required';
+  if (mode === 'llm') return exercise.sources?.length ? 'AI writing · library references' : 'AI writing · no attached reference';
+  return exercise.sources?.length ? 'Calculated case · library references' : 'Calculated case · no readable reference';
 }
 
 function buildLocalDeskExercise(request, error) {

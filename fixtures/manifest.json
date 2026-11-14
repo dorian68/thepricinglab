@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "tpl.public-fixtures.v1",
+  "algorithm": "sha256",
+  "snapshotDate": "2026-11-14",
+  "origin": "Workspace fixtures; numerical contracts and independently generated golden cases",
+  "files": [
+    {
+      "name": "binomial_contract.json",
+      "bytes": 2255,
+      "sha256": "3b18e1f4dc9c776f1e40f0f63db6439d4d49ed78c0b473039ab32a575a32bae8"
+    },
+    {
+      "name": "black_scholes_contract.json",
+      "bytes": 3346,
+      "sha256": "f3426d4ff05692c1b11bc5b836843e8c34976e4a920f431d208f6a3ded525b69"
+    },
+    {
+      "name": "bond_contract.json",
+      "bytes": 3025,
+      "sha256": "b22b1c7aa71b99373607074d1b6e5fab487b65820572dacbe932c210087601ca"
+    },
+    {
+      "name": "monte_carlo_contract.json",
+      "bytes": 2693,
+      "sha256": "a2f4e72b41fc3f47ac4bf3c00a64182b25799d765f1ebc42b764338709c1346f"
+    },
+    {
+      "name": "payoff_strategy_contract.json",
+      "bytes": 1938,
+      "sha256": "9d7297776c20158f6049cc62a3610366364b2f5a760c6249f7a3ef8ea3a741a7"
+    },
+    {
+      "name": "payoff_strategy_golden.json",
+      "bytes": 4667,
+      "sha256": "909ad3d54c2800755dcf6e92d8def1a9131943e460bdc85968541ce3b9a47cc2"
+    },
+    {
+      "name": "realized_volatility_contract.json",
+      "bytes": 2953,
+      "sha256": "ec9c0ea43efe74d2f4bdecc22ce14da2fc7552eeaf2cd91a31e9df4f392389cf"
+    },
+    {
+      "name": "realized_volatility_golden.json",
+      "bytes": 4776,
+      "sha256": "f823c2040aa488420470b48ebb3583ab24b1d8d3c4c19bd24f6d6d0f3e58f230"
+    },
+    {
+      "name": "teaching_scenarios_reference.json",
+      "bytes": 1530,
+      "sha256": "0424d815822c23d0d4f31a0a716212cc86345e982b77d011aeeaa1ac95c9d9f4"
+    },
+    {
+      "name": "vol_surface_contract.json",
+      "bytes": 2564,
+      "sha256": "f9afcb5468c0fec3491df6ff7c69c35e8a5c22d37c9a4ff8c5492a0155ecc5b3"
+    },
+    {
+      "name": "yield_curve_golden.json",
+      "bytes": 3779,
+      "sha256": "81a72f876d14930a9e8b96cf400226696cf86b0ea6a4df2e3aa42ded683588a4"
+    }
+  ]
+}

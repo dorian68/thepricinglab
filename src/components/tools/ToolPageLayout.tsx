@@ -17,6 +17,8 @@ interface ToolPageLayoutProps {
   valueProp: string;
   /** Supporting paragraph (2-3 sentences) */
   supportingText: string;
+  /** Keep the first calculation within reach on small screens. */
+  compactHeader?: boolean;
   /** Trust signals shown below the supporting text */
   trustSignals?: string[];
   /** Primary CTA label */
@@ -46,6 +48,7 @@ const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
   headline,
   valueProp,
   supportingText,
+  compactHeader = false,
   trustSignals,
   methodology,
   relatedResources,
@@ -63,14 +66,14 @@ const ToolPageLayout: React.FC<ToolPageLayoutProps> = ({
       </Helmet>
 
       {/* Hero */}
-      <header data-page-title={title} data-page-description={metaDescription} className="py-10 md:py-14 px-6 border-b border-border">
+      <header data-page-title={title} data-page-description={metaDescription} className={`${compactHeader ? 'py-5 md:py-8' : 'py-10 md:py-14'} px-6 border-b border-border`}>
         <div className="max-w-5xl mx-auto">
           <h1 className="text-2xl md:text-4xl font-bold terminal-text mb-3">{headline}</h1>
           <p className="text-base md:text-lg text-primary font-medium mb-2">{valueProp}</p>
-          <p className="text-sm md:text-base text-muted-foreground max-w-3xl leading-relaxed">{supportingText}</p>
+          {compactHeader ? <details className="mt-3 max-w-3xl text-sm text-muted-foreground"><summary className="cursor-pointer">Model assumptions & evidence</summary><p className="mt-2 leading-relaxed">{supportingText}</p></details> : <p className="text-sm md:text-base text-muted-foreground max-w-3xl leading-relaxed">{supportingText}</p>}
 
           {trustSignals && trustSignals.length > 0 && (
-            <div className="flex flex-wrap gap-3 mt-5">
+            <div className={`flex flex-wrap gap-3 mt-5 ${compactHeader ? 'hidden md:flex' : ''}`}>
               {trustSignals.map((signal, i) => (
                 <span
                   key={i}

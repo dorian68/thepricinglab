@@ -6,5 +6,6 @@ import remarkGfm from 'remark-gfm';
 import 'katex/dist/katex.min.css';
 
 export default function CourseMarkdown({ children, tables = false }) {
-  return <ReactMarkdown remarkPlugins={tables ? [remarkGfm, remarkMath] : [remarkMath]} rehypePlugins={[rehypeKatex]}>{children}</ReactMarkdown>;
+  const content = String(children || '').replace(/<!--[\s\S]*?-->/g, '');
+  return <ReactMarkdown remarkPlugins={tables ? [remarkGfm, remarkMath] : [remarkMath]} rehypePlugins={[rehypeKatex]}>{content}</ReactMarkdown>;
 }

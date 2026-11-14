@@ -17,7 +17,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { platformApi, getPracticeApiBase } from '../claude/practiceEngine';
+import { platformApi, getPracticeApiBase, getPlatformAccessToken } from '../claude/practiceEngine';
 import { loadDeskSeries } from '../claude/marketSeries';
 import { BLACK_SCHOLES_INPUT_SCHEMA, blackScholesOption, normCdf as canonicalNormCdf, normalizeBlackScholesInput, solveImpliedVolatility } from '../lib/blackScholes.mjs';
 
@@ -384,7 +384,7 @@ function TopNav({ apiReachable }) {
   return <header className="agent-room-topnav">
     <Link to="/" aria-label="The Pricing Library home"><img src="/brand/thepricinglibrary.svg" width="841" height="401" alt="The Pricing Library" style={{width:112,height:'auto',display:'block'}}/></Link>
     <nav aria-label="Desk navigation">{items.map(([to,label])=><Link key={to} to={to} aria-current={to==='/agent-room'?'page':undefined}>{label}</Link>)}</nav>
-    <span className="agent-room-api-status" role="status" style={{color:apiReachable===true?T.green:T.amber}}>{apiReachable===true?'Desk disponible':apiReachable===false?'Desk indisponible':'Vérification du desk…'}</span>
+    <span className="agent-room-api-status" role="status" style={{color:apiReachable===true?T.green:T.amber}}>{apiReachable===true?'Service reachable · execution checked per request':apiReachable===false?'Desk service unavailable':'Checking the desk service…'}</span>
   </header>;
 }
 
@@ -530,7 +530,8 @@ export default function AgentRoomReal() {
       //    (avoids a /market/history 404 on the stateless desk build).
       if (!(await marketApiAvailable(base))) return;
       try {
-        const r = await fetch(`${base}/market/history/${encodeURIComponent(c.api)}?points=120`);
+        const marketToken = getPlatformAccessToken();
+        const r = await fetch(`${base}/market/history/${encodeURIComponent(c.api)}?points=120`, { headers: marketToken ? {Authorization: `Bearer ${marketToken}`} : {}, signal: AbortSignal.timeout(8000) });
         if (r.ok) {
           const j = await r.json();
           const closes = (j.series || []).map((s) => s.close).filter((x) => isFinite(x));
@@ -778,7 +779,7 @@ export default function AgentRoomReal() {
                 </Panel>
 
                 {/* agent pipeline (real backend) */}
-                <Panel title="Pipeline multi-agents" right={<span style={tag}>{desk ? 'backend · ' + desk.desk + ' desk' : 'backend requis'}</span>}>
+                <Panel title="Agent analysis" right={<span style={tag}>{desk ? 'Completed · ' + desk.desk + ' desk' : busy ? 'Analysis in progress' : 'No completed run'}</span>}>
                   {desk?.agents?.length ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                       {desk.agents.map((ag) => (
@@ -790,8 +791,9 @@ export default function AgentRoomReal() {
                     </div>
                   ) : (
                     <div style={{ padding: '24px 0', textAlign: 'center', color: T.amber, fontFamily: MONO, fontSize: 12 }}>
-                      Backend requis pour l'analyse multi-agents temps réel.<br />
-                      <span style={{ color: T.dim, fontSize: 11 }}>Lancez le RAG backend (uvicorn) puis renvoyez la requête.</span>
+                      {busy ? 'Your request is being checked. No result is available yet.' : 'No completed agent analysis is available for this request.'}<br />
+                      <span style={{ color: T.mute, fontSize: 11 }}>Submit a request to try again. The displayed local calculations remain available with their stated inputs.</span><br />
+                      <Link to="/interview" style={{display:'inline-block',marginTop:12,color:T.text}}>Continue with interview practice →</Link>
                     </div>
                   )}
                 </Panel>

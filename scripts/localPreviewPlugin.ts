@@ -80,19 +80,23 @@ export function localPreviewPlugin(): Plugin {
       if (req.method !== 'GET') { reply(res, 405, { detail: 'GET required.' }); return; }
       try {
         const port = await startApi();
+        const learner = new URL(req.url || '/', 'http://localhost').searchParams.get('role') === 'learner';
+        const previewId = learner ? '00000000-0000-4000-8000-000000000002' : ID;
+        const previewEmail = learner ? 'learner@local.tpl.test' : EMAIL;
         const expires = Math.floor(Date.now() / 1000) + 3600;
         const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
-        const payload = Buffer.from(JSON.stringify({ sub: ID, email: EMAIL, role: 'operator', exp: expires })).toString('base64url');
+        const payload = Buffer.from(JSON.stringify({ sub: previewId, email: previewEmail, role: learner ? 'member' : 'operator', exp: expires })).toString('base64url');
         const signature = createHmac('sha256', secret).update(`${header}.${payload}`).digest('base64url');
         const token = `${header}.${payload}.${signature}`;
         const entitlement = await fetch(`http://127.0.0.1:${port}/billing/entitlement`, { headers: { Authorization: `Bearer ${token}` } });
         if (!entitlement.ok) throw new Error('Local entitlement unavailable.');
         const access = await entitlement.json() as { plan: string; status: string };
-        if (access.plan !== 'pro' || access.status !== 'active') throw new Error('Local Pro entitlement missing.');
-        const user = { id: ID, email: EMAIL, aud: 'authenticated', role: 'authenticated', app_metadata: { role: 'admin', provider: 'local-preview' }, user_metadata: { prenom: 'Admin', nom: 'local' }, created_at: '2026-11-10T00:00:00Z' };
+        if (!learner && (access.plan !== 'pro' || access.status !== 'active')) throw new Error('Local Pro entitlement missing.');
+        const previewName = learner ? 'Learner' : 'Admin';
+        const user = { id: previewId, email: previewEmail, aud: 'authenticated', role: 'authenticated', app_metadata: { role: learner ? 'user' : 'admin', provider: 'local-preview' }, user_metadata: { prenom: previewName, nom: 'local' }, created_at: '2026-11-10T00:00:00Z' };
         reply(res, 200, {
           session: { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: expires, refresh_token: '', user },
-          profile: { id: ID, email: EMAIL, prenom: 'Admin', nom: 'local', plan: access.plan, role: 'admin', date_inscription: user.created_at },
+          profile: { id: previewId, email: previewEmail, prenom: previewName, nom: 'local', plan: access.plan, role: learner ? 'user' : 'admin', date_inscription: user.created_at },
           entitlement: access,
         });
       } catch (error) { reply(res, 503, { detail: error instanceof Error ? error.message : 'Local API unavailable.' }); }

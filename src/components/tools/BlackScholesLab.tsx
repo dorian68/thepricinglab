@@ -19,6 +19,7 @@ import {
   normalizeBlackScholesInput,
 } from '@/lib/blackScholes.mjs';
 import ToolPageLayout from './ToolPageLayout';
+import { readInterviewToolContext } from '@/lib/interviewToolContext.mjs';
 
 type QuoteMode = 'volatility' | 'market_price';
 type OptionType = 'call' | 'put';
@@ -52,22 +53,23 @@ const downloadTextFile = (fileName: string, content: string, mediaType: string) 
 };
 
 const BlackScholesLab: React.FC = () => {
+  const initial = useMemo(() => readInterviewToolContext(window.location.search), []);
   const [quoteMode, setQuoteMode] = useState<QuoteMode>('volatility');
-  const [optionType, setOptionType] = useState<OptionType>('call');
-  const [spot, setSpot] = useState(100);
-  const [strike, setStrike] = useState(100);
-  const [maturityDays, setMaturityDays] = useState(365);
-  const [riskFreeRatePercent, setRiskFreeRatePercent] = useState(5);
-  const [dividendYieldPercent, setDividendYieldPercent] = useState(0);
-  const [volatilityPercent, setVolatilityPercent] = useState(20);
+  const [optionType, setOptionType] = useState<OptionType>(initial.optionType || 'call');
+  const [spot, setSpot] = useState(initial.spot ?? 100);
+  const [strike, setStrike] = useState(initial.strike ?? 100);
+  const [maturityDays, setMaturityDays] = useState(initial.maturityDays ?? 365);
+  const [riskFreeRatePercent, setRiskFreeRatePercent] = useState(initial.riskFreeRate ?? 5);
+  const [dividendYieldPercent, setDividendYieldPercent] = useState(initial.dividendYield ?? 0);
+  const [volatilityPercent, setVolatilityPercent] = useState(initial.volatility ?? 20);
   const [marketPrice, setMarketPrice] = useState(10.4505756);
-  const [currency, setCurrency] = useState('USD');
-  const [position, setPosition] = useState<Position>('long');
-  const [quantity, setQuantity] = useState(1);
-  const [multiplier, setMultiplier] = useState(100);
-  const [spotShockPercent, setSpotShockPercent] = useState(10);
-  const [volShockPointsPercent, setVolShockPointsPercent] = useState(5);
-  const [daysShock, setDaysShock] = useState(30);
+  const [currency, setCurrency] = useState(initial.currency || 'USD');
+  const [position, setPosition] = useState<Position>(initial.position || 'long');
+  const [quantity, setQuantity] = useState(initial.quantity ?? 1);
+  const [multiplier, setMultiplier] = useState(initial.multiplier ?? 100);
+  const [spotShockPercent, setSpotShockPercent] = useState(initial.spotShockPercent ?? 10);
+  const [volShockPointsPercent, setVolShockPointsPercent] = useState(initial.volShockPointsPercent ?? 5);
+  const [daysShock, setDaysShock] = useState(initial.daysShock ?? 30);
   const [sensitivityAxis, setSensitivityAxis] = useState<SensitivityAxis>('spot');
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -192,7 +194,8 @@ const BlackScholesLab: React.FC = () => {
       title="Black-Scholes Pricing & IV Lab"
       metaDescription="Price European calls and puts, invert strict implied volatility, inspect signed Greeks and scenarios, and export SHA-bound evidence."
       headline="Black-Scholes Pricing & IV Lab"
-      valueProp="A desk-grade closed-form reference for prices, implied volatility, Greeks and position scenarios."
+      valueProp="Price a European option and explain its risks."
+      compactHeader
       supportingText="Run the canonical European Black-Scholes-Merton engine with continuous rates and dividend yield. Every successful analysis is computed locally in a worker, bound to its normalized inputs by SHA-256, and exportable as JSON plus scenario and sensitivity CSV evidence."
       trustSignals={[`Canonical engine ${BLACK_SCHOLES_ENGINE_VERSION}`, 'Strict IV bounds', 'T=0 and σ=0 limits', 'ACT/365F', 'Anonymous & free', 'JSON + 2 CSV exports']}
     >
@@ -220,6 +223,8 @@ const BlackScholesLab: React.FC = () => {
               </div>
               {quoteMode === 'volatility' ? <label className="block space-y-1.5 text-xs text-muted-foreground">Volatility σ (%)<Input aria-label="BS volatility" type="number" min="0" max="500" step="0.1" value={volatilityPercent} onChange={(event) => invalidate(() => setVolatilityPercent(Number(event.target.value)))} /></label> : <label className="block space-y-1.5 text-xs text-muted-foreground">Observed option price<Input aria-label="BS market price" type="number" min="0" step="0.0001" value={marketPrice} onChange={(event) => invalidate(() => setMarketPrice(Number(event.target.value)))} /></label>}
               <p className="rounded-md border bg-secondary/20 p-3 text-xs text-muted-foreground">Rates and dividend yield are continuously compounded. Maturity is converted exactly as days ÷ 365. IV inversion rejects prices outside no-arbitrage and engine bounds.</p>
+              <Button variant="finance" size="lg" className="min-h-[44px] w-full" onClick={run} disabled={busy} data-bs-run="true"><Play className="mr-2 h-4 w-4" />{busy ? 'Calculating…' : 'Run pricing analysis'}</Button>
+              {error && <Alert variant="destructive" data-bs-error="true"><AlertTriangle className="h-4 w-4" /><AlertTitle>Analysis rejected</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
             </Card>
 
             <Card className="space-y-4 p-5">
@@ -232,8 +237,6 @@ const BlackScholesLab: React.FC = () => {
                 <label className="space-y-1.5 text-xs text-muted-foreground">Vol shock ± (pts)<Input aria-label="BS volatility shock" type="number" min="0" max="500" step="0.1" value={volShockPointsPercent} onChange={(event) => invalidate(() => setVolShockPointsPercent(Number(event.target.value)))} /></label>
                 <label className="space-y-1.5 text-xs text-muted-foreground">Time forward (days)<Input aria-label="BS days shock" type="number" min="0" max="10950" step="1" value={daysShock} onChange={(event) => invalidate(() => setDaysShock(Number(event.target.value)))} /></label>
               </div>
-              <Button variant="finance" size="lg" className="min-h-[44px] w-full" onClick={run} disabled={busy} data-bs-run="true"><Play className="mr-2 h-4 w-4" />{busy ? 'Calculating in worker…' : 'Run pricing analysis'}</Button>
-              {error && <Alert variant="destructive" data-bs-error="true"><AlertTriangle className="h-4 w-4" /><AlertTitle>Analysis rejected</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
             </Card>
           </div>
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import AuthenticationPage from './AuthenticationPage';
+import InterviewPilotMetrics from './InterviewPilotMetrics';
 import ForumWorkspace from './ForumWorkspace';
 import { StrategyPayoffFigure, SimulationComparison } from './LabIllustrations';
 import { shortStrangleScenario } from '../lib/teachingScenarios.mjs';
@@ -95,6 +96,7 @@ import {
 } from './practiceEngine';
 
 const AgentRoomReal = React.lazy(() => import('../agent/AgentRoomReal'));
+const InterviewLab = React.lazy(() => import('./InterviewLab'));
 const StarterKitPage = React.lazy(() => import('./StarterKitPage'));
 const CourseMarkdown = React.lazy(() => import('./CourseMarkdown'));
 const ModelCalibrationTool = React.lazy(() => import('../components/tools/ModelCalibration'));
@@ -592,7 +594,7 @@ function Ticker() {
 const NAV_ITEMS = [
   {to:'/courses', label:'Courses'},
   {to:'/tools', label:'Tools'},
-  {to:'/exercises', label:'Exercises'},
+  {to:'/interview', label:'Interview Lab'},
   {to:'/lab', label:'Trading Lab'},
   {to:'/agent-room', label:'Agent Room'},
   {to:'/community', label:'Community'},
@@ -1486,13 +1488,13 @@ function FinalCTA() {
         <div aria-hidden="true" style={{position:'absolute', right:-40, top:-40, opacity:0.06, fontFamily:"'JetBrains Mono',monospace", fontSize:280, fontWeight:700, color:'#FF2E45'}}>σ</div>
         <div style={{position:'relative', maxWidth:'60ch'}}>
           <div className="section-eyebrow" style={{margin:0}}>Your next step</div>
-          <h2 className="section-title" style={{fontSize:32, marginTop:8}}>Start serious desk practice at 9€.</h2>
+          <h2 className="section-title" style={{fontSize:32, marginTop:8}}>See what you can explain in an interview.</h2>
           <p className="text-2" style={{marginTop:10, fontSize:14}}>
-            Starter gives the core curriculum, practical exercises and calculators. Upgrade when you need advanced products, notebooks and professional workflow tools.
+            Try a pricing case, write your reasoning and check the result. Build evidence of your own progress before choosing a paid library plan.
           </p>
         </div>
         <div className="row" style={{gap:10, position:'relative', flexShrink:0}}>
-          <Link to="/pricing" className="btn btn-primary">Explore plans <Icon name="arrow-right" size={14}/></Link>
+          <Link to="/interview" className="btn btn-primary">Try the Interview Lab <Icon name="arrow-right" size={14}/></Link>
           <Link to="/courses/black-scholes" className="btn btn-ghost">Read the free preview</Link>
         </div>
       </div>
@@ -1525,8 +1527,8 @@ function CoursesPage() {
         }
       />
       <div className="catalogue-start">
-        <div><span className="micro">Start here · free preview</span><h2>Build your first pricing intuition.</h2><p>Read the option ticket, understand Black-Scholes, then try the calculator.</p></div>
-        <Link to="/courses/black-scholes" className="btn btn-outline">Open free preview <Icon name="arrow-right" size={14}/></Link>
+        <div><span className="micro">English · guided interview practice</span><h2>Start with a ticket you can defend.</h2><p>Choose a short session, submit your answer and reasoning, then test the idea on a new variant. The legacy course library is in French.</p></div>
+        <Link to="/interview" className="btn btn-outline">Open Interview Lab <Icon name="arrow-right" size={14}/></Link>
       </div>
       <div className="tabs-bar" role="group" aria-label="Filter courses by tier">
         {tiers.map(t=>(
@@ -1724,6 +1726,10 @@ function CourseDetailContent({route}) {
   const [selectedModuleIndex, setSelectedModuleIndex] = useState(0);
   const [completedModules, setCompletedModules] = useState(()=>new Set());
   const [completionBusy, setCompletionBusy] = useState(false);
+  const [progressReady, setProgressReady] = useState(false);
+  const restoredPosition = useRef(null);
+  const loadedProgressKey = useRef(null);
+  const savedCoursePosition = useRef(null);
   const contentTopRef = useRef(null);
   const scriptState = useCourseScript(c.id, locked, previewOnly);
   const scriptModel = useMemo(
@@ -1739,7 +1745,11 @@ function CourseDetailContent({route}) {
   const userId = auth?.user?.id || auth?.user?.email || null;
   useEffect(() => {
     setCompletedModules(new Set());
-    if (!userId || locked || previewOnly) return undefined;
+    setProgressReady(false);
+    restoredPosition.current = null;
+    loadedProgressKey.current = null;
+    savedCoursePosition.current = null;
+    if (!userId || locked) { loadedProgressKey.current = `${userId || 'visitor'}:${c.id}`; setProgressReady(true); return undefined; }
     let active = true;
     platformApi.getProgress(userId).then((progress) => {
       if (!active || !progress) return;
@@ -1753,12 +1763,31 @@ function CourseDetailContent({route}) {
           .filter(Number.isInteger)
       );
       setCompletedModules(restored);
-    }).catch(()=>{});
+      savedCoursePosition.current = progress.course_positions?.find(position=>position.course===c.id)?.module_index;
+      loadedProgressKey.current = `${userId}:${c.id}`;
+      setProgressReady(true);
+    }).catch(()=>{ if (active) { loadedProgressKey.current = `${userId}:${c.id}`; setProgressReady(true); } });
     return () => { active = false; };
   }, [c.id, locked, previewOnly, userId]);
 
+  useEffect(() => {
+    const count = scriptModel?.modules?.length || 0;
+    const key = `${userId || 'visitor'}:${c.id}`;
+    if (!progressReady || loadedProgressKey.current !== key || !count || restoredPosition.current === key) return;
+    let visited = -1;
+    try { visited = Number(window.localStorage.getItem(`tpl:course-position:v1:${key}`) ?? -1); } catch { /* storage is optional */ }
+    const nextIncomplete = Array.from({length:count}, (_,index)=>index).find(index=>!completedModules.has(index));
+    const serverPosition = savedCoursePosition.current;
+    const target = Number.isInteger(serverPosition) && serverPosition >= 0 && serverPosition < count ? serverPosition
+      : Number.isInteger(visited) && visited >= 0 && visited < count ? visited : (nextIncomplete ?? count - 1);
+    setSelectedModuleIndex(target);
+    restoredPosition.current = key;
+  }, [c.id, completedModules, progressReady, scriptModel, userId]);
+
   const openModule = useCallback((index) => {
     setSelectedModuleIndex(index);
+    try { window.localStorage.setItem(`tpl:course-position:v1:${userId || 'visitor'}:${c.id}`, String(index)); } catch { /* storage is optional */ }
+    if (userId) void platformApi.coursePosition(c.id,index).catch(()=>notify('Your reading position could not be saved. Completed modules are still recorded separately.', 'warning'));
     setTab('content');
     // Scroll the lesson content back to the top of the viewport: selecting a
     // module only swaps state (not a route change), so without this the page
@@ -1766,7 +1795,7 @@ function CourseDetailContent({route}) {
     requestAnimationFrame(() => {
       contentTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
-  }, []);
+  }, [c.id, userId]);
 
   const completeModule = useCallback(async () => {
     setCompletionBusy(true);
@@ -1792,15 +1821,17 @@ function CourseDetailContent({route}) {
           <span className="badge">{c.tier}</span>
           <span className="badge">{c.level}</span>
           <span className="badge">{c.duration}</span>
-          {!locked && <button className="btn btn-primary btn-sm" onClick={()=>openModule(selectedModuleIndex)}>Resume <Icon name="play" size={13}/></button>}
+          {!locked && <button className="btn btn-primary btn-sm" disabled={!progressReady} onClick={()=>openModule(selectedModuleIndex)}>{progressReady ? 'Resume' : 'Restoring…'} <Icon name="play" size={13}/></button>}
         </>}
       />
 
+      {!locked && !previewOnly && <aside className="course-language-note"><span>Library course · French</span><Link to="/interview">Prefer English? Open the Interview Lab <Icon name="arrow-right" size={13}/></Link></aside>}
       {locked ? <LockPanel required={requiredPlan} what={`The ${c.title} course`}/> : <div className="course-detail-layout">
         <CourseSidebar
           c={c}
           scriptModel={scriptModel}
           selectedModuleIndex={selectedModuleIndex}
+          completedModules={completedModules}
           onSelectModule={openModule}
           onOpenScript={()=>setTab('script')}
           onOpenResources={()=>setTab('resources')}
@@ -1808,11 +1839,11 @@ function CourseDetailContent({route}) {
         <div ref={contentTopRef} style={{scrollMarginTop:16}}>
           <div className="tabs-bar">
             {[
-              ['content','Content'],
-              ['script','Script'],
+              ['content','Lesson'],
               ['calc','Calculator'],
               ['exercises','Exercises'],
-              ['resources','Resources'],
+              ['resources','References'],
+              ['script','Full script'],
             ].map(([k,l])=>(
               <button key={k} className={"tab-btn "+(tab===k?'on':'')} onClick={()=>setTab(k)}>{l}</button>
             ))}
@@ -1851,7 +1882,7 @@ function useCourseScript(courseId, locked = false, previewOnly = false) {
       : platformApi.courseScript(courseId);
     let active = true;
     request
-      .then((content) => { if (active) setScript({status:'ready', content, error:''}); })
+      .then((content) => { if (active) setScript({status:'ready', content:String(content).replace(/<!--[\s\S]*?-->/g, ''), error:''}); })
       .catch((error) => {
         if (active) {
           setScript({status:'error', content:'', error:error.message || 'Course script unavailable'});
@@ -2056,7 +2087,14 @@ function markdownSection(markdown, heading) {
   return (next === -1 ? rest : rest.slice(0, next)).trim();
 }
 
-function CourseSidebar({c, scriptModel, selectedModuleIndex = 0, onSelectModule, onOpenScript, onOpenResources}) {
+function CourseSidebar({c, scriptModel, selectedModuleIndex = 0, completedModules = new Set(), onSelectModule, onOpenScript, onOpenResources}) {
+  const [modulesOpen, setModulesOpen] = useState(()=>window.matchMedia('(min-width: 900px)').matches);
+  useEffect(()=>{
+    const media = window.matchMedia('(min-width: 900px)');
+    const update = ()=>setModulesOpen(media.matches);
+    media.addEventListener('change',update);
+    return ()=>media.removeEventListener('change',update);
+  },[]);
   const lessons = scriptModel?.modules?.length
     ? scriptModel.modules.map((module,idx)=>({
         n: String(idx + 1).padStart(2, '0'),
@@ -2073,20 +2111,21 @@ function CourseSidebar({c, scriptModel, selectedModuleIndex = 0, onSelectModule,
         d: lesson.d,
       }));
   const unlockedCount = lessons.length;
+  const completedCount = [...completedModules].filter(index=>index>=0 && index<unlockedCount).length;
   return (
     <div className="course-sidebar">
       <div className="panel" style={{padding:16, marginBottom:16}}>
-        <div className="label" style={{marginBottom:10}}>Your progress</div>
+        <div className="label" style={{marginBottom:10}}>Modules completed</div>
         <div className="row between" style={{marginBottom:6}}>
-          <span className="mono" style={{fontSize:18,fontWeight:700}}>Module {Math.min(selectedModuleIndex+1, unlockedCount)}</span>
+          <span className="mono" style={{fontSize:18,fontWeight:700}}>{completedCount}</span>
           <span className="mono mute" style={{fontSize:11}}>of {unlockedCount}</span>
         </div>
         <div style={{height:3,background:'var(--line)',borderRadius:0}}>
-          <div style={{height:'100%',width:`${unlockedCount?Math.round((Math.min(selectedModuleIndex+1,unlockedCount))/unlockedCount*100):0}%`,background:'var(--red)'}}></div>
+          <div data-course-completion="true" style={{height:'100%',width:`${unlockedCount?Math.round(completedCount/unlockedCount*100):0}%`,background:'var(--red)'}}></div>
         </div>
       </div>
-      <div className="panel">
-        <div className="label" style={{padding:'14px 14px 8px'}}>Open modules</div>
+      <details className="panel course-module-list" open={modulesOpen} onToggle={event=>setModulesOpen(event.currentTarget.open)}>
+        <summary className="label" style={{padding:'14px'}}>Lesson {Math.min(selectedModuleIndex+1,unlockedCount)} of {unlockedCount} · browse modules</summary>
         {lessons.map((l,idx) => {
           const active = idx === selectedModuleIndex;
           return (
@@ -2096,18 +2135,10 @@ function CourseSidebar({c, scriptModel, selectedModuleIndex = 0, onSelectModule,
               <div className="course-lesson-title">{l.t}</div>
               <div className="mono mute" style={{fontSize:10.5,marginTop:2}}>{l.d}</div>
             </div>
-            <Icon name={active?'play':'circle'} size={12} style={{color: active?'var(--red)':'var(--steel)', marginTop:2}}/>
+            <Icon name={completedModules.has(idx)?'check':active?'play':'circle'} size={12} style={{color: completedModules.has(idx)?'var(--green)':active?'var(--red)':'var(--steel)', marginTop:2}}/>
           </button>
         )})}
-      </div>
-      <div className="panel" style={{padding:14,marginTop:16}}>
-        <div className="label" style={{marginBottom:8}}>Course desk</div>
-        <div className="col" style={{gap:6}}>
-          <button type="button" className="course-side-action" onClick={onOpenScript}><span>Full script</span><Icon name="file-text" size={13}/></button>
-          <button type="button" className="course-side-action" onClick={onOpenResources}><span>RAG sources</span><Icon name="database" size={13}/></button>
-          <Link to="/exercises" className="course-side-action"><span>Practice cases</span><Icon name="arrow-right" size={13}/></Link>
-        </div>
-      </div>
+      </details>
     </div>
   );
 }
@@ -2710,7 +2741,7 @@ function LatexMarkdown({content}) {
 }
 
 function stripFrontmatter(markdown = '') {
-  return markdown.replace(/^---\s*[\s\S]*?\s*---\s*/, '');
+  return String(markdown).replace(/<!--[\s\S]*?-->/g, '').replace(/^---\s*[\s\S]*?\s*---\s*/, '');
 }
 
 // Both demanding personas flagged the same #1 trust-killer: inline
@@ -2753,143 +2784,37 @@ const _LESSON_BOILERPLATE = new RegExp('^(?:' + [
 function PracticeCourseContent({c, scriptState, scriptModel, selectedModuleIndex = 0, onSelectModule, onOpenScript}) {
   const modules = scriptModel?.modules || [];
   const safeIndex = Math.min(Math.max(selectedModuleIndex, 0), Math.max(modules.length - 1, 0));
-  const activeModule = modules[safeIndex];
   const formulas = scriptModel?.formulas || [];
-  const uiBlocks = scriptModel?.uiBlocks || [];
-  const labs = scriptModel?.labs || [];
-  const facts = scriptModel?.facts?.slice(0, 6) || [];
-  const supports = scriptModel?.supports || [];
-  const loading = scriptState?.status === 'loading';
-
-  return (
-    <div className="col" style={{gap:18}}>
-      <div className="panel" style={{padding:24}}>
-        <div className="section-eyebrow" style={{margin:0}}>// Parcours pratique salle de marche</div>
-        <h2 className="mono" style={{fontSize:24,fontWeight:700,marginTop:10,marginBottom:12}}>{c.title}</h2>
-        <p className="text-2" style={{fontSize:13.5,lineHeight:1.75,marginTop:0,maxWidth:'82ch'}}>
-          {c.tagline} Chaque module part d'un ticket ou d'un risque de marche, introduit la theorie utile,
-          puis force un calcul, un controle, une lecture de risque et une action de desk.
-        </p>
-        <div className="row" style={{gap:8,flexWrap:'wrap',marginTop:16}}>
-          <span className="badge badge-green">Modules ouverts</span>
-          {modules.slice(0, 6).map((step,idx)=>(
-            <span key={step.title || step} className="badge">{String(idx + 1).padStart(2,'0')} · {step.title || step}</span>
-          ))}
-        </div>
-      </div>
-
-      {loading && (
-        <div className="panel course-script-state">
-          <Icon name="loader-circle" size={16} style={{color:'var(--red)'}}/>
-          <span className="mono mute">Loading generated RAG course modules...</span>
-        </div>
-      )}
-
-      <CourseModuleReader
-        c={c}
-        module={activeModule}
-        writtenLesson={scriptModel?.writtenLessons?.[safeIndex]}
-        formula={formulas[safeIndex % Math.max(formulas.length, 1)]}
-        uiBlocks={selectModuleUiBlocks(uiBlocks, safeIndex)}
-        moduleCount={modules.length}
-        selectedModuleIndex={safeIndex}
-        onOpenScript={onOpenScript}
-      />
-
-      <div>
-        <div className="panel" style={{padding:18}}>
-          <div className="label" style={{marginBottom:14}}>Ce que l'apprenant produit</div>
-          <div className="col" style={{gap:10}}>
-            {[
-              ['Lecture marche', 'Inputs, hypotheses et donnees manquantes sont explicites.'],
-              ['Calcul', 'Les chiffres ont des unites, des signes et des controles.'],
-              ['Vue risque', "L'apprenant identifie l'exposition qui compte vraiment."],
-              ['Action', 'Chaque lecon finit par quote, hedge, monitor, reduce ou escalate.'],
-            ].map(([title,desc])=>(
-              <div key={title} className="row" style={{gap:12,alignItems:'flex-start',padding:'9px 0',borderTop:title!=='Market read'?'1px solid var(--line)':'none'}}>
-                <Icon name="check" size={13} style={{color:'var(--green)',marginTop:2}}/>
-                <div>
-                  <div className="mono" style={{fontWeight:700,fontSize:12.5}}>{title}</div>
-                  <div className="mute" style={{fontSize:12,marginTop:3,lineHeight:1.5}}>{desc}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid-2">
-        <div className="panel formula-bank-preview">
-          <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
-            <div className="label">Formules de desk</div>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={onOpenScript}>Derivation complete <Icon name="arrow-right" size={13}/></button>
-          </div>
-          <div className="formula-bank-list">
-            {formulas.length ? formulas.map((formula)=>(
-              <div key={formula.number} className="formula-card">
-                <div className="row between" style={{marginBottom:8}}>
-                  <strong className="mono">{formula.title}</strong>
-                  <span className="badge">F{formula.number}</span>
-                </div>
-                <LatexMarkdown content={`$$\n${formula.expression}\n$$\n${formula.usage}`}/>
-              </div>
-            )) : (
-              <div className="mute" style={{fontSize:12.5,lineHeight:1.6,padding:16}}>Formula bank is loading from the generated script.</div>
-            )}
-          </div>
-        </div>
-        <div className="panel">
-          <div className="row between" style={{padding:'12px 16px',borderBottom:'1px solid var(--line)'}}>
-            <div className="label">Labs pratiques</div>
-            <Link to="/exercises" className="btn btn-outline btn-sm">Cas pratiques <Icon name="arrow-right" size={13}/></Link>
-          </div>
-          <div className="course-lab-list">
-            {labs.map((lab,idx)=>(
-              <div key={lab} className="course-lab-item">
-                <span className="mono">{String(idx + 1).padStart(2,'0')}</span>
-                <p>{lab}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-
-      <div className="grid-2">
-        <div className="panel" style={{padding:18}}>
-          <div className="label" style={{marginBottom:12}}>Angles extraits des ouvrages</div>
-          <div className="course-source-facts">
-            {(facts.length ? facts : supports).slice(0,6).map((fact,idx)=>(
-              <div key={`${idx}-${fact}`} className="row" style={{gap:10,alignItems:'flex-start'}}>
-                <Icon name="quote" size={13} style={{color:'var(--red)',marginTop:3,flexShrink:0}}/>
-                <p>{fact}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="panel" style={{padding:18}}>
-          <div className="label" style={{marginBottom:12}}>Supports produits par le cours</div>
-          <div className="course-support-list">
-            {supports.slice(0,6).map((support,idx)=>(
-              <div key={`${idx}-${support}`} className="row between">
-                <span>{support}</span>
-                <Icon name={idx % 2 ? 'file-text' : 'book-open'} size={13} style={{color:'var(--mute)'}}/>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+  if (scriptState?.status==='loading') return <div className="panel course-script-state"><Icon name="loader-circle" size={16}/><span role="status">Loading your lesson…</span></div>;
+  return <div className="col" style={{gap:18}}>
+    <CourseModuleReader c={c} module={modules[safeIndex]} writtenLesson={scriptModel?.writtenLessons?.[safeIndex]} formula={formulas[safeIndex % Math.max(formulas.length,1)]} uiBlocks={selectModuleUiBlocks(scriptModel?.uiBlocks || [],safeIndex,modules[safeIndex],scriptModel?.writtenLessons?.[safeIndex])} moduleCount={modules.length} selectedModuleIndex={safeIndex} onOpenScript={onOpenScript}/>
+    <div className="lesson-next-action">
+      <div><div className="label">Put the lesson into practice</div><p>Use a worked case for this topic. For submitted answers and transfer checks, choose the English Interview Lab.</p></div>
+      <div className="row" style={{gap:8,flexWrap:'wrap'}}><Link to={courseGeneratorLink(c)} className="btn btn-outline btn-sm">Topic practice <Icon name="arrow-right" size={13}/></Link><Link to="/interview" className="btn btn-primary btn-sm">Interview Lab</Link>{safeIndex<modules.length-1 && <button type="button" className="btn btn-ghost btn-sm" onClick={()=>onSelectModule?.(safeIndex+1)}>Next lesson <Icon name="arrow-right" size={13}/></button>}</div>
     </div>
-  );
+  </div>;
 }
 
-function selectModuleUiBlocks(uiBlocks = [], selectedModuleIndex = 0) {
-  if (!uiBlocks.length) return [];
-  const practicalBlocks = uiBlocks.filter((block) => block.type !== 'equation');
-  const primary = practicalBlocks[selectedModuleIndex % Math.max(practicalBlocks.length, 1)] || uiBlocks[selectedModuleIndex % uiBlocks.length];
-  const equation = uiBlocks.find((block) => block.type === 'equation');
-  const picked = [primary, equation].filter(Boolean);
-  return picked.filter((block, index) => picked.findIndex((item) => item.number === block.number) === index).slice(0, 2);
+function selectModuleUiBlocks(uiBlocks = [], selectedModuleIndex = 0, module = {}, writtenLesson = {}) {
+  const primary = `${module.title || ''} ${module.objective || ''}`;
+  const context = `${primary} ${module.notion || ''} ${writtenLesson.title || ''} ${writtenLesson.body || ''}`;
+  const concept = {
+    payoff:/payoff|expiration|exercice|terminal/i,
+    scenario_table:/sc[eé]nario|choc|stress|tableau/i,
+    greeks_scenario:/greeks|delta|gamma|vega|theta|hedg|couverture/i,
+    corr_matrix:/corr[eé]lation|covariance|co[- ]?mouvement/i,
+    price_chart:/historique|s[eé]rie de prix|price history/i,
+    vol_smile:/smile|surface de vol|volatilit[eé] implicite/i,
+    monte_carlo:/monte.?carlo|simulation|convergence|erreur standard/i,
+  };
+  return uiBlocks.filter(block=>{
+    const declared = block.lesson_number ?? block.params?.lesson_number;
+    if (Number.isInteger(Number(declared)) && declared != null) return Number(declared)===selectedModuleIndex+1;
+    // Flat course widgets are not a rotating lesson schedule. The lesson's own
+    // formula is rendered separately; parity must not inherit a generic BSM proof.
+    if (/parit/i.test(primary)) return /parit/i.test(block.title || '');
+    return Boolean(concept[block.type]?.test(context));
+  }).filter(block=>block.type!=='equation').slice(0,1);
 }
 
 function normalizeCourseMicrocopy(value = '') {
@@ -2932,17 +2857,11 @@ function CourseModuleReader({c, module, writtenLesson, formula, uiBlocks = [], m
           <p className="text-2">{module.objective || module.situation || 'Module pratique construit depuis les sources de la bibliotheque.'}</p>
         </div>
         <div className="row" style={{gap:8,flexWrap:'wrap'}}>
-          {lessonWords > 0 && <span className="badge">{lessonWords} mots</span>}
-          {uiBlocks.length > 0 && <span className="badge badge-blue">{uiBlocks.length} UI blocks</span>}
-          <button type="button" className="btn btn-outline btn-sm" onClick={onOpenScript}>Script complet <Icon name="file-text" size={13}/></button>
-          <Link to="/exercises" className="btn btn-primary btn-sm">Exercice <Icon name="arrow-right" size={13}/></Link>
+          {lessonWords > 0 && <span className="badge">About {Math.max(3, Math.ceil(lessonWords / 160))} min to read</span>}
+          <Link to={courseGeneratorLink(c)} className="btn btn-outline btn-sm">Practise this topic <Icon name="arrow-right" size={13}/></Link>
         </div>
       </div>
-      <div className="course-desk-fields">
-        {fields.map(([label,value,icon])=>(
-          <DeskField key={label} label={label} value={value} icon={icon}/>
-        ))}
-      </div>
+      {!writtenLesson?.body && <div className="course-desk-fields">{fields.map(([label,value,icon])=><DeskField key={label} label={label} value={value} icon={icon}/>)}</div>}
       {writtenLesson?.body && (
         <CourseWrittenLessonExperience
           c={c}
@@ -2974,31 +2893,10 @@ function CourseWrittenLessonExperience({c, module, writtenLesson, formula, uiBlo
   const showMarket = showMarketOnLesson(courseSlug, writtenLesson.number);
   return (
     <div className={`course-written-lesson course-written-lesson-cockpit tone-${tone}`}>
-      <div className="course-written-head">
-        <div>
-          <div className="label">Cours redige</div>
-          <h3 className="mono course-written-title">Lecon {writtenLesson.number} - {writtenLesson.title}</h3>
-          <p className="mute">{layout?.hero ? `Fil du cours: ${layout.hero}.` : 'Lecture guidee: situation, intuition, demonstration, widget, action.'}</p>
-        </div>
-        <div className="row" style={{gap:8,flexWrap:'wrap'}}>
-          <span className="badge">{lessonWords} mots</span>
-          <span className="badge badge-blue">cockpit</span>
-        </div>
-      </div>
-
-      <div className="lesson-situation-grid">
-        <div className="lesson-situation-card">
-          <div className="label">Mise en situation</div>
-          <p>{normalizeCourseMicrocopy(module.situation || "Le desk demande une decision chiffrable avant d'envoyer le niveau au client.")}</p>
-        </div>
-        <div className="lesson-situation-card">
-          <div className="label">Question de valorisation</div>
-          <p>{normalizeCourseMicrocopy(module.objective || "Transformer la notion en prix, risque, controle et action.")}</p>
-        </div>
-        <div className="lesson-situation-card">
-          <div className="label">Livrable desk</div>
-          <p>{actionText}</p>
-        </div>
+      <div className="lesson-task-brief">
+        <div className="label">The desk question</div>
+        <p>{normalizeCourseMicrocopy(module.situation || module.objective || "Use the inputs to explain a price, its risks and the hedge.")}</p>
+        <details><summary>What you will produce</summary><p>{actionText}</p></details>
       </div>
 
       {sections.length > 0 && (
@@ -3023,10 +2921,10 @@ function CourseWrittenLessonExperience({c, module, writtenLesson, formula, uiBlo
         <div className="course-module-uiblocks lesson-widget-lab">
           <div className="row between" style={{marginBottom:12}}>
             <div>
-              <div className="label">Lab interactif de marche</div>
-              <p className="mute">Le widget met la notion en risque, prix, P&L ou scenario manipulable.</p>
+              <div className="label">Try the calculation</div>
+              <p className="mute">Change an input, inspect the result and explain what moved.</p>
             </div>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={onOpenScript}>Tous les blocs <Icon name="arrow-right" size={13}/></button>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={onOpenScript}>Full reference <Icon name="arrow-right" size={13}/></button>
           </div>
           <div className="course-module-uiblock-grid">
             {uiBlocks.map((block) => <UIBlock key={`${block.number}-${block.type}`} spec={block}/>)}
@@ -3073,94 +2971,12 @@ function buildBespokeSections(prose) {
 
 function buildEquationDemo(c, module, formula, resolveDerivation) {
   if (!formula?.expression) return null;
-  // Prefer a rigorous, formula-specific proof when one is authored; otherwise
-  // fall back to the generic family-level outline (no regression).
-  const slug = COURSE_SCRIPT_SLUGS[c.id] || c.id;
-  const real = resolveDerivation?.(slug, formula);
-  if (real) {
-    return {
-      title: formula.title,
-      expression: real.expression,
-      assumption: real.assumption,
-      steps: real.steps,
-      result: real.result,
-      desk: real.desk,
-      limit: real.limit,
-      proof: true,
-    };
-  }
-  const family = inferEquationFamily(c.id, `${module.title} ${module.notion} ${formula.title} ${formula.expression}`);
-  const library = {
-    option: {
-      assumption: 'Sous-jacent lognormal, taux et volatilite constants, marche sans arbitrage, payoff europeen.',
-      steps: ['Ecrire le payoff actualise sous la mesure risque-neutre.', 'Remplacer la dynamique du sous-jacent par sa loi lognormale.', 'Standardiser le seuil de payoff avec d1 et d2.', 'Separer valeur forward attendue et strike actualise pour obtenir le prix.'],
-      desk: 'Le prix devient defendable car chaque input du ticket a une place: spot, strike, maturite, taux, dividende et vol.',
-      limit: 'La formule est locale au modele: smile, dividendes discrets, liquidite et exercice anticipe doivent etre controles.'
-    },
-    rates: {
-      assumption: 'Courbe de discount factors construite, cash-flows dates, conventions de year fraction et signe payer/receiver fixes.',
-      steps: ['Actualiser chaque cash-flow avec le discount factor de sa date.', 'Regrouper la jambe fixe dans une annuite de swap.', 'Imposer PV fixe = PV flottante pour obtenir le taux par.', 'Bumper la courbe de 1 bp pour lire DV01 et P&L de taux.'],
-      desk: 'La valorisation explique directement quel bucket de courbe porte le risque.',
-      limit: 'Interpolation, collateral, basis et convexity peuvent dominer si les conventions ne sont pas celles du ticket.'
-    },
-    credit: {
-      assumption: 'Survie, recovery, risky annuity et spread de credit fixes au niveau du ticket.',
-      steps: ['Ecrire la jambe de prime comme spread multiplie par risky annuity.', 'Ecrire la jambe de protection comme perte en cas de defaut actualisee.', 'Lineariser la variation de valeur par 1 bp de spread.', 'Comparer CS01, carry et jump-to-default avant de decider.'],
-      desk: 'Le trader voit si le risque vient du carry, du mark-to-market ou du defaut saute.',
-      limit: 'La linearisation CS01 casse pour larges chocs, restructuration, wrong-way risk ou recovery instable.'
-    },
-    var: {
-      assumption: 'Distribution de P&L, horizon, niveau de confiance et matrice de correlation fixes.',
-      steps: ['Transformer les positions en sensibilites aux facteurs.', 'Propager la variance via covariance/correlation.', 'Lire le quantile de perte au niveau de confiance.', 'Comparer VaR, expected shortfall et stress avant escalation.'],
-      desk: 'La mesure devient utile seulement si elle identifie le facteur et la limite a escalader.',
-      limit: 'Normalite, correlation stable et historique representatif sont des hypotheses fortes en regime de stress.'
-    },
-    montecarlo: {
-      assumption: 'Dynamique stochastique, payoff, discounting, nombre de chemins et graine de simulation controles.',
-      steps: ['Simuler les chemins sous la mesure de pricing.', 'Evaluer le payoff sur chaque trajectoire.', 'Actualiser puis moyenner les payoffs.', 'Calculer erreur standard et intervalle de confiance.'],
-      desk: "Le prix n'est utilisable que si l'incertitude Monte Carlo est petite face au bid/ask ou au seuil de decision.",
-      limit: 'Discretisation, variance, rare events et model risk doivent etre suivis avant de citer un prix.'
-    },
-    bond: {
-      assumption: 'Cash-flows, yield, frequence, convention de prix et courbe de taux controles.',
-      steps: ['Actualiser chaque coupon et le principal.', 'Sommer les valeurs presentes pour obtenir le prix.', 'Deriver le prix par rapport au yield pour duration.', 'Ajouter le terme de convexite pour les grands chocs.'],
-      desk: 'Duration et convexite transforment un mouvement de taux en P&L explicable.',
-      limit: 'Optionnalite, spread de credit, accrued interest et liquidite peuvent deformer la lecture yield-only.'
-    },
-    stochastic: {
-      assumption: 'Processus SDE specifie, fonction de valeur derivable, volatilite et mesure de pricing claires.',
-      steps: ['Partir de la dynamique du facteur de risque.', 'Appliquer Ito pour separer drift, delta et gamma.', 'Construire le portefeuille hedge pour annuler le risque aleatoire local.', 'Lire l equation de pricing ou de P&L hedgee.'],
-      desk: 'La demonstration relie le symbole mathematique au ticket hedgeable.',
-      limit: 'Les hypotheses de continuite, liquidite et rebalancement continu ne tiennent pas telles quelles en production.'
-    },
-    generic: {
-      assumption: 'Inputs, conventions, unite de choc et signe de position fixes avant le calcul.',
-      steps: ['Identifier la variable d etat et le payoff ou cash-flow.', 'Ecrire la valeur comme prix, esperance actualisee ou approximation de sensibilite.', 'Isoler les termes qui changent sous choc.', 'Conclure avec unite, controle et action de desk.'],
-      desk: 'La formule n est utile que si elle produit un chiffre defendable et une decision.',
-      limit: 'Une formule sans conventions ni controle d ordre de grandeur ne doit pas etre envoyee au desk.'
-    },
-  };
-  const item = library[family] || library.generic;
-  return {
-    title: formula.title,
-    expression: formula.expression,
-    assumption: item.assumption,
-    steps: item.steps,
-    desk: item.desk,
-    limit: item.limit,
-  };
-}
-
-function inferEquationFamily(courseId, text = '') {
-  const t = `${courseId} ${text}`.toLowerCase();
-  if (/black|option|greek|vol|smile|barrier|autocall|payoff|delta|vega|gamma/.test(t)) return 'option';
-  if (/swap|curve|rate|dv01|discount|forward/.test(t)) return 'rates';
-  if (/credit|cds|cs01|recovery|spread/.test(t)) return 'credit';
-  if (/var|expected shortfall|stress|correlation/.test(t)) return 'var';
-  if (/monte|simulation|gbm|confidence/.test(t)) return 'montecarlo';
-  if (/bond|duration|convexity|ytm/.test(t)) return 'bond';
-  if (/stochastic|ito|sde|girsanov/.test(t)) return 'stochastic';
-  return 'generic';
+  const real = resolveDerivation?.(COURSE_SCRIPT_SLUGS[c.id] || c.id, formula);
+  // A family checklist is not a mathematical derivation of this exact formula.
+  // Only an explicitly authored, formula-specific proof may use that scaffold.
+  if (!real || !Array.isArray(real.steps) || !real.steps.length) return null;
+  return {title:formula.title, expression:real.expression, assumption:real.assumption,
+    steps:real.steps, result:real.result, desk:real.desk, limit:real.limit, proof:true};
 }
 
 function EquationDemo({demo}) {
@@ -3173,7 +2989,7 @@ function EquationDemo({demo}) {
           <div className="label">Demonstration mathematique</div>
           <h4 className="mono">{demo.title}</h4>
         </div>
-        <span className="badge badge-blue">{isProof ? 'preuve pas a pas' : 'valuation proof'}</span>
+        <span className="badge badge-blue">{isProof ? 'Authored derivation' : 'Reasoning notes'}</span>
       </div>
       <div className="equation-demo-grid">
         <div className="equation-demo-formula">
@@ -3689,6 +3505,18 @@ function CourseCalculator({c}) {
   return <div className="panel" style={{padding:24}}><div className="label">Validated calculator workspace</div><p className="text-2">The calculator for this topic is delivered as a separately validated tool under the same plan.</p><Link to={tool[0]} className="btn btn-primary btn-sm">{tool[1]} <Icon name="arrow-right" size={13}/></Link></div>;
 }
 
+function courseGeneratorLink(c) {
+  const presetId = ({'rates-swaps':'rates-swap','yield-curves':'rates-swap','credit-derivatives':'credit-cds','market-risk-var':'risk-var',exotics:'barrier-fx','structured-products':'barrier-fx'})[c.id] || 'options-book';
+  const preset = GENERATOR_PRESETS.find(item=>item.id===presetId) || GENERATOR_PRESETS[0];
+  const courseConcept = Array.isArray(c.topics) && c.topics.length ? c.topics.join(', ') : preset.concept;
+  const request = c.id==='black-scholes' ? {
+    topic:c.title, product:'European vanilla option', concept:'Black-Scholes price and Greeks', difficulty:'beginner', exercise_format:'quantitative_problem', language:'en',
+    free_prompt:'European call: spot 100, strike 100, rate 5%, dividend yield 0%, volatility 20%, maturity 1 year. Price the option, interpret delta and state the model assumptions.',
+  } : {...preset, topic:c.title, concept:courseConcept, difficulty:c.tier==='Complex'?'advanced':'intermediate', language:'en'};
+  // Only newly seeded course tickets use these English defaults. Saved custom
+  // requests are restored by the retry flow without rewriting their wording.
+  return `/exercises?${new URLSearchParams({course:c.id, ...Object.fromEntries(Object.entries(request).filter(([key])=>['topic','product','concept','difficulty','exercise_format','free_prompt','language'].includes(key)))}).toString()}`;
+}
 function CourseExercises({c}) {
   const related = EXERCISES
     .filter((exercise)=>exercise.courseIds?.includes(c.id) || exercise.cat === c.title)
@@ -3715,9 +3543,9 @@ function CourseExercises({c}) {
         <div className="row between" style={{gap:14}}>
           <div>
             <div className="label" style={{marginBottom:6}}>Generate from this course</div>
-            <div className="mute" style={{fontSize:12.5,lineHeight:1.5}}>Use the AI generator to create a fresh desk case with this course context, difficulty and product family.</div>
+            <div className="mute" style={{fontSize:12.5,lineHeight:1.5}}>Start with this course topic and level already filled in. Review the scenario and inputs before generating a new worked case.</div>
           </div>
-          <Link to="/exercises" className="btn btn-primary btn-sm" style={{flexShrink:0}}>Open generator <Icon name="arrow-right" size={13}/></Link>
+          <Link to={courseGeneratorLink(c)} className="btn btn-primary btn-sm" style={{flexShrink:0}}>Open generator <Icon name="arrow-right" size={13}/></Link>
         </div>
       </div>
     </div>
@@ -3959,8 +3787,8 @@ function ToolDetailPage({id}) {
   const tool = TOOLS.find(t=>t.id===id);
   if (!tool) return <ToolNotFound/>;
   const renderers = {
-    'bs-pricer': <React.Suspense fallback={<div className="container page"><div className="panel" style={{padding:28}}><span className="mono mute">Loading canonical Black-Scholes engine…</span></div></div>}><BlackScholesLabTool/></React.Suspense>,
-    payoff: <React.Suspense fallback={<div className="container page"><div className="panel" style={{padding:28}}><span className="mono mute">Loading deterministic payoff engine…</span></div></div>}><PayoffStrategyLabTool/></React.Suspense>,
+    'bs-pricer': <React.Suspense fallback={<div className="container page"><div className="panel" style={{padding:28}}><span className="mono mute">Loading canonical Black-Scholes engine…</span></div></div>}><BlackScholesLabTool key={window.location.search}/></React.Suspense>,
+    payoff: <React.Suspense fallback={<div className="container page"><div className="panel" style={{padding:28}}><span className="mono mute">Loading deterministic payoff engine…</span></div></div>}><PayoffStrategyLabTool key={window.location.search} initialPreset={new URLSearchParams(window.location.search).get('preset') || undefined}/></React.Suspense>,
     mc: <React.Suspense fallback={<div className="container page"><div className="panel" style={{padding:28}}><span className="mono mute">Loading deterministic Monte Carlo engine…</span></div></div>}><MonteCarloLabTool/></React.Suspense>,
     'iv-calc': <React.Suspense fallback={<div className="container page"><div className="panel" style={{padding:28}}><span className="mono mute">Loading deterministic realized-volatility engine…</span></div></div>}><RealizedVolatilityLabTool/></React.Suspense>,
     calib: <React.Suspense fallback={<div className="container page"><div className="panel" style={{padding:28}}><span className="mono mute">Loading deterministic calibration engine…</span></div></div>}><ModelCalibrationTool/></React.Suspense>,
@@ -3970,7 +3798,7 @@ function ToolDetailPage({id}) {
     volsurface: <React.Suspense fallback={<div className="container page"><div className="panel" style={{padding:28}}><span className="mono mute">Loading deterministic volatility-surface engine…</span></div></div>}><VolSurfaceLabTool/></React.Suspense>,
   };
   const content = renderers[id] || renderers['bs-pricer'];
-  const contract = <div className="container page" style={{paddingBottom:0}}><ToolContractPanel tool={tool}/></div>;
+  const contract = <div className="container page tool-contract-wrap" style={{paddingBottom:0}}>{id==='bs-pricer' ? <details className="tool-contract-disclosure"><summary>Conventions &amp; engine details</summary><ToolContractPanel tool={tool}/></details> : <ToolContractPanel tool={tool}/>}</div>;
   if (tool.tier !== 'free') {
     return <><>{contract}</><GatedTool required={tool.tier} name={tool.name}>{content}</GatedTool></>;
   }
@@ -4041,6 +3869,7 @@ function BacktestPanel() {
   // honest "backend requis" state.
   const [meta, setMeta] = useState(null);     // { instruments, available, strategies }
   const [metaErr, setMetaErr] = useState(false);
+  const [metaRevision, setMetaRevision] = useState(0);
   const [instrument, setInstrument] = useState('EURUSD');
   const [strategy, setStrategy] = useState('ensemble');
   const [capital, setCapital] = useState(5000);
@@ -4055,13 +3884,14 @@ function BacktestPanel() {
 
   useEffect(() => {
     let alive = true;
+    setMeta(null); setMetaErr(false);
     strategyApi.instruments().then((d) => {
       if (!alive) return;
-      if (!d || !d.instruments) { setMetaErr(true); return; }
+      if (!d || !Array.isArray(d.instruments)) { setMetaErr(true); return; }
       setMeta(d);
     });
     return () => { alive = false; };
-  }, []);
+  }, [metaRevision]);
 
   useEffect(() => {
     const info = meta?.instruments?.find((i) => i.key === instrument);
@@ -4092,6 +3922,7 @@ function BacktestPanel() {
   };
 
   const instruments = meta?.instruments || [];
+  const engineReady = Boolean(meta?.available && instruments.length);
   const m = res?.metrics || {};
   // Real equity curve + underwater drawdown derived from the engine equity.
   const eqSeries = useMemo(() => (res?.equity || []).map((p, i) => ({ x: i, y: p.v })), [res]);
@@ -4144,7 +3975,7 @@ function BacktestPanel() {
             <div className="label">Configuration</div>
             <span className={'badge ' + (metaErr ? 'badge-red' : (meta?.available ? 'badge-green' : ''))}>
               <span className={'dot ' + (metaErr ? 'dot-red' : 'dot-green')}></span>
-              {metaErr ? 'BACKEND HORS LIGNE' : (meta ? (meta.available ? 'MOTEUR EN LIGNE' : 'MOTEUR INDISPONIBLE') : 'CONNEXION…')}
+              {metaErr ? 'SERVICE UNAVAILABLE' : meta ? engineReady ? 'ENGINE READY' : 'ENGINE UNAVAILABLE' : 'CHECKING SERVICE…'}
             </span>
           </div>
 
@@ -4179,10 +4010,10 @@ function BacktestPanel() {
             </select>
           </div>
 
-          <button className="btn btn-primary btn-sm" disabled={loading || metaErr} onClick={runBacktest} style={{ width: '100%', justifyContent: 'center', marginTop: 4 }}>
+          <button className="btn btn-primary btn-sm" disabled={loading || !engineReady} onClick={runBacktest} style={{ width: '100%', justifyContent: 'center', marginTop: 4 }}>
             <Icon name="play" size={13} /> {loading ? 'Backtest en cours…' : 'Run backtest'}
           </button>
-          <button className="btn btn-outline btn-sm" disabled={wfLoading || metaErr} onClick={runWalkforward} style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}>
+          <button className="btn btn-outline btn-sm" disabled={wfLoading || !engineReady} onClick={runWalkforward} style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}>
             <Icon name="activity" size={13} /> {wfLoading ? 'Walk-forward…' : 'Walk-forward (out-of-sample)'}
           </button>
           {strategy !== 'ensemble' && (
@@ -4211,7 +4042,7 @@ function BacktestPanel() {
             </table>
           ) : (
             <div className="mute" style={{ fontSize: 12 }}>
-              {loading ? 'Calcul du backtest sur données réelles…' : (metaErr ? 'Backend requis : aucune métrique tant que le moteur est hors ligne.' : 'Lance un backtest pour afficher des métriques réelles.')}
+              {loading ? 'Computing the historical backtest…' : !engineReady ? 'No new run is available. Metrics appear only after a completed calculation.' : 'Run a backtest to see the computed metrics.'}
             </div>
           )}
         </div>
@@ -4219,12 +4050,11 @@ function BacktestPanel() {
 
       {/* charts + verdict + trades */}
       <div className="col" style={{ gap: 14 }}>
-        {metaErr && (
-          <div className="panel" style={{ padding: 18, borderColor: '#FF2E45' }}>
-            <div className="label" style={{ color: '#FF2E45' }}>Backend requis</div>
-            <div className="mute" style={{ fontSize: 13, marginTop: 8 }}>
-              Le Trading Lab exécute un vrai moteur de backtest côté serveur ({strategyApi.base()}). Démarre le backend FastAPI pour lancer des backtests sur données réelles. Aucun chiffre n’est simulé ici.
-            </div>
+        {(metaErr || (meta && !engineReady)) && (
+          <div className="panel" role="status" style={{padding:18}}>
+            <h2 className="mono" style={{fontSize:17,margin:'0 0 10px'}}>Historical research is unavailable</h2>
+            <p className="text-2" style={{fontSize:13,lineHeight:1.7}}>The service cannot provide a new backtest right now. Retry the connection, or continue with a pricing case that uses declared teaching inputs.</p>
+            <div className="row" style={{gap:10,flexWrap:'wrap'}}><button type="button" className="btn btn-outline btn-sm" onClick={()=>setMetaRevision(value=>value+1)}>Retry service</button><Link to="/interview" className="btn btn-primary btn-sm">Continue interview practice</Link></div>
           </div>
         )}
 
@@ -4414,7 +4244,7 @@ function StrategiesPanel() {
               <div className="mono" style={{fontSize:12,fontWeight:600,marginTop:2}}>{t.cost}</div>
             </div>
           </div>
-          <Link to="/tools/payoff" className="btn btn-outline btn-sm" style={{width:'100%',justifyContent:'center',marginTop:14}}>Open payoff builder <Icon name="arrow-right" size={13}/></Link>
+          <Link to={`/tools/payoff?preset=${encodeURIComponent(t.n)}`} className="btn btn-outline btn-sm" style={{width:'100%',justifyContent:'center',marginTop:14}}>Open payoff builder <Icon name="arrow-right" size={13}/></Link>
         </div>
       ))}
     </div>
@@ -4480,7 +4310,10 @@ function ExercisesIndex({route}) {
   const [hasMore,setHasMore] = useState(false);
   const [loadingMore,setLoadingMore] = useState(false);
   const retryId = new URLSearchParams(window.location.search).get('retry');
-  const retryRequest = retryId ? getExerciseById(retryId, owner)?.request : null;
+  const params = new URLSearchParams(route.query);
+  const contextCourse = COURSES.find(course=>course.id===params.get('course'));
+  const courseRequest = contextCourse ? Object.fromEntries(['topic','product','concept','difficulty','exercise_format','free_prompt','language'].map(key=>[key, (params.get(key) || '').slice(0,key==='free_prompt'?4000:300)]).filter(([,value])=>value)) : null;
+  const retryRequest = retryId ? getExerciseById(retryId, owner)?.request : courseRequest;
   useEffect(()=>{
     let active = true;
     setGenerated(loadGeneratedExercises(owner));
@@ -4523,7 +4356,7 @@ function ExercisesIndex({route}) {
     if (ownerRef.current !== owner) return;
     const next = saveGeneratedExercise(exercise, owner);
     setGenerated(next);
-    notify(exercise.metadata?.persistence === 'account' ? 'Exercice créé et enregistré dans votre bibliothèque.' : 'Exemple hors connexion ouvert sur cet appareil.');
+    notify(exercise.metadata?.persistence === 'account' ? 'Exercise created and saved to your account library.' : 'Offline reference example opened on this device.');
     nav(`/exercises/${exercise.id}`);
   };
   return (
@@ -4537,10 +4370,11 @@ function ExercisesIndex({route}) {
           <Link to="/practice" className="btn btn-outline btn-sm">Practice Hub <Icon name="arrow-right" size={13}/></Link>
         </>}
       />
-      <ExerciseGeneratorPanel key={retryId || 'new'} initialRequest={retryRequest} onGenerated={onGenerated}/>
-      {libraryError && <ServiceUnavailable title="Votre bibliothèque de compte est temporairement indisponible. Les cas en cache restent accessibles." onRetry={()=>setLibraryRevision(value=>value+1)}/>}
+      {contextCourse && <div className="course-language-note"><span>Practice context: {contextCourse.title} · {retryRequest?.difficulty || 'intermediate'}</span><Link to={`/courses/${contextCourse.id}`}>Back to course</Link></div>}
+      <ExerciseGeneratorPanel key={retryId || route.query || 'new'} initialRequest={retryRequest} onGenerated={onGenerated}/>
+      {libraryError && <ServiceUnavailable title="Your account library is temporarily unavailable. Cached cases remain accessible." onRetry={()=>setLibraryRevision(value=>value+1)}/>}
       <ExerciseLibraryStats exercises={allExercises} generatedCount={generated.length}/>
-      {hasMore && <button className="btn btn-outline" disabled={loadingMore} onClick={loadMore}>{loadingMore?'Chargement…':'Charger les exercices enregistrés suivants'}</button>}
+      {hasMore && <button className="btn btn-outline" disabled={loadingMore} onClick={loadMore}>{loadingMore?'Loading…':'Load more saved exercises'}</button>}
       <div className="tabs-bar">
         {cats.map(c=>(
           <button key={c} className={"tab-btn "+(cat===c?'on':'')} onClick={()=>setCat(c)}>{c}</button>
@@ -4578,14 +4412,16 @@ function ExerciseLibraryStats({exercises, generatedCount}) {
 }
 
 function ExerciseGeneratorPanel({onGenerated,initialRequest}) {
-  const [form,setForm] = useState(()=>({...GENERATOR_PRESETS[0],number_of_questions:5,...initialRequest}));
+  const [form,setForm] = useState(()=>({...GENERATOR_PRESETS[0],language:'en',number_of_questions:5,...initialRequest}));
   const [busy,setBusy] = useState(false);
   const [error,setError] = useState(null);
   const [status,setStatus] = useState({checked:false, ok:false, detail:'Checking engine'});
 
   useEffect(()=>{
     let alive = true;
-    fetch(`${getPracticeApiBase()}/health`)
+    const controller = new AbortController();
+    const timeout = setTimeout(()=>controller.abort(),8000);
+    fetch(`${getPracticeApiBase()}/health`,{signal:controller.signal})
       .then((response)=>response.ok ? response.json() : Promise.reject(new Error(`HTTP ${response.status}`)))
       .then((data)=>{
         if (!alive) return;
@@ -4593,16 +4429,17 @@ function ExerciseGeneratorPanel({onGenerated,initialRequest}) {
         setStatus({
           checked:true,
           ok:canGenerate,
-          detail:canGenerate ? (data.llm==='template' ? 'Rédaction structurée · sans API IA externe' : 'Rédaction IA configurée') : 'Service de rédaction indisponible',
+          detail:canGenerate ? (String(data.llm).startsWith('template') ? 'Structured writing · no external AI API' : 'AI writing configured') : 'Writing service unavailable',
           sources:Boolean(data.rag_available),
         });
       })
-      .catch((error)=>{ if (alive) setStatus({checked:true, ok:false, detail:error.message}); });
-    return ()=>{ alive = false; };
+      .catch(()=>{ if (alive) setStatus({checked:true, ok:false, detail:'Practice service unavailable. A fixed offline reference remains available.'}); })
+      .finally(()=>clearTimeout(timeout));
+    return ()=>{ alive = false; clearTimeout(timeout); controller.abort(); };
   },[]);
 
   const update = (key,value) => setForm((current)=>({...current, [key]: value}));
-  const applyPreset = (preset) => { setForm({...preset,number_of_questions:form.number_of_questions || 5}); setError(null); };
+  const applyPreset = (preset) => { setForm({...preset,language:form.language || 'en',number_of_questions:form.number_of_questions || 5}); setError(null); };
   const generate = async () => {
     setBusy(true);
     setError(null);
@@ -4625,7 +4462,7 @@ function ExerciseGeneratorPanel({onGenerated,initialRequest}) {
         </div>
         <div className="row" style={{gap:8,flexWrap:'wrap',justifyContent:'flex-end'}}>
           <span className={"badge "+(status.ok && status.sources?'badge-green':'badge-amber')}>
-            <span className={"dot "+(status.ok?'dot-green':'dot-red')}></span>{status.ok ? status.sources ? 'BIBLIOTHÈQUE DISPONIBLE' : 'SANS RÉFÉRENCE DISPONIBLE' : 'MODE HORS CONNEXION'}
+            <span className={"dot "+(status.ok?'dot-green':'dot-red')}></span>{!status.checked ? 'CHECKING SERVICE' : status.ok ? status.sources ? 'REFERENCES AVAILABLE' : 'NO REFERENCES AVAILABLE' : 'OFFLINE REFERENCE MODE'}
           </span>
           <span className="mono mute" style={{fontSize:10.5}}>{status.detail}</span>
         </div>
@@ -4675,14 +4512,15 @@ function ExerciseGeneratorPanel({onGenerated,initialRequest}) {
               <option value="risk_management">Risk management</option>
             </select>
           </div>
-          <label className="field"><span className="mono mute" style={{fontSize:11}}>Nombre de questions</span><input aria-label="Number of questions" type="number" min="1" max="12" value={form.number_of_questions} onChange={event=>update('number_of_questions',event.target.value)}/></label>
+          <label className="field"><span className="mono mute" style={{fontSize:11}}>Exercise language</span><select aria-label="Exercise language" value={form.language || 'en'} onChange={event=>update('language',event.target.value)}><option value="en">English</option><option value="fr">Français</option></select></label>
+          <label className="field"><span className="mono mute" style={{fontSize:11}}>Number of questions</span><input aria-label="Number of questions" type="number" min="1" max="12" value={form.number_of_questions} onChange={event=>update('number_of_questions',event.target.value)}/></label>
           <button className="btn btn-primary" onClick={generate} disabled={busy} style={{alignSelf:'end',justifyContent:'center'}}>
             {busy ? <><Icon name="terminal" size={13}/> Generating</> : <><Icon name="play" size={13}/> Generate exercise</>}
           </button>
         </div>
       </div>
-      {busy && <p role="status" className="text-2">Recherche des références et préparation du corrigé…</p>}
-      {error && <div role="alert" className="exercise-generator-error"><p>{error.message || 'La création a échoué. Votre demande est conservée.'}</p>{error.status===401 && <Link className="btn btn-outline" to="/auth/login">Se reconnecter</Link>}{error.status===403 && <Link className="btn btn-outline" to="/pricing">Vérifier mon accès</Link>}<p className="text-2">Votre demande est conservée. Corrigez les paramètres ou réessayez.</p></div>}
+      {busy && <p role="status" className="text-2">Retrieving references and preparing the worked solution…</p>}
+      {error && <div role="alert" className="exercise-generator-error"><p>{error.message || 'Creation failed. Your request is preserved.'}</p>{error.status===401 && <Link className="btn btn-outline" to="/auth/login">Sign in again</Link>}{error.status===403 && <Link className="btn btn-outline" to="/pricing">Review my access</Link>}<p className="text-2">Your request is preserved. Adjust the parameters or try again.</p></div>}
     </div>
   );
 }
@@ -4889,10 +4727,11 @@ function GeneratedExerciseDetail({ex}) {
           <button className="btn btn-primary btn-sm" onClick={()=>downloadExercise(ex)}><Icon name="download" size={13}/> Download JSON</button>
         </>}
       />
-      {ex.engine==='fallback' && <aside className="panel exercise-offline-notice"><strong>Exemple fixe hors connexion : vos paramètres personnalisés ne sont pas appliqués.</strong><p>Aucune source de la bibliothèque n’est attachée. Votre demande originale est conservée pour réessayer.</p><details><summary>Retrouver ma demande</summary><p>{ex.request?.free_prompt}</p></details><Link className="btn btn-outline" to={`/exercises?retry=${encodeURIComponent(ex.id)}`}>Reprendre ma demande</Link></aside>}
-      <p className="text-2" role="status">{ex.metadata?.persistence==='account' ? 'Enregistré dans votre bibliothèque de compte.' : ex.metadata?.cache_warning ? 'Cache de cet appareil indisponible. Téléchargez cet exemple pour le conserver.' : 'Conservé uniquement sur cet appareil.'}</p>
+      {ex.engine==='fallback' && <aside className="panel exercise-offline-notice"><strong>Fixed offline reference: your custom parameters have not been applied.</strong><p>No library reference is attached. Your original request is preserved so you can retry.</p><details><summary>Review my request</summary><p>{ex.request?.free_prompt}</p></details><Link className="btn btn-outline" to={`/exercises?retry=${encodeURIComponent(ex.id)}`}>Retry my request</Link></aside>}
+      <p className="text-2" role="status">{ex.metadata?.persistence==='account' ? 'Saved to your account library.' : ex.metadata?.cache_warning ? 'Device cache unavailable. Download this example to keep it.' : 'Kept only on this device.'}</p>
+      <p className="text-2" style={{fontSize:11}}>Readable references are available in Sources. Markdown and JSON downloads preserve the original saved text, including historical references.</p>
       <div className="tabs-bar">
-        {[['brief','Brief'],['solution','Correction'],['sources','Sources'],['export','Export']].map(([k,l])=>(
+        {[['brief','Brief'],['solution','Worked solution'],['sources','Sources'],['export','Export']].map(([k,l])=>(
           <button key={k} className={"tab-btn "+(tab===k?'on':'')} onClick={()=>setTab(k)}>{l}</button>
         ))}
       </div>
@@ -4910,10 +4749,10 @@ function GeneratedExerciseDetail({ex}) {
         </div>
         <div className="col exercise-side-stack">
           <div className="panel exercise-side-panel">
-            <div className="label" style={{marginBottom:10}}>À propos de ce cas</div>
+            <div className="label" style={{marginBottom:10}}>About this case</div>
             <div className="col" style={{gap:8}}>
               {[
-                ['Rédaction', exerciseModeLabel(ex)],
+                ['Writing mode', exerciseModeLabel(ex)],
                 ['Product', ex.product || '-'],
                 ['Concept', ex.concept || '-'],
                 ['Sources', String(sources.length)],
@@ -4929,9 +4768,9 @@ function GeneratedExerciseDetail({ex}) {
           <div className="panel exercise-side-panel">
             <div className="label" style={{marginBottom:10}}>Next action</div>
             <div className="mute" style={{fontSize:12.5,lineHeight:1.55}}>
-              Solve the case first, then open the correction. If no reference is attached, treat the prompt as unsourced practice material.
+              This library case is for self-review: it does not grade a submitted answer. Use the Interview Lab to record a numerical answer, reasoning and a transfer check. If no reference is attached, treat this case as unsourced practice material.
             </div>
-            <button className="btn btn-outline btn-sm" onClick={()=>nav('/exercises')} style={{width:'100%',justifyContent:'center',marginTop:14}}>Back to generator</button>
+            <Link className="btn btn-primary btn-sm" to="/interview" style={{marginTop:14}}>Practise with a submitted answer</Link><button className="btn btn-outline btn-sm" onClick={()=>nav('/exercises')} style={{width:'100%',justifyContent:'center',marginTop:10}}>Back to generator</button>
           </div>
         </div>
       </div>
@@ -4970,103 +4809,63 @@ function readableExerciseText(value) {
   return String(value || '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g,' ');
 }
 function MarkdownBlock({content}) {
-  return <div className="exercise-rich-markdown"><React.Suspense fallback={<p role="status">Chargement du document…</p>}><CourseMarkdown tables>{readableExerciseText(content).replace(/^# /gm,'## ')}</CourseMarkdown></React.Suspense></div>;
+  return <div className="exercise-rich-markdown"><React.Suspense fallback={<p role="status">Loading document…</p>}><CourseMarkdown tables>{readableExerciseText(content).replace(/^# /gm,'## ')}</CourseMarkdown></React.Suspense></div>;
 }
 
 function pickGeneratedContent(content, mode) {
+  // Saved documents stay immutable. The reader uses the checked Sources tab,
+  // rather than replaying historical OCR from an embedded references footer.
+  const readerContent = String(content || '').split(/^##\s+R[eé]f[eé]rences[^\n]*$/im)[0].trim();
   if (mode === 'solution') {
-    const match = String(content || '').match(/## Corrig[\s\S]*/i);
-    return match ? match[0] : content;
+    const match = readerContent.match(/^## (?:Corrig[^\n]*|Verified solution)\s*$[\s\S]*/im);
+    return match ? match[0] : readerContent;
   }
   if (mode === 'brief') {
-    return String(content || '').split(/## Corrig/i)[0].trim() || content;
+    return readerContent.split(/^## (?:Corrig[^\n]*|Verified solution)\s*$/im)[0].trim() || readerContent;
   }
-  return content;
+  return readerContent;
 }
 
 // ============= SURVIVAL MODE =============
 function SurvivalPage({route}) {
   const sub = route.parts[1];
-  if (sub) return <SurvivalWave wave={sub}/>;
-  return <SurvivalIndex/>;
+  if (!sub) return <SurvivalIndex/>;
+  if (route.parts.length===2 && ['core','beginner'].includes(sub)) return <SurvivalWave wave="core"/>;
+  return <div className="container page"><PageHead title="This wave is not available" sub="The released timed practice is one mixed Core wave. Separate difficulty levels are not published yet."/><div className="panel service-state"><h2>Try the Core practice wave</h2><p>20 questions · 30 seconds per question · 3 lives. Your feedback stays on the answered question until you choose Next.</p><Link to="/survival/core" className="btn btn-primary">Open Core practice <Icon name="arrow-right" size={13}/></Link></div></div>;
 }
 
 function SurvivalIndex() {
   const [board,setBoard] = useState(null);
   useEffect(()=>{ platformApi.survivalLeaderboard(10).then(setBoard).catch(()=>setBoard([])); },[]);
-  const waves = [
-    {n:'Beginner', lvl:1, time:'60s', count:10, topics:['Definitions','Basic payoffs'], status:'current'},
-    {n:'Intermediate', lvl:2, time:'45s', count:15, topics:['Black-Scholes','Greeks'], status:'locked'},
-    {n:'Advanced', lvl:3, time:'30s', count:20, topics:['Volatility','Hedging'], status:'locked'},
-    {n:'Expert', lvl:4, time:'25s', count:25, topics:['Exotics','MC'], status:'locked'},
-    {n:'Master', lvl:5, time:'20s', count:30, topics:['SDE','Calibration'], status:'locked'},
-    {n:'Legendary', lvl:6, time:'15s', count:40, topics:['Everything'], status:'locked'},
-  ];
   return (
     <div className="container page">
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ survival</span></>}
-        title={<>Survival Mode <span className="blink" style={{color:'var(--red)',marginLeft:10}}>●</span></>}
-        sub="Pressure-tested practice. Timer running. Only server-verified runs can enter the public leaderboard."
-        right={<><span className="badge badge-red"><span className="dot dot-red"></span>Timed mode</span></>}
+        title="Survival Mode"
+        sub="One released mixed-topic practice wave. Separate difficulty levels are not available. Practice scores are unranked unless independently verified by the server."
+        right={<span className="badge">Timed practice</span>}
       />
-      <div className="grid-4" style={{marginBottom:18}}>
-        <Stat label="Highest wave" value={board?.length?'Recorded':'No runs yet'} accent="var(--red)"/>
-        <Stat label="Available waves" value={String(waves.length)}/>
-        <Stat label="Ranking" value={board===null?'Loading':board.length?'Active':'No runs yet'}/>
-        <Stat label="Avg time/Q" value="—"/>
+      <div className="grid-3" style={{marginBottom:20}}>
+        <Stat label="Questions" value={String(SURVIVAL_QUESTIONS.length)}/>
+        <Stat label="Time per question" value="30s"/>
+        <Stat label="Lives" value="3"/>
       </div>
-      <div className="grid-3">
-        {waves.map(w=>(
-          <div key={w.n} className="panel" style={{padding:0, position:'relative', overflow:'hidden', cursor: w.status!=='locked'?'pointer':'default'}}>
-            <div style={{height:6, background:'#06080B', position:'relative'}}>
-              <div style={{position:'absolute',inset:0, width: w.status==='completed'?'100%':w.status==='current'?'45%':'0%', background:'var(--red)'}}></div>
-            </div>
-            <div style={{padding:20}}>
-              <div className="row between" style={{marginBottom:14}}>
-                <div className="mono" style={{fontSize:11,letterSpacing:'.14em',color:'var(--mute)'}}>WAVE 0{w.lvl}</div>
-                <span className={"badge "+(w.status==='completed'?'badge-green':w.status==='current'?'badge-red':'badge-locked')}>
-                  {w.status==='completed'?'✓ Cleared':w.status==='current'?'● In progress':'⌬ Locked'}
-                </span>
-              </div>
-              <div className="mono" style={{fontWeight:700,fontSize:20,marginBottom:14}}>{w.n}</div>
-              <div className="grid-2" style={{gap:8, marginBottom:14}}>
-                <div className="panel-2" style={{padding:'8px 10px'}}>
-                  <div className="mono mute" style={{fontSize:10}}>TIME / Q</div>
-                  <div className="mono" style={{fontSize:14,fontWeight:600,color:'var(--red)',marginTop:2}}>{w.time}</div>
-                </div>
-                <div className="panel-2" style={{padding:'8px 10px'}}>
-                  <div className="mono mute" style={{fontSize:10}}>CHALLENGES</div>
-                  <div className="mono" style={{fontSize:14,fontWeight:600,marginTop:2}}>{w.count}</div>
-                </div>
-              </div>
-              <div className="row" style={{gap:6,flexWrap:'wrap', marginBottom:14}}>
-                {w.topics.map(t=><span key={t} className="badge">{t}</span>)}
-              </div>
-              <Link to={"/survival/"+w.n.toLowerCase()} className={"btn "+(w.status==='locked'?'btn-outline':'btn-primary')+" btn-sm"} style={{width:'100%',justifyContent:'center', opacity: w.status==='locked'?0.5:1, pointerEvents: w.status==='locked'?'none':'auto'}}>
-                {w.status==='locked' ? <><Icon name="lock" size={13}/> Locked</> : w.status==='completed' ? <>Replay <Icon name="rotate-ccw" size={13}/></> : <>Continue <Icon name="arrow-right" size={13}/></>}
-              </Link>
-            </div>
-          </div>
-        ))}
-      </div>
-      <section className="section" style={{borderTop:'1px solid var(--line)',marginTop:32}}>
-        <div className="section-eyebrow">// Leaderboard</div>
-        <div className="section-head">
-          <h2 className="section-title">All-time top 10</h2>
+      <div className="panel survival-core-card" style={{padding:28,maxWidth:820}}>
+        <div className="section-eyebrow">Core practice · mixed topics</div>
+        <h2 className="section-title">Explain the number under pressure.</h2>
+        <p className="text-2" style={{lineHeight:1.7}}>Practise Black-Scholes, Greeks, volatility and hedging. A timeout costs one life; the timer pauses while you review the explanation. Completing a run records practice activity, not a verified skill certification.</p>
+        <div className="row" style={{gap:10,marginTop:20,flexWrap:'wrap'}}>
+          <Link to="/survival/core" className="btn btn-primary">Start Core practice <Icon name="play" size={13}/></Link>
+          <Link to="/interview" className="btn btn-outline">Prefer an untimed interview case?</Link>
         </div>
+      </div>
+      <section className="section" style={{marginTop:32}}>
+        <div className="section-eyebrow">Verified leaderboard</div>
+        <h2 className="section-title">All-time top 10</h2>
         <div className="panel">
           {board===null && <div className="mute" style={{padding:18}}>Loading leaderboard…</div>}
-          {board!==null && board.length===0 && <div className="mute" style={{padding:18}}>No verified runs yet. Practice runs are saved to your progress but never self-publish a client-declared score.</div>}
-          {board && board.length>0 && <table className="data">
-            <thead><tr><th>#</th><th>Player</th><th className="num">Best score</th><th className="num">Streak</th></tr></thead>
-            <tbody>
-              {board.map(r=><tr key={r.username}>
-                <td className="symbol">#{r.rank}</td><td>@{r.username}</td>
-                <td className="num">{Number(r.score).toLocaleString()}</td><td className="num">{r.streak||0}</td>
-              </tr>)}
-            </tbody>
-          </table>}
+          {board!==null && board.length===0 && <div className="mute" style={{padding:18}}>No verified runs yet. Saved practice runs do not publish a client-declared score.</div>}
+          {board && board.length>0 && <table className="data"><thead><tr><th>#</th><th>Player</th><th className="num">Best score</th><th className="num">Streak</th></tr></thead><tbody>{board.map(r=><tr key={r.username}><td className="symbol">#{r.rank}</td><td>@{r.username}</td><td className="num">{Number(r.score).toLocaleString()}</td><td className="num">{r.streak||0}</td></tr>)}</tbody></table>}
         </div>
       </section>
     </div>
@@ -5075,22 +4874,26 @@ function SurvivalIndex() {
 
 function SurvivalWave({wave}) {
   let auth=null; try { auth=useAuth(); } catch { auth=null; }
-  const [timer, setTimer] = useState(28);
+  const [timer, setTimer] = useState(30);
   const [progress, setProgress] = useState(0);
   const [lives, setLives] = useState(3);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
   const [selected, setSelected] = useState(null);
   const [saveStatus, setSaveStatus] = useState('idle');
   const [completed, setCompleted] = useState(false);
+  const answeredRef = useRef(false);
+  const savedRef = useRef(false);
   const total = SURVIVAL_QUESTIONS.length;
-  const question = SURVIVAL_QUESTIONS[Math.min(progress, total - 1)];
+  const question = SURVIVAL_QUESTIONS[progress];
   const correct = question.correct;
-  const waveName = (wave || 'advanced').replace(/-/g,' ');
-  const prettyWave = waveName.charAt(0).toUpperCase() + waveName.slice(1);
+  const prettyWave = 'Core';
+  const answeredCount = Math.min(total, progress + (selected ? 1 : 0));
   const saveRun = async (finalScore, finalStreak) => {
+    if (savedRef.current) return;
+    savedRef.current = true;
     setSaveStatus('saving');
-    notify('Saving practice run…', 'warning');
     try {
       const result = await platformApi.recordSurvival({ wave: prettyWave, score: Math.round(finalScore), streak: finalStreak });
       if (!result?.ok) throw new Error('The server did not confirm the run.');
@@ -5102,35 +4905,30 @@ function SurvivalWave({wave}) {
       notify(`Practice run was not saved (${error.message}).`, 'error');
     }
   };
-  useEffect(()=>{
-    const id = setInterval(()=>setTimer(t=>selected?t:(t>0?t-1:30)),1000);
-    return ()=>clearInterval(id);
-  },[selected]);
   const choose = (key) => {
-    if (selected) return;
+    if (answeredRef.current || completed) return;
+    answeredRef.current = true;
     setSelected(key);
-    if (key === correct) {
-      const earned = Math.max(50, timer * 12);
-      setScore((value)=>value + earned);
-      setStreak((s)=>s+1);
-      const nextProgress = Math.min(total, progress + 1);
-      setProgress(nextProgress);
-      if (nextProgress>=total) void saveRun(score+earned, streak+1);
-      notify(`Correct. +${earned} pts.`);
-    } else {
-      setStreak(0);
-      const nextLives = Math.max(0, lives - 1);
-      setProgress(Math.min(total, progress + 1));
-      setLives(nextLives);
-      if (nextLives===0) void saveRun(score, streak);
-      notify(nextLives===0 ? 'Game over — saving practice run…' : 'Wrong answer. One life removed.', 'warning');
-    }
+    const isCorrect = key === correct;
+    const earned = isCorrect ? Math.max(50, timer * 12) : 0;
+    const nextScore = score + earned;
+    const nextStreak = isCorrect ? streak + 1 : 0;
+    const nextBest = Math.max(bestStreak, nextStreak);
+    const nextLives = isCorrect ? lives : Math.max(0, lives - 1);
+    setScore(nextScore); setStreak(nextStreak); setBestStreak(nextBest); setLives(nextLives);
+    if (progress + 1 >= total || nextLives===0) void saveRun(nextScore, nextBest);
   };
+  useEffect(()=>{
+    if (selected || completed) return undefined;
+    if (timer===0) { choose('timeout'); return undefined; }
+    const id = setTimeout(()=>setTimer(value=>Math.max(0,value-1)),1000);
+    return ()=>clearTimeout(id);
+  },[timer, selected, completed]);
   const nextQuestion = () => {
-    if (progress >= total) {
-      setCompleted(true);
-      return;
-    }
+    if (!selected) return;
+    if (progress + 1 >= total || lives===0) { setCompleted(true); return; }
+    setProgress(value=>value+1);
+    answeredRef.current = false;
     setSelected(null);
     setTimer(30);
   };
@@ -5138,14 +4936,14 @@ function SurvivalWave({wave}) {
     <div className="container page">
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><Link to="/survival">/ survival</Link><i>›</i><span>/ complete</span></>}
-        title="Wave complete"
-        sub={`You completed ${total} deterministic teaching challenges in the ${prettyWave} wave.`}
-        right={<span className="badge badge-green">Completed</span>}
+        title={lives===0?'Practice run ended':'Wave complete'}
+        sub={`You answered ${answeredCount} of ${total} teaching questions in the ${prettyWave} wave.`}
+        right={<span className="badge">{lives===0?'Three lives used':'Completed'}</span>}
       />
       <div className="panel" style={{padding:28,maxWidth:680}}>
         <div className="grid-3" style={{marginBottom:22}}>
           <Stat label="Score" value={score.toLocaleString()} accent="var(--green)"/>
-          <Stat label="Best streak" value={`x${streak}`}/>
+          <Stat label="Best streak" value={`x${bestStreak}`}/>
           <Stat label="Save status" value={saveStatus==='ranked'?'Verified':saveStatus==='saved'?'Saved':saveStatus==='saving'?'Saving…':saveStatus==='error'?'Not saved':'Pending'}/>
         </div>
         <p className="text-2" style={{fontSize:13,lineHeight:1.65}}>
@@ -5175,7 +4973,7 @@ function SurvivalWave({wave}) {
           </div>
           <div>
             <div className="mono mute" style={{fontSize:10,textAlign:'right'}}>PROGRESS</div>
-            <div className="mono" style={{fontSize:14,fontWeight:700,textAlign:'right'}}>{progress}/{total}</div>
+            <div className="mono" style={{fontSize:14,fontWeight:700,textAlign:'right'}}>{answeredCount}/{total}</div>
           </div>
           <div>
             <div className="mono mute" style={{fontSize:10,textAlign:'right'}}>TIME</div>
@@ -5183,8 +4981,8 @@ function SurvivalWave({wave}) {
           </div>
         </div>
       </div>
-      <div style={{display:'grid',gridTemplateColumns:'1fr 320px',gap:24}}>
-        <div className="panel" style={{padding:40}}>
+      <div className="survival-question-grid">
+        <div className="panel survival-question-panel" style={{padding:40}}>
           <div className="mono mute" style={{fontSize:11,letterSpacing:'.14em',marginBottom:18}}>QUESTION {Math.min(progress + 1, total)} / {total} · {question.topic}</div>
           <h2 className="mono" style={{fontSize:26,fontWeight:700,lineHeight:1.3,marginTop:0,marginBottom:6}}>
             {question.prompt}
@@ -5195,7 +4993,7 @@ function SurvivalWave({wave}) {
               const isCorrect = selected && k === correct;
               const isWrong = selected === k && k !== correct;
               return (
-              <button key={k} onClick={()=>choose(k)} className="panel-2" style={{padding:'14px 18px',display:'flex',alignItems:'center',gap:18,textAlign:'left',cursor:selected?'default':'pointer',transition:'all .15s',borderColor:isCorrect?'var(--green)':isWrong?'var(--red)':'var(--line)'}}>
+              <button key={k} disabled={Boolean(selected)} onClick={()=>choose(k)} className="panel-2" style={{padding:'14px 18px',display:'flex',alignItems:'center',gap:18,textAlign:'left',cursor:selected?'default':'pointer',transition:'all .15s',borderColor:isCorrect?'var(--green)':isWrong?'var(--red)':'var(--line)'}}>
                 <span className="mono" style={{width:30,height:30,border:'1px solid '+(isCorrect?'var(--green)':isWrong?'var(--red)':'var(--line-2)'),display:'grid',placeItems:'center',borderRadius:3,fontSize:13,fontWeight:600,color:isCorrect?'var(--green)':isWrong?'var(--red)':'var(--text)'}}>{k}</span>
                 <span className="mono" style={{fontSize:16,fontWeight:500}}>{v}</span>
               </button>
@@ -5204,10 +5002,10 @@ function SurvivalWave({wave}) {
           </div>
           {selected && (
             <div className="row between" style={{marginTop:22,paddingTop:18,borderTop:'1px solid var(--line)'}}>
-              <span className={selected===correct?'green mono':'red mono'} style={{fontSize:12}}>
-                {selected===correct ? `Correct. ${question.explanation}` : `Correct answer: ${correct}. ${question.explanation}`}
+              <span role="status" className={selected===correct?'green mono':'red mono'} style={{fontSize:12}}>
+                {selected===correct ? `Correct. ${question.explanation}` : `${selected==='timeout'?'Time is up. ':''}Correct answer: ${correct}. ${question.explanation}`}
               </span>
-              <button className="btn btn-primary btn-sm" onClick={nextQuestion}>Next <Icon name="arrow-right" size={13}/></button>
+              <button className="btn btn-primary btn-sm" onClick={nextQuestion}>{progress + 1 >= total || lives===0 ? 'Finish run' : 'Next'} <Icon name="arrow-right" size={13}/></button>
             </div>
           )}
         </div>
@@ -5366,7 +5164,7 @@ function BlogIndex() {
   });
   if (loadError) return <div className="container page"><PageHead title="The Pricing Letter" sub="Essays on pricing, risk and quantitative finance."/><ServiceUnavailable title="Articles could not be loaded" onRetry={loadPosts}/></div>;
   if (posts===null) return <div className="container page"><PageHead title="The Pricing Letter"/><p role="status">Loading articles…</p></div>;
-  if (all.length===0) return <div className="container page"><PageHead title="The Pricing Letter" sub="Essays on pricing, risk and quantitative finance."/><div className="panel service-state"><h2>No articles published yet</h2><p>Explore a course or try a calculator while the next article is being prepared.</p><Link className="btn btn-outline" to="/courses">Browse courses</Link></div></div>;
+  if (all.length===0) return <div className="container page"><PageHead title="The Pricing Letter" sub="Essays on pricing, risk and quantitative finance."/><div className="panel service-state"><h2>No articles published yet</h2><p>Work on a pricing interview case while the editorial library is being prepared.</p><Link className="btn btn-outline" to="/interview">Start interview practice</Link></div></div>;
   if (!matches.length) return <div className="container page"><PageHead title="The Pricing Letter"/><label className="field">Search articles<input type="search" value={query} onChange={(event)=>setQuery(event.target.value)}/></label><div className="panel service-state"><h2>No articles match this search</h2><button type="button" className="btn btn-outline" onClick={()=>{setQuery('');setTag('All');}}>Clear filters</button></div></div>;
   const featured = matches[0];
   const cards = matches.filter((post) => post.id !== featured.id);
@@ -5558,7 +5356,7 @@ function DashboardPage() {
         sub="Your learning desk · progress, achievements, recent activity."
         right={<>
           <span className="badge"><span className="dot dot-green"></span>{plan}</span>
-          <Link to="/pricing" className="btn btn-primary btn-sm">Upgrade <Icon name="arrow-right" size={13}/></Link>
+          <Link to="/interview" className="btn btn-primary btn-sm">Continue interview practice <Icon name="arrow-right" size={13}/></Link>
         </>}
       />
       <div className="tabs-bar">
@@ -5578,7 +5376,7 @@ function DashboardPage() {
 function EmptyDash({what}) {
   return <div className="panel" style={{padding:28,textAlign:'center'}}>
     <div className="mono" style={{fontWeight:600}}>Nothing here yet.</div>
-    <div className="mute" style={{fontSize:13,marginTop:8}}>{what} As you study, open lessons and run exercises, your real activity appears here.</div>
+    <div className="mute" style={{fontSize:13,marginTop:8}}>{what} Saved completions and submitted activities appear here. Viewing a lesson alone does not count as completion.</div>
   </div>;
 }
 function DashOverview({prog}) {
@@ -5759,13 +5557,13 @@ function PricingPage() {
   const authEmail = auth?.user?.email || null;
   const accessToken = auth?.session?.access_token || null;
   const plans = [
-    {name:'Starter', key:'starter', price:9, desc:'For learners who want the core desk workflow, not scattered theory.',
+    {name:'Starter', key:'starter', price:9, desc:'Build a vanilla option quote and explain its inputs, Greeks and limits.',
      features:['All Fundamentals courses','Payoff, Monte Carlo, volatility, bond and curve tools','Exercise workspace','Course scripts with LaTeX formulas','Recorded progress + forum access'],
      cta:'Start Starter', highlight:false},
-    {name:'Student', key:'student', price:19, desc:'For active learners building pricing and risk intuition.', popular:false,
+    {name:'Student', key:'student', price:19, desc:'Compare hedges and explain how volatility and rate scenarios change risk.', popular:false,
      features:['Everything in Starter','All Advanced courses','Calibration, binomial and vol-surface tools','Trading Lab + Survival Mode','Browser Python notebook','Verified course references'],
      cta:'Go Student', highlight:true},
-    {name:'Professional', key:'pro', price:49, desc:'For working quants, desk analysts and serious career transition.',
+    {name:'Professional', key:'pro', price:49, desc:'Explore more complex model assumptions and research workflows.',
      features:['Everything in Student','All Complex courses','Agentic RFQ desk cockpit','Backtest research workspace','Advanced model and risk notes'],
      cta:'Go Pro', highlight:false},
   ];
@@ -5783,9 +5581,9 @@ function PricingPage() {
       const s = await startCheckout(planKey, accessToken);
       if (s.mode === 'live' && s.url) { window.location.href = s.url; return; }
       // Backend reachable but Stripe not configured (mock) — be honest.
-      setNotice({type:'info', msg:`Paiement en mode test : Stripe n'est pas encore configuré sur le backend (plan ${planName}). Renseigne les clés Stripe pour activer le vrai checkout.`});
+      setNotice({type:'info', msg:`Checkout is not available for ${planName}. Your account has not been charged.`});
     } catch(e){
-      setNotice({type:'error', msg:`Paiement indisponible — le backend de paiement est requis (${e.message}).`});
+      setNotice({type:'error', msg:'Checkout is temporarily unavailable. Your account has not been charged. Please try again later.'});
     } finally { setBusy(null); }
   }
   return (
@@ -5793,7 +5591,7 @@ function PricingPage() {
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ pricing</span></>}
         title="Plans"
-        sub="Three paid tiers: 9€, 19€ and 49€ per month. Each tier maps to a real learning workflow, not just locked pages."
+        sub="Preview the library plans and their learning outcomes. Start with a demonstrable English interview case; purchases remain disabled until the public sale requirements are met."
         right={<span className="badge">{LEGAL_READY && SOURCE_RIGHTS_CLEARED?'Monthly · cancel through support':'PREVIEW · SALES DISABLED'}</span>}
       />
       {notice && (
@@ -5801,13 +5599,14 @@ function PricingPage() {
           <span className="mono" style={{color:notice.type==='error'?'var(--red)':'var(--text)'}}>{notice.type==='error'?'⚠ ':'ℹ '}</span>{notice.msg}
         </div>
       )}
+      <div className="catalogue-start"><div><span className="micro">Try the outcome before choosing a plan</span><h2>Pricing &amp; Greeks Interview Lab</h2><p>English cases with a saved attempt, a computed correction, a reasoning self-review and a concept transfer check. Prerequisites: basic option payoffs and percentages. No hiring certification or human feedback is included.</p></div><Link to="/interview" className="btn btn-primary">Try a case <Icon name="arrow-right" size={13}/></Link></div>
       <Link to="/starter-kit" className="panel" style={{display:'flex',alignItems:'center',gap:18,padding:'18px 22px',marginBottom:18,borderColor:'rgba(255,46,69,.35)',background:'linear-gradient(100deg, rgba(255,46,69,.07), transparent 60%)',textDecoration:'none'}}>
         <span className="badge">PREVIEW · NOT YET ON SALE</span>
         <div style={{flex:1}}>
           <div className="mono" style={{fontWeight:700,fontSize:14}}>Market Finance Starter Kit</div>
-          <div className="mute" style={{fontSize:12.5,marginTop:3}}>Construis en 7 jours ton premier projet finance de marché en Python &amp; Excel — prêt pour ton CV, GitHub ou LinkedIn.</div>
+          <div className="mute" style={{fontSize:12.5,marginTop:3}}>French-language downloadable project with Python and Excel materials. Review the included deliverables and access limits before choosing it.</div>
         </div>
-        <span className="btn btn-primary btn-sm" style={{flexShrink:0}}>Voir l'offre<Icon name="arrow-right" size={13}/></span>
+        <span className="btn btn-primary btn-sm" style={{flexShrink:0}}>Review the kit<Icon name="arrow-right" size={13}/></span>
       </Link>
       <div className="grid-3">
         {plans.map(p=>(
@@ -5819,7 +5618,7 @@ function PricingPage() {
               <span className="mono" style={{fontSize:48,fontWeight:700,lineHeight:1}}>{p.price+'€'}</span>
               <span className="mono mute" style={{fontSize:12}}>/mo</span>
             </div>
-            <button type="button" onClick={()=>handleCheckout(p.key, p.name)} disabled={busy===p.key || !LEGAL_READY || !SOURCE_RIGHTS_CLEARED} className={"btn "+(p.highlight?'btn-primary':'btn-outline')} style={{width:'100%',justifyContent:'center',marginTop:24,cursor:busy===p.key?'wait':'pointer',opacity:LEGAL_READY && SOURCE_RIGHTS_CLEARED?1:0.55}}>{busy===p.key?'Redirection…':LEGAL_READY && SOURCE_RIGHTS_CLEARED?p.cta:'Sales disabled'}</button>
+            <button type="button" onClick={()=>handleCheckout(p.key, p.name)} disabled={busy===p.key || !LEGAL_READY || !SOURCE_RIGHTS_CLEARED} className={"btn "+(p.highlight?'btn-primary':'btn-outline')} style={{width:'100%',justifyContent:'center',marginTop:24,cursor:busy===p.key?'wait':'pointer',opacity:LEGAL_READY && SOURCE_RIGHTS_CLEARED?1:0.55}}>{busy===p.key?'Redirecting…':LEGAL_READY && SOURCE_RIGHTS_CLEARED?p.cta:'Sales disabled'}</button>
             <ul style={{listStyle:'none',padding:0,marginTop:28}}>
               {p.features.map(f=>(
                 <li key={f} className="row" style={{gap:10,padding:'8px 0',borderTop:'1px solid var(--line)'}}>
@@ -5972,7 +5771,7 @@ function NotebooksPage() {
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ notebooks</span></>}
         title="Notebooks"
         sub="One verified browser Python lab. Persistent saving and sharing are not included in this release."
-        right={<span className="badge">Pyodide runtime</span>}
+        right={<Link to="/interview" className="btn btn-outline btn-sm">Continue the interview path <Icon name="arrow-right" size={13}/></Link>}
       />
       <div className="workspace-sidebar-left">
         <div className="panel">
@@ -6035,7 +5834,7 @@ function MentoringPage() {
       <section className="section">
         <h2 className="section-title">Available mentors</h2>
         <div className="grid-2" style={{marginTop:14}}>
-          <div className="panel" style={{padding:24}}><div className="mono" style={{fontWeight:700}}>No mentor is publicly listed yet.</div><p className="text-2" style={{fontSize:13}}>Profiles will only be shown after identity, experience and availability have been verified. The pilot is not bookable or payable online.</p><SupportLink subject="Mentoring pilot application" className="btn btn-primary btn-sm">Apply to the pilot</SupportLink></div>
+          <div className="panel" style={{padding:24}}><div className="mono" style={{fontWeight:700}}>No mentor is publicly listed yet.</div><p className="text-2" style={{fontSize:13}}>Profiles will only be shown after identity, experience and availability have been verified. The pilot is not bookable or payable online.</p><SupportLink subject="Mentoring pilot application" className="btn btn-outline btn-sm">Ask about the pilot</SupportLink><Link to="/interview" className="btn btn-primary btn-sm" style={{marginLeft:8}}>Practise without a mentor</Link></div>
         </div>
       </section>
       <section className="section">
@@ -6090,7 +5889,7 @@ function JobsPage() {
       <div className="panel">
         {loadError && <ServiceUnavailable title="Openings could not be loaded" onRetry={refetch}/>}
         {jobs===null && !loadError && <div className="mute" style={{padding:20}} role="status">Loading jobs…</div>}
-        {jobs!==null && list.length===0 && <div className="mute" style={{padding:20}}>No verified openings are currently published.</div>}
+        {jobs!==null && list.length===0 && <div className="service-state"><h2>No verified openings are currently published</h2><p>Keep preparing your option quote, hedge explanation and risk memo.</p><Link to="/interview" className="btn btn-outline">Practise an interview case</Link></div>}
         {!loadError && list.length>0 && filtered.length===0 && <div className="service-state"><h2>No openings match your search</h2><button className="btn btn-outline" onClick={()=>{setQuery('');setTab('all');}}>Clear filters</button></div>}
         {list.length>0 && <table className="data">
           <thead><tr><th>Company</th><th>Role</th><th>Location</th><th>Type</th><th></th></tr></thead>
@@ -6278,6 +6077,7 @@ function AdminPage() {
         title={<>Admin Dashboard <span className="badge badge-red" style={{marginLeft:12,fontSize:9}}>RESTRICTED</span></>}
         sub="Platform operations · live counts from the platform database."
       />
+      <InterviewPilotMetrics/>
       {countsError && <div className="panel" role="alert" style={{padding:14,marginBottom:16,borderColor:'var(--red)',color:'var(--red)'}}>{countsError}</div>}
       <div className="grid-4">
         {[
@@ -6453,13 +6253,14 @@ function PracticePage() {
       <PageHead
         crumb={<><Link to="/">/ home</Link><i>›</i><span>/ practice</span></>}
         title="Practice Hub"
-        sub="Exercises · Course reviews · Survival Mode · Practice Challenge — all in one place."
+        sub="Start with the guided English interview path, then use the library and calculators for targeted practice."
       />
       <div className="grid-3">
         {[
-          {t:'Exercises',d:'Source-backed desk exercises with calculated solutions.',ic:'code',to:'/exercises',n:'Practice generator'},
+          {t:'Pricing & Greeks Interview Lab',d:'Submit a numerical answer and reasoning, review the correction and test a new concept variant.',ic:'target',to:'/interview',n:'English · guided practice'},
+          {t:'Exercises',d:'Source-backed worked cases with calculated solutions. These library cases use self-review.',ic:'code',to:'/exercises',n:'Practice generator'},
           {t:'Course review',d:'Review the questions and worked corrections in your course.',ic:'help-circle',to:'/courses',n:'inside each course'},
-          {t:'Survival Mode',d:'Pressure-tested questions. Timer running.',ic:'zap',to:'/survival',n:'6 waves'},
+          {t:'Survival Mode',d:'Pressure-tested questions. Timer running.',ic:'zap',to:'/survival',n:'1 Core wave · 20 questions'},
           {t:'Practice Challenge',d:'A worked desk problem to practise on.',ic:'trophy',to:'/challenge',n:'preview'},
           {t:'Activity board',d:'Recorded learning activity from platform accounts.',ic:'crown',to:'/leaderboard',n:'recorded activity'},
           {t:'Community discussion',d:'Discuss pricing and risk questions with other learners.',ic:'users',to:'/community',n:'via community'},
@@ -7051,6 +6852,7 @@ function App() {
   if (path==='' || path==='/') page = <HomePage/>;
   else if (path.startsWith('/courses/')) page = <CourseDetailPage route={route}/>;
   else if (path==='/courses') page = <CoursesPage/>;
+  else if (path==='/interview' || path.startsWith('/interview/')) page = <React.Suspense fallback={<div className="container page"><p role="status">Loading Interview Lab…</p></div>}><InterviewLab route={route}/></React.Suspense>;
   else if ((path==='/tools' || path.startsWith('/tools/'))) page = <ToolsPage route={route}/>;
   else if ((path==='/lab' || path.startsWith('/lab/'))) page = <GatedPage required="student" what="Trading Lab"><TradingLabPage route={route}/></GatedPage>;
   else if ((path==='/exercises' || path.startsWith('/exercises/'))) page = <GatedPage required="starter" what="The exercise workspace"><ExercisesPage route={route}/></GatedPage>;

@@ -208,7 +208,8 @@ try {
     await page.getByRole('button', { name: 'Reset', exact: true }).click();
     assert.equal(await page.locator('.catalogue-grid .course-card').count(), all);
     assert.equal(await page.getByRole('searchbox', { name: 'Search courses' }).inputValue(), '');
-    await page.getByRole('link', { name: 'Open free preview', exact: true }).click();
+    assert.ok(await page.getByRole('link', { name: 'Open Interview Lab', exact: false }).isVisible());
+    await page.locator('.catalogue-grid a[href="/courses/black-scholes"]').click();
     await page.getByRole('heading', { name: 'Black-Scholes Model', exact: true, level: 1 }).waitFor();
     await page.getByText('Read the option ticket', { exact: true }).first().waitFor();
     assert.ok(await page.getByRole('heading', { name: 'Starter plan required', exact: true }).isVisible());

@@ -39,6 +39,7 @@ import {
   buildPayoffScenarioCsv,
 } from '@/lib/payoffStrategy.mjs';
 import ToolPageLayout from './ToolPageLayout';
+import { readPayoffPreset } from '@/lib/interviewToolContext.mjs';
 
 type OptionType = 'call' | 'put';
 type Side = 'long' | 'short';
@@ -145,13 +146,16 @@ const presetLegs = (name: string, spot: number): LegInput[] => {
     Butterfly: [model('wing-low', 'call', 'long', 0.95), model('body', 'call', 'short', 1, 2), model('wing-high', 'call', 'long', 1.05)],
     'Iron condor': [model('put-wing', 'put', 'long', 0.85), model('short-put', 'put', 'short', 0.95), model('short-call', 'call', 'short', 1.05), model('call-wing', 'call', 'long', 1.15)],
     'Naked short call': [model('short-call', 'call', 'short', 1)],
+    'Long call': [model('long-call', 'call', 'long', 1)],
+    'Bear put spread': [model('long-put', 'put', 'long', 1), model('short-put', 'put', 'short', 0.9)],
+    'Short strangle': [model('short-put', 'put', 'short', 0.95), model('short-call', 'call', 'short', 1.05)],
   };
   return presets[name].map((leg) => ({ ...leg }));
 };
 
 const defaultLegs = () => presetLegs('Bull call spread', 100);
 
-const PayoffStrategyLab: React.FC = () => {
+const PayoffStrategyLab: React.FC<{initialPreset?: string}> = ({initialPreset}) => {
   const [spot, setSpot] = useState(100);
   const [volatilityPercent, setVolatilityPercent] = useState(20);
   const [maturityDays, setMaturityDays] = useState(90);
@@ -159,7 +163,7 @@ const PayoffStrategyLab: React.FC = () => {
   const [dividendYieldPercent, setDividendYieldPercent] = useState(0);
   const [currency, setCurrency] = useState('USD');
   const [contractMultiplier, setContractMultiplier] = useState(100);
-  const [legs, setLegs] = useState<LegInput[]>(defaultLegs);
+  const [legs, setLegs] = useState<LegInput[]>(() => presetLegs(readPayoffPreset(initialPreset || new URLSearchParams(window.location.search).get('preset')), 100));
   const [result, setResult] = useState<StrategyResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -348,7 +352,7 @@ const PayoffStrategyLab: React.FC = () => {
                 <Button variant="outline" size="sm" onClick={addLeg} disabled={legs.length >= PAYOFF_STRATEGY_CONTRACT.limits.maxLegs}><Plus className="mr-2 h-4 w-4" /> Add leg</Button>
               </div>
               <div className="flex flex-wrap gap-2" aria-label="Strategy presets">
-                {['Bull call spread', 'Long straddle', 'Butterfly', 'Iron condor', 'Naked short call'].map((preset) => (
+                {['Bull call spread', 'Long straddle', 'Butterfly', 'Iron condor', 'Naked short call', 'Long call', 'Bear put spread', 'Short strangle'].map((preset) => (
                   <Button key={preset} variant="secondary" size="sm" onClick={() => loadPreset(preset)}>{preset}</Button>
                 ))}
               </div>

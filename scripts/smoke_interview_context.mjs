@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import { readInterviewToolContext, readPayoffPreset } from '../src/lib/interviewToolContext.mjs';
+import { interviewAuthDestination, interviewAuthLink } from '../src/lib/interviewNavigation.mjs';
+import { readableSourceReferences } from '../src/claude/sourceReferences.mjs';
+
+const ticket = readInterviewToolContext('?spot=125&strike=110&maturityDays=273.75&volatility=30&riskFreeRate=3&dividendYield=1&position=short&quantity=10&optionType=put&unknown=9');
+assert.deepEqual(ticket, {spot:125,strike:110,maturityDays:273.75,riskFreeRate:3,dividendYield:1,volatility:30,quantity:10,optionType:'put',position:'short'});
+assert.deepEqual(readInterviewToolContext('?spot=NaN&strike=-9&volatility=9999&quantity=Infinity&currency=%3Cscript%3E&position=admin'), {});
+for (const preset of ['Iron Condor', 'Bull Call Spread', 'Long Call', 'Bear Put Spread', 'Short Strangle', 'Butterfly']) assert.notEqual(readPayoffPreset(preset), undefined);
+assert.equal(readPayoffPreset('Iron-Condor'), 'Iron condor');
+assert.equal(readPayoffPreset('__proto__'), 'Bull call spread');
+const link = interviewAuthLink('signup', 'delta-hedge', 'transfer');
+assert.equal(link, '/auth/signup?next=interview&case=delta-hedge&variant=transfer');
+assert.equal(interviewAuthDestination(new URL(link, 'https://tpl.test').searchParams), '/interview/delta-hedge?variant=transfer');
+for (const unsafe of ['https://evil.test', '//evil.test', '../admin', 'javascript:alert(1)']) assert.equal(interviewAuthDestination(new URLSearchParams({next:'interview',case:unsafe})), '/interview');
+assert.equal(interviewAuthDestination(new URLSearchParams({next:'https://evil.test'})), null);
+const prose = 'The delta of a European call measures the local change in option value for a small change in the underlying stock price, with all other inputs held fixed.';
+const clean = readableSourceReferences([{title:'Options ( PDFDrive ).pdf',snippet:prose},{title:'Options.pdf',snippet:prose},{title:'Empty',snippet:''},{title:'Broken',snippet:'1.387) '+prose},{title:'Noise',snippet:'x = ^__ = 2 44 0 1 2'}]);
+assert.equal(clean.length,1); assert.equal(clean[0].title,'Options'); assert.equal(clean[0].snippet,prose);
+console.log('Interview context PASS: exact inputs, preset continuity, safe auth return, readable deduplicated sources');

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSafeNavigate } from '../security/useSafeNavigate';
 import { useAuth } from '../contexts/AuthContext';
+import { interviewAuthDestination } from '../lib/interviewNavigation.mjs';
 
 export default function AuthenticationPage({ brand, mode = 'login' }) {
   const auth = useAuth();
@@ -10,8 +11,9 @@ export default function AuthenticationPage({ brand, mode = 'login' }) {
   const query = new URLSearchParams(location.search);
   const next = query.get('next');
   const plan = ['starter', 'student', 'pro'].includes(query.get('plan')) ? query.get('plan') : null;
-  const destination = next === 'starter-kit' ? '/starter-kit' : next === 'checkout' ? '/pricing' : next === 'jobs' ? '/jobs' : '/dashboard';
-  const continuation = next ? `?${new URLSearchParams({ next, ...(plan ? { plan } : {}) })}` : '';
+  const interviewDestination = interviewAuthDestination(query);
+  const destination = interviewDestination || (next === 'starter-kit' ? '/starter-kit' : next === 'checkout' ? '/pricing' : next === 'jobs' ? '/jobs' : '/dashboard');
+  const continuation = next ? `?${new URLSearchParams({ next, ...(plan ? { plan } : {}), ...(interviewDestination && query.get('case') ? {case: query.get('case'), variant: query.get('variant') === 'transfer' ? 'transfer' : 'primary'} : {}) })}` : '';
   const login = mode === 'login';
   const signup = mode === 'signup';
   const forgot = mode === 'forgot-password';
