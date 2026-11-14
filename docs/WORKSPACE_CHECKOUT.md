@@ -105,3 +105,11 @@ Do not substitute `npm run audit:technical` for this public gate: that historica
 aggregate also expects the wider private product workspace and its delivery
 artifacts. Keep using the full aggregate in the appropriate private validation
 environment; its additional requirements have not been waived.
+
+## Paired rollback checkpoint
+
+The validated local interview pilot is recorded by the same immutable tag name,
+`tpl-interview-pilot-2026-11-14`, in both repositories. Restore that tag in each
+repository within a separate workspace, then prepare the fixtures as above. The
+tag identifies source code; private content and activity databases are managed
+separately. Details and scope are in `docs/INTERVIEW_LAB_CHECKPOINT.json`.
