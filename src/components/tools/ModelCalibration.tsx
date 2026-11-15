@@ -329,9 +329,9 @@ const ModelCalibration: React.FC = () => {
             </div>
 
             <div>
-              <Label className="block text-sm font-medium mb-1">Model</Label>
+              <Label htmlFor="calibration-model" className="block text-sm font-medium mb-1">Model</Label>
               <Select value={selectedModel} disabled={isCalibrating} onValueChange={(value) => { setSelectedModel(value as ModelName); setCalibrationResults(null); setCalibrationError(''); }}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger id="calibration-model"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="black">Black — flat volatility</SelectItem>
                   <SelectItem value="sabr">SABR — Hagan lognormal</SelectItem>
@@ -341,9 +341,9 @@ const ModelCalibration: React.FC = () => {
             </div>
 
             <div>
-              <Label className="block text-sm font-medium mb-1">Objective</Label>
+              <Label htmlFor="calibration-objective" className="block text-sm font-medium mb-1">Objective</Label>
               <Select value={objective} disabled={isCalibrating} onValueChange={(value) => { setObjective(value as ObjectiveName); setCalibrationResults(null); setCalibrationError(''); }}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger id="calibration-objective"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="volatility">Implied-volatility RMSE</SelectItem>
                   <SelectItem value="price">Normalized-price RMSE</SelectItem>
@@ -391,16 +391,16 @@ const ModelCalibration: React.FC = () => {
             <>
               <div className="grid grid-cols-1 gap-4 mb-4 sm:grid-cols-2">
                 <div>
-                  <Label className="block text-sm font-medium mb-1">Maturity</Label>
+                  <Label htmlFor="calibration-maturity" className="block text-sm font-medium mb-1">Maturity</Label>
                   <Select value={selectedMaturity?.toString() ?? ''} onValueChange={(value) => setSelectedMaturity(Number(value))}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger id="calibration-maturity"><SelectValue /></SelectTrigger>
                     <SelectContent>{getUniqueValues('maturity').map((maturity) => <SelectItem key={maturity} value={maturity.toString()}>{maturity}y</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label className="block text-sm font-medium mb-1">Strike / moneyness</Label>
+                  <Label htmlFor="calibration-strike" className="block text-sm font-medium mb-1">Strike / moneyness</Label>
                   <Select value={selectedStrike?.toString() ?? ''} onValueChange={(value) => setSelectedStrike(Number(value))}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger id="calibration-strike"><SelectValue /></SelectTrigger>
                     <SelectContent>{getUniqueValues('strike').map((strike) => <SelectItem key={strike} value={strike.toString()}>{strike}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>

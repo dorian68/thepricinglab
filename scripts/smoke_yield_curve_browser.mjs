@@ -173,6 +173,7 @@ try {
       }
     });
     await anonymousPage.route('http://127.0.0.1:8000/**', async (route) => {
+      if(new URL(route.request().url()).pathname==='/billing/config')return route.fulfill({status:200,headers:{...corsHeaders,'Content-Type':'application/json'},json:{sales_enabled:false}});
       await route.fulfill({
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -182,7 +183,8 @@ try {
     await anonymousPage.goto(`${baseUrl}/tools/curve`, { waitUntil: 'networkidle', timeout: 60_000 });
     await anonymousPage.getByRole('heading', { name: 'Starter plan required', exact: true }).waitFor({ timeout: 30_000 });
     assert.equal(await anonymousPage.locator('[data-yield-curve-builder="true"]').count(), 0, 'premium curve component mounted before entitlement');
-    assert.match((await anonymousPage.locator('body').textContent()) || '', /Create a free account, then confirm the plan through checkout/);
+    assert.match((await anonymousPage.locator('body').textContent()) || '', /Paid access is not on sale yet/, 'closed billing must not advertise an available checkout');
+    assert.equal(await anonymousPage.getByRole('link',{name:'Try available interview practice',exact:true}).getAttribute('href'),'/interview','the locked workspace must retain an available free-practice route');
     await anonymousContext.close();
     return 'locked panel visible; premium component absent';
   }, 'prove bearer-bound Starter access');

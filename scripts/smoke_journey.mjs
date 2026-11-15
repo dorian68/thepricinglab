@@ -90,7 +90,7 @@ try {
   const blockedPaidAsset = await page.request.get(`${baseUrl}/course-scripts/yield-curve-bootstrapping.md`);
   check(blockedPaidAsset.status() === 404, 'legacy public URL for a paid course returns 404');
 
-  await page.getByRole('button', { name: 'Script', exact: true }).click();
+  await page.getByRole('button', { name: 'Full script', exact: true }).click();
   await page.getByRole('heading', { name: 'Starter plan required', exact: true }).waitFor();
   check(await page.locator('.course-script-shell').count() === 0, 'anonymous Script tab renders no full course shell');
   check(loadedScripts.some((url) => /markdown-[^/]+\.js$/.test(url)), 'Markdown renderer loads only for the bounded course preview');

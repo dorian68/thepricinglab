@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { getPracticeApiBase } from './practiceEngine';
 import { interviewAuthLink } from '../lib/interviewNavigation.mjs';
 import './interviewLab.css';
+const InterviewPortability=React.lazy(()=>import('./InterviewPortability'));
 
 const taskLink = (task) => `/interview/${encodeURIComponent(task?.case_id || task?.id || 'call-quote')}?variant=${task?.variant === 'transfer' ? 'transfer' : 'primary'}`;
 const format = (value) => typeof value === 'number' ? new Intl.NumberFormat('en-US', { maximumFractionDigits: 6 }).format(value) : String(value ?? '');
@@ -249,7 +250,7 @@ function InterviewWorkspace({ auth }) {
         {!catalog && !error && <p role="status">Loading the practice path…</p>}
         {(catalog?.cases || []).map(item => { const history = (state?.attempts || []).filter(a => a.case_id === item.id); const passed = history.some(a => a.numerical_pass && a.independent); const transfer = history.some(a => a.variant === 'transfer' && a.numerical_pass && a.independent); return <Link key={item.id} className="il-path-row" to={taskLink(item)}><span className="il-path-number">{String(item.order).padStart(2, '0')}</span><div><h3>{item.title}</h3><p>{item.summary}</p><span className="il-path-status">{transfer ? 'Transfer check passed' : passed ? 'Calculation passed · test transfer next' : history.length ? 'Attempt recorded · keep practising' : item.public_preview ? 'Free case · no account needed' : token ? 'Included in the pilot' : 'Sign in to continue'}</span></div><span className="il-path-time">{item.minutes} min{passed ? <CheckCircle2 size={18}/> : <ArrowRight size={18}/>}</span></Link>; })}
       </section>
-      {token && <section className="il-record"><div><h2>A record of what you actually did.</h2><p>Export your original answers, calculated feedback and self-reviews. Observed active use: {Math.floor((metrics.active_seconds || 0) / 60)} min, excluding hidden or idle tabs. This is a learning record, not a certification.</p></div><button className="btn btn-outline" onClick={exportReport} disabled={busy}><Download size={15}/>Export my practice report</button></section>}
+      {token && <><section className="il-record"><div><h2>A record of what you actually did.</h2><p>Export your original answers, calculated feedback and self-reviews. Observed active use: {Math.floor((metrics.active_seconds || 0) / 60)} min, excluding hidden or idle tabs. This is a learning record, not a certification.</p></div><button className="btn btn-outline" onClick={exportReport} disabled={busy}><Download size={15}/>Export my practice report</button></section><React.Suspense fallback={<p role="status">Loading portable practice files…</p>}><InterviewPortability token={token} state={state}/></React.Suspense></>}
     </> : <>
       <div className="il-case-top"><Link to="/interview"><ChevronLeft size={15}/>My preparation path</Link><span>{variant === 'transfer' ? 'TRANSFER CHECK · CHANGED ASSUMPTION' : 'PRACTICE CASE'}</span></div>
       {loading && <p className="il-loading" role="status">Opening your case…</p>}

@@ -1,54 +1,45 @@
-// Real in-browser Python execution via Pyodide (loaded lazily from the CDN on
-// first use). Keeps the platform Lovable-hostable: no backend needed for the
-// "Run" buttons on exercises and notebooks. Auto-loads numpy/scipy/pandas etc.
-// from the code's own imports.
-
-let _pyodidePromise = null;
-const PYODIDE_VERSION = 'v0.26.2';
-const BASE = `https://cdn.jsdelivr.net/pyodide/${PYODIDE_VERSION}/full/`;
-
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.src = src;
-    s.onload = resolve;
-    s.onerror = () => reject(new Error('failed to load ' + src));
-    document.head.appendChild(s);
-  });
+// Python runs outside the rendering thread. Failed/timed-out CDN loads remain
+// retryable, and a stopped runtime cannot continue consuming CPU in a hidden tab.
+let worker = null;
+let nextId = 0;
+let pending = null;
+export function pyodideReady() { return worker !== null; }
+function finish(result) {
+  if (!pending) return;
+  const current = pending; pending = null;
+  clearTimeout(current.timer); current.resolve(result);
 }
-
-export function pyodideReady() {
-  return _pyodidePromise != null;
+export function cancelPython() {
+  worker?.terminate(); worker = null;
+  finish({ ok: false, stdout: '', error: 'Python runtime stopped. Your source has been retained.' });
 }
-
 export function getPyodide() {
-  if (!_pyodidePromise) {
-    _pyodidePromise = (async () => {
-      if (!window.loadPyodide) await loadScript(BASE + 'pyodide.js');
-      return window.loadPyodide({ indexURL: BASE });
-    })();
+  if (!worker) {
+    worker = new Worker(new URL('./pyodide.worker.js', import.meta.url));
+    worker.onmessage = event => {
+      if (event.data.id !== pending?.id) return;
+      const result = event.data;
+      if (result.runtimeFailure) { worker?.terminate(); worker = null; }
+      finish({ ok: result.ok, stdout: result.stdout || '', error: result.error || null });
+    };
+    worker.onerror = event => {
+      event.preventDefault(); worker?.terminate(); worker = null;
+      finish({ ok: false, stdout: '', error: 'Python runtime could not load. Retry or download the source and run it locally.' });
+    };
   }
-  return _pyodidePromise;
+  return worker;
 }
-
-export async function runPython(code) {
-  let py;
-  try {
-    py = await getPyodide();
-  } catch (e) {
-    return { ok: false, stdout: '', error: 'Python runtime failed to load: ' + (e.message || e) };
-  }
-  // Redirect stdout/stderr to a buffer.
-  py.runPython('import sys, io\n_buf = io.StringIO()\nsys.stdout = _buf\nsys.stderr = _buf');
-  let err = null;
-  try {
-    try { await py.loadPackagesFromImports(code); } catch { /* best-effort package load */ }
-    await py.runPythonAsync(code);
-  } catch (e) {
-    err = String(e.message || e);
-  }
-  let out = '';
-  try { out = py.runPython('_buf.getvalue()'); } catch { /* ignore */ }
-  py.runPython('sys.stdout = sys.__stdout__\nsys.stderr = sys.__stderr__');
-  return { ok: !err, stdout: out, error: err };
+export function runPython(code, { timeoutMs = 60000 } = {}) {
+  if (pending) return Promise.resolve({ ok: false, stdout: '', error: 'A Python run is already in progress. Stop it before starting another.' });
+  if (typeof code !== 'string' || code.length > 200000) return Promise.resolve({ ok: false, stdout: '', error: 'Python source must be text of at most 200,000 characters.' });
+  return new Promise(resolve => {
+    const id = ++nextId;
+    const timer = setTimeout(() => {
+      worker?.terminate(); worker = null;
+      finish({ ok: false, stdout: '', error: 'Python runtime timed out. Your source has been retained; retry or run the downloaded file locally.' });
+    }, timeoutMs);
+    pending = { id, timer, resolve };
+    try { getPyodide().postMessage({ id, code }); }
+    catch { worker?.terminate(); worker = null; finish({ ok: false, stdout: '', error: 'Browser Python is unavailable. Download the source to run it locally.' }); }
+  });
 }

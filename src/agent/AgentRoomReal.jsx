@@ -20,12 +20,15 @@ import { Link } from 'react-router-dom';
 import { platformApi, getPracticeApiBase, getPlatformAccessToken } from '../claude/practiceEngine';
 import { loadDeskSeries } from '../claude/marketSeries';
 import { BLACK_SCHOLES_INPUT_SCHEMA, blackScholesOption, normCdf as canonicalNormCdf, normalizeBlackScholesInput, solveImpliedVolatility } from '../lib/blackScholes.mjs';
+import { deskNumber, hasNumericValue, deskRiskLabel } from '../lib/deskDisplay.mjs';
+import DeskContract from './DeskContract';
+import {parseDeskRequest as parseRequest,safeDeskIllustrations} from '../lib/deskRequest.mjs';
 
 /* ------------------------------------------------------------------ tokens */
 const T = {
   bg: '#070A0F', panel: '#0C1118', panel2: '#0A0F15', inset: '#0A0E14',
   line: '#171F2B', line2: '#222C3A', red: '#F23645', redDim: '#7d1f29',
-  green: '#2FBF71', text: '#E6EAF1', mute: '#6F7B8C', dim: '#47525f',
+  green: '#2FBF71', text: '#E6EAF1', mute: '#9AA7B9', dim: '#8995A7',
   amber: '#E8B339', blue: '#4C7DFF', purple: '#A974FF',
 };
 const MONO = "'JetBrains Mono','SF Mono',ui-monospace,monospace";
@@ -42,8 +45,8 @@ function bsPrice({ S, K, r, q = 0, sigma, T: tt, type = 'call' }) {
   return { price: option.price, ...option.greeks, d1: option.d1 ?? 0, d2: option.d2 ?? 0 };
 }
 
-const fmt = (n, d = 2) => (isFinite(n) ? Number(n).toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }) : '—');
-const eur0 = (n) => (isFinite(n) ? Math.round(n).toLocaleString('en-US') : '—');
+const fmt = deskNumber;
+const eur0 = (n) => (hasNumericValue(n) ? Math.round(Number(n)).toLocaleString('en-US') : '—');
 
 // Black-76 on a forward RATE (caps/floors/swaptions). Returns a value in the
 // SAME units as the rate (decimal), NOT a discounted cash price — multiply by
@@ -117,32 +120,7 @@ function marketApiAvailable(base) {
 }
 
 /* ------------------------------------------------ deterministic NL parsing */
-// Mirrors pricinglibrary_rag/desk.py:parse_request — the backend itself derives
-// these fields deterministically (not via an LLM), so showing them offline is
-// honest, not a fake "agent" result.
-function parseRequest(text) {
-  const t = (text || '').toLowerCase();
-  let underlying = 'Crude Oil (WTI)', factor = 'oil';
-  if (/\bbtc\b|bitcoin|\beth\b|ether|crypto|deribit/.test(t)) { underlying = /\beth\b|ether/.test(t) ? 'Ethereum (ETH)' : 'Bitcoin (BTC)'; factor = 'crypto'; }
-  else if (/p[ée]trole|oil|wti|brent|crude|baril/.test(t)) { underlying = 'Crude Oil (WTI)'; factor = 'oil'; }
-  else if (/inflation|cpi/.test(t)) { underlying = 'Inflation (CPI)'; factor = 'inflation'; }
-  else if (/credit|spread|cds|d[ée]faut|default/.test(t)) { underlying = 'Credit Spreads'; factor = 'credit'; }
-  else if (/taux|rate|rates|bond|obligation|swap|coupon|callable/.test(t)) { underlying = 'US Rates (10Y)'; factor = 'rates'; }
-  else if (/\bgold\b|\bor\b|once/.test(t)) { underlying = 'Gold'; factor = 'gold'; }
-  else if (/eur|usd|fx|change|devise|dollar/.test(t)) { underlying = 'EUR/USD'; factor = 'fx'; }
-  else { underlying = 'S&P 500'; factor = 'equity'; }
-  const mM = t.match(/(\d+)\s*(mois|month)/), mY = t.match(/(\d+)\s*(ans?|years?)/);
-  const months = mM ? +mM[1] : mY ? +mY[1] * 12 : 5;
-  const horizon = mM ? `${mM[1]} Months` : mY ? `${mY[1]} Years` : '5 Months';
-  let view = 'Price increase';
-  if (/baiss|fall|down|drop|decreas|chut|recul/.test(t)) view = 'Price decrease';
-  else if (/stable|sideways|range|flat|inchang|stagn/.test(t)) view = 'Range / stable';
-  let intention = 'Hedge / Express a view';
-  if (/explain|comprendre|understand|what is|c'est quoi|apprendre|fonctionne/.test(t)) intention = 'Learn a concept';
-  else if (/price|pricer|quote|cote|combien|valoris/.test(t)) intention = 'Price a product';
-  else if (/hedge|couvr|prot[ée]g|peur|afraid|worried|inqui[eè]t/.test(t)) intention = 'Hedge / Express a view';
-  return { underlying, factor, horizon, months, view, intention, objective: 'Protection / Opportunity' };
-}
+// Local interpretation is descriptive; the backend owns the calculated ticket.
 
 /* --------------------------------------------- market-context per factor */
 // api: live symbol for /market/history; bundled: key in desk-series.json
@@ -176,8 +154,8 @@ function modelLabel(factor) {
 function buildApproaches({ spot, vol, r, T: tt, view, unit, factor, deskRecon }) {
   if (factor === 'rates' || factor === 'inflation') return ratesApproaches({ spot, vol, T: tt, view });
   if (factor === 'credit') return creditApproaches({ spot, T: tt, view });
-  if (factor === 'fx') return optionApproaches({ spot, vol, r, q: 0.03, T: tt, view, unit, deskRecon }); // GK: q = foreign (EUR) rate
-  return optionApproaches({ spot, vol, r, q: 0, T: tt, view, unit, deskRecon, commodity: factor === 'oil' || factor === 'gold' }); // equity / crypto = BS ; oil / gold = Black-76 on forward
+  if (factor === 'fx') return optionApproaches({ spot, vol, r, q: deskRecon?.dividendYield ?? 0.03, T: tt, view, unit, deskRecon }); // GK: q = foreign (EUR) rate
+  return optionApproaches({ spot, vol, r, q: deskRecon?.dividendYield ?? 0, T: tt, view, unit, deskRecon, commodity: factor === 'oil' || factor === 'gold' }); // equity / crypto = BS ; oil / gold = Black-76 on forward
 }
 
 /* ---- RATES: swap (DV01) + cap/floor & swaption (Black-76), premia in bp ---- */
@@ -264,8 +242,8 @@ function creditApproaches({ spot, T: tt, view }) {
 /* ---- EQUITY / COMMODITY / CRYPTO / FX: Black-Scholes (q=carry; FX→GK) ---- */
 function optionApproaches({ spot, vol, r, q = 0, T: tt, view, unit, deskRecon, commodity = false }) {
   const S = spot;
-  const down = view === 'Price decrease';
-  const fwd = S * Math.exp((r - q) * tt);
+  const down = deskRecon?.optionType ? deskRecon.optionType === 'put' : view === 'Price decrease';
+  const fwd = deskRecon?.forward ?? S * Math.exp((r - q) * tt);
   // Commodity options trade on the future: price the illustrative alternatives in
   // Black-76 on the forward F (== the desk's lognormal-futures model), and anchor
   // their strikes/moneyness to F so the "Black-76 (forward)" label is literally true.
@@ -283,8 +261,8 @@ function optionApproaches({ spot, vol, r, q = 0, T: tt, view, unit, deskRecon, c
   // exists for an option product, the headline uses the desk's OWN strike and
   // its EXACT quoted premium (== desk MID) so the two pricers never disagree.
   // Alternatives stay illustrative but already share the desk's vol/spot.
-  const bestK = deskRecon && isFinite(deskRecon.strike) ? deskRecon.strike : Katm;
-  const bestPremOverride = deskRecon && isFinite(deskRecon.mid) ? deskRecon.mid : null;
+  const bestK = deskRecon && Number.isFinite(deskRecon.strike) ? deskRecon.strike : Katm;
+  const bestPremOverride = deskRecon && Number.isFinite(deskRecon.mid) ? deskRecon.mid : null;
 
   // capital-protected note participation, derived from BS (ZC + ATM option)
   const budget = 1 - Math.exp(-r * tt);
@@ -392,7 +370,7 @@ function TopNav({ apiReachable }) {
 function Ticker({ rows }) {
   if (!rows.length) return null;
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 24, padding: '9px 24px', borderTop: `1px solid ${T.line}`, background: T.bg, overflowX: 'auto' }}>
+    <div tabIndex={0} role="region" aria-label="Market reference summary" style={{ display: 'flex', alignItems: 'center', gap: 24, padding: '9px 24px', borderTop: `1px solid ${T.line}`, background: T.bg, overflowX: 'auto' }}>
       <span style={{ fontFamily: MONO, fontSize: 10, color: T.red, letterSpacing: '.1em', flexShrink: 0 }}>MARKET WATCH</span>
       {rows.map((r) => (
         <span key={r.sym} style={{ display: 'flex', gap: 7, fontFamily: MONO, fontSize: 11, flexShrink: 0 }}>
@@ -458,6 +436,7 @@ export default function AgentRoomReal() {
   const [q, setQ] = useState(DEFAULT_Q);
   const [submitted, setSubmitted] = useState(DEFAULT_Q);
   const [parsed, setParsed] = useState(() => parseRequest(DEFAULT_Q));
+  const [deskError,setDeskError]=useState('');
   const [desk, setDesk] = useState(null);       // real /agent/desk/run result
   const [busy, setBusy] = useState(false);
   const [apiUp, setApiUp] = useState(null);     // null=unknown, bool once probed
@@ -560,80 +539,39 @@ export default function AgentRoomReal() {
     const t = (text || '').trim();
     if (!t) return;
     const id = ++reqId.current;
-    setSubmitted(t);
-    setParsed(parseRequest(t));
-    setSel(0);
-    setBusy(true);
-    setDesk(null);
-    const result = await platformApi.deskRun(t);   // POST /agent/desk/run (real)
-    if (id !== reqId.current) return;               // stale
-    if (result) { setDesk(result); setApiUp(true); if (result.parsed) setParsed((p) => ({ ...p, ...result.parsed })); }
-    else { setApiUp(false); }
-    setBusy(false);
+    const local=parseRequest(t);
+    setSubmitted(t);setParsed(local);setSel(0);setBusy(true);setDesk(null);setDeskError('');
+    if(local.durationError){setDeskError(local.durationError);setBusy(false);return;}
+    try{
+      const result=await platformApi.deskRun(t,{throwOnError:true});
+      if(id!==reqId.current)return;
+      if(!result?.pricing_result)throw new Error('No calculated contract was returned.');
+      setDesk(result);setApiUp(true);if(result.parsed)setParsed(p=>({...p,...result.parsed}));
+    }catch(failure){if(id===reqId.current)setDeskError(`The request could not be priced. ${failure.message||'Check the contract and try again.'} Edit it and submit again; no previous result is retained.`);}
+    finally{if(id===reqId.current)setBusy(false);}
+
   };
 
-  // approaches priced on the displayed market-context spot
+  // The calculated contract comes from one backend result. Local alternatives
+  // are separate contracts; no option premium is reused for an autocall.
   const c = FACTOR_CTX[parsed.factor] || FACTOR_CTX.equity;
-  // The 100 is only a sub-second pre-load
-  // guard so the payoff SVGs never draw NaN before the real series resolves; it
-  // and is never displayed as market data (Market Context shows the value or '—').
-  const spot = Number.isFinite(ctxData.last) ? ctxData.last : (Number.isFinite(c.refSpot) ? c.refSpot : 100);
-  const tt = Math.max((parsed.months || 5) / 12, 1 / 12);
-
-  // Reconciliation seed for OPTION desks: the desk's own pricing inputs + the
-  // exact quoted premium, read straight from POST /agent/desk/run. Driving the
-  // BEST card from these makes the headline premium == desk MID (no 6.71-vs-3.45).
-  const deskRecon = useMemo(() => {
-    if (!desk || desk.pricing?.kind !== 'option') return null;
-    const ms = desk.market_snapshot || {};
-    const sp = desk.product_spec || {};
-    const pr = desk.pricing_result || {};
-    const midRaw = desk.quote?.mid;
-    const mid = Number.isFinite(midRaw) ? midRaw : (Number.isFinite(desk.pricing?.est_price) ? desk.pricing.est_price : null);
-    const strike = Number.isFinite(sp.strike) ? sp.strike : (Number.isFinite(pr.strike) ? pr.strike : null);
-    const vol = Number.isFinite(ms.vol) ? ms.vol : (Number.isFinite(pr.vol) ? pr.vol : null);
-    const dspot = Number.isFinite(ms.spot) ? ms.spot : (Number.isFinite(pr.spot) ? pr.spot : null);
-    if (mid == null) return null;
-    return { mid, strike, vol, spot: dspot, unit: desk.pricing?.unit };
-  }, [desk]);
-  // Back out ONE self-consistent vol from the desk's quoted MID so the BEST card
-  // (= desk MID, an override) and the forward-anchored ALTERNATIVES are priced off
-  // the SAME vol. The desk MID is the ATM premium; the snapshot/realized vol
-  // (deskRecon.vol, e.g. 13.4%) reprices the ATM call at ~2.74, NOT the quoted 3.45
-  // — so it would contradict the BEST card. We instead invert the alternatives' OWN
-  // pricer at the ATM anchor (forward for commodities, spot for equity/FX) against
-  // the MID: that recovers the MID-implied vol (~16%) and GUARANTEES the spread's
-  // ATM long leg == the standalone Long Call == desk MID (no 3.45-vs-2.74 split).
-  // If the inversion fails (price below intrinsic / no solution) we fall back to the
-  // realized vol and DROP the "même vol" reconciliation claim downstream.
-  const { usedVol, volImplied } = useMemo(() => {
-    const fallback = (deskRecon && Number.isFinite(deskRecon.vol)) ? deskRecon.vol : c.vol;
-    if (!deskRecon || !Number.isFinite(deskRecon.mid)) return { usedVol: fallback, volImplied: false };
-    const f = parsed.factor;
-    const type = parsed.view === 'Price decrease' ? 'put' : 'call';
-    let iv = null;
-    if (f === 'oil' || f === 'gold') {
-      const F = spot * Math.exp(0.04 * tt);            // same forward the alternatives use
-      iv = black76ImpliedVol({ F, K: F, r: 0.04, T: tt, price: deskRecon.mid, type });
-    } else if (f === 'fx' || f === 'equity' || f === 'crypto') {
-      const q = f === 'fx' ? 0.03 : 0;                 // GK foreign rate for FX, else BS
-      iv = bsImpliedVol({ S: spot, K: spot, r: 0.04, q, T: tt, price: deskRecon.mid, type });
-    }
-    return Number.isFinite(iv) ? { usedVol: iv, volImplied: true } : { usedVol: fallback, volImplied: false };
-  }, [deskRecon, c.vol, parsed.factor, parsed.view, spot, tt]);
-  // Footer labelling: only assert "reconciled / même vol" when the inversion held.
-  const volPct = (usedVol * 100).toFixed(1);
-  const volTag = !deskRecon ? 'hyp.' : (volImplied ? 'desk (implicite)' : 'réalisée, indicatif');
-  const reconNote = deskRecon
-    ? (volImplied
-        ? ' Carte BEST = prime cotée par le desk ; alternatives à la même vol implicite (cohérentes avec la prime cotée).'
-        : ' Carte BEST = prime cotée par le desk ; alternatives à la vol réalisée (indicatif, non reconciliées).')
-    : '';
-
-  const approaches = useMemo(
-    () => buildApproaches({ spot, vol: usedVol, r: 0.04, T: tt, view: parsed.view, unit: c.unit, factor: parsed.factor, deskRecon }),
-    [spot, usedVol, c.unit, tt, parsed.view, parsed.factor, deskRecon]
-  );
+  const deskRecon = useMemo(()=>{
+    if(!desk || desk.product_spec?.kind!=='option')return null;
+    const inputs=desk.pricing_result?.calculation?.inputs||desk.product_spec.inputs||{};
+    const mid=desk.pricing_result?.theoretical_price;
+    if(!Number.isFinite(mid)||!['call','put'].includes(inputs.optionType))return null;
+    return {...inputs,mid,vol:inputs.volatility,unit:desk.pricing_result.unit};
+  },[desk]);
+  const fallbackSpot=Number.isFinite(ctxData.last)?ctxData.last:Number.isFinite(c.refSpot)?c.refSpot:100;
+  const spot=Number.isFinite(deskRecon?.spot)?deskRecon.spot:Number.isFinite(deskRecon?.forward)?deskRecon.forward:fallbackSpot;
+  const tt=Number.isFinite(deskRecon?.maturityYears)?deskRecon.maturityYears:Math.max((parsed.months||5)/12,1/12);
+  const usedRate=Number.isFinite(deskRecon?.riskFreeRate)?deskRecon.riskFreeRate:.04;
+  const usedVol=Number.isFinite(deskRecon?.volatility)?deskRecon.volatility:c.vol;
+  const volPct=(usedVol*100).toFixed(1);
+  const volTag=deskRecon?'ticket':'hyp.';
+  const reconNote=' Alternatives are different contracts with their own stated assumptions.';
+  const illustration=useMemo(()=>busy||deskError||parsed.durationError?{items:[],error:deskError||parsed.durationError}:safeDeskIllustrations(buildApproaches,{spot,vol:usedVol,r:usedRate,T:tt,view:deskRecon?.optionType==='put'?'Price decrease':deskRecon?.optionType==='call'?'Price increase':parsed.view,unit:deskRecon?`${desk.pricing_result.currency||''} ${deskRecon.unit||''}`:c.unit,factor:parsed.factor,deskRecon}),[spot,usedVol,usedRate,c.unit,tt,parsed.view,parsed.factor,deskRecon,busy,deskError,parsed.durationError]);
+  const approaches=illustration.items;
 
   const interp = [
     { ic: 'shuffle', t: 'Request Type', v: parsed.intention },
@@ -685,7 +623,7 @@ export default function AgentRoomReal() {
                 <Panel title="1. Votre requête" right={<span style={tag}>langage naturel</span>}>
                   <form onSubmit={(e) => { e.preventDefault(); run(q); }} style={{ display: 'flex', gap: 0, border: `1px solid ${T.line2}`, borderRadius: 6, overflow: 'hidden', background: T.panel2 }}>
                     <textarea aria-label="Votre question au desk" value={q} onChange={(e) => setQ(e.target.value)} rows={2} style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', resize: 'none', color: T.text, fontFamily: MONO, fontSize: 12.5, padding: '12px 14px', lineHeight: 1.5 }} />
-                    <button type="submit" aria-label="Envoyer la requête au desk" disabled={busy} style={{ alignSelf: 'stretch', width: 52, background: T.red, border: 'none', color: '#fff', cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1, display: 'grid', placeItems: 'center' }}>
+                    <button type="submit" aria-label="Envoyer la requête au desk" disabled={busy} style={{ alignSelf: 'stretch', width: 52, background: T.red, border: 'none', color: T.bg, cursor: busy ? 'default' : 'pointer', opacity: busy ? 0.6 : 1, display: 'grid', placeItems: 'center' }}>
                       <Icon name={busy ? 'loader-2' : 'send'} size={16} color="#fff" />
                     </button>
                   </form>
@@ -695,7 +633,8 @@ export default function AgentRoomReal() {
                     ))}
                   </div>
                   {desk && <div style={{ marginTop: 10, fontFamily: MONO, fontSize: 11, color: T.green }}>● Routé vers le desk {desk.desk} · {desk.agents?.length || 0} agents · théo {fmt(desk.pricing?.est_price, 2)}{desk.pricing?.unit ? ` ${String(desk.pricing.unit).trim().replace(/^\/\s*/, '/ ')}` : ''}</div>}
-                  {apiUp === false && <div style={{ marginTop: 10, fontFamily: MONO, fontSize: 11, color: T.amber }}>● Backend requis pour l'analyse multi-agents temps réel — interprétation locale ci-dessous (déterministe).</div>}
+                  {deskError&&<div role="alert" lang="en" style={{marginTop:14,color:T.amber,lineHeight:1.65}}>{deskError}</div>}
+                  {apiUp === false && !deskError && <div style={{ marginTop: 10, fontFamily: MONO, fontSize: 11, color: T.amber }}>● Backend requis pour l'analyse multi-agents temps réel — interprétation locale ci-dessous (déterministe).</div>}
                 </Panel>
 
                 {/* 2. interpretation */}
@@ -712,8 +651,10 @@ export default function AgentRoomReal() {
                   </div>
                 </Panel>
 
-                {/* 3. approaches */}
-                <Panel title="3. Approches produit" right={<span style={tag}>{modelLabel(parsed.factor)}</span>}>
+                {desk?.pricing_result&&<DeskContract desk={desk} query={submitted}/>}
+                {/* Existing hypothetical alternatives remain available, separate from the calculated contract. */}
+                {approaches.length>0?<><Panel title="3. Illustrative alternative contracts" right={<span style={tag}>{modelLabel(parsed.factor)}</span>}>
+                  <p lang="en" style={{fontSize:12,color:T.mute,lineHeight:1.6}}>These are different illustrative contracts, not an automatic recommendation. {desk?.product_spec?.kind==='exotic'?'The autocall value, schedule and Monte Carlo uncertainty are shown in the calculated contract above; none of these vanilla cards represents that autocall.':'Where an option ticket is available, the directional illustration uses its option type, strike and pricing inputs.'}</p>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 10 }}>
                     {approaches.map((a, i) => {
                       const active = i === sel;
@@ -721,7 +662,6 @@ export default function AgentRoomReal() {
                         <button key={a.name} onClick={() => setSel(i)} style={{ textAlign: 'left', cursor: 'pointer', background: active ? 'rgba(242,54,69,.05)' : T.inset, border: `1px solid ${active ? T.redDim : T.line}`, borderRadius: 6, padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 6 }}>
                             <span style={{ fontFamily: MONO, fontSize: 12, fontWeight: 700, color: T.text }}>{a.name}</span>
-                            {a.best && <span style={{ fontFamily: MONO, fontSize: 8, color: T.red, border: `1px solid ${T.redDim}`, borderRadius: 2, padding: '1px 4px' }}>BEST</span>}
                           </div>
                           <span style={{ ...tag, alignSelf: 'flex-start' }}>{a.tag}</span>
                           <div style={{ background: T.bg, borderRadius: 4, border: `1px solid ${T.line}` }}>
@@ -737,7 +677,7 @@ export default function AgentRoomReal() {
                     })}
                   </div>
                   <div style={{ marginTop: 10, fontFamily: MONO, fontSize: 10, color: T.dim }}>
-                    {parsed.factor === 'rates' || parsed.factor === 'inflation'
+                    {deskRecon ? `Server option ticket: ${deskRecon.optionType}, strike ${fmt(deskRecon.strike,4)}, spot/forward ${fmt(spot,4)}, rate ${fmt(usedRate*100)}%, vol ${volPct}%, T=${fmt(tt,4)} years. ${reconNote}` : parsed.factor === 'rates' || parsed.factor === 'inflation'
                       ? `Swaps via DV01 (annuité × notionnel × 1bp) ; caps/floors & swaptions en Black-76 sur le taux ${fmt(spot, 2)}%, vol ${(c.vol * 100).toFixed(0)}%, T=${tt.toFixed(2)}a, notionnel 1,000,000 $. Primes en bp de notionnel — pas en % de taux.`
                       : parsed.factor === 'credit'
                         ? `CDS : prime = spread ${fmt(spot, 2)}% (${(spot * 100).toFixed(0)} bp p.a.) ; CS01 = annuité risquée × notionnel × 1bp ; JTD = (1−R) × notionnel (R=40%), notionnel 1,000,000 €.`
@@ -765,18 +705,10 @@ export default function AgentRoomReal() {
                       ))}
                     </div>
                   </div>
-                  {desk?.quote && (
-                    <div style={{ marginTop: 12, padding: '10px 12px', border: `1px solid ${T.line}`, borderRadius: 6, background: T.inset }}>
-                      <div style={{ fontFamily: MONO, fontSize: 10, color: T.mute, marginBottom: 6 }}>QUOTE DESK {desk.desk} (structure recommandée par le desk : {desk.pricing?.product})</div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: MONO, fontSize: 12 }}>
-                        <span style={{ color: T.green }}>BID {desk.quote.bid}</span>
-                        <span style={{ color: T.mute }}>MID {desk.quote.mid}</span>
-                        <span style={{ color: T.red }}>ASK {desk.quote.ask}</span>
-                        {desk.risk && <span style={{ color: desk.risk.status === 'GREEN' ? T.green : T.amber }}>RISK {desk.risk.status} · {desk.risk.dominant_risk}</span>}
-                      </div>
-                    </div>
-                  )}
+
                 </Panel>
+
+                </>:<Panel title="Local illustration"><p role={busy?'status':'alert'} lang="en" style={{color:T.mute,lineHeight:1.65}}>{busy?'Checking the requested contract. No previous result is displayed.':illustration.error||'Edit the request and submit a supported contract.'}</p></Panel>}
 
                 {/* agent pipeline (real backend) */}
                 <Panel title="Agent analysis" right={<span style={tag}>{desk ? 'Completed · ' + desk.desk + ' desk' : busy ? 'Analysis in progress' : 'No completed run'}</span>}>
@@ -792,7 +724,7 @@ export default function AgentRoomReal() {
                   ) : (
                     <div style={{ padding: '24px 0', textAlign: 'center', color: T.amber, fontFamily: MONO, fontSize: 12 }}>
                       {busy ? 'Your request is being checked. No result is available yet.' : 'No completed agent analysis is available for this request.'}<br />
-                      <span style={{ color: T.mute, fontSize: 11 }}>Submit a request to try again. The displayed local calculations remain available with their stated inputs.</span><br />
+                      <span style={{ color: T.mute, fontSize: 11 }}>Submit a request to try again. {approaches.length?'The local illustrations use their own stated inputs.':'No local alternative calculation is displayed for this request.'}</span><br />
                       <Link to="/interview" style={{display:'inline-block',marginTop:12,color:T.text}}>Continue with interview practice →</Link>
                     </div>
                   )}
@@ -834,7 +766,7 @@ export default function AgentRoomReal() {
               <p style={{ fontSize: 12.5, color: T.mute, lineHeight: 1.6 }}>
                 This release exposes the delivered RFQ Cockpit and its backend desk pipeline. No additional desk surface is advertised here.
               </p>
-              <button onClick={() => setTab('RFQ')} style={{ marginTop: 14, background: T.red, border: 'none', borderRadius: 4, color: '#fff', fontFamily: MONO, fontSize: 12, fontWeight: 600, padding: '9px 16px', cursor: 'pointer' }}>← Retour au RFQ Cockpit</button>
+              <button onClick={() => setTab('RFQ')} style={{ marginTop: 14, background: T.red, border: 'none', borderRadius: 4, color: T.bg, fontFamily: MONO, fontSize: 12, fontWeight: 600, padding: '9px 16px', cursor: 'pointer' }}>← Retour au RFQ Cockpit</button>
             </div>
           </div>
         )}

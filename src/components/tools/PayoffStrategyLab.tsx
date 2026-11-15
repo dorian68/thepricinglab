@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertTriangle,
   BarChart3,
@@ -40,6 +40,7 @@ import {
 } from '@/lib/payoffStrategy.mjs';
 import ToolPageLayout from './ToolPageLayout';
 import { readPayoffPreset } from '@/lib/interviewToolContext.mjs';
+import { uncoverFormControl } from '@/lib/scrollVisibility.mjs';
 
 type OptionType = 'call' | 'put';
 type Side = 'long' | 'short';
@@ -171,6 +172,11 @@ const PayoffStrategyLab: React.FC<{initialPreset?: string}> = ({initialPreset}) 
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const nextId = useRef(1);
   const nextRun = useRef(1);
+  useEffect(()=>{
+    if(!result)return;
+    const frame=requestAnimationFrame(()=>uncoverFormControl(document.querySelector('[data-payoff-strategy-lab]')));
+    return()=>cancelAnimationFrame(frame);
+  },[result]);
 
   const invalidate = (action: () => void) => {
     action();
@@ -367,16 +373,16 @@ const PayoffStrategyLab: React.FC<{initialPreset?: string}> = ({initialPreset}) 
                     const reference = modelPremium(leg);
                     return <TableRow key={leg.id}>
                       <TableCell className="sticky left-0 z-10 bg-background font-mono text-xs">{leg.id}</TableCell>
-                      <TableCell><select className={selectClassName} value={leg.side} onChange={(event) => updateLeg(leg.id, { side: event.target.value as Side })}><option value="long">Long</option><option value="short">Short</option></select></TableCell>
-                      <TableCell><select className={selectClassName} value={leg.type} onChange={(event) => updateLeg(leg.id, { type: event.target.value as OptionType })}><option value="call">Call</option><option value="put">Put</option></select></TableCell>
-                      <TableCell><Input className={numberClassName} type="number" min="0.000001" value={leg.strike} onChange={(event) => updateLeg(leg.id, { strike: Number(event.target.value) })} /></TableCell>
-                      <TableCell><Input className={numberClassName} type="number" min="1" step="1" value={leg.quantity} onChange={(event) => updateLeg(leg.id, { quantity: Number(event.target.value) })} /></TableCell>
-                      <TableCell><select className={selectClassName} value={leg.premiumSource} onChange={(event) => {
+                      <TableCell><select aria-label={`${leg.id} side`} className={selectClassName} value={leg.side} onChange={(event) => updateLeg(leg.id, { side: event.target.value as Side })}><option value="long">Long</option><option value="short">Short</option></select></TableCell>
+                      <TableCell><select aria-label={`${leg.id} option type`} className={selectClassName} value={leg.type} onChange={(event) => updateLeg(leg.id, { type: event.target.value as OptionType })}><option value="call">Call</option><option value="put">Put</option></select></TableCell>
+                      <TableCell><Input aria-label={`${leg.id} strike (${currency} per unit)`} className={numberClassName} type="number" min="0.000001" value={leg.strike} onChange={(event) => updateLeg(leg.id, { strike: Number(event.target.value) })} /></TableCell>
+                      <TableCell><Input aria-label={`${leg.id} quantity (contracts)`} className={numberClassName} type="number" min="1" step="1" value={leg.quantity} onChange={(event) => updateLeg(leg.id, { quantity: Number(event.target.value) })} /></TableCell>
+                      <TableCell><select aria-label={`${leg.id} premium source`} className={selectClassName} value={leg.premiumSource} onChange={(event) => {
                         const source = event.target.value as PremiumSource;
                         updateLeg(leg.id, { premiumSource: source, manualPremium: source === 'manual' ? Number(reference.toFixed(6)) : null });
                       }}><option value="model">BSM model</option><option value="manual">Manual entry</option></select></TableCell>
                       <TableCell>{leg.premiumSource === 'manual'
-                        ? <Input className={numberClassName} type="number" min="0" step="0.01" value={leg.manualPremium ?? 0} onChange={(event) => updateLeg(leg.id, { manualPremium: Number(event.target.value) })} />
+                        ? <Input aria-label={`${leg.id} entry premium (${currency} per unit)`} className={numberClassName} type="number" min="0" step="0.01" value={leg.manualPremium ?? 0} onChange={(event) => updateLeg(leg.id, { manualPremium: Number(event.target.value) })} />
                         : <span className="block text-right text-xs text-muted-foreground">model</span>}</TableCell>
                       <TableCell className="text-right font-mono text-xs">{formatNumber(reference, 4)}</TableCell>
                       <TableCell><Button variant="ghost" size="icon" aria-label={`Remove ${leg.id}`} onClick={() => removeLeg(leg.id)}><Trash2 className="h-4 w-4" /></Button></TableCell>

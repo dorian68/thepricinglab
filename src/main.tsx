@@ -40,7 +40,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
       return (
         <div className="h-screen w-full flex flex-col items-center justify-center text-white p-4">
           <h1 className="text-2xl font-bold text-red-500 mb-4">Une erreur est survenue</h1>
-          <p className="mb-4">Nous sommes désolés pour ce problème. Notre équipe a été notifiée.</p>
+          <p className="mb-4">Le chargement de cette page a échoué. Rechargez-la pour réessayer.</p>
           <pre className="bg-gray-800 p-4 rounded overflow-auto max-w-full max-h-[300px]">
             {this.state.error && this.state.error.toString()}
           </pre>

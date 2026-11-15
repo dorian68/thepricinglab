@@ -1,5 +1,5 @@
 
-import { defineConfig, type ViteDevServer, type UserConfig } from "vite";
+import { defineConfig, type Plugin, type ViteDevServer, type UserConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import fs from "fs";
@@ -119,6 +119,26 @@ const dependencyChunk = (rawId: string) => {
   return undefined;
 };
 
+// Every application route uses this shell. Fetch its generated chunk while
+// the entry boots, keeping its execution lazy and route-specific tools deferred.
+const preloadApplicationShell = (): Plugin => {
+  let base = '/';
+  return {
+    name: 'tpl-preload-application-shell',
+    apply: 'build',
+    configResolved(config) { base = config.base; },
+    transformIndexHtml: {
+      order: 'post',
+      handler(_html, context) {
+        const shell = Object.values(context.bundle || {}).find((asset) =>
+          asset.type === 'chunk' && asset.moduleIds.some((id) => id.replaceAll('\\', '/').endsWith('/src/claude/ClaudeFrontend.jsx')));
+        if (!shell) return;
+        return [{ tag: 'link', attrs: { rel: 'modulepreload', href: `${base}${shell.fileName}`, crossorigin: '', fetchpriority: 'low' }, injectTo: 'head' }];
+      },
+    },
+  };
+};
+
 // https://vitejs.dev/config/
 export default defineConfig((): UserConfig => ({
   server: {
@@ -165,6 +185,7 @@ export default defineConfig((): UserConfig => ({
     starterKitLanding(),
     protectedCourseAssets(),
     retiredAgentRoomKit(),
+    preloadApplicationShell(),
   ].filter(Boolean),
   resolve: {
     alias: {

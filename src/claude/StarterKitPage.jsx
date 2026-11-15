@@ -132,7 +132,7 @@ export default function StarterKitPage({ salesGuard, returnStatus = null }) {
   }
 
   return (
-    <div className="container page" data-starter-kit-state={access.state}>
+    <div className="container page" lang="fr" data-starter-kit-state={access.state}>
       <div className="crumb"><RouterLink to="/pricing">/ pricing</RouterLink><i>›</i><span>/ starter kit</span></div>
       <section className="panel" style={{ padding: '34px 34px 30px', marginBottom: 18, background: 'linear-gradient(115deg, rgba(255,46,69,.10), rgba(13,17,24,.96) 58%)' }}>
         <div className="row between" style={{ gap: 18, alignItems: 'flex-start', flexWrap: 'wrap' }}>

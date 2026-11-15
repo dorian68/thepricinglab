@@ -80,6 +80,9 @@
     "smoke:delivery:browser": "node scripts/with_preview.mjs smoke_delivery_browser.mjs",
     "smoke:teaching-scenarios": "node scripts/smoke_teaching_scenarios.mjs",
     "smoke:product-contract": "node scripts/smoke_product_contract.mjs",
+    "smoke:product-cycle2": "node scripts/smoke_product_cycle2.mjs",
+    "smoke:product-cycle2:browser": "node scripts/smoke_product_cycle2_browser.mjs",
+    "smoke:continuity-recovery:browser": "node scripts/smoke_continuity_recovery_browser.mjs",
     "smoke:retired-surfaces": "node scripts/smoke_retired_surfaces.mjs",
     "audit:frontend-trust": "node scripts/audit_frontend_trust.mjs",
     "smoke:rum:browser": "node scripts/smoke_rum_browser.mjs",
@@ -98,7 +101,10 @@
     "audit:trust": "node scripts/audit_business.mjs trust",
     "audit:business": "node scripts/audit_business.mjs all",
     "check:production-env": "node scripts/check_production_env.mjs",
-    "audit:technical": "npm run lint && npm run typecheck && npm run smoke:visual-shell && npm run smoke:sources && npm run smoke:tools-catalog && npm run smoke:auth-freshness && npm run smoke:calibration && npm run smoke:curve && npm run smoke:realized-vol && npm run smoke:realized-vol:cross-engine && npm run smoke:payoff && npm run smoke:payoff:cross-engine && npm run smoke:payoff:compat && npm run smoke:mc && npm run smoke:mc:cross-engine && npm run smoke:mc:backend && npm run smoke:mc:worker && npm run smoke:binomial && npm run smoke:binomial:cross-engine && npm run smoke:binomial:backend && npm run smoke:binomial:worker && npm run smoke:bond && npm run smoke:bond:cross-engine && npm run smoke:bond:backend && npm run smoke:bond:worker && npm run smoke:vol-surface && npm run smoke:vol-surface:cross-engine && npm run smoke:vol-surface:backend && npm run smoke:vol-surface:worker && npm run smoke:black-scholes && npm run smoke:black-scholes:cross-engine && npm run smoke:black-scholes:backend && npm run smoke:black-scholes:worker && npm run smoke:legacy-options && npm run smoke:rum && npm run smoke:rum:browser && npm run smoke:navigation-security && npm run smoke:production-env-contract && npm run audit:business && npm run smoke:journey && npm run smoke:teaching-scenarios && npm run smoke:delivery:browser && npm run smoke:performance"
+    "audit:technical": "npm run lint && npm run typecheck && npm run smoke:visual-shell && npm run smoke:sources && npm run smoke:tools-catalog && npm run smoke:auth-freshness && npm run smoke:calibration && npm run smoke:curve && npm run smoke:realized-vol && npm run smoke:realized-vol:cross-engine && npm run smoke:payoff && npm run smoke:payoff:cross-engine && npm run smoke:payoff:compat && npm run smoke:mc && npm run smoke:mc:cross-engine && npm run smoke:mc:backend && npm run smoke:mc:worker && npm run smoke:binomial && npm run smoke:binomial:cross-engine && npm run smoke:binomial:backend && npm run smoke:binomial:worker && npm run smoke:bond && npm run smoke:bond:cross-engine && npm run smoke:bond:backend && npm run smoke:bond:worker && npm run smoke:vol-surface && npm run smoke:vol-surface:cross-engine && npm run smoke:vol-surface:backend && npm run smoke:vol-surface:worker && npm run smoke:black-scholes && npm run smoke:black-scholes:cross-engine && npm run smoke:black-scholes:backend && npm run smoke:black-scholes:worker && npm run smoke:legacy-options && npm run smoke:rum && npm run smoke:rum:browser && npm run smoke:navigation-security && npm run smoke:production-env-contract && npm run audit:business && npm run smoke:journey && npm run smoke:teaching-scenarios && npm run smoke:delivery:browser && npm run smoke:performance",
+    "smoke:product-hardening": "node scripts/smoke_product_hardening.mjs",
+    "smoke:product-hardening:browser": "node scripts/smoke_product_hardening_browser.mjs",
+    "smoke:notebook:browser-runtime": "node scripts/smoke_notebook_runtime_browser.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -180,6 +186,7 @@
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react-swc": "^3.11.0",
     "autoprefixer": "^10.4.20",
+    "axe-core": "4.14.0",
     "browserslist": "^4.28.6",
     "caniuse-lite": "^1.0.30001806",
     "eslint": "^10.8.0",

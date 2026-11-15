@@ -12,7 +12,14 @@ import './agent/agent.css';
 
 const loadAgentDock = () => import('./agent/AgentDock');
 const AgentDock = lazy(loadAgentDock);
-const ClaudeFrontend = lazy(() => import('./claude/ClaudeFrontend'));
+const ClaudeFrontend = lazy(() => {
+  if (typeof window !== 'undefined' && /^\/starter-kit(?:\/|$)/.test(window.location.pathname)) {
+    // Fetch this small route while its shell loads, avoiding a second mobile
+    // network round trip. The normal lazy route still owns load/error handling.
+    void import('./claude/StarterKitPage').catch(() => undefined);
+  }
+  return import('./claude/ClaudeFrontend');
+});
 
 function ApplicationLoadingState() {
   return (

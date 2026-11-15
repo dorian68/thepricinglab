@@ -50,6 +50,7 @@ assert.equal(
   Object.keys(privateCourseFiles).length,
   'every commercial course route must deliver a unique script',
 );
+const survivalFirst=JSON.parse(await readFile(path.join(backendRoot,'pricinglibrary_rag/learning_assets/survival_questions.json'),'utf8')).questions[0];
 const privateCourseMarkdown = Object.fromEntries(await Promise.all(
   Object.entries(privateCourseFiles).map(async ([courseId, filename]) => {
     const coursePath = path.join(privateCourseDirectory, filename);
@@ -148,7 +149,7 @@ try {
   async function planPage(plan, {survivalFailure = false} = {}) {
     const context = await browser.newContext({viewport:{width:1280,height:900}});
     const page = await context.newPage();
-    const state = {requests:[],courseBytes:{},progressSaved:false,survivalSaved:false,pageErrors:[]};
+    const state = {requests:[],courseBytes:{},progressSaved:false,survivalSaved:false,survivalStartIds:[],pageErrors:[]};
     page.on('pageerror', (error)=>state.pageErrors.push(error.message));
     if (plan !== 'anonymous') { await seedAuth(page); await mockSupabase(page); }
     await page.route(`${apiOrigin}/**`, async (route) => {
@@ -157,13 +158,14 @@ try {
       if (request.method() === 'OPTIONS') return route.fulfill({status:204,headers:corsHeaders});
       state.requests.push(`${request.method()} ${pathname}`);
       if (pathname === '/billing/entitlement') return route.fulfill({status:200,headers:{...corsHeaders,'Content-Type':'application/json'},body:JSON.stringify({active:plan!=='free'&&plan!=='anonymous',plan:plan==='anonymous'?'free':plan})});
+      if (pathname === '/learner/catalog') return route.fulfill({status:200,headers:{...corsHeaders,'Content-Type':'application/json'},json:{courses:Object.keys(privateCourseFiles).map(id=>({id,available_languages:['fr']}))}});
       if (pathname.startsWith('/courses/') && pathname.endsWith('/script')) {
         const courseId = pathname.split('/')[2];
         const allowed = (rank[plan] ?? -1) >= rank[requiredCourse[courseId] || 'pro'];
         const markdown = privateCourseMarkdown[courseId];
         if (allowed && !markdown) return route.fulfill({status:404,headers:{...corsHeaders,'Content-Type':'application/json'},body:JSON.stringify({detail:'course smoke fixture missing'})});
         if (allowed) state.courseBytes[courseId] = Buffer.byteLength(markdown, 'utf8');
-        return route.fulfill({status:allowed?200:403,headers:{...corsHeaders,'Content-Type':allowed?'text/markdown':'application/json'},body:allowed?markdown:JSON.stringify({detail:'insufficient plan'})});
+        return route.fulfill({status:allowed?200:403,headers:{...corsHeaders,'Content-Type':allowed?'text/markdown':'application/json','Content-Language':'fr'},body:allowed?markdown:JSON.stringify({detail:'insufficient plan'})});
       }
       if (pathname === `/platform/progress/${userId}`) return route.fulfill({status:200,headers:{...corsHeaders,'Content-Type':'application/json'},body:JSON.stringify({events:state.progressSaved?[{kind:'lesson',ref:'yield-curves#L0'}]:[]})});
       if (pathname === '/platform/progress' && request.method() === 'POST') {
@@ -171,11 +173,12 @@ try {
         state.progressSaved = true;
         return route.fulfill({status:200,headers:{...corsHeaders,'Content-Type':'application/json'},body:JSON.stringify({ok:true,created:true,id:'prg-browser'})});
       }
-      if (pathname === '/platform/survival' && request.method() === 'POST') {
-        await new Promise((resolve)=>setTimeout(resolve,350));
-        if (survivalFailure) return route.fulfill({status:503,headers:{...corsHeaders,'Content-Type':'application/json'},body:JSON.stringify({detail:'practice store unavailable'})});
-        state.survivalSaved = true;
-        return route.fulfill({status:200,headers:{...corsHeaders,'Content-Type':'application/json'},body:JSON.stringify({ok:true,ranked:false})});
+      if (pathname === '/learning/survival/runs' && request.method()==='GET') return route.fulfill({status:200,headers:corsHeaders,json:{runs:[]}});
+      if (pathname.startsWith('/learning/survival/runs')) {
+        if(request.method()==='POST')state.survivalStartIds.push(request.postDataJSON().client_request_id);
+        if(survivalFailure)return route.fulfill({status:503,headers:corsHeaders,json:{detail:'Explicit isolated persistence failure'}});
+        const {correct,explanation,...question}=survivalFirst;
+        return route.fulfill({status:200,headers:corsHeaders,json:{id:'srv_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',index:0,total_questions:20,answered_count:0,lives:3,score:0,streak:0,best_streak:0,completed:false,phase:'answer',question,remaining_seconds:30,feedback:null,ranked:false,proctored:false}});
       }
       if (pathname === '/strategy/instruments') return route.fulfill({status:200,headers:{...corsHeaders,'Content-Type':'application/json'},body:JSON.stringify({instruments:[{key:'EURUSD',label:'EUR/USD',capital:5000}],available:['EURUSD'],strategies:['ensemble']})});
       return route.fulfill({status:plan==='anonymous'?401:404,headers:{...corsHeaders,'Content-Type':'application/json'},body:'{}'});
@@ -186,16 +189,15 @@ try {
   {
     const {context,page,state} = await planPage('student', {survivalFailure:true});
     await page.goto(`${baseUrl}/survival/beginner`, {waitUntil:'networkidle'});
-    for (let attempt = 0; attempt < 3; attempt += 1) {
-      await page.getByRole('button', {name:/^A\s+/}).click();
-      if (attempt < 2) await page.getByRole('button', {name:'Next',exact:true}).click();
-    }
-    await page.getByText('Saving…', {exact:true}).waitFor();
-    await page.getByText('Not saved', {exact:true}).waitFor();
-    assert.equal(state.survivalSaved, false);
+    await page.getByRole('button',{name:'Retry the same action',exact:true}).waitFor();
+    assert.ok(await page.getByRole('alert').innerText(),'A failed start is explicitly reported, not a locally invented run');
+    await page.getByRole('button',{name:'Retry the same action',exact:true}).click();
+    await waitFor(()=>state.survivalStartIds.length===2,'The same start action must be retried');
+    assert.equal(state.survivalStartIds[0],state.survivalStartIds[1],'Unconfirmed start retry must preserve its request identity');
+    assert.equal(await page.locator('.survival-question-panel').count(),0,'No question or score may be invented after a persistence failure');
     assert.deepEqual(state.pageErrors, []);
     await context.close();
-    console.log('PASS failed Survival persistence is reported as Not saved');
+    console.log('PASS failed Survival start remains explicit and retry preserves the same request identity');
   }
 
   {
@@ -231,6 +233,9 @@ try {
     await page.getByRole('button', {name:'Completion saved',exact:false}).waitFor();
     assert.equal(state.progressSaved, true);
     await page.reload({waitUntil:'networkidle'});
+    // Resume may advance to the next incomplete module. Reopen the first one
+    // to verify its actual saved state rather than assuming the reading index.
+    await page.locator('.course-lesson-item').first().click();
     await page.getByRole('button', {name:'Completion saved',exact:false}).waitFor();
     await page.getByRole('button', {name:'Calculator',exact:true}).click();
     assert.equal(await page.getByRole('link', {name:'Open Yield Curve Builder',exact:false}).getAttribute('href'), '/tools/curve');
@@ -268,59 +273,32 @@ try {
     await page.goto(`${baseUrl}/exercises/options-book-greeks`, {waitUntil:'networkidle'});
     await page.getByRole('heading', {name:'Attribute P&L on an Options Book',exact:true,level:1}).waitFor();
     await page.getByRole('button', {name:'Reference output',exact:true}).click();
-    const greekOutput = page.locator('pre').first();
-    await greekOutput.waitFor();
-    const greekOutputText = await greekOutput.innerText();
-    assert.match(greekOutputText, /Gamma P&L:\s*-160,000 EUR/, 'browser exercise must show the corrected gamma P&L');
-    assert.match(greekOutputText, /Total:\s*-315,000 EUR/, 'browser exercise must show the reconciled total P&L');
-    assert.doesNotMatch(greekOutputText, /-320,000|-475,000/, 'browser exercise must not show obsolete Greek P&L values');
-    for (const check of [
-      {path:'/exercises/swap-dv01', heading:'Shock a EUR 5Y Swap Book', expected:/PV approx:\s*-910,000 EUR/, obsolete:/PV approx:\s*\+910,000 EUR/},
-      {path:'/exercises/curve-boot', heading:'Bootstrap a Zero Curve', expected:/DF\(2Y\):\s*0\.9389[\s\S]*DF\(3Y\):\s*0\.9057/, obsolete:/DF\(2Y\):\s*0\.9384|DF\(3Y\):\s*0\.9056/},
-      {path:'/exercises/iv-newton', heading:'Implied Vol via Newton-Raphson', expected:/Implied volatility:\s*26\.73%/, obsolete:/Implied volatility:\s*25\.43%/},
-      {path:'/exercises/mc-asian', heading:'Monte Carlo an Asian Option', expected:/Asian call price:\s*5\.36[\s\S]*95% CI:\s*\[5\.31, 5\.41\]/, obsolete:/Asian call price:\s*5\.32[\s\S]*95% CI:\s*\[5\.28, 5\.36\]/},
-    ]) {
-      await page.goto(`${baseUrl}${check.path}`, {waitUntil:'networkidle'});
-      await page.getByRole('heading', {name:check.heading,exact:true,level:1}).waitFor();
-      await page.getByRole('button', {name:'Reference output',exact:true}).click();
-      const output = page.locator('pre').first();
-      await output.waitFor();
-      const outputText = await output.innerText();
-      assert.match(outputText, check.expected, `${check.path} must show its corrected golden output`);
-      assert.doesNotMatch(outputText, check.obsolete, `${check.path} must not show obsolete golden output`);
-    }
+    const readOutput=async()=>{await page.waitForFunction(()=>document.querySelector('pre[aria-label="Computed exercise reference output"]')?.textContent.trim().startsWith('{'));return JSON.parse(await page.getByLabel('Computed exercise reference output',{exact:true}).innerText());};
+    const greekOutput=await readOutput();assert.equal(greekOutput.result.gamma_pnl,-160000);assert.equal(greekOutput.result.total_pnl,-315000);
+    for(const check of [
+      {id:'swap-dv01',verify:r=>Math.abs(r.pv_approximation+910000)<1e-6&&r.signed_dv01_per_bp_up===45500},
+      {id:'curve-boot',verify:r=>r.nodes.map(n=>n.discount_factor.toFixed(4)).join(',')==='0.9709,0.9389,0.9057'},
+      {id:'iv-newton',verify:r=>r.converged&&Math.abs(r.volatility_percent-26.73112393864625)<1e-10&&Math.abs(r.repriced_call-8)<1e-10},
+      {id:'mc-asian',verify:r=>Math.abs(r.price-5.356683200676238)<1e-10&&r.seed===7&&r.paths===100000&&r.confidence_interval_95[0]<r.price&&r.confidence_interval_95[1]>r.price},
+    ]){await page.goto(`${baseUrl}/exercises/${check.id}`,{waitUntil:'networkidle'});await page.getByRole('button',{name:'Reference output',exact:true}).click();const value=await readOutput();assert.equal(value.id,check.id);assert.ok(check.verify(value.result),`${check.id} must expose the actual verified numerical output`);assert.ok(Object.values(value.checks).every(Boolean));}
     await page.goto(`${baseUrl}/lab/backtest`, {waitUntil:'networkidle'});
     await page.getByRole('heading', {name:'Professional plan required',exact:true}).waitFor();
     assert.equal(await page.getByRole('button', {name:'Run backtest',exact:true}).count(), 0);
     assert.ok(!state.requests.some((item)=>item.startsWith('POST /strategy/')));
     await page.goto(`${baseUrl}/survival/beginner`, {waitUntil:'networkidle'});
-    const firstSurvivalQuestion = await page.getByRole('heading', {level:2}).innerText();
-    assert.match(firstSurvivalQuestion, /at-the-money European call/i, 'Survival must start from its canonical first question');
-    for (let attempt = 0; attempt < 3; attempt += 1) {
-      await page.getByRole('button', {name:/^A\s+/}).click();
-      if (attempt < 2) await page.getByRole('button', {name:'Next',exact:true}).click();
-      if (attempt === 0) {
-        const secondSurvivalQuestion = await page.getByRole('heading', {level:2}).innerText();
-        assert.notEqual(secondSurvivalQuestion, firstSurvivalQuestion, 'Survival must advance to a distinct question');
-      }
-    }
-    await page.getByText('Saving…', {exact:true}).waitFor();
-    assert.equal(state.survivalSaved, false, 'Survival must not claim a saved run before the API confirms it');
-    await page.getByText('Saved · unranked', {exact:true}).waitFor();
-    assert.equal(state.survivalSaved, true);
-    await page.goto(`${baseUrl}/survival/beginner`, {waitUntil:'networkidle'});
-    for (let attempt = 0; attempt < 20; attempt += 1) {
-      await page.getByRole('button', {name:/^A\s+/}).click();
-      await page.getByRole('button', {name:'Next',exact:true}).click();
-    }
-    await page.getByRole('heading', {name:'Wave complete',exact:true,level:1}).waitFor();
+    await page.locator('.survival-question-panel h2').waitFor();
+    assert.equal(await page.locator('.survival-question-panel h2').innerText(),survivalFirst.prompt,'The question is read from the common API contract');
+    assert.ok(state.requests.includes('POST /learning/survival/runs'),'An allowed plan must use the common persisted workflow');
+    assert.equal(await page.getByRole('button',{name:`A ${Object.fromEntries(survivalFirst.options).A}`,exact:true}).count(),1,'Server choices retain their canonical labels');
+    // Full scoring/deadline/reload journeys are exercised against the actual API
+    // in smoke_product_cycle2_browser, not a second rule engine in this mock.
     await page.goto(`${baseUrl}/notebooks`, {waitUntil:'networkidle'});
     await page.getByRole('heading', {name:'Notebooks',exact:true,level:1}).waitFor();
     const notebookText = await page.locator('body').innerText();
-    assert.match(notebookText, /Persistent saving and sharing are not included in this release\./, 'notebooks must exclude persistence and sharing from the current release');
+    assert.match(notebookText, /Drafts stay on this device; cloud saving and sharing are not included\./, 'notebooks must exclude persistence and sharing from the current release');
     assert.doesNotMatch(notebookText, /not available yet|coming soon/i, 'notebooks must not promise a future delivery state');
     await context.close();
-    console.log('PASS Student receives Advanced courses, a non-mounted Pro Backtest, honest notebook scope and server-confirmed unranked Survival saves');
+    console.log('PASS Student receives Advanced courses, a non-mounted Pro Backtest, device-only notebook drafts and access to the common Survival workflow (permission transport fixture)');
   }
 
   {
@@ -340,7 +318,7 @@ try {
       await page.getByRole('heading', {name:expectedCourseTitle[courseId],exact:true,level:1}).waitFor();
       await page.getByText(firstModuleTitle[courseId], {exact:true}).first().waitFor();
       assert.ok(state.courseBytes[courseId] > 40_000, `${courseId} public projection is unexpectedly thin`);
-      await page.getByRole('button', {name:'Script',exact:true}).click();
+      await page.getByRole('button', {name:'Full script',exact:true}).click();
       await page.waitForTimeout(750);
       const renderedTypes = await page.locator('[data-ui-block-type]').evaluateAll((nodes)=>nodes.map((node)=>node.getAttribute('data-ui-block-type')));
       console.log(`WIDGETS ${courseId}: ${renderedTypes.join(',') || 'none'}`);
@@ -368,7 +346,7 @@ try {
       }
     }
     await page.goto(`${baseUrl}/courses/yield-curves`, {waitUntil:'networkidle'});
-    await page.getByRole('button', {name:'Resources',exact:true}).click();
+    await page.getByRole('button', {name:'References',exact:true}).click();
     await page.getByText('Course references', {exact:true}).waitFor();
     assert.ok(await page.locator('.course-source-row').count() >= 1, 'clean course references must remain visible after authoring redaction');
     const referenceExcerpt = (await page.locator('.course-source-row small').first().innerText()).trim();

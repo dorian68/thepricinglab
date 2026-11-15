@@ -49,8 +49,10 @@ export function RouteMetadata({ path }) {
       return Boolean(heading);
     };
     update();
-    const observer = new MutationObserver(() => { if (update()) observer.disconnect(); });
-    if (root) observer.observe(root, { childList: true, subtree: true });
+    // Lazy/authenticated routes may render a transient heading before their
+    // actual ticket. Follow this route until navigation/unmount, not first H1.
+    const observer = new MutationObserver(update);
+    if (root) observer.observe(root, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['data-page-title', 'data-page-description'] });
     return () => observer.disconnect();
   }, [path]);
   return null;

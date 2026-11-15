@@ -7,6 +7,8 @@ const manifest = await readFile(new URL('../src/claude/courseManifest.js', impor
 const agentRoom = await readFile(new URL('../src/agent/AgentRoomReal.jsx', import.meta.url), 'utf8');
 const agentDock = await readFile(new URL('../src/agent/AgentDock.jsx', import.meta.url), 'utf8');
 const courseLayouts = await readFile(new URL('../src/claude/courseLayouts.js', import.meta.url), 'utf8');
+const notebookWorkspace = await readFile(new URL('../src/claude/NotebookWorkspace.jsx', import.meta.url), 'utf8');
+const serverSurvival = await readFile(new URL('../src/claude/ServerSurvival.jsx', import.meta.url), 'utf8');
 const starterKitPreview = await readFile(new URL('../public/market-finance-starter-kit/index.html', import.meta.url), 'utf8');
 const toolsBlock = source.match(/const TOOLS = \[([\s\S]*?)\n\];/)?.[1];
 assert.ok(toolsBlock, 'active TOOLS block must exist');
@@ -25,7 +27,7 @@ assert.doesNotMatch(source, /Private backend API beta/, 'unconfigured API beta m
 assert.doesNotMatch(source, /How do I cancel during beta\?|current public beta prices/, 'pricing FAQ must not present an unconfigured beta billing state as a product promise');
 assert.doesNotMatch(source, /supported beta sign-in method|during beta|beta features may change|cancellation during beta|Beta support target|The backend API beta/, 'active copy must not expose obsolete beta-stage wording');
 assert.doesNotMatch(source, /\bbeta\b|à venir|coming next/, 'active frontend bundle must not expose obsolete beta or future-feature wording');
-assert.match(source, /Persistent saving and sharing are not included in this release\./, 'notebooks must state that persistence and sharing are outside the current release');
+assert.match(notebookWorkspace, /Drafts stay on this device; cloud saving and sharing are not included\./, 'notebooks must distinguish device drafts from cloud saving/sharing');
 assert.doesNotMatch(agentRoom, /à venir|prochaine itération|coming next/, 'paid Agent Room must not expose future surfaces as active navigation');
 assert.match(source, /This preview is not included in paid plans/, 'private API preview must be excluded from paid-plan promise');
 assert.doesNotMatch(source, /mailto:contact@thepricinglibrary\.com/, 'support actions must use the configured legal support identity');
@@ -53,7 +55,10 @@ assert.doesNotMatch(source, /opened in the trading lab\./, 'Trading Lab exercise
 const survivalIds = [...practiceEngine.matchAll(/id: 'survival-[^']+'/g)].map((match) => match[0]);
 assert.equal(survivalIds.length, 20, 'Survival Mode must expose twenty canonical questions');
 assert.equal(new Set(survivalIds).size, survivalIds.length, 'Survival Mode question IDs must be unique');
-assert.match(source, /SURVIVAL_QUESTIONS\[Math\.min\(progress, total - 1\)\]/, 'Survival Mode must render the canonical question bank');
+assert.match(source, /<ServerSurvival\s*\/>/, 'Survival Mode must use the server-owned workflow');
+assert.match(serverSurvival, /learning\/survival\/runs/, 'Survival must consume the same persisted API as CLI');
+assert.match(serverSurvival, /run\.question\.options/, 'Survival question choices must be supplied by the canonical server run');
+assert.doesNotMatch(serverSurvival, /setScore|Math\.random|Date\.now\(\)\s*\+\s*30/, 'the browser must not invent scores, random questions or reset the server deadline');
 assert.doesNotMatch(source, /const correct = 'D'/, 'Survival Mode must not repeat one hard-coded answer');
 const gammaPnl = 0.5 * -80_000 * ((-2) ** 2);
 const greekPnlTotal = (250_000 * -2) + gammaPnl + (120_000 * 3) - 15_000;

@@ -14,7 +14,7 @@ export interface AuthContextType {
   isAdmin: () => boolean
   plan: string
   hasPlan: (required: string) => boolean
-  refreshEntitlement: () => Promise<void>
+  refreshEntitlement: () => Promise<void | boolean>
   signUp: (email: string, password: string, prenom: string, nom: string) => Promise<{ confirmationRequired: boolean }>
   signIn: (email: string, password: string) => Promise<void>
   requestPasswordReset: (email: string) => Promise<void>
@@ -50,10 +50,9 @@ const SupabaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [entitlementPlan, setEntitlementPlan] = useState<string | null>(null)
   const freshness = useRef(createAuthFreshnessGuard())
 
-  useEffect(() => {
-    setPlatformAccessToken(session?.access_token || null)
-    return () => setPlatformAccessToken(null)
-  }, [session?.access_token])
+  // Publish the bearer before authenticated children can mount. An effect
+  // depending on session ran after their first requests and could send a 401.
+  useEffect(() => () => setPlatformAccessToken(null), [])
 
   // Récupérer le profil utilisateur
   const fetchProfile = async (userId: string) => {
@@ -85,6 +84,7 @@ const SupabaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const applySession = (currentSession: Session | null) => {
       const accessToken = currentSession?.access_token || null
       const ticket = freshness.current.beginSession(accessToken)
+      setPlatformAccessToken(accessToken)
       setSession(currentSession)
       setUser(currentSession?.user ?? null)
       setProfile(null)
@@ -138,15 +138,17 @@ const SupabaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const ticket = freshness.current.beginEntitlement(accessToken || null)
     setEntitlementPlan(null)
     if (!accessToken) {
-      return
+      return false
     }
     try {
-      const entitlement = await getEntitlement(accessToken) as { active?: boolean; plan?: string | null }
+      const entitlement = await getEntitlement(accessToken) as { active?: boolean; plan?: string | null; reachable?: boolean }
       if (!freshness.current.isEntitlementCurrent(ticket)) return
       setEntitlementPlan(entitlement?.active && entitlement.plan ? String(entitlement.plan).toLowerCase() : null)
+      return entitlement?.reachable !== false
     } catch {
       if (!freshness.current.isEntitlementCurrent(ticket)) return
       setEntitlementPlan(null)
+      return false
     }
   }, [session?.access_token, sessionRevision])
 

@@ -10,6 +10,7 @@ const authContext = fs.readFileSync(path.join(root, 'src/contexts/AuthContext.ts
 const adminGuard = fs.readFileSync(path.join(root, 'src/components/admin/AdminRouteGuard.tsx'), 'utf8');
 const navbar = fs.readFileSync(path.join(root, 'src/components/Navbar.tsx'), 'utf8');
 const preview = fs.readFileSync(path.join(root, 'public/course-scripts/vanilla-options-quote.md'), 'utf8');
+const survival = fs.readFileSync(path.join(root, 'src/claude/ServerSurvival.jsx'), 'utf8');
 const publicBuild = path.join(root, 'dist/course-scripts');
 const publicSource = path.join(root, 'public/course-scripts');
 const publicAssets = path.join(root, 'dist/assets');
@@ -45,8 +46,9 @@ for (const marker of [
   'relatedExerciseIds',
 ]) assert.ok(!publicJs.includes(marker), `paid course blueprint/widget leaked into public JavaScript: ${marker}`);
 
-assert.match(frontend, /useCourseScript\(c\.id, locked, previewOnly\)/);
-assert.match(frontend, /platformApi\.courseScript\(courseId\)/);
+assert.ok(/useCourseScript\(c\.id, locked, previewOnly, selectedLanguage\)/.test(frontend), 'the selected published language must reach the entitlement-aware course loader');
+assert.ok(/platformApi\.courseScript\(courseId, \{ withMetadata: true, language \}\)/.test(frontend), 'the private script request must retain its real response language');
+assert.ok(frontend.includes("scriptState.status!=='ready' || !scriptModel?.modules?.length"), 'a missing language or failed script must not offer module completion');
 assert.match(frontend, /previewOnly \? <LockPanel required="starter" what="The full Black-Scholes script"/);
 assert.ok(!frontend.includes("recordProgressOnce(auth, 'lesson', `${c.id}#L0`, 5"), 'loading a course must not complete it');
 assert.ok(!frontend.includes("recordProgressOnce(auth, 'lesson', `${c.id}#L${index}`, 5"), 'opening a module must not complete it');
@@ -66,8 +68,10 @@ assert.ok(!frontend.includes('getCourseBlueprint('), 'paid course blueprints mus
 for (const component of ['YCContent', 'GreeksContent', 'IVContent', 'ExoticsContent', 'MCContent']) {
   assert.ok(!frontend.includes(`<${component}`), `${component} must not be mounted from the public course shell`);
 }
-assert.match(frontend, /const result = await platformApi\.recordSurvival/, 'Survival save must wait for server confirmation');
-assert.match(frontend, /Practice run was not saved/, 'Survival save failure must be visible');
+assert.ok(/<ServerSurvival\s*\/>/.test(frontend), 'Survival must mount the persisted server workflow');
+assert.ok(survival.includes('await learningJson(action.path,token,action.body)'), 'Survival actions must wait for the common server confirmation');
+assert.ok(survival.includes('Retry the same action')&&survival.includes('role="alert"'), 'Survival action failure and safe retry must be visible');
+assert.ok(!frontend.includes('await platformApi.recordSurvival'), 'the active frontend must not submit a client-declared final score');
 
 for (const id of ['rates-swaps', 'fixed-income-bonds']) {
   const block = practice.slice(practice.indexOf(`id: '${id}'`), practice.indexOf(`id: '${id}'`) + 500);

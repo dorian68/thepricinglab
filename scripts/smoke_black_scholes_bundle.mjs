@@ -15,7 +15,8 @@ assert.equal(components.length, 1, `expected one BlackScholesLab chunk, got ${co
 assert.equal(workers.length, 1, `expected one Black-Scholes worker, got ${workers.map(({ file }) => file).join(', ') || 'none'}`);
 for (const marker of ['Black-Scholes Pricing & IV Lab', 'Strict implied volatility converged', 'Exact one-factor shocks', 'Successful session runs', 'Sensitivities CSV', 'Continue from this analysis', 'Payoff Strategy', 'American CRR', 'Vol Surface']) assert.ok(components[0].source.includes(marker), `component missing ${marker}`);
 for (const marker of ['tpl.black-scholes.analysis.v1', 'market_price', 'spotDown', 'zero_volatility', 'portfolioGreeks']) assert.ok(workers[0].source.includes(marker), `worker missing ${marker}`);
-assert.match(shell, /const BlackScholesLabTool = React\.lazy/); assert.match(shell, /'bs-pricer': <React\.Suspense[\s\S]*?<BlackScholesLabTool\/>/);
+assert.match(shell, /const BlackScholesLabTool = React\.lazy/);
+assert.ok(/'bs-pricer': <React\.Suspense[\s\S]*?<BlackScholesLabTool(?:\s[^>]*?)?\/>/.test(shell), 'the dedicated lazy Black-Scholes engine must render, including its ticket-query remount key');
 assert.doesNotMatch(shell, /function BSPricerTool\(/); assert.doesNotMatch(shell, /function normCdf\(/);
 assert.match(shell, /import \{ blackScholesOption, normCdf as canonicalNormCdf, normPdf as canonicalNormPdf \} from '\.\.\/lib\/blackScholes\.mjs'/);
 assert.doesNotMatch(shell, /maturityYears:Math\.max\(0,T\)|volatility:Math\.max\(0,sigma\)/, 'legacy compatibility adapter must not clamp invalid inputs');

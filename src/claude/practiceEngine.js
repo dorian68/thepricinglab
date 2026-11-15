@@ -1,3 +1,4 @@
+import realizedVolExercise from '../data/realizedVolExercise.json';
 import { PRACTICE_COURSE_EXTENSIONS as CANONICAL_PRACTICE_COURSE_EXTENSIONS } from './courseManifest.js';
 import { buildOfflineReference } from './exerciseFallback.mjs';
 import { readableSourceReferences } from './sourceReferences.mjs';
@@ -521,6 +522,7 @@ export const COURSE_BLUEPRINTS = {
 };
 
 export const PRACTICE_EXERCISES = [
+  realizedVolExercise,
   {
     id: 'bs-eur-call',
     title: 'Quote a European Call',
@@ -1193,13 +1195,13 @@ export async function startCheckout(plan, accessToken) {
 }
 
 export async function getEntitlement(accessToken) {
-  if (!accessToken) return { active: false, plan: null };
+  if (!accessToken) return { active: false, plan: null, reachable: false };
   try {
     const r = await fetch(`${getPracticeApiBase()}/billing/entitlement`, { headers: bearerHeaders(accessToken) });
-    if (!r.ok) return { active: false, plan: null };
-    return r.json();
+    if (!r.ok) return { active: false, plan: null, reachable: false };
+    return { ...(await r.json()), reachable: true };
   } catch {
-    return { active: false, plan: null };
+    return { active: false, plan: null, reachable: false };
   }
 }
 
@@ -1290,9 +1292,9 @@ export async function downloadStarterKit(accessToken) {
 // gracefully (returns null/[]) so the UI can show an honest empty/offline state
 // instead of crashing when the backend is down.
 
-async function platformGet(path, required = false) {
+async function platformGet(path, required = false, accessToken = platformAccessToken) {
   try {
-    const r = await fetch(`${getPracticeApiBase()}${path}`, { headers: bearerHeaders(platformAccessToken), signal: AbortSignal.timeout(8000) });
+    const r = await fetch(`${getPracticeApiBase()}${path}`, { headers: bearerHeaders(accessToken), signal: AbortSignal.timeout(8000) });
     if (!r.ok) {
       if (!required) return null;
       const error = new Error(`Service unavailable (HTTP ${r.status}).`);
@@ -1328,6 +1330,7 @@ async function platformPost(path, body) {
 }
 
 export const platformApi = {
+  async learnerCatalog() { return platformGet('/learner/catalog', true); },
   base: getPracticeApiBase,
   async listExercises(owner, offset=0) {
     const data = await platformGet(`/platform/exercises?offset=${offset}`, true);
@@ -1345,8 +1348,9 @@ export const platformApi = {
     if (!response.ok) throw new Error(`Admin counts denied (HTTP ${response.status}).`);
     return response.json();
   },
-  async courseScript(courseId) {
-    const response = await fetch(`${getPracticeApiBase()}/courses/${encodeURIComponent(courseId)}/script`, {
+  async courseScript(courseId, { language, withMetadata = false } = {}) {
+    const query = language ? `?language=${encodeURIComponent(language)}` : '';
+    const response = await fetch(`${getPracticeApiBase()}/courses/${encodeURIComponent(courseId)}/script${query}`, {
       headers: bearerHeaders(platformAccessToken),
     });
     if (!response.ok) {
@@ -1354,7 +1358,8 @@ export const platformApi = {
       try { detail = (await response.json()).detail || detail; } catch { /* ignore */ }
       throw new Error(detail);
     }
-    return response.text();
+    const content = await response.text();
+    return withMetadata ? { content, language: response.headers.get('Content-Language')?.split('-')[0] || language || 'fr' } : content;
   },
   // blog
   async listBlog() { return platformList('/platform/blog', 'posts'); },
@@ -1375,7 +1380,7 @@ export const platformApi = {
   async subscribe(email, source) { return platformPost('/platform/newsletter', { email, source }); },
   // progress + leaderboard
   async recordProgress(body) { try { return await platformPost('/platform/progress', body); } catch { return null; } },
-  async getProgress(userId) { return platformGet(`/platform/progress/${encodeURIComponent(userId)}`, true); },
+  async getProgress(userId, accessToken = platformAccessToken) { return platformGet(`/platform/progress/${encodeURIComponent(userId)}`, true, accessToken); },
   async coursePosition(courseId, moduleIndex) {
     const response = await fetch(`${getPracticeApiBase()}/platform/courses/${encodeURIComponent(courseId)}/position`, {
       method: 'PUT', headers: { 'Content-Type': 'application/json', ...bearerHeaders(platformAccessToken) },
@@ -1386,7 +1391,7 @@ export const platformApi = {
   },
   async leaderboard(limit = 20) { return platformList(`/platform/leaderboard?limit=${limit}`, 'leaderboard'); },
   // agentic desk (multi-agent trading room)
-  async deskRun(query) { try { return await platformPost('/agent/desk/run', { query }); } catch { return null; } },
+  async deskRun(query, {throwOnError=false}={}) { try { return await platformPost('/agent/desk/run', { query }); } catch(error) { if(throwOnError)throw error;return null; } },
   async deskState() { return platformGet('/agent/desk/state'); },
   async deskTrade(query) { try { return await platformPost('/agent/desk/trade', { query }); } catch { return null; } },
   // survival
